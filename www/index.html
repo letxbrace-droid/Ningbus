@@ -595,12 +595,38 @@ function normalizeDay(s){
 }
 
 function parseShiftsFromText(text){
-  // 1) clean + split into "lines" but also try to recompose lines that OCR cut
   const cleaned = text.replace(/[ \t]+/g,' ').replace(/\u00a0/g,' ');
   const lines = cleaned.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
 
+  // Detect planning month/year from header line (ex: "MAI 2026")
+  const MONTH_FR = {jan:0,fev:1,mar:2,avr:3,mai:4,jun:5,juin:5,jul:6,juil:6,aou:7,sep:8,oct:9,nov:10,dec:11};
+  let ctxYear = new Date().getFullYear();
+  let ctxMonth = null;
+  for(const line of lines){
+    const hm = line.match(/\b(jan(?:vier)?|f[e\u00e9]v(?:rier)?|mars?|avr(?:il)?|mai|juin?|juil(?:let)?|ao[u\u00fb]t?|sep(?:tembre)?|oct(?:obre)?|nov(?:embre)?|d[e\u00e9]c(?:embre)?)\b[^0-9]*(20\d{2})\b/i);
+    if(hm){
+      const k = hm[1].toLowerCase().slice(0,3).replace(/[\u00e9\u00e8]/g,'e').replace(/[\u00fb\u00f9]/g,'u');
+      if(MONTH_FR[k] !== undefined) ctxMonth = MONTH_FR[k];
+      ctxYear = +hm[2];
+      break;
+    }
+  }
+
   const shifts = [];
   for(const line of lines){
+    // Skip depot detail lines (course lists, location names)
+    if(/d[\u00e9e]p[o\u00f4]t/i.test(line)) continue;
+    // Skip rest-day lines ("R" alone)
+    if(/^\s*[Rr]\s*$/.test(line)) continue;
+
+    // Detect comma-separated course number lists to exclude from service detection
+    const courseSet = new Set();
+    const clRe = /\b(\d{3,5})(?:\s*,\s*\d{3,5})+/g;
+    let clm;
+    while((clm = clRe.exec(line)) !== null){
+      clm[0].split(',').forEach(n => courseSet.add(n.trim()));
+    }
+
     const times = [];
     TIME_RE.lastIndex = 0;
     let m;
@@ -608,33 +634,50 @@ function parseShiftsFromText(text){
       const h = +m[1], mn = +m[2];
       if(h<=27 && mn<=59) times.push(`${pad(h)}:${pad(mn)}`);
     }
-    if(times.length < 2) continue; // need at least start + end
-    if(times.length > 6) continue; // probably noise / multiple shifts merged
+    if(times.length < 2) continue;
+    if(times.length > 6) continue;
 
-    const sm = line.match(SERVICE_RE);
     const dm = line.match(DAY_RE);
     const datem = line.match(DATE_RE);
     const lm = line.match(LINE_RE);
 
+    // Service number: prefer 5-digit numbers not in course list
+    let serviceNum = '';
+    const allNums = [...line.matchAll(/\b(\d{3,6})\b/g)]
+      .map(x => x[1])
+      .filter(n => !courseSet.has(n));
+    const fiveDigit = allNums.find(n => n.length === 5);
+    if(fiveDigit){
+      serviceNum = fiveDigit;
+    } else {
+      const sm = line.match(SERVICE_RE);
+      if(sm && !courseSet.has(sm[1])) serviceNum = sm[1];
+    }
+
+    // Build ISO date
     let isoDate = '';
     if(datem){
       const d = pad(+datem[1]), mo = pad(+datem[2]);
-      let y = datem[3] ? (+datem[3] < 100 ? 2000 + +datem[3] : +datem[3]) : new Date().getFullYear();
+      const y = datem[3] ? (+datem[3]<100 ? 2000+(+datem[3]) : +datem[3]) : ctxYear;
       isoDate = `${y}-${mo}-${d}`;
+    } else if(ctxMonth !== null){
+      // Extract day number from line (exclude time components)
+      const lineNoTimes = line.replace(TIME_RE, ' ');
+      TIME_RE.lastIndex = 0;
+      const dayNumM = lineNoTimes.match(/\b(0?[1-9]|[12]\d|3[01])\b/);
+      if(dayNumM) isoDate = `${ctxYear}-${pad(ctxMonth+1)}-${pad(+dayNumM[1])}`;
     }
 
-    // confidence: more matches = more confident
     let conf = 0.4;
-    if(sm) conf += 0.2;
+    if(serviceNum) conf += 0.3;
     if(dm) conf += 0.15;
-    if(datem) conf += 0.15;
-    if(times.length >= 2) conf += 0.1;
+    if(isoDate) conf += 0.15;
 
     shifts.push({
       id: uid(),
       date: isoDate,
       day: normalizeDay(dm ? dm[1] : ''),
-      service: sm ? sm[1] : '',
+      service: serviceNum,
       line: lm ? lm[1] : '',
       start: times[0],
       end: times[times.length-1],
@@ -646,13 +689,15 @@ function parseShiftsFromText(text){
       raw: line
     });
   }
-  // dédup approx (même date+service+start)
-  const seen = new Set();
-  return shifts.filter(s=>{
-    const k = `${s.date}|${s.service}|${s.start}|${s.end}`;
-    if(seen.has(k)) return false;
-    seen.add(k); return true;
-  });
+
+  // Dedup: same start+end+date -> keep highest confidence
+  const groups = new Map();
+  for(const s of shifts){
+    const k = `${s.date}|${s.start}|${s.end}`;
+    const ex = groups.get(k);
+    if(!ex || s.confidence > ex.confidence) groups.set(k, s);
+  }
+  return [...groups.values()];
 }
 
 /* ============================================================
@@ -1316,9 +1361,9 @@ function renderShifts(){
   wrap.innerHTML = sorted.map(s=>{
     const dur = shiftDurationMin(s);
     const dateBits = s.date ? fmtDateShort(s.date) : null;
-    const dn = dateBits ? dateBits.num : '—';
-    const dm = dateBits ? dateBits.mon : (s.day ? s.day.slice(0,3) : '');
-    const dd = dateBits ? dateBits.day : '';
+    const dn = dateBits ? dateBits.num : '';
+    const dm = dateBits ? dateBits.mon : '';
+    const dd = dateBits ? dateBits.day : (s.day ? s.day.slice(0,3).toLowerCase() : '');
 
     const flagged = (dur && (dur > SHIFT_MAX_MIN || dur <=0)) ? 'flagged' : '';
     const lowConf = (s.confidence != null && s.confidence < 0.6) ? '⚠' : '';
