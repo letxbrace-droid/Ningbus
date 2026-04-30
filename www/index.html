@@ -582,7 +582,7 @@ function fmtDateShort(iso){
    PARSER : texte OCR -> services
 ============================================================ */
 const TIME_RE = /(\d{1,2})\s*[:hH.]\s*(\d{2})/g;
-const SERVICE_RE = /\b(?:S(?:ervice|er|v)?[\s\-\.]?|N°?\s?)?(\d{3,5})\b/i;
+const SERVICE_RE = /\b(\d{5,6})\b/; // 5-6 chiffres = service, 4 chiffres = ligne/course
 const DAY_RE = /\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|lun\.?|mar\.?|mer\.?|jeu\.?|ven\.?|sam\.?|dim\.?)\b/i;
 const DATE_RE = /\b(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.](\d{2,4}))?\b/;
 const LINE_RE = /\b(?:ligne|L)\s*[:#]?\s*([A-Z0-9]{1,4})\b/i;
@@ -645,8 +645,8 @@ function parseShiftsFromText(text){
     let serviceNum = '';
     const allNums = [...line.matchAll(/\b(\d{3,6})\b/g)]
       .map(x => x[1])
-      .filter(n => !courseSet.has(n));
-    const fiveDigit = allNums.find(n => n.length === 5);
+      .filter(n => !courseSet.has(n) && n.length !== 4); // 4 chiffres = numéro de ligne
+    const fiveDigit = allNums.find(n => n.length === 5 || n.length === 6);
     if(fiveDigit){
       serviceNum = fiveDigit;
     } else {
