@@ -30,7 +30,7 @@
   --glass:rgba(255,255,255,.03);--glass-2:rgba(255,255,255,.07);
   --shadow:0 2px 12px rgba(0,0,0,.5);--shadow-lg:0 8px 40px rgba(0,0,0,.7);
   --r:12px;--r-sm:8px;--r-xs:6px;
-  --dur:200ms;--dur-fast:140ms;--ease:cubic-bezier(.4,0,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --dur:200ms;--dur-fast:140ms;--ease:cubic-bezier(0.32,0.72,0,1);--spring:cubic-bezier(0.34,1.56,0.64,1);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -225,10 +225,10 @@ input[type=file]{display:none}
 .toggle-wrap .tgl-lbl{font-family:"JetBrains Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)}
 .tgl{position:relative;display:inline-block;flex-shrink:0}
 .tgl input{opacity:0;width:0;height:0;position:absolute}
-.tgl-track{display:block;width:46px;height:26px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:13px;position:relative;cursor:pointer;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur)}
-.tgl input:checked+.tgl-track{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(124,58,237,.4)}
-.tgl-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform var(--dur) var(--spring);box-shadow:0 2px 6px rgba(0,0,0,.5)}
-.tgl input:checked+.tgl-track .tgl-thumb{transform:translateX(20px)}
+.tgl-track{display:block;width:51px;height:31px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:16px;position:relative;cursor:pointer;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur)}
+.tgl input:checked+.tgl-track{background:#34c759;border-color:#34c759;box-shadow:0 0 12px rgba(52,199,89,.35)}
+.tgl-thumb{position:absolute;top:3px;left:3px;width:23px;height:23px;background:#fff;border-radius:50%;transition:transform var(--dur) var(--spring);box-shadow:0 2px 8px rgba(0,0,0,.4),0 0 0 0.5px rgba(0,0,0,.06)}
+.tgl input:checked+.tgl-track .tgl-thumb{transform:translateX(22px)}
 
 /* NOTIF STATUS */
 .notif-status{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)}
@@ -261,6 +261,38 @@ input[type=file]{display:none}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--surface-2);border:1px solid var(--border-2);color:var(--text);padding:12px 20px;font-size:12px;z-index:200;transition:transform .25s var(--ease),opacity .25s;font-family:"JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;border-radius:30px;box-shadow:var(--shadow-lg);opacity:0;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .actions-row{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+/* LIGHT MODE */
+html.light{
+  --bg:#f5f5f7;--bg-2:#fff;--bg-3:#f5f5f7;
+  --surface:#fff;--surface-2:#f5f5f7;
+  --border:rgba(0,0,0,.08);--border-2:rgba(0,0,0,.14);
+  --text:#1d1d1f;--text-2:#515154;--text-3:#86868b;
+  --glass:rgba(0,0,0,.02);--glass-2:rgba(0,0,0,.05);
+}
+html.light header.top{background:rgba(245,245,247,.85)}
+html.light .weather{background:linear-gradient(135deg,#2d0a5c 0%,#1a2744 100%)}
+
+/* REST DAY CARD */
+.shift.rest-day{opacity:.6}
+.shift.rest-day .day-block{background:var(--surface-2)}
+.shift.rest-day .rest-badge{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn);padding:4px 10px;border-radius:20px;margin-top:4px}
+
+/* OCR LOADING OVERLAY */
+.ocr-overlay{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center}
+.ocr-overlay.show{display:flex}
+.ocr-pct{font-family:"JetBrains Mono",monospace;font-size:clamp(72px,20vw,120px);font-weight:700;letter-spacing:-.04em;color:#fff;line-height:1;transition:opacity .2s}
+.ocr-stage{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:16px}
+.ocr-bar{width:200px;height:2px;background:rgba(255,255,255,.1);border-radius:1px;margin-top:32px;overflow:hidden}
+.ocr-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s var(--ease);border-radius:1px}
+
+/* CONFIDENCE BADGE */
+.conf-badge{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid}
+.conf-badge.sesame{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.conf-badge.generic{color:var(--text-3);border-color:var(--border-2);background:transparent}
+
+/* BUTTON SPRING TAP */
+.btn:active,.icon-btn:active{transform:scale(0.96)}
+
 </style>
 </head>
 <body>
@@ -279,8 +311,12 @@ input[type=file]{display:none}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
     <div class="dropdown-menu" id="settingsMenu">
-      <button class="dropdown-item" id="dd-weather">
+      <button class="dropdown-item" id="dd-theme">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <span id="dd-theme-lbl">Mode clair</span>
+      </button>
+      <button class="dropdown-item" id="dd-weather">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
         Réinitialiser position
       </button>
       <div class="dropdown-sep"></div>
@@ -366,7 +402,7 @@ input[type=file]{display:none}
 <section class="block">
   <div class="section-head">
     <h2>3 / Services extraits</h2>
-    <span class="count mono"><span id="shiftsCount">0</span> total</span>
+    <div style="display:flex;align-items:center;gap:8px"><span id="confBadge" class="conf-badge"></span><span class="count mono"><span id="shiftsCount">0</span> services</span></div>
   </div>
   <div id="shiftsWrap" class="shifts"></div>
 </section>
@@ -412,6 +448,13 @@ input[type=file]{display:none}
       <button class="btn primary" id="modalSave">Enregistrer</button>
     </div>
   </div>
+</div>
+
+<!-- OCR OVERLAY -->
+<div class="ocr-overlay" id="ocrOverlay">
+  <div class="ocr-pct mono" id="ocrPct">0%</div>
+  <div class="ocr-stage mono" id="ocrStage">Initialisation</div>
+  <div class="ocr-bar"><i id="ocrBarI"></i></div>
 </div>
 
 <!-- TOAST -->
@@ -520,6 +563,129 @@ function normalizeDay(s){
   const k = s.toLowerCase().replace('.','').slice(0,3);
   const map = {lun:'Lundi',mar:'Mardi',mer:'Mercredi',jeu:'Jeudi',ven:'Vendredi',sam:'Samedi',dim:'Dimanche'};
   return map[k] || '';
+}
+
+
+/* ============================================================
+   SESAME PARSER SPÉCIALISÉ
+============================================================ */
+function parseSesameOCR(text){
+  const cleaned = text.replace(/[ \t]+/g,' ').replace(/ /g,' ');
+  const lines = cleaned.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+
+  // Détecte mois/année depuis le header "MAI 2026"
+  const MOIS={janvier:1,fevrier:2,fev:2,mars:3,avril:4,avr:4,mai:5,juin:6,
+    juillet:7,juil:7,aout:8,septembre:9,sep:9,octobre:10,oct:10,novembre:11,nov:11,decembre:12,dec:12};
+  let ctxMonth=null, ctxYear=null;
+  for(const line of lines){
+    const m=line.match(/\b(janvier|f[eé]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[eé]cembre)\b[^0-9]*(20\d{2})\b/i);
+    if(m){
+      const k=m[1].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').slice(0,4);
+      for(const [kk,vv] of Object.entries(MOIS)){ if(kk.startsWith(k.slice(0,3))){ ctxMonth=vv; break; } }
+      ctxYear=+m[2]; break;
+    }
+  }
+  if(!ctxMonth||!ctxYear) return null; // pas format Sesame
+
+  const DAY_RE=/^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i;
+  const REST_RE=/\b(R|CP|JF)\b/;
+  const SVC_RE=/\b(\d{5})\b/;
+  const LN4_RE=/\b(\d{4})\b/g;
+  const RANGE_RE=/(\d{1,2}[hH:]\d{2})\s*[-–]\s*(\d{1,2}[hH:]\d{2})/;
+
+  // Grouper en blocs-jours
+  const blocks=[]; let cur=null;
+  for(const line of lines){
+    if(DAY_RE.test(line)){ if(cur) blocks.push(cur); cur=[line]; }
+    else if(cur) cur.push(line);
+  }
+  if(cur) blocks.push(cur);
+  if(!blocks.length) return null;
+
+  const pt=t=>{ const m=t.match(/(\d{1,2})[hH:](\d{2})/); return m?`${pad(+m[1])}:${pad(+m[2])}`:''; };
+
+  const shifts=[];
+  for(const block of blocks){
+    const bt=block.join('\n');
+    const dayM=block[0].match(DAY_RE);
+    const dayName=dayM?dayM[1].toLowerCase():'';
+
+    // Numéro de jour (évite de prendre les heures ou services)
+    const btClean=bt.replace(/\d{1,2}[hH:]\d{2}/g,'').replace(/\b\d{5}\b/g,'');
+    const dnM=btClean.match(/\b(0?[1-9]|[12]\d|3[01])\b/);
+    const dayNum=dnM?+dnM[1]:null;
+    const isoDate=dayNum?`${ctxYear}-${pad(ctxMonth)}-${pad(dayNum)}`:'';
+
+    // Repos (R, CP, JF)
+    const restM=bt.match(REST_RE);
+    if(restM){
+      const lbl=restM[1]==='CP'?'Congé payé':restM[1]==='JF'?'Jour férié':'Repos';
+      shifts.push({id:uid(),date:isoDate,day:normalizeDay(dayName),service:'',line:'',
+        start:'',end:'',breakStart:'',breakEnd:'',notes:lbl,source:'sesame',
+        confidence:1,isRest:true,raw:bt});
+      continue;
+    }
+
+    // Service 5 chiffres
+    const svcM=bt.match(SVC_RE);
+    const service=svcM?svcM[1]:'';
+
+    // Horaires depuis la ligne "HH:MM - HH:MM"
+    let start='',end='';
+    for(const ln of block){
+      const rng=ln.match(RANGE_RE);
+      if(rng){ start=pt(rng[1]); end=pt(rng[2]); break; }
+    }
+
+    // Numéros de ligne (4 chiffres) depuis lignes dépôt
+    const lineSet=new Set();
+    for(const ln of block){
+      if(/d[eé]p[oô]t/i.test(ln)){
+        LN4_RE.lastIndex=0; let lm;
+        while((lm=LN4_RE.exec(ln))!==null) lineSet.add(lm[1]);
+      }
+    }
+
+    // Nom du dépôt (dynamique : Marcoussis 1, Marcoussis 2, Ratel…)
+    let depotName='';
+    for(const ln of block){
+      const dm=ln.match(/d[eé]p[oô]t\s+([a-zA-ZÀ-ž\s0-9]+?)(?:\s+\d{2}[:hH]\d{2}|,|\n|$)/i);
+      if(dm){ depotName=dm[1].trim(); break; }
+    }
+
+    const conf=[service,start,end,isoDate].filter(Boolean).length/4;
+    shifts.push({id:uid(),date:isoDate,day:normalizeDay(dayName),service,
+      line:[...lineSet].join(', '),start,end,breakStart:'',breakEnd:'',
+      notes:depotName?`Dépôt ${depotName}`:'',source:'sesame',
+      confidence:Math.min(1,0.5+conf*0.5),isRest:false,raw:bt});
+  }
+  return shifts.length?{shifts,totalDays:blocks.length}:null;
+}
+
+/* Préprocessing image pour OCR : niveaux de gris + contraste + inversion
+   (Sesame = thème sombre → inversion donne noir sur blanc, meilleur pour Tesseract) */
+function preprocessForOCR(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=img.naturalWidth; canvas.height=img.naturalHeight;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const d=ctx.getImageData(0,0,canvas.width,canvas.height);
+      for(let i=0;i<d.data.length;i+=4){
+        const gray=0.299*d.data[i]+0.587*d.data[i+1]+0.114*d.data[i+2];
+        const c=Math.min(255,Math.max(0,(gray-128)*1.8+128));
+        d.data[i]=d.data[i+1]=d.data[i+2]=255-c; // inversion
+      }
+      ctx.putImageData(d,0,0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob=>resolve(blob||file),'image/png');
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); resolve(file); };
+    img.src=url;
+  });
 }
 
 function parseShiftsFromText(text){
@@ -653,48 +819,66 @@ async function runOCR(files){
     previewStrip.appendChild(img);
   }
 
-  setProc('Téléchargement modèle FR', 5);
+  showOcrOverlay(true);
+  setOcr('Téléchargement modèle FR', 5);
   try{
     await loadTesseract();
   }catch(e){
-    showProc(false);
-    toast('Échec chargement OCR');
-    return;
+    showOcrOverlay(false); showProc(false);
+    toast('Échec chargement OCR'); return;
   }
 
   const worker = await Tesseract.createWorker('fra', 1, {
     logger: m=>{
-      if(m.status === 'recognizing text'){
-        setProc('Reconnaissance', Math.round(20 + m.progress * 75));
+      if(m.status==='recognizing text'){
+        setOcr('Reconnaissance', Math.round(20+m.progress*75));
       } else if(m.status){
-        setProc(m.status.replace(/_/g,' '), Math.round(5 + m.progress * 15));
+        setOcr(m.status.replace(/_/g,' '), Math.round(5+m.progress*15));
       }
     }
   });
 
-  let allShifts = [];
+  let allText = '';
   for(let i=0;i<files.length;i++){
-    setProc(`Image ${i+1}/${files.length}`, 20);
+    setOcr(`Prétraitement image ${i+1}/${files.length}`, 15);
     try{
-      const { data } = await worker.recognize(files[i]);
-      const shifts = parseShiftsFromText(data.text);
-      allShifts = allShifts.concat(shifts);
-    }catch(e){
-      console.warn(e); toast('Erreur sur 1 image');
-    }
+      const processed = await preprocessForOCR(files[i]);
+      setOcr(`Reconnaissance ${i+1}/${files.length}`, 20);
+      const { data } = await worker.recognize(processed);
+      allText += (allText ? '\n' : '') + data.text;
+    }catch(e){ console.warn(e); toast('Erreur sur 1 image'); }
   }
   await worker.terminate();
+  setOcr('Analyse…', 95);
 
-  setProc('Terminé', 100);
+  // Sesame parser en priorité, fallback générique
+  const sesameResult = parseSesameOCR(allText);
+  let allShifts, parserUsed;
+  if(sesameResult){
+    allShifts = sesameResult.shifts;
+    parserUsed = 'sesame';
+    state._sesameTotal = sesameResult.totalDays;
+  } else {
+    allShifts = parseShiftsFromText(allText);
+    parserUsed = 'generic';
+    state._sesameTotal = null;
+  }
 
-  if(allShifts.length === 0){
-    toast('Aucun service détecté — vérifie ou ajoute manuellement');
-  }else{
+  setOcr('Terminé', 100);
+  showOcrOverlay(false);
+
+  if(allShifts.length===0){
+    toast('Aucun service détecté — ajoute manuellement');
+  } else {
     state.shifts = mergeShifts(state.shifts, allShifts);
     save(); render();
-    toast(`${allShifts.length} services détectés`);
+    if('vibrate' in navigator) navigator.vibrate(8);
+    const label = parserUsed==='sesame'
+      ? `Sesame · ${allShifts.filter(s=>!s.isRest).length} services, ${allShifts.filter(s=>s.isRest).length} repos`
+      : `${allShifts.length} services (parser générique)`;
+    toast(label, 3000);
   }
-  setTimeout(()=>showProc(false), 600);
+  setTimeout(()=>showProc(false), 400);
 }
 
 function mergeShifts(existing, incoming){
@@ -708,6 +892,17 @@ function mergeShifts(existing, incoming){
 }
 
 function showProc(on){ $('#proc').classList.toggle('show', on) }
+function showOcrOverlay(on){
+  const ov=$('#ocrOverlay');
+  if(ov) ov.classList.toggle('show', on);
+}
+function setOcr(stage, pct){
+  setProc(stage, pct);
+  const ep=$('#ocrPct'), es=$('#ocrStage'), eb=$('#ocrBarI');
+  if(ep) ep.textContent=pct+'%';
+  if(es) es.textContent=stage;
+  if(eb) eb.style.width=pct+'%';
+}
 function setProc(stage, pct){
   $('#procStage').textContent = stage;
   $('#procPct').textContent = pct + '%';
@@ -1273,7 +1468,23 @@ function renderHero(){
 
 function renderShifts(){
   const wrap = $('#shiftsWrap');
-  $('#shiftsCount').textContent = state.shifts.length;
+  $('#shiftsCount').textContent = state.shifts.filter(s=>!s.isRest).length;
+  // Confidence badge
+  const confEl = $('#confBadge');
+  if(confEl){
+    const sesameShifts = state.shifts.filter(s=>s.source==='sesame');
+    if(sesameShifts.length && state._sesameTotal){
+      const complete = sesameShifts.filter(s=>s.isRest||(s.service&&s.start&&s.end)).length;
+      const pct = Math.round(complete/state._sesameTotal*100);
+      confEl.textContent = `Sesame · ${pct}%`;
+      confEl.className = 'conf-badge sesame';
+    } else if(sesameShifts.length===0 && state.shifts.length){
+      confEl.textContent = 'Parser générique';
+      confEl.className = 'conf-badge generic';
+    } else {
+      confEl.textContent = '';
+    }
+  }
 
   if(state.shifts.length === 0){
     wrap.innerHTML = `<div class="empty"><strong>Aucun service</strong>Charge un screenshot ou ajoute un service manuellement.</div>`;
@@ -1311,7 +1522,7 @@ function renderShifts(){
       </div>` : '';
 
     return `
-    <article class="shift ${flagged}" data-id="${s.id}" style="--ci:${i}">
+    <article class="shift ${flagged}${s.isRest?' rest-day':''}" data-id="${s.id}" style="--ci:${i}">
       <div class="day-block">
         <div class="d-num mono">${dn}</div>
         <div class="d-mon mono">${dm}</div>
@@ -1330,12 +1541,14 @@ function renderShifts(){
           <div class="service mono">Service<strong>${s.service || '—'}</strong></div>
           ${lowConf ? `<div class="service mono" style="color:var(--warn)">${lowConf} à vérifier</div>`:''}
         </div>
-        <div class="times mono">
-          ${s.start || '—:—'}
+        ${s.isRest
+          ? `<div class="rest-badge">${s.notes||'Repos'}</div>`
+          : `<div class="times mono">
+          ${s.start||'—:—'}
           <span class="arrow">→</span>
-          ${s.end || '—:—'}
+          ${s.end||'—:—'}
           <span class="dur mono">${fmtDur(dur)}</span>
-        </div>
+        </div>`}
         <div class="meta-line">
           ${s.line ? `<span>Ligne <b>${s.line}</b></span>`:''}
           ${breakLine}
@@ -1565,6 +1778,21 @@ $('#dd-clear').addEventListener('click', ()=>{
   if(confirm('Tout effacer ?')){ localStorage.removeItem(STORE_KEY); location.reload(); }
   $('#settingsDropdown').classList.remove('open');
 });
+
+// Theme toggle
+function applyTheme(light){
+  document.documentElement.classList.toggle('light', light);
+  const lbl=$('#dd-theme-lbl');
+  if(lbl) lbl.textContent = light ? 'Mode sombre' : 'Mode clair';
+  localStorage.setItem('planning_theme', light?'light':'dark');
+}
+$('#dd-theme').addEventListener('click', ()=>{
+  const isLight = document.documentElement.classList.contains('light');
+  applyTheme(!isLight);
+  $('#settingsDropdown').classList.remove('open');
+});
+// Restore theme on load
+applyTheme(localStorage.getItem('planning_theme')==='light');
 
 /* ============================================================
    SERVICE WORKER (offline shell)
