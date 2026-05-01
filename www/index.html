@@ -587,11 +587,16 @@ function parseSesameOCR(text){
   }
   if(!ctxMonth||!ctxYear) return null; // pas format Sesame
 
-  const DAY_RE=/^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i;
-  const REST_RE=/\b(R|CP|JF)\b/;
+  // DAY_RE: tolérer caractères parasites OCR en début de ligne (| ou espace insécable)
+  const DAY_RE=/(?:^|[^a-zA-Z\u00C0-\u024F])(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i;
+  // REST: CP/JF globaux (termes spécifiques), R uniquement seul sur sa ligne
+  const REST_CPJF=/\b(CP|JF)\b/;
+  const REST_R_LINE=/(?:^|\n)\s*R\s*(?:\n|$)/;
   const SVC_RE=/\b(\d{5})\b/;
   const LN4_RE=/\b(\d{4})\b/g;
-  const RANGE_RE=/(\d{1,2}[hH:]\d{2})\s*[-–]\s*(\d{1,2}[hH:]\d{2})/;
+  // RANGE_RE: tiret ou en-dash, RANGE_RE2: fallback sans séparateur (OCR qui perd le tiret)
+  const RANGE_RE=/(\d{1,2}[hH:.]\d{2})\s*[-–]\s*(\d{1,2}[hH:.]\d{2})/;
+  const RANGE_RE2=/(\d{1,2}[hH:.]\d{2})[ \t]+(\d{1,2}[hH:.]\d{2})(?!\d)/;
 
   // Grouper en blocs-jours
   const blocks=[]; let cur=null;
@@ -602,7 +607,7 @@ function parseSesameOCR(text){
   if(cur) blocks.push(cur);
   if(!blocks.length) return null;
 
-  const pt=t=>{ const m=t.match(/(\d{1,2})[hH:](\d{2})/); return m?`${pad(+m[1])}:${pad(+m[2])}`:''; };
+  const pt=t=>{ const m=t.match(/(\d{1,2})[hH:.]([0-5]\d)/); return m?`${pad(+m[1])}:${pad(+m[2])}`:''; };
 
   const shifts=[];
   for(const block of blocks){
@@ -611,15 +616,19 @@ function parseSesameOCR(text){
     const dayName=dayM?dayM[1].toLowerCase():'';
 
     // Numéro de jour (évite de prendre les heures ou services)
-    const btClean=bt.replace(/\d{1,2}[hH:]\d{2}/g,'').replace(/\b\d{5}\b/g,'');
+    const btClean=bt.replace(/\d{1,2}[hH:.]\d{2}/g,'').replace(/\b\d{5}\b/g,'').replace(/\b\d{4}\b/g,'');
     const dnM=btClean.match(/\b(0?[1-9]|[12]\d|3[01])\b/);
     const dayNum=dnM?+dnM[1]:null;
     const isoDate=dayNum?`${ctxYear}-${pad(ctxMonth)}-${pad(dayNum)}`:'';
 
-    // Repos (R, CP, JF)
-    const restM=bt.match(REST_RE);
-    if(restM){
-      const lbl=restM[1]==='CP'?'Congé payé':restM[1]==='JF'?'Jour férié':'Repos';
+    // Repos — 'R' seul sur une ligne (évite faux-positif si OCR coupe "Ratel" en "R atel")
+    const restCPJF=bt.match(REST_CPJF);
+    const isRonOwnLine=REST_R_LINE.test('\n'+bt+'\n');
+    // R en fin de ligne du jour ex: "Lundi 5 R" → retirer nom+num du jour et vérifier
+    const dayStripped=block[0].replace(/^[^a-zA-Z\u00C0-\u024F]*(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s*\d*\s*/i,'');
+    const isRonDayLine=dayStripped==='R'||dayStripped==='R ';
+    if(restCPJF||isRonOwnLine||isRonDayLine){
+      const lbl=restCPJF?(restCPJF[1]==='CP'?'Congé payé':'Jour férié'):'Repos';
       shifts.push({id:uid(),date:isoDate,day:normalizeDay(dayName),service:'',line:'',
         start:'',end:'',breakStart:'',breakEnd:'',notes:lbl,source:'sesame',
         confidence:1,isRest:true,raw:bt});
@@ -633,14 +642,14 @@ function parseSesameOCR(text){
     // Horaires depuis la ligne "HH:MM - HH:MM"
     let start='',end='';
     for(const ln of block){
-      const rng=ln.match(RANGE_RE);
+      const rng=ln.match(RANGE_RE)||ln.match(RANGE_RE2);
       if(rng){ start=pt(rng[1]); end=pt(rng[2]); break; }
     }
 
     // Numéros de ligne (4 chiffres) depuis lignes dépôt
     const lineSet=new Set();
     for(const ln of block){
-      if(/d[eé]p[oô]t/i.test(ln)){
+      if(/d[e3é][p][o0ô]t?/i.test(ln)||(/d[eé]p/i.test(ln)&&/\b\d{4}\b/.test(ln))){
         LN4_RE.lastIndex=0; let lm;
         while((lm=LN4_RE.exec(ln))!==null) lineSet.add(lm[1]);
       }
@@ -649,7 +658,7 @@ function parseSesameOCR(text){
     // Nom du dépôt (dynamique : Marcoussis 1, Marcoussis 2, Ratel…)
     let depotName='';
     for(const ln of block){
-      const dm=ln.match(/d[eé]p[oô]t\s+([a-zA-ZÀ-ž\s0-9]+?)(?:\s+\d{2}[:hH]\d{2}|,|\n|$)/i);
+      const dm=ln.match(/d[e3é][p][o0ô]t?\s+([a-zA-Z\u00C0-\u024F\s0-9]+?)(?:\s+\d{2}[:hH]\d{2}|,|\n|$)/i);
       if(dm){ depotName=dm[1].trim(); break; }
     }
 
