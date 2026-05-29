@@ -255,6 +255,59 @@
       .stat-value { font-size: 1.4rem; }
       .cards-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Run modal ────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      width: min(440px, 95vw);
+      box-shadow: var(--shadow);
+    }
+    .modal h2 { font-size: 1rem; margin-bottom: 1rem; }
+    .modal label { display: block; font-size: 0.78rem; color: var(--muted); margin: 0.75rem 0 0.3rem; }
+    .modal input, .modal select {
+      width: 100%; padding: 0.5rem 0.75rem;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 0.85rem;
+    }
+    .modal input:focus, .modal select:focus { outline: 2px solid var(--accent); }
+    .modal-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+    .modal-hint a { color: var(--accent); }
+    .modal-actions { display: flex; gap: 0.6rem; margin-top: 1.25rem; justify-content: flex-end; }
+    .btn-primary {
+      padding: 0.5rem 1.1rem; border-radius: 6px;
+      background: var(--accent); color: #fff; border: none;
+      font-size: 0.85rem; cursor: pointer; font-weight: 600;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Run status badge */
+    .run-badge {
+      font-size: 0.72rem; padding: 3px 10px; border-radius: 999px;
+      font-weight: 600; display: none; align-items: center; gap: 0.4rem;
+    }
+    .run-badge.show { display: inline-flex; }
+    .run-badge.queued    { background: rgba(99,102,241,0.2); color: #818cf8; }
+    .run-badge.running   { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .run-badge.success   { background: rgba(34,197,94,0.2);  color: #22c55e; }
+    .run-badge.failure   { background: rgba(239,68,68,0.2);  color: #ef4444; }
+    .run-spinner {
+      width: 10px; height: 10px; border: 2px solid currentColor;
+      border-top-color: transparent; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
   </style>
 </head>
 <body data-theme="dark">
@@ -262,10 +315,47 @@
 <header>
   <div class="logo">TrendTrack <span>· Angle Intelligence</span></div>
   <div class="header-actions">
+    <span class="run-badge" id="runBadge"></span>
+    <button id="launchBtn" title="Lancer le scrape depuis le dashboard">⚡ Analyser</button>
     <button id="refreshBtn" title="Recharger les données">↻ Refresh</button>
     <button id="themeBtn" title="Basculer dark/light mode">◑ Mode</button>
   </div>
 </header>
+
+<!-- Modal de lancement ────────────────────────────────────── -->
+<div class="modal-overlay" id="launchModal">
+  <div class="modal">
+    <h2>⚡ Lancer une analyse</h2>
+
+    <label>GitHub Token (PAT)
+      <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" />
+    </label>
+    <p class="modal-hint">
+      Token avec scope <strong>workflow</strong> uniquement.
+      <a href="https://github.com/settings/tokens/new?scopes=workflow" target="_blank" rel="noopener">Créer →</a>
+      (sauvegardé localement, jamais envoyé ailleurs que l'API GitHub)
+    </p>
+
+    <label>Niche (laisser vide = toutes)
+      <input type="text" id="nicheInput" placeholder="ex: collagen skin, weight loss…" />
+    </label>
+
+    <label>Pays
+      <select id="countryInput">
+        <option value="FR">🇫🇷 France (FR)</option>
+        <option value="US">🇺🇸 États-Unis (US)</option>
+        <option value="GB">🇬🇧 Royaume-Uni (GB)</option>
+        <option value="DE">🇩🇪 Allemagne (DE)</option>
+        <option value="ES">🇪🇸 Espagne (ES)</option>
+      </select>
+    </label>
+
+    <div class="modal-actions">
+      <button id="modalCancel">Annuler</button>
+      <button class="btn-primary" id="modalLaunch">🚀 Lancer</button>
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- Stats bar -->
@@ -614,6 +704,138 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
     }
   });
 });
+
+// ── GitHub Actions trigger ─────────────────────────────────────────────────
+const GH_OWNER    = GITHUB_USER;
+const GH_REPO     = GITHUB_REPO;
+const WORKFLOW_ID = 'scrape_and_analyze.yml';
+const GH_API      = 'https://api.github.com';
+
+let pollTimer = null;
+
+function ghHeaders(pat) {
+  return {
+    'Authorization': `token ${pat}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+  };
+}
+
+async function triggerWorkflow(pat, niche, country) {
+  const res = await fetch(
+    `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+    {
+      method: 'POST',
+      headers: ghHeaders(pat),
+      body: JSON.stringify({
+        ref: 'main',
+        inputs: { niche: niche || '', country: country || 'FR', max_ads: '100' },
+      }),
+    }
+  );
+  return res.status === 204;
+}
+
+async function getLatestRun(pat) {
+  const res = await fetch(
+    `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/actions/runs?per_page=1`,
+    { headers: ghHeaders(pat) }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.workflow_runs?.[0] || null;
+}
+
+function setBadge(status, text) {
+  const badge = document.getElementById('runBadge');
+  badge.className = `run-badge show ${status}`;
+  const spin = (status === 'running' || status === 'queued')
+    ? '<span class="run-spinner"></span>' : '';
+  badge.innerHTML = `${spin}${escHtml(text)}`;
+}
+
+function startPolling(pat) {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const run = await getLatestRun(pat);
+      if (!run) return;
+      const { status, conclusion } = run;
+      if (status === 'queued')     { setBadge('queued',  '⏳ En attente…'); return; }
+      if (status === 'in_progress'){ setBadge('running', '⚙️ Analyse en cours…'); return; }
+      // completed
+      clearInterval(pollTimer);
+      pollTimer = null;
+      if (conclusion === 'success') {
+        setBadge('success', '✅ Terminé — actualisation…');
+        setTimeout(() => loadData(true), 3000);
+        setTimeout(() => { document.getElementById('runBadge').classList.remove('show'); }, 12000);
+      } else {
+        setBadge('failure', `❌ Échec (${conclusion})`);
+      }
+    } catch (e) { console.warn('Polling error:', e); }
+  }, 8000);
+}
+
+// Modal wiring
+document.getElementById('launchBtn').addEventListener('click', () => {
+  const saved = localStorage.getItem('gh_pat') || '';
+  document.getElementById('patInput').value = saved;
+  document.getElementById('launchModal').classList.add('open');
+});
+document.getElementById('modalCancel').addEventListener('click', () => {
+  document.getElementById('launchModal').classList.remove('open');
+});
+document.getElementById('launchModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('launchModal'))
+    document.getElementById('launchModal').classList.remove('open');
+});
+
+document.getElementById('modalLaunch').addEventListener('click', async () => {
+  const pat     = document.getElementById('patInput').value.trim();
+  const niche   = document.getElementById('nicheInput').value.trim();
+  const country = document.getElementById('countryInput').value;
+  const btn     = document.getElementById('modalLaunch');
+
+  if (!pat) {
+    alert('Entre ton GitHub Token (PAT) avec le scope workflow.');
+    return;
+  }
+
+  localStorage.setItem('gh_pat', pat);
+  btn.disabled = true;
+  btn.textContent = 'Lancement…';
+
+  try {
+    const ok = await triggerWorkflow(pat, niche, country);
+    if (!ok) {
+      alert('Erreur lors du déclenchement. Vérifie que le token a le scope "workflow".');
+      btn.disabled = false;
+      btn.textContent = '🚀 Lancer';
+      return;
+    }
+    document.getElementById('launchModal').classList.remove('open');
+    setBadge('queued', '⏳ Workflow lancé…');
+    // Wait 5s before first poll (GitHub needs a moment to register the run)
+    setTimeout(() => startPolling(pat), 5000);
+  } catch (err) {
+    alert(`Erreur réseau: ${err.message}`);
+  }
+  btn.disabled = false;
+  btn.textContent = '🚀 Lancer';
+});
+
+// Resume polling if a run was in progress (page reload)
+(function resumePolling() {
+  const pat = localStorage.getItem('gh_pat');
+  if (!pat) return;
+  getLatestRun(pat).then(run => {
+    if (run && (run.status === 'queued' || run.status === 'in_progress')) {
+      setBadge('running', '⚙️ Analyse en cours…');
+      startPolling(pat);
+    }
+  }).catch(() => {});
+})();
 
 // ── Init ───────────────────────────────────────────────────────────────────
 (function init() {

@@ -2,20 +2,19 @@ name: Scrape & Analyze Meta Ads
 
 on:
   schedule:
-    # Run every day at 06:00 UTC
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       niche:
-        description: "Niche keyword to scrape (leave empty for all niches in config)"
+        description: "Niche keyword (laisser vide = toutes les niches)"
         required: false
         default: ""
       country:
-        description: "Country code (FR, US, GB...)"
+        description: "Code pays (FR, US, GB...)"
         required: false
         default: "FR"
       max_ads:
-        description: "Max ads per niche"
+        description: "Max annonces par niche"
         required: false
         default: "100"
 
@@ -38,23 +37,24 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache pip dependencies
+      - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          restore-keys: ${{ runner.os }}-pip-
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt --no-cache-dir
 
+      - name: Install Chromium (open-source browser)
+        run: playwright install chromium --with-deps
+
       - name: Check imports
-        run: python -c "import groq, aiohttp, yaml; print('All imports OK')"
+        run: python -c "import groq, aiohttp, yaml, playwright; print('All imports OK')"
 
       - name: Run scraper
         env:
-          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ vars.GROQ_MODEL || 'llama-3.1-70b-versatile' }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
@@ -67,13 +67,13 @@ jobs:
           else
             python -m scraper.main --country "${COUNTRY_OVERRIDE:-FR}" --max-ads "${MAX_ADS:-100}"
           fi
-          # Fallback: if scraping returned 0 ads, generate demo data so dashboard stays populated
+          # Fallback: si 0 ads scrappés → données démo pour garder le dashboard vivant
           TOTAL=$(python -c "import json; d=json.load(open('data/latest_analysis.json')); print(d.get('total_ads',0))" 2>/dev/null || echo "0")
           if [ "$TOTAL" = "0" ]; then
-            echo "⚠️  Scraping returned 0 ads (Meta blocking) — injecting demo data"
+            echo "⚠️  0 ads récupérés — injection données démo"
             python generate_demo.py
           else
-            echo "✅ Real ads scraped: $TOTAL"
+            echo "✅ Vrais ads scrappés: $TOTAL"
           fi
 
       - name: Commit and push data
@@ -82,13 +82,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
           if git diff --staged --quiet; then
-            echo "No data changes to commit."
+            echo "Aucun changement à committer."
           else
-            git commit -m "chore: auto-update scrape data $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "chore: mise à jour données scrape $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
           fi
 
-      - name: Upload logs as artifact
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
