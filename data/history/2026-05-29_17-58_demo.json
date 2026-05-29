@@ -1,0 +1,3298 @@
+{
+  "generated_at": "2026-05-29T17:58:56Z",
+  "niches_processed": [
+    "foot wellness",
+    "posture corrector",
+    "sleep supplement",
+    "hair loss",
+    "joint pain",
+    "weight loss",
+    "gut health",
+    "collagen",
+    "anti aging",
+    "teeth whitening"
+  ],
+  "total_ads": 730,
+  "results": [
+    {
+      "niche": "foot wellness",
+      "angle_kpis": [
+        {
+          "angle": "Pain Agitation",
+          "count": 13,
+          "usage_pct": 0.197,
+          "avg_days_running": 90.4,
+          "median_days_running": 88.8,
+          "viability_score": 90.4,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Specific Result",
+          "count": 17,
+          "usage_pct": 0.2576,
+          "avg_days_running": 88.1,
+          "median_days_running": 85.0,
+          "viability_score": 88.1,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "bioessence.myshopify.com",
+              "days_running": 98,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "bioessence.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 6,
+          "usage_pct": 0.0909,
+          "avg_days_running": 74.8,
+          "median_days_running": 74.7,
+          "viability_score": 74.8,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "purehealth.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 81,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 8,
+          "usage_pct": 0.1212,
+          "avg_days_running": 71.7,
+          "median_days_running": 63.1,
+          "viability_score": 71.7,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "healthboost.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "purehealth.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "natureflex.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 8,
+          "usage_pct": 0.1212,
+          "avg_days_running": 61.2,
+          "median_days_running": 54.9,
+          "viability_score": 61.2,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "healthboost.myshopify.com",
+              "days_running": 56,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "purehealth.myshopify.com",
+              "days_running": 50,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "purehealth.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 6,
+          "usage_pct": 0.0909,
+          "avg_days_running": 56.6,
+          "median_days_running": 50.6,
+          "viability_score": 56.6,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 45,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "natureflex.myshopify.com",
+              "days_running": 50,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 22,
+          "usage_pct": 0.3333,
+          "avg_days_running": 51.2,
+          "median_days_running": 46.2,
+          "viability_score": 51.2,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 45,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 63,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "purehealth.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 13,
+          "usage_pct": 0.197,
+          "avg_days_running": 43.6,
+          "median_days_running": 39.7,
+          "viability_score": 43.6,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 55,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "bioessence.myshopify.com",
+              "days_running": 39,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "bioessence.myshopify.com",
+              "days_running": 42,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "femmes 35-60, actives"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 74.8,
+          "usage_count": 6,
+          "usage_pct": 0.0909,
+          "avg_days_running": 74.8,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "purehealth.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 81,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "femmes 35-60, actives",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Foot Wellness Solution Pro",
+              "handle": "foot-wellness-pro",
+              "url": "https://healthboost.myshopify.com/products/foot-wellness-pro",
+              "price": "75.99",
+              "image": "",
+              "store": "purehealth.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Foot Wellness Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 66,
+        "unique_angles": 8,
+        "gaps_found": 1
+      }
+    },
+    {
+      "niche": "posture corrector",
+      "angle_kpis": [
+        {
+          "angle": "Specific Result",
+          "count": 17,
+          "usage_pct": 0.191,
+          "avg_days_running": 97.6,
+          "median_days_running": 83.6,
+          "viability_score": 97.6,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 107,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 94,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "healthboost.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 13,
+          "usage_pct": 0.1461,
+          "avg_days_running": 92.4,
+          "median_days_running": 78.6,
+          "viability_score": 92.4,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 110,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 105,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 109,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 2,
+          "usage_pct": 0.0225,
+          "avg_days_running": 82.5,
+          "median_days_running": 86.2,
+          "viability_score": 82.5,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 7,
+          "usage_pct": 0.0787,
+          "avg_days_running": 71.4,
+          "median_days_running": 73.4,
+          "viability_score": 71.4,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 63,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "natureflex.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 9,
+          "usage_pct": 0.1011,
+          "avg_days_running": 65.2,
+          "median_days_running": 67.5,
+          "viability_score": 65.2,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "healthboost.myshopify.com",
+              "days_running": 55,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "healthboost.myshopify.com",
+              "days_running": 82,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 24,
+          "usage_pct": 0.2697,
+          "avg_days_running": 57.8,
+          "median_days_running": 59.4,
+          "viability_score": 57.8,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "healthboost.myshopify.com",
+              "days_running": 44,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "bioessence.myshopify.com",
+              "days_running": 68,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "natureflex.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 9,
+          "usage_pct": 0.1011,
+          "avg_days_running": 57.2,
+          "median_days_running": 50.5,
+          "viability_score": 57.2,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 71,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 57,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 12,
+          "usage_pct": 0.1348,
+          "avg_days_running": 39.2,
+          "median_days_running": 38.8,
+          "viability_score": 39.2,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "natureflex.myshopify.com",
+              "days_running": 32,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "healthboost.myshopify.com",
+              "days_running": 29,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "natureflex.myshopify.com",
+              "days_running": 38,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "télétravailleurs 25-45"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 82.5,
+          "usage_count": 2,
+          "usage_pct": 0.0225,
+          "avg_days_running": 82.5,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "télétravailleurs 25-45",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "viability_score": 71.4,
+          "usage_count": 7,
+          "usage_pct": 0.0787,
+          "avg_days_running": 71.4,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 63,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "natureflex.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-2"
+            }
+          ],
+          "primary_audience": "télétravailleurs 25-45",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Posture Corrector Solution Pro",
+              "handle": "posture-corrector-pro",
+              "url": "https://bioessence.myshopify.com/products/posture-corrector-pro",
+              "price": "64.99",
+              "image": "",
+              "store": "vitalcare.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Posture Corrector Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Before/After Transformation",
+          "products": [
+            {
+              "title": "Posture Corrector Solution Pro",
+              "handle": "posture-corrector-pro",
+              "url": "https://wellness-pro.myshopify.com/products/posture-corrector-pro",
+              "price": "44.99",
+              "image": "",
+              "store": "purehealth.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Posture Corrector Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 89,
+        "unique_angles": 8,
+        "gaps_found": 2
+      }
+    },
+    {
+      "niche": "sleep supplement",
+      "angle_kpis": [
+        {
+          "angle": "Specific Result",
+          "count": 16,
+          "usage_pct": 0.3137,
+          "avg_days_running": 96.6,
+          "median_days_running": 94.1,
+          "viability_score": 96.6,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "purehealth.myshopify.com",
+              "days_running": 96,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 112,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 110,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 11,
+          "usage_pct": 0.2157,
+          "avg_days_running": 92.8,
+          "median_days_running": 89.1,
+          "viability_score": 92.8,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 85,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 106,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 108,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 7,
+          "usage_pct": 0.1373,
+          "avg_days_running": 74.3,
+          "median_days_running": 68.8,
+          "viability_score": 74.3,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 88,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "bioessence.myshopify.com",
+              "days_running": 66,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 8,
+          "usage_pct": 0.1569,
+          "avg_days_running": 73.6,
+          "median_days_running": 62.6,
+          "viability_score": 73.6,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 86,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 82,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 11,
+          "usage_pct": 0.2157,
+          "avg_days_running": 65.4,
+          "median_days_running": 58.7,
+          "viability_score": 65.4,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "natureflex.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 82,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 10,
+          "usage_pct": 0.1961,
+          "avg_days_running": 64.4,
+          "median_days_running": 57.6,
+          "viability_score": 64.4,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 64,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 55,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 22,
+          "usage_pct": 0.4314,
+          "avg_days_running": 53.9,
+          "median_days_running": 46.8,
+          "viability_score": 53.9,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "healthboost.myshopify.com",
+              "days_running": 40,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 41,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "bioessence.myshopify.com",
+              "days_running": 56,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 13,
+          "usage_pct": 0.2549,
+          "avg_days_running": 38.6,
+          "median_days_running": 39.8,
+          "viability_score": 38.6,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "healthboost.myshopify.com",
+              "days_running": 29,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 49,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 42,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "adultes 30-55, stressés"
+        }
+      ],
+      "gaps": [],
+      "recommendations": [],
+      "stats": {
+        "total_ads": 51,
+        "unique_angles": 8,
+        "gaps_found": 0
+      }
+    },
+    {
+      "niche": "hair loss",
+      "angle_kpis": [
+        {
+          "angle": "Pain Agitation",
+          "count": 13,
+          "usage_pct": 0.1444,
+          "avg_days_running": 83.8,
+          "median_days_running": 86.3,
+          "viability_score": 83.8,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 78,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 93,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Specific Result",
+          "count": 22,
+          "usage_pct": 0.2444,
+          "avg_days_running": 83.0,
+          "median_days_running": 81.3,
+          "viability_score": 83.0,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 93,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "bioessence.myshopify.com",
+              "days_running": 91,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "healthboost.myshopify.com",
+              "days_running": 100,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 4,
+          "usage_pct": 0.0444,
+          "avg_days_running": 76.1,
+          "median_days_running": 67.5,
+          "viability_score": 76.1,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 62,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 85,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 78,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 11,
+          "usage_pct": 0.1222,
+          "avg_days_running": 73.1,
+          "median_days_running": 70.8,
+          "viability_score": 73.1,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 66,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 5,
+          "usage_pct": 0.0556,
+          "avg_days_running": 68.4,
+          "median_days_running": 70.9,
+          "viability_score": 68.4,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 64,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 24,
+          "usage_pct": 0.2667,
+          "avg_days_running": 60.7,
+          "median_days_running": 53.4,
+          "viability_score": 60.7,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "healthboost.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "healthboost.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 6,
+          "usage_pct": 0.0667,
+          "avg_days_running": 57.2,
+          "median_days_running": 57.1,
+          "viability_score": 57.2,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 45,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 62,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 58,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "hommes 30-55"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 13,
+          "usage_pct": 0.1444,
+          "avg_days_running": 40.9,
+          "median_days_running": 40.2,
+          "viability_score": 40.9,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "purehealth.myshopify.com",
+              "days_running": 36,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "natureflex.myshopify.com",
+              "days_running": 47,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "purehealth.myshopify.com",
+              "days_running": 30,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "hommes 30-55"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 76.1,
+          "usage_count": 4,
+          "usage_pct": 0.0444,
+          "avg_days_running": 76.1,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 62,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 85,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 78,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "hommes 30-55",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Authority / Expert",
+          "viability_score": 68.4,
+          "usage_count": 5,
+          "usage_pct": 0.0556,
+          "avg_days_running": 68.4,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 64,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            }
+          ],
+          "primary_audience": "hommes 30-55",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Hair Loss Solution Pro",
+              "handle": "hair-loss-pro",
+              "url": "https://purehealth.myshopify.com/products/hair-loss-pro",
+              "price": "45.99",
+              "image": "",
+              "store": "wellness-pro.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Hair Loss Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Authority / Expert",
+          "products": [
+            {
+              "title": "Hair Loss Solution Pro",
+              "handle": "hair-loss-pro",
+              "url": "https://healthboost.myshopify.com/products/hair-loss-pro",
+              "price": "21.99",
+              "image": "",
+              "store": "healthboost.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Hair Loss Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 90,
+        "unique_angles": 8,
+        "gaps_found": 2
+      }
+    },
+    {
+      "niche": "joint pain",
+      "angle_kpis": [
+        {
+          "angle": "Specific Result",
+          "count": 19,
+          "usage_pct": 0.2676,
+          "avg_days_running": 97.4,
+          "median_days_running": 85.4,
+          "viability_score": 97.4,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 114,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 117,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 98,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 15,
+          "usage_pct": 0.2113,
+          "avg_days_running": 82.4,
+          "median_days_running": 80.5,
+          "viability_score": 82.4,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 73,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 5,
+          "usage_pct": 0.0704,
+          "avg_days_running": 79.5,
+          "median_days_running": 77.6,
+          "viability_score": 79.5,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 89,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 11,
+          "usage_pct": 0.1549,
+          "avg_days_running": 75.4,
+          "median_days_running": 71.5,
+          "viability_score": 75.4,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "natureflex.myshopify.com",
+              "days_running": 64,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 89,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "healthboost.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 6,
+          "usage_pct": 0.0845,
+          "avg_days_running": 72.9,
+          "median_days_running": 62.6,
+          "viability_score": 72.9,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 91,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 58,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 89,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 7,
+          "usage_pct": 0.0986,
+          "avg_days_running": 66.9,
+          "median_days_running": 65.3,
+          "viability_score": 66.9,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 68,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "healthboost.myshopify.com",
+              "days_running": 69,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 24,
+          "usage_pct": 0.338,
+          "avg_days_running": 48.9,
+          "median_days_running": 49.9,
+          "viability_score": 48.9,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "bioessence.myshopify.com",
+              "days_running": 51,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 36,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 53,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 10,
+          "usage_pct": 0.1408,
+          "avg_days_running": 44.6,
+          "median_days_running": 44.0,
+          "viability_score": 44.6,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "bioessence.myshopify.com",
+              "days_running": 54,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 35,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 42,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "hommes/femmes 45-70"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 79.5,
+          "usage_count": 5,
+          "usage_pct": 0.0704,
+          "avg_days_running": 79.5,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 89,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "hommes/femmes 45-70",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Authority / Expert",
+          "viability_score": 72.9,
+          "usage_count": 6,
+          "usage_pct": 0.0845,
+          "avg_days_running": 72.9,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 91,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 58,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 89,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-4"
+            }
+          ],
+          "primary_audience": "hommes/femmes 45-70",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Us vs Them",
+          "viability_score": 66.9,
+          "usage_count": 7,
+          "usage_pct": 0.0986,
+          "avg_days_running": 66.9,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 68,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "healthboost.myshopify.com",
+              "days_running": 69,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            }
+          ],
+          "primary_audience": "hommes/femmes 45-70",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Joint Pain Solution Pro",
+              "handle": "joint-pain-pro",
+              "url": "https://healthboost.myshopify.com/products/joint-pain-pro",
+              "price": "56.99",
+              "image": "",
+              "store": "natureflex.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Joint Pain Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Authority / Expert",
+          "products": [
+            {
+              "title": "Joint Pain Solution Pro",
+              "handle": "joint-pain-pro",
+              "url": "https://vitalcare.myshopify.com/products/joint-pain-pro",
+              "price": "53.99",
+              "image": "",
+              "store": "healthboost.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Joint Pain Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Us vs Them",
+          "products": [
+            {
+              "title": "Joint Pain Solution Pro",
+              "handle": "joint-pain-pro",
+              "url": "https://wellness-pro.myshopify.com/products/joint-pain-pro",
+              "price": "75.99",
+              "image": "",
+              "store": "bioessence.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Joint Pain Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 71,
+        "unique_angles": 8,
+        "gaps_found": 3
+      }
+    },
+    {
+      "niche": "weight loss",
+      "angle_kpis": [
+        {
+          "angle": "Pain Agitation",
+          "count": 18,
+          "usage_pct": 0.2045,
+          "avg_days_running": 85.5,
+          "median_days_running": 89.2,
+          "viability_score": 85.5,
+          "examples": [
+            {
+              "hook": "Vous avez tout essayé et rien ne fonctionne — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 104,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous avez tout essayé et rien ne fonctionne — voici pourquoi",
+              "store": "bioessence.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous avez tout essayé et rien ne fonctionne — voici pourquoi",
+              "store": "healthboost.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Frustration régime"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Contre-intuitive",
+          "count": 2,
+          "usage_pct": 0.0227,
+          "avg_days_running": 84.9,
+          "median_days_running": 73.3,
+          "viability_score": 84.9,
+          "examples": [
+            {
+              "hook": "Pourquoi manger moins vous fait grossir — la science l'explique",
+              "store": "healthboost.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi manger moins vous fait grossir — la science l'explique",
+              "store": "natureflex.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Manger plus pour maigrir"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Specific Result",
+          "count": 10,
+          "usage_pct": 0.1136,
+          "avg_days_running": 84.2,
+          "median_days_running": 81.2,
+          "viability_score": 84.2,
+          "examples": [
+            {
+              "hook": "Perdre 4kg en 3 semaines sans se priver",
+              "store": "healthboost.myshopify.com",
+              "days_running": 90,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "Perdre 4kg en 3 semaines sans se priver",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 71,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "Perdre 4kg en 3 semaines sans se priver",
+              "store": "bioessence.myshopify.com",
+              "days_running": 100,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Résultat chiffré"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 19,
+          "usage_pct": 0.2159,
+          "avg_days_running": 77.6,
+          "median_days_running": 75.1,
+          "viability_score": 77.6,
+          "examples": [
+            {
+              "hook": "Ma transformation en 60 jours — photos avant/après",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 63,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "Ma transformation en 60 jours — photos avant/après",
+              "store": "healthboost.myshopify.com",
+              "days_running": 71,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "Ma transformation en 60 jours — photos avant/après",
+              "store": "purehealth.myshopify.com",
+              "days_running": 68,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Transformation physique"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 3,
+          "usage_pct": 0.0341,
+          "avg_days_running": 73.8,
+          "median_days_running": 76.5,
+          "viability_score": 73.8,
+          "examples": [
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "bioessence.myshopify.com",
+              "days_running": 67,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "purehealth.myshopify.com",
+              "days_running": 65,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "bioessence.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Mécanisme inconnu"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 7,
+          "usage_pct": 0.0795,
+          "avg_days_running": 68.8,
+          "median_days_running": 64.7,
+          "viability_score": 68.8,
+          "examples": [
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "purehealth.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "healthboost.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Validation scientifique"
+          ],
+          "primary_audience": "femmes 25-45"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 21,
+          "usage_pct": 0.2386,
+          "avg_days_running": 60.8,
+          "median_days_running": 52.0,
+          "viability_score": 60.8,
+          "examples": [
+            {
+              "hook": "Rejoignez 100 000 personnes qui ont transformé leur corps",
+              "store": "purehealth.myshopify.com",
+              "days_running": 47,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "Rejoignez 100 000 personnes qui ont transformé leur corps",
+              "store": "healthboost.myshopify.com",
+              "days_running": 50,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "Rejoignez 100 000 personnes qui ont transformé leur corps",
+              "store": "purehealth.myshopify.com",
+              "days_running": 58,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Communauté de succès"
+          ],
+          "primary_audience": "femmes 25-45"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Contre-intuitive",
+          "viability_score": 84.9,
+          "usage_count": 2,
+          "usage_pct": 0.0227,
+          "avg_days_running": 84.9,
+          "examples": [
+            {
+              "hook": "Pourquoi manger moins vous fait grossir — la science l'explique",
+              "store": "healthboost.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi manger moins vous fait grossir — la science l'explique",
+              "store": "natureflex.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            }
+          ],
+          "primary_audience": "femmes 25-45",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 73.8,
+          "usage_count": 3,
+          "usage_pct": 0.0341,
+          "avg_days_running": 73.8,
+          "examples": [
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "bioessence.myshopify.com",
+              "days_running": 67,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "purehealth.myshopify.com",
+              "days_running": 65,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Ce que votre médecin ne vous dit pas sur la perte de poids",
+              "store": "bioessence.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            }
+          ],
+          "primary_audience": "femmes 25-45",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Authority / Expert",
+          "viability_score": 68.8,
+          "usage_count": 7,
+          "usage_pct": 0.0795,
+          "avg_days_running": 68.8,
+          "examples": [
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "purehealth.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 74,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Approuvé par des nutritionnistes : la méthode du jeûne intermittent",
+              "store": "healthboost.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            }
+          ],
+          "primary_audience": "femmes 25-45",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Contre-intuitive",
+          "products": [
+            {
+              "title": "Weight Loss Solution Pro",
+              "handle": "weight-loss-pro",
+              "url": "https://vitalcare.myshopify.com/products/weight-loss-pro",
+              "price": "74.99",
+              "image": "",
+              "store": "natureflex.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Weight Loss Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Weight Loss Solution Pro",
+              "handle": "weight-loss-pro",
+              "url": "https://wellness-pro.myshopify.com/products/weight-loss-pro",
+              "price": "55.99",
+              "image": "",
+              "store": "healthboost.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Weight Loss Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Authority / Expert",
+          "products": [
+            {
+              "title": "Weight Loss Solution Pro",
+              "handle": "weight-loss-pro",
+              "url": "https://wellness-pro.myshopify.com/products/weight-loss-pro",
+              "price": "68.99",
+              "image": "",
+              "store": "vitalcare.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Weight Loss Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 88,
+        "unique_angles": 7,
+        "gaps_found": 3
+      }
+    },
+    {
+      "niche": "gut health",
+      "angle_kpis": [
+        {
+          "angle": "Specific Result",
+          "count": 16,
+          "usage_pct": 0.1739,
+          "avg_days_running": 95.9,
+          "median_days_running": 84.6,
+          "viability_score": 95.9,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "healthboost.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "bioessence.myshopify.com",
+              "days_running": 102,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "purehealth.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 16,
+          "usage_pct": 0.1739,
+          "avg_days_running": 93.3,
+          "median_days_running": 92.0,
+          "viability_score": 93.3,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "purehealth.myshopify.com",
+              "days_running": 90,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 79,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 8,
+          "usage_pct": 0.087,
+          "avg_days_running": 83.4,
+          "median_days_running": 82.7,
+          "viability_score": 83.4,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 98,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 88,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 79,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 8,
+          "usage_pct": 0.087,
+          "avg_days_running": 77.9,
+          "median_days_running": 68.5,
+          "viability_score": 77.9,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "purehealth.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "bioessence.myshopify.com",
+              "days_running": 87,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 10,
+          "usage_pct": 0.1087,
+          "avg_days_running": 73.8,
+          "median_days_running": 64.3,
+          "viability_score": 73.8,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 85,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "bioessence.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 9,
+          "usage_pct": 0.0978,
+          "avg_days_running": 58.5,
+          "median_days_running": 50.4,
+          "viability_score": 58.5,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "purehealth.myshopify.com",
+              "days_running": 73,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 56,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 52,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 26,
+          "usage_pct": 0.2826,
+          "avg_days_running": 52.6,
+          "median_days_running": 55.1,
+          "viability_score": 52.6,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 40,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 38,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "natureflex.myshopify.com",
+              "days_running": 51,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "femmes 28-50"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 12,
+          "usage_pct": 0.1304,
+          "avg_days_running": 47.5,
+          "median_days_running": 42.1,
+          "viability_score": 47.5,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 66,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "natureflex.myshopify.com",
+              "days_running": 52,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "healthboost.myshopify.com",
+              "days_running": 65,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "femmes 28-50"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 83.4,
+          "usage_count": 8,
+          "usage_pct": 0.087,
+          "avg_days_running": 83.4,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 98,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 88,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 79,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "femmes 28-50",
+          "potential": "HIGH"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "viability_score": 77.9,
+          "usage_count": 8,
+          "usage_pct": 0.087,
+          "avg_days_running": 77.9,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "purehealth.myshopify.com",
+              "days_running": 84,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "bioessence.myshopify.com",
+              "days_running": 87,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            }
+          ],
+          "primary_audience": "femmes 28-50",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Gut Health Solution Pro",
+              "handle": "gut-health-pro",
+              "url": "https://purehealth.myshopify.com/products/gut-health-pro",
+              "price": "49.99",
+              "image": "",
+              "store": "vitalcare.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Gut Health Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        },
+        {
+          "angle": "Before/After Transformation",
+          "products": [
+            {
+              "title": "Gut Health Solution Pro",
+              "handle": "gut-health-pro",
+              "url": "https://purehealth.myshopify.com/products/gut-health-pro",
+              "price": "27.99",
+              "image": "",
+              "store": "wellness-pro.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Gut Health Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 92,
+        "unique_angles": 8,
+        "gaps_found": 2
+      }
+    },
+    {
+      "niche": "collagen",
+      "angle_kpis": [
+        {
+          "angle": "Specific Result",
+          "count": 19,
+          "usage_pct": 0.3167,
+          "avg_days_running": 97.2,
+          "median_days_running": 90.5,
+          "viability_score": 97.2,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 93,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 116,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 102,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 12,
+          "usage_pct": 0.2,
+          "avg_days_running": 85.4,
+          "median_days_running": 81.0,
+          "viability_score": 85.4,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 102,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 81,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 8,
+          "usage_pct": 0.1333,
+          "avg_days_running": 77.1,
+          "median_days_running": 78.3,
+          "viability_score": 77.1,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 94,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "healthboost.myshopify.com",
+              "days_running": 86,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 2,
+          "usage_pct": 0.0333,
+          "avg_days_running": 75.0,
+          "median_days_running": 69.0,
+          "viability_score": 75.0,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 90,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 9,
+          "usage_pct": 0.15,
+          "avg_days_running": 62.7,
+          "median_days_running": 61.3,
+          "viability_score": 62.7,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 50,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "healthboost.myshopify.com",
+              "days_running": 81,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 22,
+          "usage_pct": 0.3667,
+          "avg_days_running": 57.3,
+          "median_days_running": 57.5,
+          "viability_score": 57.3,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 69,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "natureflex.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "natureflex.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 8,
+          "usage_pct": 0.1333,
+          "avg_days_running": 57.1,
+          "median_days_running": 54.1,
+          "viability_score": 57.1,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "natureflex.myshopify.com",
+              "days_running": 42,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "healthboost.myshopify.com",
+              "days_running": 47,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "natureflex.myshopify.com",
+              "days_running": 60,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "femmes 35-55"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 9,
+          "usage_pct": 0.15,
+          "avg_days_running": 46.9,
+          "median_days_running": 46.4,
+          "viability_score": 46.9,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 56,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "bioessence.myshopify.com",
+              "days_running": 43,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "healthboost.myshopify.com",
+              "days_running": 36,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "femmes 35-55"
+        }
+      ],
+      "gaps": [
+        {
+          "angle": "Curiosity Gap",
+          "viability_score": 75.0,
+          "usage_count": 2,
+          "usage_pct": 0.0333,
+          "avg_days_running": 75.0,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 90,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "healthboost.myshopify.com",
+              "days_running": 77,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-6"
+            }
+          ],
+          "primary_audience": "femmes 35-55",
+          "potential": "HIGH"
+        }
+      ],
+      "recommendations": [
+        {
+          "angle": "Curiosity Gap",
+          "products": [
+            {
+              "title": "Collagen Solution Pro",
+              "handle": "collagen-pro",
+              "url": "https://wellness-pro.myshopify.com/products/collagen-pro",
+              "price": "72.99",
+              "image": "",
+              "store": "natureflex.myshopify.com"
+            }
+          ],
+          "trends": [
+            {
+              "product": "Collagen Solution",
+              "trend": "rising",
+              "volume": "medium"
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total_ads": 60,
+        "unique_angles": 8,
+        "gaps_found": 1
+      }
+    },
+    {
+      "niche": "anti aging",
+      "angle_kpis": [
+        {
+          "angle": "Before/After Transformation",
+          "count": 12,
+          "usage_pct": 0.1714,
+          "avg_days_running": 91.7,
+          "median_days_running": 96.1,
+          "viability_score": 91.7,
+          "examples": [
+            {
+              "hook": "Ma peau à 55 ans vs 45 ans — le secret de ma routine",
+              "store": "natureflex.myshopify.com",
+              "days_running": 105,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Ma peau à 55 ans vs 45 ans — le secret de ma routine",
+              "store": "healthboost.myshopify.com",
+              "days_running": 95,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Ma peau à 55 ans vs 45 ans — le secret de ma routine",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Rajeunissement visible"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Specific Result",
+          "count": 14,
+          "usage_pct": 0.2,
+          "avg_days_running": 84.5,
+          "median_days_running": 78.7,
+          "viability_score": 84.5,
+          "examples": [
+            {
+              "hook": "Réduction de 40% des rides en 28 jours — prouvé cliniquement",
+              "store": "purehealth.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Réduction de 40% des rides en 28 jours — prouvé cliniquement",
+              "store": "bioessence.myshopify.com",
+              "days_running": 97,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Réduction de 40% des rides en 28 jours — prouvé cliniquement",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 69,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Résultat mesurable"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 8,
+          "usage_pct": 0.1143,
+          "avg_days_running": 82.5,
+          "median_days_running": 82.4,
+          "viability_score": 82.5,
+          "examples": [
+            {
+              "hook": "Ce que les dermatologues utilisent vraiment chez eux",
+              "store": "healthboost.myshopify.com",
+              "days_running": 98,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "Ce que les dermatologues utilisent vraiment chez eux",
+              "store": "bioessence.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "Ce que les dermatologues utilisent vraiment chez eux",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 90,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Dermatologue recommande"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Pain Agitation",
+          "count": 8,
+          "usage_pct": 0.1143,
+          "avg_days_running": 76.1,
+          "median_days_running": 74.2,
+          "viability_score": 76.1,
+          "examples": [
+            {
+              "hook": "Chaque matin, ces rides vous rappellent que le temps passe",
+              "store": "purehealth.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "Chaque matin, ces rides vous rappellent que le temps passe",
+              "store": "natureflex.myshopify.com",
+              "days_running": 61,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "Chaque matin, ces rides vous rappellent que le temps passe",
+              "store": "bioessence.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Peur du vieillissement"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Naturalness",
+          "count": 9,
+          "usage_pct": 0.1286,
+          "avg_days_running": 57.3,
+          "median_days_running": 50.7,
+          "viability_score": 57.3,
+          "examples": [
+            {
+              "hook": "Sans parabènes, sans silicones — juste ce que votre peau demande",
+              "store": "bioessence.myshopify.com",
+              "days_running": 75,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Sans parabènes, sans silicones — juste ce que votre peau demande",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 65,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Sans parabènes, sans silicones — juste ce que votre peau demande",
+              "store": "healthboost.myshopify.com",
+              "days_running": 73,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Formule clean"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 10,
+          "usage_pct": 0.1429,
+          "avg_days_running": 53.5,
+          "median_days_running": 52.2,
+          "viability_score": 53.5,
+          "examples": [
+            {
+              "hook": "L'efficacité des crèmes à 200€ pour 35€",
+              "store": "purehealth.myshopify.com",
+              "days_running": 43,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "L'efficacité des crèmes à 200€ pour 35€",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 59,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "L'efficacité des crèmes à 200€ pour 35€",
+              "store": "healthboost.myshopify.com",
+              "days_running": 51,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Luxe accessible"
+          ],
+          "primary_audience": "femmes 45-65"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 22,
+          "usage_pct": 0.3143,
+          "avg_days_running": 48.4,
+          "median_days_running": 41.5,
+          "viability_score": 48.4,
+          "examples": [
+            {
+              "hook": "Le secret beauté des femmes de 50 ans qui font 35 ans",
+              "store": "healthboost.myshopify.com",
+              "days_running": 34,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "Le secret beauté des femmes de 50 ans qui font 35 ans",
+              "store": "bioessence.myshopify.com",
+              "days_running": 46,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "Le secret beauté des femmes de 50 ans qui font 35 ans",
+              "store": "purehealth.myshopify.com",
+              "days_running": 34,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Stars et célébrités"
+          ],
+          "primary_audience": "femmes 45-65"
+        }
+      ],
+      "gaps": [],
+      "recommendations": [],
+      "stats": {
+        "total_ads": 70,
+        "unique_angles": 7,
+        "gaps_found": 0
+      }
+    },
+    {
+      "niche": "teeth whitening",
+      "angle_kpis": [
+        {
+          "angle": "Pain Agitation",
+          "count": 15,
+          "usage_pct": 0.283,
+          "avg_days_running": 89.8,
+          "median_days_running": 89.3,
+          "viability_score": 89.8,
+          "examples": [
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "natureflex.myshopify.com",
+              "days_running": 80,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 91,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            },
+            {
+              "hook": "Vous marchez 8h/jour avec des semelles inadaptées — voici pourquoi vos pieds vous font souffrir",
+              "store": "purehealth.myshopify.com",
+              "days_running": 92,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-1"
+            }
+          ],
+          "sub_angles": [
+            "Douleur chronique"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Specific Result",
+          "count": 17,
+          "usage_pct": 0.3208,
+          "avg_days_running": 87.8,
+          "median_days_running": 88.6,
+          "viability_score": 87.8,
+          "examples": [
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 78,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-3"
+            },
+            {
+              "hook": "94% des utilisateurs ressentent un soulagement en 7 jours",
+              "store": "natureflex.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-3"
+            }
+          ],
+          "sub_angles": [
+            "Chiffre précis"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Curiosity Gap",
+          "count": 8,
+          "usage_pct": 0.1509,
+          "avg_days_running": 85.5,
+          "median_days_running": 73.8,
+          "viability_score": 85.5,
+          "examples": [
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "bioessence.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-6"
+            },
+            {
+              "hook": "La vraie raison pour laquelle vos pieds gonflent le soir",
+              "store": "purehealth.myshopify.com",
+              "days_running": 103,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-6"
+            }
+          ],
+          "sub_angles": [
+            "Secret méconnu"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Before/After Transformation",
+          "count": 6,
+          "usage_pct": 0.1132,
+          "avg_days_running": 67.3,
+          "median_days_running": 68.8,
+          "viability_score": 67.3,
+          "examples": [
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 72,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "vitalcare.myshopify.com",
+              "days_running": 83,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-2"
+            },
+            {
+              "hook": "J'ai testé ces semelles pendant 30 jours — résultats surprenants",
+              "store": "purehealth.myshopify.com",
+              "days_running": 57,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-2"
+            }
+          ],
+          "sub_angles": [
+            "Avant/après usage"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Authority / Expert",
+          "count": 6,
+          "usage_pct": 0.1132,
+          "avg_days_running": 62.6,
+          "median_days_running": 55.0,
+          "viability_score": 62.6,
+          "examples": [
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "bioessence.myshopify.com",
+              "days_running": 76,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "bioessence.myshopify.com",
+              "days_running": 51,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-4"
+            },
+            {
+              "hook": "Les podologues recommandent cette technique anti-douleur",
+              "store": "natureflex.myshopify.com",
+              "days_running": 70,
+              "landing_page_url": "https://natureflex.myshopify.com/products/solution-4"
+            }
+          ],
+          "sub_angles": [
+            "Recommandation podologue"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Us vs Them",
+          "count": 10,
+          "usage_pct": 0.1887,
+          "avg_days_running": 62.5,
+          "median_days_running": 58.8,
+          "viability_score": 62.5,
+          "examples": [
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "bioessence.myshopify.com",
+              "days_running": 49,
+              "landing_page_url": "https://wellness-pro.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 63,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-7"
+            },
+            {
+              "hook": "Pourquoi les semelles classiques aggravent vos douleurs",
+              "store": "natureflex.myshopify.com",
+              "days_running": 69,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-7"
+            }
+          ],
+          "sub_angles": [
+            "Vs semelles classiques"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Social Proof",
+          "count": 22,
+          "usage_pct": 0.4151,
+          "avg_days_running": 50.1,
+          "median_days_running": 51.4,
+          "viability_score": 50.1,
+          "examples": [
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "bioessence.myshopify.com",
+              "days_running": 36,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "wellness-pro.myshopify.com",
+              "days_running": 54,
+              "landing_page_url": "https://healthboost.myshopify.com/products/solution-5"
+            },
+            {
+              "hook": "Plus de 50 000 paires vendues — voici pourquoi",
+              "store": "purehealth.myshopify.com",
+              "days_running": 68,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-5"
+            }
+          ],
+          "sub_angles": [
+            "Témoignages clients"
+          ],
+          "primary_audience": "adultes 20-40"
+        },
+        {
+          "angle": "Price Anchoring",
+          "count": 8,
+          "usage_pct": 0.1509,
+          "avg_days_running": 39.3,
+          "median_days_running": 35.5,
+          "viability_score": 39.3,
+          "examples": [
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "bioessence.myshopify.com",
+              "days_running": 49,
+              "landing_page_url": "https://vitalcare.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "purehealth.myshopify.com",
+              "days_running": 36,
+              "landing_page_url": "https://bioessence.myshopify.com/products/solution-8"
+            },
+            {
+              "hook": "Évitez 300€ chez le kiné avec cette solution à 29€",
+              "store": "purehealth.myshopify.com",
+              "days_running": 45,
+              "landing_page_url": "https://purehealth.myshopify.com/products/solution-8"
+            }
+          ],
+          "sub_angles": [
+            "Comparaison coût"
+          ],
+          "primary_audience": "adultes 20-40"
+        }
+      ],
+      "gaps": [],
+      "recommendations": [],
+      "stats": {
+        "total_ads": 53,
+        "unique_angles": 8,
+        "gaps_found": 0
+      }
+    }
+  ]
+}
