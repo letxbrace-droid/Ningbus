@@ -1,5 +1,53 @@
 {
-  "generated_at": "2026-05-29T19:57:03Z",
-  "ads": [],
-  "demo": true
+  "generated_at": "2026-05-29T20:18:37Z",
+  "ads": [
+    {
+      "ad_copy": "Support stamina and heart health every day",
+      "creative_id": "",
+      "page_name": "Wendy Bolton",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "angle_data": {
+        "angle": "Santé cardiaque",
+        "sub_angle": "Prévention quotidienne",
+        "hook": "Support stamina and heart health",
+        "pain_point": "Problèmes de santé cardiaque",
+        "desire": "Bien-être et santé cardiaque",
+        "mechanism": "Supporte la santé cardiaque",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Personnes âgées de 40-65 ans",
+        "confidence": 0.8
+      }
+    },
+    {
+      "ad_copy": "Get Grounded While You Sleep.",
+      "creative_id": "",
+      "page_name": "Elizabeth Porter",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "angle_data": {
+        "angle": "Pain Agitation",
+        "sub_angle": "Santé et bien-être",
+        "hook": "Get Grounded While You Sleep",
+        "pain_point": "Manque de sommeil ou de détente",
+        "desire": "Meilleur sommeil et bien-être",
+        "mechanism": "Technologie de mise à la terre pendant le sommeil",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Personnes souffrant de troubles du sommeil",
+        "confidence": 0.8
+      }
+    }
+  ]
 }
