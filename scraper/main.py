@@ -20,8 +20,6 @@ from .meta_scraper import MetaScraper
 from .shop_finder import find_scaling_shops
 from .utils import Timer, setup_logging
 
-
-
 logger = logging.getLogger(__name__)
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
@@ -50,6 +48,41 @@ def _now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
+    """Convert a shop dict to an advertiser profile dict for the dashboard."""
+    angles_used = shop.get("angles_used") or []
+    gap_angles = [g["angle"] for g in gaps if g["angle"] not in set(angles_used)]
+    products = shop.get("products") or []
+    domain = shop.get("domain", "")
+    store_url = shop.get("store_url") or shop.get("base_url") or (
+        f"https://{domain}" if domain else ""
+    )
+    ads = shop.get("ads") or []
+    avg_days = (
+        round(sum(a.get("days_running", 0) for a in ads) / len(ads), 1) if ads else 0.0
+    )
+    scaling_score = shop.get("scaling_score") or round(
+        len(products) * max(shop.get("max_days_running", 1), 1) * 0.1, 1
+    )
+    dominant = angles_used[0] if angles_used else ""
+    return {
+        "name":               shop.get("page_name") or domain,
+        "domain":             domain,
+        "store_url":          store_url,
+        "scaling_score":      scaling_score,
+        "ads_count":          shop.get("ads_count", len(ads)),
+        "max_days_running":   shop.get("max_days_running", 0),
+        "avg_days_running":   avg_days,
+        "estimated_spend":    shop.get("total_spend", 0),
+        "angles_used":        angles_used,
+        "dominant_angle":     dominant,
+        "angle_gaps":         gap_angles,
+        "products":           products,
+        "ad_examples":        [],
+        "platforms":          list({p for a in ads for p in (a.get("publisher_platforms") or [])}),
+    }
+
+
 async def run_niche(
     niche: str,
     country: str,
@@ -70,34 +103,16 @@ async def run_niche(
     logger.info("Step 1 — %d ads scraped", len(ads))
 
     if not ads:
-        logger.warning("No Meta ads for '%s' — falling back to shop finder", niche)
+        logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)
         with Timer("shop_finder_fallback"):
             shops = await find_scaling_shops([], niche, country)
-        advertisers = [
-            {
-                "name":               s["domain"],
-                "domain":             s["domain"],
-                "store_url":          s["store_url"],
-                "scaling_score":      s["scaling_score"],
-                "ads_count":          0,
-                "max_days_running":   0,
-                "avg_days_running":   0.0,
-                "estimated_spend":    0,
-                "angles_used":        [],
-                "dominant_angle":     "",
-                "angle_gaps":         [],
-                "products":           s["products"],
-                "ad_examples":        [],
-                "platforms":          [],
-            }
-            for s in shops
-        ]
+        advertisers = [_shop_to_advertiser(s, []) for s in shops]
         logger.info("shop_finder fallback: %d advertisers from real shops", len(advertisers))
         return {
-            "niche":      niche,
-            "ads":        [],
-            "angle_kpis": [],
-            "gaps":       [],
+            "niche":       niche,
+            "ads":         [],
+            "angle_kpis":  [],
+            "gaps":        [],
             "advertisers": advertisers,
             "stats": {
                 "total_ads":         0,
@@ -124,31 +139,26 @@ async def run_niche(
 
     # 5. Find scaling shops + their product catalogs
     with Timer("shop_finder"):
-        shops = await find_scaling_shops(niche, analyzed_ads, min_days=15)
+        shops = await find_scaling_shops(analyzed_ads, niche, country)
     logger.info("Step 5 — %d scaling shops found", len(shops))
 
-    # 6. Enrich each shop with gap angles they don't use
-    angle_names_used_globally = {k["angle"] for k in angle_kpis}
-    for shop in shops:
-        used = set(shop.get("angles_used") or [])
-        shop["angle_gaps"] = [
-            g for g in gaps if g["angle"] not in used
-        ]
+    # 6. Convert shops to advertiser profiles with gap analysis
+    advertisers = [_shop_to_advertiser(s, gaps) for s in shops]
 
     elapsed = time.perf_counter() - t0
     logger.info("Pipeline '%s' done in %.1fs", niche, elapsed)
 
     return {
-        "niche":      niche,
-        "ads":        analyzed_ads,
-        "angle_kpis": angle_kpis,
-        "gaps":       gaps,
-        "shops":      shops,
+        "niche":       niche,
+        "ads":         analyzed_ads,
+        "angle_kpis":  angle_kpis,
+        "gaps":        gaps,
+        "advertisers": advertisers,
         "stats": {
-            "total_ads":     len(analyzed_ads),
-            "unique_angles": len(angle_kpis),
-            "gaps_found":    len(gaps),
-            "shops_found":   len(shops),
+            "total_ads":         len(analyzed_ads),
+            "unique_angles":     len(angle_kpis),
+            "gaps_found":        len(gaps),
+            "advertisers_found": len(advertisers),
         },
     }
 
@@ -181,29 +191,26 @@ async def main_async(args: argparse.Namespace) -> None:
         except Exception as exc:
             logger.error("Niche '%s' failed: %s", niche, exc, exc_info=True)
 
-    # Write latest.json (raw ads)
     all_ads = [ad for r in all_results for ad in r.get("ads", [])]
     _write_json(DATA_DIR / "latest.json", {"generated_at": _now(), "ads": all_ads})
 
-    # Write latest_analysis.json (angles + shops)
     analysis = {
         "generated_at":     _now(),
         "niches_processed": [r["niche"] for r in all_results],
         "total_ads":        len(all_ads),
         "results": [
             {
-                "niche":      r["niche"],
-                "angle_kpis": r["angle_kpis"],
-                "gaps":       r["gaps"],
-                "shops":      r["shops"],
-                "stats":      r["stats"],
+                "niche":       r["niche"],
+                "angle_kpis":  r["angle_kpis"],
+                "gaps":        r["gaps"],
+                "advertisers": r["advertisers"],
+                "stats":       r["stats"],
             }
             for r in all_results
         ],
     }
     _write_json(DATA_DIR / "latest_analysis.json", analysis)
 
-    # Archive
     stamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M")
     _write_json(HISTORY_DIR / f"{stamp}.json", analysis)
 
@@ -212,9 +219,9 @@ async def main_async(args: argparse.Namespace) -> None:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="TrendTrack scraper")
-    p.add_argument("--niche",    default="")
-    p.add_argument("--country",  default="")
-    p.add_argument("--max-ads",  default=100, type=int)
+    p.add_argument("--niche",   default="")
+    p.add_argument("--country", default="")
+    p.add_argument("--max-ads", default=100, type=int)
     return p
 
 
