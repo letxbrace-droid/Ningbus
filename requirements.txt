@@ -1,0 +1,11 @@
+# Core
+playwright==1.44.0
+anthropic==0.28.0
+aiohttp==3.9.5
+pyyaml==6.0.1
+
+# Stealth (reduces bot detection)
+playwright-stealth==1.0.6
+
+# Data & utils
+python-dateutil==2.9.0

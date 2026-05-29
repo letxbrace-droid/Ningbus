@@ -1,143 +1,177 @@
-# Planning Chauffeur
+# TrendTrack · Angle Intelligence
 
-App PWA + native (iOS/Android via Capacitor) pour gérer le planning chauffeur bus / VTC : **OCR de screenshots**, **alarmes natives** pour les prises de service, **météo J+1**, **contrôles de cohérence** (repos quotidien, durée max, total semaine), **export iCalendar**.
+Un tracker d'annonces Meta + analyseur d'angles marketing, entièrement gratuit, déployé sur GitHub Pages & GitHub Actions.
+
+Il scrape la Meta Ad Library, classe chaque pub par **angle marketing** via Claude AI, détecte les **niches sous-exploitées** (haut potentiel, faible concurrence), et propose des **produits Shopify** à tester.
 
 ---
 
-## 🚀 Build APK sans rien installer (recommandé)
+## Architecture
 
-Tu pousses sur GitHub → la CI compile l'APK → tu télécharges depuis ton téléphone.
+```
+Meta Ad Library (Playwright)
+        │
+        ▼
+  angle_analyzer.py  ←  Claude API (Sonnet)
+        │
+        ▼
+  angle_aggregator.py  →  KPIs + Gap detection
+        │
+        ▼
+  product_recommender.py  →  DuckDuckGo + /products.json
+        │
+        ▼
+  data/latest_analysis.json  (commit auto)
+        │
+        ▼
+  docs/index.html  ←  Dashboard PWA (GitHub Pages)
+```
 
-### 1. Crée un repo GitHub
+GitHub Actions orchestre tout en cron quotidien (06h UTC).
 
-Depuis ton phone (app GitHub) ou web :
-- Nouveau repo, par ex. `planning-chauffeur`, **Private** ou **Public** au choix
+---
 
-### 2. Pousse le code
+## Setup (15 minutes)
 
-Sur Termux ou n'importe quel terminal :
+### 1. Fork le repo
 
 ```bash
-cd planning-chauffeur
-git init
-git add .
-git commit -m "init"
-git branch -M main
-git remote add origin git@github.com:TON_USER/planning-chauffeur.git
-git push -u origin main
+# Depuis GitHub : bouton "Fork" en haut à droite
+# Puis clone local :
+git clone https://github.com/TON_USERNAME/ningbus
+cd ningbus
 ```
 
-### 3. Attends ~5–10 min
+### 2. Ajouter les GitHub Secrets
 
-Va sur **github.com/TON_USER/planning-chauffeur/actions** → tu vois le workflow `Build Android APK` tourner.
+Dans ton repo → **Settings → Secrets and variables → Actions → New repository secret** :
 
-### 4. Télécharge l'APK
+| Secret | Obligatoire | Description |
+|--------|-------------|-------------|
+| `CLAUDE_API_KEY` | ✅ | Clé Anthropic ([console.anthropic.com](https://console.anthropic.com/)) |
+| `BRIGHT_DATA_TOKEN` | ⚡ Recommandé | Token Bright Data pour proxy SOCKS5 (évite les bans Meta) |
+| `SERPAPI_KEY` | ❌ Optionnel | Fallback pour la recherche produits |
 
-À la fin, dans la run, section **Artifacts** → `planning-chauffeur-apk` (ZIP). Télécharge depuis ton téléphone, dézippe, installe l'APK (autorise « Sources inconnues » dans les réglages).
+### 3. Activer GitHub Pages
 
-### 5. Active les alarmes
+**Settings → Pages → Source : Deploy from a branch → Branch: `main` → Folder: `/docs`**
 
-Dans l'app : section **4 / Réveils** → **Activer alarmes natives**. Android te demande la permission notifications + permission alarmes exactes (à activer dans Réglages système).
+Ton dashboard sera disponible sur : `https://TON_USERNAME.github.io/ningbus/`
+
+### 4. Mettre à jour la config du dashboard
+
+Dans `docs/index.html`, ligne 4–5, remplace :
+
+```js
+const GITHUB_USER = 'letxbrace-droid';
+const GITHUB_REPO = 'ningbus';
+```
+
+par ton nom d'utilisateur et le nom de ton repo forké.
+
+### 5. Activer le workflow
+
+**Actions → (onglet) → Enable workflows**
 
 ---
 
-## 🧪 Test PWA en attendant (sans build)
+## Usage
 
-Tu peux tester immédiatement la version web sur GitHub Pages : il suffit de servir `www/index.html` à la racine. Ou ouvrir le fichier en local sur ton téléphone via Termux + un serveur HTTP simple :
+### Lancement automatique
+
+Le workflow tourne chaque jour à **06h00 UTC** et scrape toutes les niches listées dans `scraper/config.yaml`.
+
+### Lancement manuel
+
+**Actions → Scrape & Analyze Meta Ads → Run workflow** 
+
+Paramètres disponibles :
+- `niche` : mot-clé à scraper (ex: `"collagen skin"`)
+- `country` : code pays (défaut: `FR`)
+- `max_ads` : limite d'annonces (défaut: `100`)
+
+### Ajouter des niches
+
+Édit `scraper/config.yaml` :
+
+```yaml
+niches:
+  - "foot wellness"
+  - "ma nouvelle niche"
+```
+
+### Dashboard
+
+Ouvre `https://TON_USERNAME.github.io/ningbus/`
+
+- Onglets par niche
+- **Angles inexploités** (carte jaune = opportunité)
+- **Performances** de tous les angles détectés
+- Sort par viabilité / jours / volume
+- Recherche par nom d'angle
+- Mode sombre/clair
+- Installable comme app (PWA)
+
+---
+
+## Développement local
 
 ```bash
-cd planning-chauffeur/www
-python3 -m http.server 8080
-# puis ouvre http://localhost:8080 dans Chrome
-```
+# Installer les dépendances
+pip install -r requirements.txt
+playwright install chromium
 
-⚠️ La version PWA n'a pas les **vraies alarmes natives** — utilise l'export `.ics` vers ton Calendrier en attendant le build APK.
+# Copier les secrets
+cp .env.example .env
+# Éditer .env avec tes clés
+
+# Lancer le scraper
+python -m scraper.main --niche "foot wellness" --country FR --max-ads 50
+
+# Générer les icônes PWA
+python generate_icons.py
+
+# Tester le dashboard en local
+cd docs && python -m http.server 8080
+# Ouvrir http://localhost:8080
+```
 
 ---
 
-## 📂 Structure
+## Coûts
 
-```
-planning-chauffeur/
-├── www/
-│   └── index.html              ← l'app entière (1 fichier)
-├── .github/workflows/
-│   └── build-android.yml       ← CI qui build l'APK
-├── package.json                ← deps Capacitor
-├── capacitor.config.json       ← config app (id, nom, plugins)
-├── .gitignore
-└── README.md
-```
+| Service | Coût |
+|---------|------|
+| GitHub Actions | **Gratuit** (2 000 min/mois) |
+| GitHub Pages | **Gratuit** |
+| Claude API (Sonnet) | ~$0.003/ad · 100 ads/niche/jour = **~$0.30/jour** |
+| Bright Data proxy | ~10€/mois (optionnel) |
+| SerpAPI | Gratuit jusqu'à 100 requêtes/mois |
 
-`android/` et `ios/` ne sont **pas** dans le repo — la CI les régénère à chaque build via `npx cap add android`. Si tu builds en local et veux versionner ces dossiers (recommandé pour personnaliser l'icône, la signature release, etc.), retire-les du `.gitignore`.
+**Total minimum : ~$9/mois** (Claude API uniquement)
 
 ---
 
-## 🔧 Build local (si tu préfères)
+## Limitations
 
-Si tu as un poste de dev sous la main :
-
-```bash
-npm install
-npx cap add android
-npx cap sync
-npx cap open android       # ouvre Android Studio
-```
-
-Build dans Android Studio → APK dans `android/app/build/outputs/apk/debug/`.
+- **~50–100 ads/niche** par scrape (vs. 2–3M pour TrendTrack Pro)
+- Meta peut changer son GraphQL → le scraper peut nécessiter des mises à jour
+- Sans proxy : risque de ban IP temporaire
+- Les angles sont classifiés par LLM → quelques erreurs possibles
+- Google Trends : signal approximatif (pas l'API officielle)
 
 ---
 
-## 🍎 Build iOS
+## Contributing
 
-Le workflow CI ne build **pas iOS** par défaut (les runners macOS GitHub coûtent 10× plus cher en minutes). Pour iOS :
-- Mac requis avec Xcode
-- `npx cap add ios` puis `npx cap open ios`
-- Voir `READMECAPACITOR.md` pour les détails (signing, Info.plist)
-
-Pour 600 chauffeurs, viable seulement avec compte Apple Developer (99 €/an) + TestFlight.
-
----
-
-## 🎛️ Customisation
-
-### Changer l'app id / nom
-Édite `capacitor.config.json` :
-```json
-{
-  "appId": "fr.tondomaine.planning",
-  "appName": "Mon App"
-}
-```
-
-### Changer l'icône
-Place `assets/icon.png` (1024×1024) à la racine, puis :
-```bash
-npm install --save-dev @capacitor/assets
-npx capacitor-assets generate
-```
-
-### Changer la couleur du splash / theme
-`capacitor.config.json` → `plugins.SplashScreen.backgroundColor`
+Les PR sont les bienvenues ! Idées d'améliorations :
+- Support d'autres plateformes (TikTok Ads, YouTube Ads)
+- Meilleure détection de tendances
+- Alertes email/Slack sur nouveaux gaps
+- Export CSV/Notion
 
 ---
 
-## 🐛 Debug
+## Licence
 
-| Problème | Solution |
-|---|---|
-| L'APK s'installe pas | Active « Sources inconnues » dans les réglages Android |
-| Les alarmes sonnent pas | Réglages > Apps > Planning Chauffeur > Alarmes et rappels : activer |
-| Permission notifications refusée | Réinstalle ou réglages > notifications > activer |
-| OCR très lent | Premier lancement : télécharge ~10 Mo de modèle FR, c'est normal. Ensuite cache local. |
-| Build CI échoue | Onglet Actions > clique la run en échec > regarde le log. Souvent : Java mémoire (relance), ou conflit Gradle (touche pas, c'est temporaire). |
-
----
-
-## 📋 Roadmap
-
-- [ ] Scan caméra direct (sans passer par la galerie)
-- [ ] Synchronisation entre plusieurs appareils (backend FastAPI)
-- [ ] Mode dépôt avec admin (pour rouler sur 600 chauffeurs)
-- [ ] Intégration directe planning RATP / Transilien (parsing PDF officiel)
-- [ ] Cross-référence avec courses VTC pour optimiser les doubles activités
+MIT

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="TrendTrack — Meta Ads Angle Intelligence Dashboard" />
+  <title>TrendTrack · Angle Intelligence</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    /* ── Reset & tokens ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --border:   #334155;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --accent:   #6366f1;
+      --gap:      #ffc107;
+      --gap-bg:   rgba(255,193,7,0.08);
+      --gap-border:#ffc107;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --radius:   10px;
+      --shadow:   0 4px 24px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] {
+      --bg:      #f1f5f9;
+      --surface: #ffffff;
+      --border:  #cbd5e1;
+      --text:    #0f172a;
+      --muted:   #64748b;
+      --shadow:  0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: -0.5px; }
+    .logo span { color: var(--text); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    /* ── Stat bar ─────────────────────────────────────────────── */
+    .stat-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 0.25rem; color: var(--text); }
+
+    /* ── Section headers ──────────────────────────────────────── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .badge-gap   { background: var(--gap); color: #000; }
+    .badge-all   { background: var(--border); color: var(--text); }
+
+    /* ── Toolbar ──────────────────────────────────────────────── */
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .toolbar input {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    .toolbar input:focus { outline: 2px solid var(--accent); }
+    button {
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover  { background: var(--border); }
+    button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── Cards grid ───────────────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+    .card.gap-card {
+      border: 2px solid var(--gap-border);
+      background: var(--gap-bg);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .viability-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .card-meta strong { color: var(--text); }
+
+    /* Expanded detail panel */
+    .card-detail {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .card.open .card-detail { display: block; }
+
+    .example-item {
+      padding: 0.5rem;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 0.4rem;
+    }
+    .example-hook { color: var(--text); line-height: 1.4; }
+    .example-meta { color: var(--muted); font-size: 0.72rem; margin-top: 0.25rem; }
+
+    /* Products inside gap cards */
+    .product-list { margin-top: 0.75rem; }
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 0.35rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.1s;
+    }
+    .product-item:hover { background: rgba(255,255,255,0.07); }
+    .product-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .product-name { font-size: 0.8rem; font-weight: 500; }
+    .product-price { font-size: 0.72rem; color: var(--green); }
+
+    /* ── Niche selector ───────────────────────────────────────── */
+    .niche-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Loading / Error states ───────────────────────────────── */
+    .state-msg {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 0.75rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive tweaks ────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .stat-value { font-size: 1.4rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="logo">TrendTrack <span>· Angle Intelligence</span></div>
+  <div class="header-actions">
+    <button id="refreshBtn" title="Recharger les données">↻ Refresh</button>
+    <button id="themeBtn" title="Basculer dark/light mode">◑ Mode</button>
+  </div>
+</header>
+
+<main>
+  <!-- Stats bar -->
+  <div class="stat-bar">
+    <div class="stat-card">
+      <div class="stat-label">Last update</div>
+      <div class="stat-value" id="statDate">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ads analysés</div>
+      <div class="stat-value" id="statAds">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Angles détectés</div>
+      <div class="stat-value" id="statAngles">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Gaps trouvés</div>
+      <div class="stat-value" id="statGaps">—</div>
+    </div>
+  </div>
+
+  <!-- Niche selector tabs -->
+  <div class="niche-tabs" id="nicheTabs"></div>
+
+  <!-- GAP section -->
+  <div class="section-title">
+    🟡 Angles inexploités
+    <span class="badge badge-gap" id="gapCount">0</span>
+  </div>
+  <div class="toolbar">
+    <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
+    <button class="sort-btn active" data-section="gap" data-sort="viability">Viabilité ↓</button>
+    <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
+    <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
+  </div>
+  <div class="cards-grid" id="gapGrid">
+    <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
+  </div>
+
+  <!-- ALL ANGLES section -->
+  <div class="section-title">
+    📊 Performances par angle
+    <span class="badge badge-all" id="allCount">0</span>
+  </div>
+  <div class="toolbar">
+    <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
+    <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
+    <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
+    <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
+  </div>
+  <div class="cards-grid" id="allGrid"></div>
+</main>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const GITHUB_USER = 'letxbrace-droid';
+const GITHUB_REPO = 'ningbus';
+const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/latest_analysis.json`;
+const IDB_NAME  = 'trendtrack';
+const IDB_STORE = 'cache';
+const IDB_KEY   = 'analysis';
+
+// ── State ─────────────────────────────────────────────────────────────────
+let state = {
+  data: null,
+  activeNiche: 0,
+  gapSort: 'viability',
+  allSort: 'viability',
+  gapFilter: '',
+  allFilter: '',
+};
+
+// ── IndexedDB helpers ──────────────────────────────────────────────────────
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror  = e => reject(e.target.error);
+  });
+}
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+async function idbSet(key, value) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────
+async function loadData(forceRefresh = false) {
+  if (!forceRefresh) {
+    const cached = await idbGet(IDB_KEY).catch(() => null);
+    if (cached) {
+      state.data = cached;
+      render();
+      return;
+    }
+  }
+  try {
+    const resp = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+    state.data = json;
+    await idbSet(IDB_KEY, json).catch(() => {});
+    render();
+  } catch (err) {
+    console.warn('Fetch failed:', err);
+    const cached = await idbGet(IDB_KEY).catch(() => null);
+    if (cached) {
+      state.data = cached;
+      render();
+    } else {
+      showError('Impossible de charger les données. Vérifiez votre connexion ou que le workflow a été exécuté.');
+    }
+  }
+}
+
+function showError(msg) {
+  document.getElementById('gapGrid').innerHTML =
+    `<div class="state-msg" style="grid-column:1/-1">⚠️ ${msg}</div>`;
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────
+function render() {
+  if (!state.data) return;
+  const { results = [], generated_at, total_ads } = state.data;
+
+  // Stats bar
+  const d = new Date(generated_at);
+  document.getElementById('statDate').textContent =
+    isNaN(d) ? '—' : d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  document.getElementById('statAds').textContent = total_ads ?? '—';
+
+  const allAngles = results.flatMap(r => r.angle_kpis || []);
+  const allGaps   = results.flatMap(r => r.gaps || []);
+  document.getElementById('statAngles').textContent = allAngles.length;
+  document.getElementById('statGaps').textContent   = allGaps.length;
+
+  // Niche tabs
+  renderNicheTabs(results);
+
+  // Render active niche
+  const nicheData = results[state.activeNiche] || {};
+  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+  renderAllAngles(nicheData.angle_kpis || []);
+}
+
+function renderNicheTabs(results) {
+  const container = document.getElementById('nicheTabs');
+  container.innerHTML = results.map((r, i) => {
+    const active = i === state.activeNiche ? 'active' : '';
+    return `<button class="${active}" data-niche="${i}">${r.niche}</button>`;
+  }).join('');
+  container.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeNiche = parseInt(btn.dataset.niche);
+      container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const nicheData = (state.data.results || [])[state.activeNiche] || {};
+      renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+      renderAllAngles(nicheData.angle_kpis || []);
+    });
+  });
+}
+
+function sortItems(items, key) {
+  const copy = [...items];
+  if (key === 'viability') return copy.sort((a, b) => (b.viability_score ?? 0) - (a.viability_score ?? 0));
+  if (key === 'days')      return copy.sort((a, b) => (b.avg_days_running ?? 0) - (a.avg_days_running ?? 0));
+  if (key === 'usage')     return copy.sort((a, b) => (a.usage_count ?? a.count ?? 0) - (b.usage_count ?? b.count ?? 0));
+  if (key === 'count')     return copy.sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
+  return copy;
+}
+
+function filterItems(items, query) {
+  if (!query) return items;
+  const q = query.toLowerCase();
+  return items.filter(item => (item.angle || '').toLowerCase().includes(q));
+}
+
+// Gap cards
+function renderGaps(gaps, recommendations) {
+  const recoByAngle = Object.fromEntries(recommendations.map(r => [r.angle, r]));
+  let items = sortItems(filterItems(gaps, state.gapFilter), state.gapSort);
+  document.getElementById('gapCount').textContent = gaps.length;
+
+  if (!items.length) {
+    document.getElementById('gapGrid').innerHTML =
+      '<div class="state-msg" style="grid-column:1/-1">Aucun gap détecté pour cette niche.</div>';
+    return;
+  }
+  document.getElementById('gapGrid').innerHTML = items.map(g =>
+    buildGapCard(g, recoByAngle[g.angle])
+  ).join('');
+
+  // Expand/collapse on click
+  document.querySelectorAll('#gapGrid .card').forEach(card => {
+    card.addEventListener('click', () => card.classList.toggle('open'));
+  });
+}
+
+function buildGapCard(gap, reco) {
+  const products = (reco?.products || []).slice(0, 3);
+  const prodHTML = products.length
+    ? `<div class="product-list">${products.map(p => `
+        <a class="product-item" href="${escHtml(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <img class="product-thumb" src="${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />
+          <div>
+            <div class="product-name">${escHtml(p.title)}</div>
+            <div class="product-price">${escHtml(p.price ? p.price + ' €' : '')}</div>
+          </div>
+        </a>`).join('')}</div>`
+    : '<p style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem">Aucun produit trouvé.</p>';
+
+  const examples = (gap.examples || []).slice(0, 3).map(ex => `
+    <div class="example-item">
+      <div class="example-hook">${escHtml(ex.hook || '—')}</div>
+      <div class="example-meta">
+        ${escHtml(ex.store)} · ${ex.days_running ?? 0}j
+        ${ex.landing_page_url ? `· <a href="${escHtml(ex.landing_page_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Voir</a>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="card gap-card">
+      <div class="card-title">
+        <span>${escHtml(gap.angle)}</span>
+        <span class="viability-pill">${gap.viability_score ?? 0}% viab.</span>
+      </div>
+      <div class="card-meta">
+        <span>Utilisé <strong>${gap.usage_count ?? 0}</strong> fois</span>
+        <span>Moy. <strong>${gap.avg_days_running ?? 0}j</strong></span>
+        <span>${escHtml(gap.primary_audience || '')}</span>
+      </div>
+      <div class="card-detail">
+        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem">Exemples :</p>
+        ${examples || '<p style="color:var(--muted);font-size:0.75rem">—</p>'}
+        <p style="font-size:0.75rem;color:var(--muted);margin:0.75rem 0 0.35rem">Produits à tester :</p>
+        ${prodHTML}
+      </div>
+    </div>`;
+}
+
+// All-angles cards
+function renderAllAngles(kpis) {
+  let items = sortItems(filterItems(kpis, state.allFilter), state.allSort);
+  document.getElementById('allCount').textContent = kpis.length;
+
+  if (!items.length) {
+    document.getElementById('allGrid').innerHTML =
+      '<div class="state-msg" style="grid-column:1/-1">Aucune donnée pour cette niche.</div>';
+    return;
+  }
+  document.getElementById('allGrid').innerHTML = items.map(k => buildAngleCard(k)).join('');
+  document.querySelectorAll('#allGrid .card').forEach(card => {
+    card.addEventListener('click', () => card.classList.toggle('open'));
+  });
+}
+
+function buildAngleCard(kpi) {
+  const examples = (kpi.examples || []).slice(0, 3).map(ex => `
+    <div class="example-item">
+      <div class="example-hook">${escHtml(ex.hook || '—')}</div>
+      <div class="example-meta">${escHtml(ex.store)} · ${ex.days_running ?? 0}j</div>
+    </div>`).join('');
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        <span>${escHtml(kpi.angle)}</span>
+        <span class="viability-pill">${kpi.viability_score ?? 0}%</span>
+      </div>
+      <div class="card-meta">
+        <span><strong>${kpi.count ?? 0}</strong> ads</span>
+        <span>Moy. <strong>${kpi.avg_days_running ?? 0}j</strong></span>
+        <span>Méd. <strong>${kpi.median_days_running ?? 0}j</strong></span>
+      </div>
+      <div class="card-detail">
+        ${examples || '<p style="color:var(--muted);font-size:0.75rem">Pas d\'exemples.</p>'}
+      </div>
+    </div>`;
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Event wiring ───────────────────────────────────────────────────────────
+document.getElementById('refreshBtn').addEventListener('click', () => loadData(true));
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const el = document.body;
+  const next = el.dataset.theme === 'dark' ? 'light' : 'dark';
+  el.dataset.theme = next;
+  localStorage.setItem('theme', next);
+});
+
+document.getElementById('gapSearch').addEventListener('input', e => {
+  state.gapFilter = e.target.value;
+  const nicheData = (state.data?.results || [])[state.activeNiche] || {};
+  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+});
+
+document.getElementById('allSearch').addEventListener('input', e => {
+  state.allFilter = e.target.value;
+  const nicheData = (state.data?.results || [])[state.activeNiche] || {};
+  renderAllAngles(nicheData.angle_kpis || []);
+});
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const section = btn.dataset.section;
+    const sort    = btn.dataset.sort;
+    document.querySelectorAll(`.sort-btn[data-section="${section}"]`)
+      .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const nicheData = (state.data?.results || [])[state.activeNiche] || {};
+    if (section === 'gap') {
+      state.gapSort = sort;
+      renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+    } else {
+      state.allSort = sort;
+      renderAllAngles(nicheData.angle_kpis || []);
+    }
+  });
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.dataset.theme = savedTheme;
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(console.warn);
+  }
+
+  loadData();
+})();
+</script>
+</body>
+</html>
