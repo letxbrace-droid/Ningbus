@@ -2,7 +2,7 @@
   "name": "TrendTrack Angle Intelligence",
   "short_name": "TrendTrack",
   "description": "Meta Ads angle tracking & gap detection dashboard",
-  "start_url": "/ningbus/",
+  "start_url": "/Ningbus/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#6366f1",

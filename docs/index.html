@@ -323,7 +323,7 @@
 <script>
 // ── Config ────────────────────────────────────────────────────────────────
 const GITHUB_USER = 'letxbrace-droid';
-const GITHUB_REPO = 'ningbus';
+const GITHUB_REPO = 'Ningbus';
 const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/latest_analysis.json`;
 const IDB_NAME  = 'trendtrack';
 const IDB_STORE = 'cache';
@@ -391,7 +391,10 @@ async function loadData(forceRefresh = false) {
       state.data = cached;
       render();
     } else {
-      showError('Impossible de charger les données. Vérifiez votre connexion ou que le workflow a été exécuté.');
+      // Show empty state — data will populate after first workflow run
+      state.data = { generated_at: null, total_ads: 0, results: [] };
+      render();
+      showError('Aucune donnée disponible. Lance le workflow GitHub Actions pour démarrer le premier scrape.');
     }
   }
 }
