@@ -1,4 +1,4 @@
-"""Orchestrator — entry point for the full scrape-analyse-recommend pipeline."""
+"""Orchestrator — pipeline: scrape → analyse angles → find scaling shops → detect gaps."""
 
 from __future__ import annotations
 
@@ -17,19 +17,15 @@ import yaml
 from .angle_aggregator import AngleAggregator
 from .angle_analyzer import AngleAnalyzer
 from .meta_scraper import MetaScraper
-from .product_recommender import ProductRecommender
+from .shop_finder import find_scaling_shops
 from .utils import Timer, setup_logging
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).parent.parent / "data"
+DATA_DIR    = Path(__file__).parent.parent / "data"
 HISTORY_DIR = DATA_DIR / "history"
 CONFIG_PATH = Path(__file__).parent / "config.yaml"
 
-
-# ---------------------------------------------------------------------------
-# Data persistence helpers
-# ---------------------------------------------------------------------------
 
 def _ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -42,17 +38,15 @@ def _write_json(path: Path, obj: object) -> None:
 
 
 def _load_config() -> dict:
-    """Load scraper/config.yaml safely."""
     if not CONFIG_PATH.exists():
-        logger.warning("config.yaml not found — using defaults")
         return {"niches": ["foot wellness"], "country": "FR"}
     with open(CONFIG_PATH, encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
 
-# ---------------------------------------------------------------------------
-# Core pipeline
-# ---------------------------------------------------------------------------
+def _now() -> str:
+    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 async def run_niche(
     niche: str,
@@ -60,67 +54,80 @@ async def run_niche(
     max_ads: int,
     analyzer: AngleAnalyzer,
     aggregator: AngleAggregator,
-    recommender: ProductRecommender,
 ) -> dict:
-    """Run the full pipeline for a single niche. Returns result dict."""
+    """Full pipeline for one niche. Returns result dict."""
     logger.info("=" * 60)
     logger.info("NICHE: %s | COUNTRY: %s | MAX ADS: %d", niche, country, max_ads)
     logger.info("=" * 60)
+    t0 = time.perf_counter()
 
-    pipeline_start = time.perf_counter()
-
-    # 1. Scrape
+    # 1. Scrape Meta ads
     with Timer("scrape"):
         scraper = MetaScraper(max_ads=max_ads)
         ads = await scraper.scrape_ads(niche=niche, country=country)
-    logger.info("Step 1 — Scraped %d ads", len(ads))
+    logger.info("Step 1 — %d ads scraped", len(ads))
 
     if not ads:
-        logger.warning("No ads found for niche '%s' — skipping analysis", niche)
-        return {"niche": niche, "ads": [], "angle_kpis": [], "gaps": [], "recommendations": []}
+        logger.warning("No ads for '%s' — returning empty result", niche)
+        return {
+            "niche": niche, "ads": [], "angle_kpis": [], "gaps": [],
+            "shops": [], "stats": {"total_ads": 0, "unique_angles": 0, "gaps_found": 0, "shops_found": 0},
+        }
 
-    # 2. Analyse angles
+    # 2. Analyse angles with Groq
     with Timer("angle_analysis"):
         analyzed_ads = await analyzer.batch_analyze_ads(ads)
-    logger.info("Step 2 — Analysed %d ads", len(analyzed_ads))
+    logger.info("Step 2 — %d ads analysed", len(analyzed_ads))
 
-    # 3. Aggregate KPIs
+    # 3. Aggregate angle KPIs
     with Timer("aggregation"):
         angle_kpis = aggregator.aggregate(analyzed_ads)
     logger.info("Step 3 — %d distinct angles", len(angle_kpis))
 
-    # 4. Detect gaps
+    # 4. Detect angle gaps
     with Timer("gap_detection"):
         gaps = aggregator.detect_gaps(angle_kpis)
-    logger.info("Step 4 — %d gap opportunities detected", len(gaps))
+    logger.info("Step 4 — %d gap opportunities", len(gaps))
 
-    # 5. Product recommendations
-    with Timer("product_recommendation"):
-        recommendations = await recommender.recommend(gaps, niche)
-    logger.info("Step 5 — %d recommendation bundles", len(recommendations))
+    # 5. Find scaling shops + their product catalogs
+    with Timer("shop_finder"):
+        shops = await find_scaling_shops(niche, analyzed_ads, min_days=15)
+    logger.info("Step 5 — %d scaling shops found", len(shops))
 
-    elapsed = time.perf_counter() - pipeline_start
-    logger.info("Pipeline for '%s' completed in %.1fs", niche, elapsed)
+    # 6. Enrich each shop with gap angles they don't use
+    angle_names_used_globally = {k["angle"] for k in angle_kpis}
+    for shop in shops:
+        used = set(shop.get("angles_used") or [])
+        shop["angle_gaps"] = [
+            g for g in gaps if g["angle"] not in used
+        ]
+
+    elapsed = time.perf_counter() - t0
+    logger.info("Pipeline '%s' done in %.1fs", niche, elapsed)
 
     return {
-        "niche": niche,
-        "ads": analyzed_ads,
+        "niche":      niche,
+        "ads":        analyzed_ads,
         "angle_kpis": angle_kpis,
-        "gaps": gaps,
-        "recommendations": recommendations,
+        "gaps":       gaps,
+        "shops":      shops,
+        "stats": {
+            "total_ads":     len(analyzed_ads),
+            "unique_angles": len(angle_kpis),
+            "gaps_found":    len(gaps),
+            "shops_found":   len(shops),
+        },
     }
 
 
 async def main_async(args: argparse.Namespace) -> None:
-    """Async entry point."""
     setup_logging(os.getenv("LOG_LEVEL", "INFO"))
     _ensure_dirs()
 
-    config = _load_config()
+    config  = _load_config()
     country = args.country or os.getenv("COUNTRY_OVERRIDE") or config.get("country", "FR")
     max_ads = int(args.max_ads or os.getenv("MAX_ADS", "100"))
 
-    # Determine niches to process
     if args.niche:
         niches = [args.niche]
     elif os.getenv("NICHE_OVERRIDE"):
@@ -130,73 +137,58 @@ async def main_async(args: argparse.Namespace) -> None:
 
     logger.info("Processing %d niche(s): %s", len(niches), niches)
 
-    # Build shared service instances
-    analyzer = AngleAnalyzer()
+    analyzer   = AngleAnalyzer()
     aggregator = AngleAggregator()
-    recommender = ProductRecommender()
 
     all_results: list[dict] = []
     for niche in niches:
         try:
-            result = await run_niche(
-                niche, country, max_ads, analyzer, aggregator, recommender
-            )
+            result = await run_niche(niche, country, max_ads, analyzer, aggregator)
             all_results.append(result)
         except Exception as exc:
             logger.error("Niche '%s' failed: %s", niche, exc, exc_info=True)
 
-    # Merge all ads for latest.json
+    # Write latest.json (raw ads)
     all_ads = [ad for r in all_results for ad in r.get("ads", [])]
     _write_json(DATA_DIR / "latest.json", {"generated_at": _now(), "ads": all_ads})
 
-    # Build analysis output
-    analysis_output = {
-        "generated_at": _now(),
+    # Write latest_analysis.json (angles + shops)
+    analysis = {
+        "generated_at":     _now(),
         "niches_processed": [r["niche"] for r in all_results],
-        "total_ads": len(all_ads),
+        "total_ads":        len(all_ads),
         "results": [
             {
-                "niche": r["niche"],
+                "niche":      r["niche"],
                 "angle_kpis": r["angle_kpis"],
-                "gaps": r["gaps"],
-                "recommendations": r["recommendations"],
-                "stats": {
-                    "total_ads": len(r["ads"]),
-                    "unique_angles": len(r["angle_kpis"]),
-                    "gaps_found": len(r["gaps"]),
-                },
+                "gaps":       r["gaps"],
+                "shops":      r["shops"],
+                "stats":      r["stats"],
             }
             for r in all_results
         ],
     }
-    _write_json(DATA_DIR / "latest_analysis.json", analysis_output)
+    _write_json(DATA_DIR / "latest_analysis.json", analysis)
 
     # Archive
     stamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M")
-    _write_json(HISTORY_DIR / f"{stamp}.json", analysis_output)
+    _write_json(HISTORY_DIR / f"{stamp}.json", analysis)
 
-    logger.info("All done. Data written to %s", DATA_DIR)
-
-
-def _now() -> str:
-    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    logger.info("All done.")
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="TrendTrack Angle Intelligence scraper")
-    parser.add_argument("--niche", default="", help="Single niche keyword to scrape")
-    parser.add_argument("--country", default="", help="Country code (FR, US, GB…)")
-    parser.add_argument("--max-ads", default=100, type=int, help="Max ads per niche")
-    return parser
+    p = argparse.ArgumentParser(description="TrendTrack scraper")
+    p.add_argument("--niche",    default="")
+    p.add_argument("--country",  default="")
+    p.add_argument("--max-ads",  default=100, type=int)
+    return p
 
 
 def main() -> None:
-    parser = build_arg_parser()
-    args = parser.parse_args()
     try:
-        asyncio.run(main_async(args))
+        asyncio.run(main_async(build_arg_parser().parse_args()))
     except KeyboardInterrupt:
-        logger.info("Interrupted by user")
         sys.exit(0)
 
 

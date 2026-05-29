@@ -135,17 +135,54 @@ def make_niche_data(niche: str) -> dict:
         for g in gaps[:3]
     ]
 
+    demo_shops = _make_demo_shops(niche, gaps, angle_kpis)
+
     return {
         "niche": niche,
         "angle_kpis": angle_kpis,
         "gaps": gaps,
+        "shops": demo_shops,
         "recommendations": reco,
         "stats": {
             "total_ads": total_ads,
             "unique_angles": len(angle_kpis),
             "gaps_found": len(gaps),
+            "shops_found": len(demo_shops),
         },
     }
+
+
+def _make_demo_shops(niche: str, gaps: list, angle_kpis: list) -> list:
+    shops = []
+    used_angles = [k["angle"] for k in angle_kpis[:3]]
+    gap_angles  = gaps[:2]
+    for i, store in enumerate(random.sample(STORES, min(4, len(STORES)))):
+        products = [
+            {
+                "title": f"{niche.title()} Pro {j+1}",
+                "handle": f"{niche.replace(' ','-')}-pro-{j+1}",
+                "url": f"https://{store}/products/{niche.replace(' ','-')}-pro-{j+1}",
+                "price": str(random.randint(19, 89)) + ".99",
+                "price_f": float(random.randint(19, 89)),
+                "image": "",
+                "tags": [niche],
+                "product_type": niche.title(),
+            }
+            for j in range(random.randint(3, 8))
+        ]
+        shops.append({
+            "domain": store,
+            "base_url": f"https://{store}",
+            "products": products,
+            "ads_count": random.randint(2, 12),
+            "max_days_running": random.randint(25, 95),
+            "total_spend": random.randint(500, 8000),
+            "angles_used": used_angles[:random.randint(1, 3)],
+            "angle_gaps": gap_angles,
+            "source": "meta_ads" if i < 2 else "search",
+        })
+    shops.sort(key=lambda s: s["max_days_running"], reverse=True)
+    return shops
 
 
 def _audience(niche: str) -> str:

@@ -256,6 +256,24 @@
       .cards-grid { grid-template-columns: 1fr; }
     }
 
+    /* ── Shop cards ───────────────────────────────────────────── */
+    .shop-card { border-left: 3px solid var(--accent); }
+    .shop-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+    .shop-domain { font-weight: 700; font-size: 0.9rem; color: var(--accent); }
+    .shop-source { font-size: 0.68rem; padding: 2px 7px; border-radius: 999px; background: var(--border); color: var(--muted); }
+    .shop-meta { display: flex; gap: 1rem; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted); }
+    .shop-meta strong { color: var(--text); }
+    .angles-used { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.6rem; }
+    .angle-chip { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: rgba(99,102,241,0.15); color: #818cf8; }
+    .angle-gap-chip { background: rgba(255,193,7,0.15); color: var(--gap); }
+    .shop-products { margin-top: 0.75rem; display: none; }
+    .card.open .shop-products { display: block; }
+    .shop-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+    .prod-card { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 0.5rem; font-size: 0.75rem; }
+    .prod-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: var(--border); margin-bottom: 0.3rem; }
+    .prod-title { font-weight: 500; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .prod-price { color: var(--green); margin-top: 0.2rem; font-weight: 600; }
+
     /* ── Run modal ────────────────────────────────────────────── */
     .modal-overlay {
       display: none;
@@ -376,10 +394,21 @@
       <div class="stat-label">Gaps trouvés</div>
       <div class="stat-value" id="statGaps">—</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">Shops scalent</div>
+      <div class="stat-value" id="statShops">—</div>
+    </div>
   </div>
 
   <!-- Niche selector tabs -->
   <div class="niche-tabs" id="nicheTabs"></div>
+
+  <!-- SHOPS section -->
+  <div class="section-title">
+    🏪 Shops qui scalent
+    <span class="badge badge-all" id="shopsCount">0</span>
+  </div>
+  <div class="cards-grid" id="shopsGrid"></div>
 
   <!-- GAP section -->
   <div class="section-title">
@@ -507,14 +536,17 @@ function render() {
 
   const allAngles = results.flatMap(r => r.angle_kpis || []);
   const allGaps   = results.flatMap(r => r.gaps || []);
+  const allShops  = results.flatMap(r => r.shops || []);
   document.getElementById('statAngles').textContent = allAngles.length;
   document.getElementById('statGaps').textContent   = allGaps.length;
+  document.getElementById('statShops').textContent  = allShops.length;
 
   // Niche tabs
   renderNicheTabs(results);
 
   // Render active niche
   const nicheData = results[state.activeNiche] || {};
+  renderShops(nicheData.shops || []);
   renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
   renderAllAngles(nicheData.angle_kpis || []);
 }
@@ -531,6 +563,7 @@ function renderNicheTabs(results) {
       container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const nicheData = (state.data.results || [])[state.activeNiche] || {};
+      renderShops(nicheData.shops || []);
       renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
       renderAllAngles(nicheData.angle_kpis || []);
     });
@@ -553,6 +586,68 @@ function filterItems(items, query) {
 }
 
 // Gap cards
+// ── Shops qui scalent ─────────────────────────────────────────────────────────
+function renderShops(shops) {
+  const grid = document.getElementById('shopsGrid');
+  document.getElementById('shopsCount').textContent = shops.length;
+
+  if (!shops.length) {
+    grid.innerHTML = '<div class="state-msg" style="grid-column:1/-1">Aucun shop détecté — relance l\'analyse pour trouver des shops actifs.</div>';
+    return;
+  }
+
+  grid.innerHTML = shops.map(s => buildShopCard(s)).join('');
+  grid.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => c.classList.toggle('open')));
+}
+
+function buildShopCard(shop) {
+  const sourceLabel = shop.source === 'meta_ads' ? '📡 Meta ads' : '🔍 Recherche';
+  const days  = shop.max_days_running || 0;
+  const spend = shop.total_spend || 0;
+  const count = shop.ads_count || 0;
+
+  const anglesUsed = (shop.angles_used || []).map(a =>
+    `<span class="angle-chip">${escHtml(a)}</span>`
+  ).join('');
+
+  const angleGaps = (shop.angle_gaps || []).slice(0, 3).map(g =>
+    `<span class="angle-chip angle-gap-chip">🟡 ${escHtml(g.angle)}</span>`
+  ).join('');
+
+  const products = (shop.products || []).slice(0, 8);
+  const prodsHtml = products.length ? `
+    <div class="shop-products-grid">
+      ${products.map(p => `
+        <a class="prod-card" href="${escHtml(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          ${p.image ? `<img src="${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
+          <div class="prod-title">${escHtml(p.title)}</div>
+          <div class="prod-price">${escHtml(p.price ? p.price + ' €' : '')}</div>
+        </a>`).join('')}
+    </div>` : '<p style="font-size:0.75rem;color:var(--muted)">Catalogue non disponible.</p>';
+
+  return `
+    <div class="card shop-card">
+      <div class="shop-header">
+        <span class="shop-domain">${escHtml(shop.domain)}</span>
+        <span class="shop-source">${sourceLabel}</span>
+      </div>
+      <div class="shop-meta">
+        ${days ? `<span>Ads actives depuis <strong>${days}j</strong></span>` : ''}
+        ${count ? `<span><strong>${count}</strong> pubs trouvées</span>` : ''}
+        ${spend ? `<span>Spend ~<strong>${spend}$</strong></span>` : ''}
+        <span><strong>${(shop.products||[]).length}</strong> produits</span>
+      </div>
+      <div class="angles-used">
+        ${anglesUsed}
+        ${angleGaps ? `<span style="font-size:0.68rem;color:var(--muted);align-self:center">Gaps →</span>${angleGaps}` : ''}
+      </div>
+      <div class="shop-products">
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem">Produits best-sellers :</p>
+        ${prodsHtml}
+      </div>
+    </div>`;
+}
+
 function renderGaps(gaps, recommendations) {
   const recoByAngle = Object.fromEntries(recommendations.map(r => [r.angle, r]));
   let items = sortItems(filterItems(gaps, state.gapFilter), state.gapSort);
