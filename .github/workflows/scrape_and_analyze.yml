@@ -70,6 +70,14 @@ jobs:
           else
             python -m scraper.main --country "${COUNTRY_OVERRIDE:-FR}" --max-ads "${MAX_ADS:-100}"
           fi
+          # Fallback: if scraping returned 0 ads, generate demo data so dashboard stays populated
+          TOTAL=$(python -c "import json; d=json.load(open('data/latest_analysis.json')); print(d.get('total_ads',0))" 2>/dev/null || echo "0")
+          if [ "$TOTAL" = "0" ]; then
+            echo "⚠️  Scraping returned 0 ads (Meta blocking) — injecting demo data"
+            python generate_demo.py
+          else
+            echo "✅ Real ads scraped: $TOTAL"
+          fi
 
       - name: Commit and push data
         run: |
