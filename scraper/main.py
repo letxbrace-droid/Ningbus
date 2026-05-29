@@ -20,6 +20,8 @@ from .meta_scraper import MetaScraper
 from .shop_finder import find_scaling_shops
 from .utils import Timer, setup_logging
 
+
+
 logger = logging.getLogger(__name__)
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
@@ -68,10 +70,41 @@ async def run_niche(
     logger.info("Step 1 — %d ads scraped", len(ads))
 
     if not ads:
-        logger.warning("No ads for '%s' — returning empty result", niche)
+        logger.warning("No Meta ads for '%s' — falling back to shop finder", niche)
+        with Timer("shop_finder_fallback"):
+            shops = await find_scaling_shops([], niche, country)
+        advertisers = [
+            {
+                "name":               s["domain"],
+                "domain":             s["domain"],
+                "store_url":          s["store_url"],
+                "scaling_score":      s["scaling_score"],
+                "ads_count":          0,
+                "max_days_running":   0,
+                "avg_days_running":   0.0,
+                "estimated_spend":    0,
+                "angles_used":        [],
+                "dominant_angle":     "",
+                "angle_gaps":         [],
+                "products":           s["products"],
+                "ad_examples":        [],
+                "platforms":          [],
+            }
+            for s in shops
+        ]
+        logger.info("shop_finder fallback: %d advertisers from real shops", len(advertisers))
         return {
-            "niche": niche, "ads": [], "angle_kpis": [], "gaps": [],
-            "shops": [], "stats": {"total_ads": 0, "unique_angles": 0, "gaps_found": 0, "shops_found": 0},
+            "niche":      niche,
+            "ads":        [],
+            "angle_kpis": [],
+            "gaps":       [],
+            "advertisers": advertisers,
+            "stats": {
+                "total_ads":         0,
+                "unique_angles":     0,
+                "gaps_found":        0,
+                "advertisers_found": len(advertisers),
+            },
         }
 
     # 2. Analyse angles with Groq

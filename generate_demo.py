@@ -9,6 +9,10 @@ DATA_DIR = Path(__file__).parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 (DATA_DIR / "history").mkdir(exist_ok=True)
 
+# Seed changes every week so demo data varies
+_week = datetime.utcnow().isocalendar()[1]
+random.seed(_week * 137 + datetime.utcnow().year)
+
 NICHES = [
     "foot wellness", "posture corrector", "sleep supplement",
     "hair loss", "joint pain", "weight loss", "gut health",

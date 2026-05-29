@@ -2,500 +2,827 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" id="themeColor" content="#0f172a" />
   <meta name="description" content="TrendTrack — Meta Ads Angle Intelligence Dashboard" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TrendTrack" />
   <title>TrendTrack · Angle Intelligence</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <style>
-    /* ── Reset & tokens ───────────────────────────────────────── */
+    /* ── Tokens ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0f172a;
-      --surface:  #1e293b;
-      --border:   #334155;
-      --text:     #e2e8f0;
-      --muted:    #94a3b8;
-      --accent:   #6366f1;
-      --gap:      #ffc107;
-      --gap-bg:   rgba(255,193,7,0.08);
-      --gap-border:#ffc107;
-      --green:    #22c55e;
-      --red:      #ef4444;
-      --radius:   10px;
-      --shadow:   0 4px 24px rgba(0,0,0,0.4);
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --surface2:   #0f172a;
+      --border:     #334155;
+      --text:       #e2e8f0;
+      --muted:      #94a3b8;
+      --accent:     #6366f1;
+      --accent2:    #8b5cf6;
+      --gap:        #ffc107;
+      --gap-bg:     rgba(255,193,7,0.08);
+      --green:      #22c55e;
+      --orange:     #f59e0b;
+      --red:        #ef4444;
+      --radius:     10px;
+      --shadow:     0 4px 24px rgba(0,0,0,0.45);
+      --sidebar-w:  240px;
+      --header-h:   56px;
     }
     [data-theme="light"] {
-      --bg:      #f1f5f9;
-      --surface: #ffffff;
-      --border:  #cbd5e1;
-      --text:    #0f172a;
-      --muted:   #64748b;
-      --shadow:  0 2px 12px rgba(0,0,0,0.1);
+      --bg:       #f1f5f9;
+      --surface:  #ffffff;
+      --surface2: #f8fafc;
+      --border:   #cbd5e1;
+      --text:     #0f172a;
+      --muted:    #64748b;
+      --shadow:   0 2px 12px rgba(0,0,0,0.1);
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      transition: background 0.2s, color 0.2s;
+      overflow-x: hidden;
     }
 
-    /* ── Layout ───────────────────────────────────────────────── */
-    header {
+    /* ── App shell (sidebar + content) ──────────────────────── */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 200;
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.5rem;
+      padding: 1.1rem 1rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .logo-text {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .logo-text small {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .sidebar-close {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+
+    /* Nav links */
+    .sidebar-nav {
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 7px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(99,102,241,0.12);
+      color: var(--text);
+    }
+    .nav-item.active { color: #818cf8; }
+    .nav-icon { font-size: 1rem; width: 1.25rem; text-align: center; }
+
+    /* Run badge inline */
+    .run-badge-sb {
+      font-size: 0.65rem; padding: 2px 7px; border-radius: 999px;
+      font-weight: 600; display: none; align-items: center; gap: 0.35rem;
+      margin-left: auto;
+    }
+    .run-badge-sb.show  { display: inline-flex; }
+    .run-badge-sb.queued    { background: rgba(99,102,241,0.2);  color: #818cf8; }
+    .run-badge-sb.running   { background: rgba(245,158,11,0.2);  color: #f59e0b; }
+    .run-badge-sb.success   { background: rgba(34,197,94,0.2);   color: #22c55e; }
+    .run-badge-sb.failure   { background: rgba(239,68,68,0.2);   color: #ef4444; }
+    .run-spinner-sm {
+      width: 8px; height: 8px; border: 1.5px solid currentColor;
+      border-top-color: transparent; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Niche list */
+    .sidebar-section {
+      padding: 0.6rem 0.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      padding: 0.3rem 0.75rem 0.5rem;
+      font-weight: 600;
+    }
+    .niche-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .niche-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .niche-item.active { background: rgba(99,102,241,0.15); color: #a5b4fc; font-weight: 600; }
+    .niche-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+      background: var(--border);
+    }
+    .niche-item.active .niche-dot { background: var(--accent); }
+
+    /* Sidebar footer actions */
+    .sidebar-footer {
+      padding: 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+    .sb-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      width: 100%;
+      text-align: left;
+    }
+    .sb-btn:hover { background: var(--border); }
+    .sb-btn.accent-btn {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .sb-btn.accent-btn:hover { opacity: 0.9; }
+
+    /* ── Sidebar backdrop (mobile only) ─────────────────────── */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 199;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ── Main wrapper ────────────────────────────────────────── */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top header (mobile-first) ───────────────────────────── */
+    .top-header {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      gap: 1rem;
-      flex-wrap: wrap;
+      padding: 0 1rem;
+      height: var(--header-h);
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
     }
-    .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: -0.5px; }
-    .logo span { color: var(--text); }
-    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .burger-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+    .header-logo {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--accent);
+      flex: 1;
+      padding-left: 0.5rem;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 7px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .icon-btn:hover { background: var(--border); }
 
-    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem; }
+    /* ── Page content ────────────────────────────────────────── */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
 
-    /* ── Stat bar ─────────────────────────────────────────────── */
+    /* ── Demo banner ─────────────────────────────────────────── */
+    .demo-banner {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius);
+      padding: 0.65rem 1rem;
+      font-size: 0.78rem;
+      color: var(--orange);
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .demo-banner.show { display: flex; }
+
+    /* ── Stat bar ────────────────────────────────────────────── */
     .stat-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
       margin-bottom: 1.5rem;
     }
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1rem;
     }
-    .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-    .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 0.25rem; color: var(--text); }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .stat-value { font-size: 1.65rem; font-weight: 800; margin-top: 0.2rem; color: var(--text); line-height: 1; }
 
-    /* ── Section headers ──────────────────────────────────────── */
-    .section-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 1.5rem 0 0.75rem;
+    /* ── Section headers ─────────────────────────────────────── */
+    .section-header {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin: 2rem 0 0.85rem;
+      scroll-margin-top: calc(var(--header-h) + 1rem);
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
     }
     .badge {
-      font-size: 0.7rem;
-      padding: 2px 8px;
+      font-size: 0.68rem;
+      padding: 2px 9px;
       border-radius: 999px;
       font-weight: 600;
     }
-    .badge-gap   { background: var(--gap); color: #000; }
+    .badge-adv   { background: rgba(99,102,241,0.25); color: #818cf8; }
+    .badge-gap   { background: rgba(255,193,7,0.2);   color: var(--gap); }
     .badge-all   { background: var(--border); color: var(--text); }
 
-    /* ── Toolbar ──────────────────────────────────────────────── */
+    /* ── Toolbar ─────────────────────────────────────────────── */
     .toolbar {
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      gap: 0.4rem;
       flex-wrap: wrap;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
     .toolbar input {
       flex: 1;
-      min-width: 180px;
-      padding: 0.45rem 0.75rem;
-      border-radius: 6px;
+      min-width: 160px;
+      padding: 0.4rem 0.7rem;
+      border-radius: 7px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
-    .toolbar input:focus { outline: 2px solid var(--accent); }
-    button {
-      padding: 0.45rem 0.9rem;
-      border-radius: 6px;
+    .toolbar input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .sort-btn {
+      padding: 0.4rem 0.8rem;
+      border-radius: 7px;
       border: 1px solid var(--border);
       background: var(--surface);
-      color: var(--text);
-      font-size: 0.8rem;
+      color: var(--muted);
+      font-size: 0.75rem;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: all 0.15s;
     }
-    button:hover  { background: var(--border); }
-    button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .sort-btn:hover  { background: var(--border); color: var(--text); }
+    .sort-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    /* ── Cards grid ───────────────────────────────────────────── */
+    /* ── Cards grid ──────────────────────────────────────────── */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 0.85rem;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
+      padding: 1rem 1.1rem;
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
-      overflow: hidden;
     }
     .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-
     .card.gap-card {
-      border: 2px solid var(--gap-border);
+      border: 2px solid rgba(255,193,7,0.5);
       background: var(--gap-bg);
     }
+    .card.adv-card { border-left: 3px solid var(--accent); }
 
-    .card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
+    /* ── Advertiser card ─────────────────────────────────────── */
+    .adv-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 0.5rem;
     }
-    .viability-pill {
-      font-size: 0.72rem;
+    .adv-name {
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #fff;
-      white-space: nowrap;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      word-break: break-word;
     }
-
-    .card-meta {
-      display: flex;
-      gap: 1rem;
+    .adv-domain {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      display: block;
+      margin-top: 0.1rem;
+    }
+    .adv-domain:hover { text-decoration: underline; }
+    .score-pill {
+      font-size: 0.7rem; font-weight: 700;
+      padding: 2px 9px; border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; white-space: nowrap; flex-shrink: 0;
+    }
+    .adv-meta {
+      display: flex; gap: 0.65rem; flex-wrap: wrap;
+      margin-top: 0.4rem; font-size: 0.72rem; color: var(--muted);
+    }
+    .adv-meta strong { color: var(--text); }
+    .chips-row {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
       margin-top: 0.5rem;
-      font-size: 0.75rem;
-      color: var(--muted);
     }
-    .card-meta strong { color: var(--text); }
+    .chips-label { font-size: 0.65rem; color: var(--muted); align-self: center; white-space: nowrap; }
+    .chip {
+      font-size: 0.65rem; padding: 2px 8px; border-radius: 999px;
+      font-weight: 500; white-space: nowrap;
+    }
+    .chip-blue     { background: rgba(99,102,241,0.15); color: #818cf8; }
+    .chip-dominant { background: rgba(99,102,241,0.35); color: #c7d2fe; font-weight: 700; }
+    .chip-yellow   { background: rgba(255,193,7,0.15);  color: var(--gap); }
+    .platform-row  { display: flex; gap: 0.3rem; margin-top: 0.35rem; flex-wrap: wrap; }
+    .platform-badge {
+      font-size: 0.62rem; padding: 1px 6px; border-radius: 4px;
+      background: var(--border); color: var(--muted); text-transform: capitalize;
+    }
 
-    /* Expanded detail panel */
+    /* Expand hint */
+    .expand-hint {
+      font-size: 0.68rem; color: var(--muted); margin-top: 0.5rem;
+      text-align: center; opacity: 0.7;
+    }
+    .card.open .expand-hint { display: none; }
+
+    /* Expanded panel */
     .card-detail {
       display: none;
-      margin-top: 1rem;
+      margin-top: 0.85rem;
       padding-top: 0.75rem;
       border-top: 1px solid var(--border);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
     }
     .card.open .card-detail { display: block; }
 
-    .example-item {
-      padding: 0.5rem;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.04);
-      margin-bottom: 0.4rem;
+    .detail-label {
+      font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted);
+      margin-bottom: 0.4rem; font-weight: 600;
     }
-    .example-hook { color: var(--text); line-height: 1.4; }
-    .example-meta { color: var(--muted); font-size: 0.72rem; margin-top: 0.25rem; }
 
-    /* Products inside gap cards */
-    .product-list { margin-top: 0.75rem; }
-    .product-item {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.4rem;
+    /* Products grid inside card */
+    .prods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 0.4rem; margin-bottom: 0.75rem;
+    }
+    .prod-tile {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.4rem;
+      text-decoration: none; color: var(--text);
+      font-size: 0.7rem; transition: background 0.1s;
+    }
+    .prod-tile:hover { background: rgba(255,255,255,0.07); }
+    .prod-tile img {
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      border-radius: 4px; background: var(--border);
+      margin-bottom: 0.25rem; display: block;
+    }
+    .prod-tile-title {
+      font-weight: 500; line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .prod-tile-price { color: var(--green); margin-top: 0.15rem; font-weight: 600; }
+
+    /* Ad copy examples */
+    .copy-item {
+      padding: 0.55rem 0.7rem;
       border-radius: 6px;
       background: rgba(255,255,255,0.03);
-      margin-bottom: 0.35rem;
-      text-decoration: none;
-      color: var(--text);
-      transition: background 0.1s;
+      border-left: 3px solid var(--border);
+      margin-bottom: 0.4rem;
     }
-    .product-item:hover { background: rgba(255,255,255,0.07); }
-    .product-thumb {
-      width: 40px;
-      height: 40px;
-      border-radius: 4px;
-      object-fit: cover;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-    .product-name { font-size: 0.8rem; font-weight: 500; }
-    .product-price { font-size: 0.72rem; color: var(--green); }
+    .copy-text { line-height: 1.5; color: var(--text); }
+    .copy-meta { font-size: 0.68rem; color: var(--muted); margin-top: 0.25rem; }
+    .copy-meta a { color: var(--accent); }
 
-    /* ── Niche selector ───────────────────────────────────────── */
-    .niche-tabs {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
+    /* ── Gap / angle cards ───────────────────────────────────── */
+    .card-title {
+      font-size: 0.9rem; font-weight: 700;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 0.5rem;
     }
+    .viability-pill {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--accent); color: #fff; white-space: nowrap;
+    }
+    .card-meta {
+      display: flex; gap: 0.8rem; flex-wrap: wrap;
+      margin-top: 0.4rem; font-size: 0.73rem; color: var(--muted);
+    }
+    .card-meta strong { color: var(--text); }
 
-    /* ── Loading / Error states ───────────────────────────────── */
+    .example-item {
+      padding: 0.45rem; border-radius: 6px;
+      background: rgba(255,255,255,0.04); margin-bottom: 0.35rem;
+    }
+    .example-hook { color: var(--text); line-height: 1.4; font-size: 0.8rem; }
+    .example-meta { color: var(--muted); font-size: 0.7rem; margin-top: 0.2rem; }
+
+    /* ── State messages ──────────────────────────────────────── */
     .state-msg {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--muted);
-      font-size: 0.9rem;
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--muted); font-size: 0.85rem;
+      grid-column: 1 / -1;
     }
     .spinner {
-      display: inline-block;
-      width: 28px;
-      height: 28px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-bottom: 0.75rem;
+      display: inline-block; width: 26px; height: 26px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-bottom: 0.6rem;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Responsive tweaks ────────────────────────────────────── */
-    @media (max-width: 480px) {
-      .stat-value { font-size: 1.4rem; }
-      .cards-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── Shop cards ───────────────────────────────────────────── */
-    .shop-card { border-left: 3px solid var(--accent); }
-    .shop-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
-    .shop-domain { font-weight: 700; font-size: 0.9rem; color: var(--accent); }
-    .shop-source { font-size: 0.68rem; padding: 2px 7px; border-radius: 999px; background: var(--border); color: var(--muted); }
-    .shop-meta { display: flex; gap: 1rem; margin-top: 0.4rem; font-size: 0.75rem; color: var(--muted); }
-    .shop-meta strong { color: var(--text); }
-    .angles-used { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.6rem; }
-    .angle-chip { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: rgba(99,102,241,0.15); color: #818cf8; }
-    .angle-gap-chip { background: rgba(255,193,7,0.15); color: var(--gap); }
-    .shop-products { margin-top: 0.75rem; display: none; }
-    .card.open .shop-products { display: block; }
-    .shop-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
-    .prod-card { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 0.5rem; font-size: 0.75rem; }
-    .prod-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: var(--border); margin-bottom: 0.3rem; }
-    .prod-title { font-weight: 500; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .prod-price { color: var(--green); margin-top: 0.2rem; font-weight: 600; }
-
-    /* ── Run modal ────────────────────────────────────────────── */
+    /* ── Modal ───────────────────────────────────────────────── */
     .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 300;
+      align-items: center; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.5rem;
-      width: min(440px, 95vw);
-      box-shadow: var(--shadow);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+      width: min(440px, 95vw); box-shadow: var(--shadow);
     }
     .modal h2 { font-size: 1rem; margin-bottom: 1rem; }
-    .modal label { display: block; font-size: 0.78rem; color: var(--muted); margin: 0.75rem 0 0.3rem; }
+    .modal label { display: block; font-size: 0.76rem; color: var(--muted); margin: 0.7rem 0 0.28rem; }
     .modal input, .modal select {
-      width: 100%; padding: 0.5rem 0.75rem;
-      border-radius: 6px; border: 1px solid var(--border);
-      background: var(--bg); color: var(--text); font-size: 0.85rem;
+      width: 100%; padding: 0.5rem 0.7rem;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 0.83rem;
     }
     .modal input:focus, .modal select:focus { outline: 2px solid var(--accent); }
-    .modal-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+    .modal-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; }
     .modal-hint a { color: var(--accent); }
-    .modal-actions { display: flex; gap: 0.6rem; margin-top: 1.25rem; justify-content: flex-end; }
-    .btn-primary {
-      padding: 0.5rem 1.1rem; border-radius: 6px;
-      background: var(--accent); color: #fff; border: none;
-      font-size: 0.85rem; cursor: pointer; font-weight: 600;
-    }
+    .modal-actions { display: flex; gap: 0.5rem; margin-top: 1.2rem; justify-content: flex-end; }
+    .btn { padding: 0.45rem 0.9rem; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.82rem; cursor: pointer; }
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
     .btn-primary:hover { opacity: 0.9; }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Run status badge */
-    .run-badge {
-      font-size: 0.72rem; padding: 3px 10px; border-radius: 999px;
-      font-weight: 600; display: none; align-items: center; gap: 0.4rem;
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 260px; }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow);
+      }
+      .sidebar-close { display: block; }
+      .sidebar-backdrop.open { display: block; }
+
+      .main-wrapper { margin-left: 0; }
+      .top-header   { display: flex; }
+
+      main { padding: 1rem 0.85rem 3rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .stat-bar { grid-template-columns: repeat(2, 1fr); }
     }
-    .run-badge.show { display: inline-flex; }
-    .run-badge.queued    { background: rgba(99,102,241,0.2); color: #818cf8; }
-    .run-badge.running   { background: rgba(245,158,11,0.2); color: #f59e0b; }
-    .run-badge.success   { background: rgba(34,197,94,0.2);  color: #22c55e; }
-    .run-badge.failure   { background: rgba(239,68,68,0.2);  color: #ef4444; }
-    .run-spinner {
-      width: 10px; height: 10px; border: 2px solid currentColor;
-      border-top-color: transparent; border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+
+    @media (min-width: 769px) {
+      .sidebar-close { display: none !important; }
+      .top-header { display: none !important; }
     }
   </style>
 </head>
 <body data-theme="dark">
 
-<header>
-  <div class="logo">TrendTrack <span>· Angle Intelligence</span></div>
-  <div class="header-actions">
-    <span class="run-badge" id="runBadge"></span>
-    <button id="launchBtn" title="Lancer le scrape depuis le dashboard">⚡ Analyser</button>
-    <button id="refreshBtn" title="Recharger les données">↻ Refresh</button>
-    <button id="themeBtn" title="Basculer dark/light mode">◑ Mode</button>
-  </div>
-</header>
+<!-- ── App shell ─────────────────────────────────────────────── -->
+<div class="app-shell">
 
-<!-- Modal de lancement ────────────────────────────────────── -->
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-text">TrendTrack<small>Angle Intelligence</small></div>
+      <button class="sidebar-close" id="sidebarClose" title="Fermer">✕</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a class="nav-item active" id="nav-adv" href="#advertisers">
+        <span class="nav-icon">🏆</span> Advertisers
+        <span class="run-badge-sb" id="runBadge"></span>
+      </a>
+      <a class="nav-item" id="nav-gap" href="#gaps">
+        <span class="nav-icon">🟡</span> Angles inexploités
+      </a>
+      <a class="nav-item" id="nav-all" href="#angles">
+        <span class="nav-icon">📊</span> Performances
+      </a>
+    </nav>
+
+    <!-- Niche list -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Niches</div>
+      <div id="nicheList"></div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="sidebar-footer">
+      <button class="sb-btn accent-btn" id="launchBtn">⚡ Lancer une analyse</button>
+      <button class="sb-btn" id="refreshBtn">↻ Actualiser les données</button>
+      <button class="sb-btn" id="themeBtn">◑ Basculer le thème</button>
+    </div>
+  </aside>
+
+  <!-- Mobile backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Main content area -->
+  <div class="main-wrapper">
+
+    <!-- Mobile sticky header -->
+    <header class="top-header">
+      <button class="burger-btn" id="burgerBtn" aria-label="Menu">☰</button>
+      <span class="header-logo">TrendTrack</span>
+      <div class="header-right">
+        <button class="icon-btn" id="refreshBtnMob" title="Refresh">↻</button>
+        <button class="icon-btn" id="launchBtnMob" title="Analyser">⚡</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Demo banner -->
+      <div class="demo-banner" id="demoBanner">
+        📊 Mode démonstration — Lance une analyse réelle pour voir les shops qui scalent en ce moment.
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stat-bar">
+        <div class="stat-card">
+          <div class="stat-label">Dernière mise à jour</div>
+          <div class="stat-value" id="statDate">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ads analysés</div>
+          <div class="stat-value" id="statAds">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Angles</div>
+          <div class="stat-value" id="statAngles">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gaps</div>
+          <div class="stat-value" id="statGaps">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Advertisers</div>
+          <div class="stat-value" id="statAdverts">—</div>
+        </div>
+      </div>
+
+      <!-- ADVERTISERS -->
+      <div class="section-header" id="advertisers">
+        <span class="section-title">🏆 Advertisers qui scalent</span>
+        <span class="badge badge-adv" id="advertisersCount">0</span>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="advSearch" placeholder="Rechercher un advertiser…" />
+        <button class="sort-btn active" data-section="adv" data-sort="score">Score ↓</button>
+        <button class="sort-btn" data-section="adv" data-sort="ads">Ads</button>
+        <button class="sort-btn" data-section="adv" data-sort="days">Jours</button>
+        <button class="sort-btn" data-section="adv" data-sort="prods">Produits</button>
+      </div>
+      <div class="cards-grid" id="advertisersGrid">
+        <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
+      </div>
+
+      <!-- GAPS -->
+      <div class="section-header" id="gaps">
+        <span class="section-title">🟡 Angles inexploités</span>
+        <span class="badge badge-gap" id="gapCount">0</span>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
+        <button class="sort-btn active" data-section="gap" data-sort="viability">Viabilité ↓</button>
+        <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
+        <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
+      </div>
+      <div class="cards-grid" id="gapGrid"></div>
+
+      <!-- ALL ANGLES -->
+      <div class="section-header" id="angles">
+        <span class="section-title">📊 Performances par angle</span>
+        <span class="badge badge-all" id="allCount">0</span>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
+        <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
+        <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
+        <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
+      </div>
+      <div class="cards-grid" id="allGrid"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Launch modal -->
 <div class="modal-overlay" id="launchModal">
   <div class="modal">
     <h2>⚡ Lancer une analyse</h2>
-
     <label>GitHub Token (PAT)
-      <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" />
+      <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" autocomplete="current-password" />
     </label>
     <p class="modal-hint">
-      Token avec scope <strong>workflow</strong> uniquement.
+      Token avec scope <strong>workflow</strong>.
       <a href="https://github.com/settings/tokens/new?scopes=workflow" target="_blank" rel="noopener">Créer →</a>
-      (sauvegardé localement, jamais envoyé ailleurs que l'API GitHub)
+      (sauvegardé localement)
     </p>
-
-    <label>Niche (laisser vide = toutes)
+    <label>Niche (vide = toutes)
       <input type="text" id="nicheInput" placeholder="ex: collagen skin, weight loss…" />
     </label>
-
     <label>Pays
       <select id="countryInput">
-        <option value="FR">🇫🇷 France (FR)</option>
-        <option value="US">🇺🇸 États-Unis (US)</option>
-        <option value="GB">🇬🇧 Royaume-Uni (GB)</option>
-        <option value="DE">🇩🇪 Allemagne (DE)</option>
-        <option value="ES">🇪🇸 Espagne (ES)</option>
+        <option value="FR">🇫🇷 France</option>
+        <option value="US">🇺🇸 États-Unis</option>
+        <option value="GB">🇬🇧 Royaume-Uni</option>
+        <option value="DE">🇩🇪 Allemagne</option>
+        <option value="ES">🇪🇸 Espagne</option>
       </select>
     </label>
-
     <div class="modal-actions">
-      <button id="modalCancel">Annuler</button>
-      <button class="btn-primary" id="modalLaunch">🚀 Lancer</button>
+      <button class="btn" id="modalCancel">Annuler</button>
+      <button class="btn btn-primary" id="modalLaunch">🚀 Lancer</button>
     </div>
   </div>
 </div>
 
-<main>
-  <!-- Stats bar -->
-  <div class="stat-bar">
-    <div class="stat-card">
-      <div class="stat-label">Last update</div>
-      <div class="stat-value" id="statDate">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Ads analysés</div>
-      <div class="stat-value" id="statAds">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Angles détectés</div>
-      <div class="stat-value" id="statAngles">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Gaps trouvés</div>
-      <div class="stat-value" id="statGaps">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Shops scalent</div>
-      <div class="stat-value" id="statShops">—</div>
-    </div>
-  </div>
-
-  <!-- Niche selector tabs -->
-  <div class="niche-tabs" id="nicheTabs"></div>
-
-  <!-- SHOPS section -->
-  <div class="section-title">
-    🏪 Shops qui scalent
-    <span class="badge badge-all" id="shopsCount">0</span>
-  </div>
-  <div class="cards-grid" id="shopsGrid"></div>
-
-  <!-- GAP section -->
-  <div class="section-title">
-    🟡 Angles inexploités
-    <span class="badge badge-gap" id="gapCount">0</span>
-  </div>
-  <div class="toolbar">
-    <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
-    <button class="sort-btn active" data-section="gap" data-sort="viability">Viabilité ↓</button>
-    <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
-    <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
-  </div>
-  <div class="cards-grid" id="gapGrid">
-    <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
-  </div>
-
-  <!-- ALL ANGLES section -->
-  <div class="section-title">
-    📊 Performances par angle
-    <span class="badge badge-all" id="allCount">0</span>
-  </div>
-  <div class="toolbar">
-    <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
-    <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
-    <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
-    <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
-  </div>
-  <div class="cards-grid" id="allGrid"></div>
-</main>
-
 <script>
-// ── Config ────────────────────────────────────────────────────────────────
+// ── Config ─────────────────────────────────────────────────────────────────
 const GITHUB_USER = 'letxbrace-droid';
 const GITHUB_REPO = 'Ningbus';
-const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/latest_analysis.json`;
-const IDB_NAME  = 'trendtrack';
-const IDB_STORE = 'cache';
-const IDB_KEY   = 'analysis';
+const DATA_URL    = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/latest_analysis.json`;
+const IDB_NAME    = 'trendtrack-v2';
+const IDB_STORE   = 'cache';
+const IDB_KEY     = 'analysis';
 
-// ── State ─────────────────────────────────────────────────────────────────
-let state = {
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
   data: null,
   activeNiche: 0,
-  gapSort: 'viability',
-  allSort: 'viability',
-  gapFilter: '',
-  allFilter: '',
+  sorts: { adv: 'score', gap: 'viability', all: 'viability' },
+  filters: { adv: '', gap: '', all: '' },
 };
 
-// ── IndexedDB helpers ──────────────────────────────────────────────────────
+// ── IndexedDB ──────────────────────────────────────────────────────────────
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror  = e => reject(e.target.error);
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(IDB_NAME, 1);
+    r.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+    r.onsuccess = e => res(e.target.result);
+    r.onerror   = e => rej(e.target.error);
   });
 }
-async function idbGet(key) {
+async function idbGet(k) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx  = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get(key);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
+  return new Promise((res, rej) => {
+    const r = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(k);
+    r.onsuccess = e => res(e.target.result);
+    r.onerror   = e => rej(e.target.error);
   });
 }
-async function idbSet(key, value) {
+async function idbSet(k, v) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx  = db.transaction(IDB_STORE, 'readwrite');
-    const req = tx.objectStore(IDB_STORE).put(value, key);
-    req.onsuccess = () => resolve();
-    req.onerror   = e => reject(e.target.error);
+  return new Promise((res, rej) => {
+    const r = db.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).put(v, k);
+    r.onsuccess = () => res();
+    r.onerror   = e => rej(e.target.error);
   });
 }
 
-// ── Data loading ──────────────────────────────────────────────────────────
-async function loadData(forceRefresh = false) {
-  if (!forceRefresh) {
+// ── Data ───────────────────────────────────────────────────────────────────
+async function loadData(force = false) {
+  if (!force) {
     const cached = await idbGet(IDB_KEY).catch(() => null);
-    if (cached) {
-      state.data = cached;
-      render();
-      return;
-    }
+    if (cached) { state.data = cached; render(); return; }
   }
+  document.getElementById('advertisersGrid').innerHTML =
+    '<div class="state-msg"><div class="spinner"></div><br/>Chargement des données…</div>';
   try {
     const resp = await fetch(DATA_URL + '?t=' + Date.now());
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -504,351 +831,339 @@ async function loadData(forceRefresh = false) {
     await idbSet(IDB_KEY, json).catch(() => {});
     render();
   } catch (err) {
-    console.warn('Fetch failed:', err);
     const cached = await idbGet(IDB_KEY).catch(() => null);
-    if (cached) {
-      state.data = cached;
-      render();
-    } else {
-      // Show empty state — data will populate after first workflow run
-      state.data = { generated_at: null, total_ads: 0, results: [] };
-      render();
-      showError('Aucune donnée disponible. Lance le workflow GitHub Actions pour démarrer le premier scrape.');
-    }
+    if (cached) { state.data = cached; render(); return; }
+    state.data = { generated_at: null, total_ads: 0, results: [] };
+    render();
+    document.getElementById('advertisersGrid').innerHTML =
+      '<div class="state-msg">⚠️ Aucune donnée. Lance le workflow pour démarrer le premier scrape.</div>';
   }
 }
 
-function showError(msg) {
-  document.getElementById('gapGrid').innerHTML =
-    `<div class="state-msg" style="grid-column:1/-1">⚠️ ${msg}</div>`;
-}
-
-// ── Rendering ─────────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────
 function render() {
   if (!state.data) return;
-  const { results = [], generated_at, total_ads } = state.data;
+  const { results = [], generated_at, total_ads, demo } = state.data;
 
-  // Stats bar
+  // Demo banner
+  document.getElementById('demoBanner').classList.toggle('show', !!demo);
+
+  // Stats
   const d = new Date(generated_at);
   document.getElementById('statDate').textContent =
     isNaN(d) ? '—' : d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-  document.getElementById('statAds').textContent = total_ads ?? '—';
+  document.getElementById('statAds').textContent     = total_ads ?? '—';
+  document.getElementById('statAngles').textContent  = results.flatMap(r => r.angle_kpis || []).length;
+  document.getElementById('statGaps').textContent    = results.flatMap(r => r.gaps || []).length;
+  document.getElementById('statAdverts').textContent = results.flatMap(r => r.advertisers || []).length;
 
-  const allAngles = results.flatMap(r => r.angle_kpis || []);
-  const allGaps   = results.flatMap(r => r.gaps || []);
-  const allShops  = results.flatMap(r => r.shops || []);
-  document.getElementById('statAngles').textContent = allAngles.length;
-  document.getElementById('statGaps').textContent   = allGaps.length;
-  document.getElementById('statShops').textContent  = allShops.length;
+  // Niche list in sidebar
+  renderNicheList(results);
 
-  // Niche tabs
-  renderNicheTabs(results);
-
-  // Render active niche
-  const nicheData = results[state.activeNiche] || {};
-  renderShops(nicheData.shops || []);
-  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
-  renderAllAngles(nicheData.angle_kpis || []);
+  // Render active niche data
+  renderNiche();
 }
 
-function renderNicheTabs(results) {
-  const container = document.getElementById('nicheTabs');
-  container.innerHTML = results.map((r, i) => {
-    const active = i === state.activeNiche ? 'active' : '';
-    return `<button class="${active}" data-niche="${i}">${r.niche}</button>`;
-  }).join('');
-  container.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.activeNiche = parseInt(btn.dataset.niche);
-      container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const nicheData = (state.data.results || [])[state.activeNiche] || {};
-      renderShops(nicheData.shops || []);
-      renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
-      renderAllAngles(nicheData.angle_kpis || []);
+function renderNicheList(results) {
+  const container = document.getElementById('nicheList');
+  container.innerHTML = results.map((r, i) => `
+    <div class="niche-item ${i === state.activeNiche ? 'active' : ''}" data-niche="${i}">
+      <span class="niche-dot"></span>${esc(r.niche)}
+    </div>`).join('');
+  container.querySelectorAll('.niche-item').forEach(el => {
+    el.addEventListener('click', () => {
+      state.activeNiche = parseInt(el.dataset.niche);
+      container.querySelectorAll('.niche-item').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+      renderNiche();
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 768) closeSidebar();
     });
   });
 }
 
+function renderNiche() {
+  const nicheData = (state.data?.results || [])[state.activeNiche] || {};
+  renderAdvertisers(nicheData.advertisers || []);
+  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+  renderAllAngles(nicheData.angle_kpis || []);
+}
+
+// ── Sort / filter ──────────────────────────────────────────────────────────
 function sortItems(items, key) {
-  const copy = [...items];
-  if (key === 'viability') return copy.sort((a, b) => (b.viability_score ?? 0) - (a.viability_score ?? 0));
-  if (key === 'days')      return copy.sort((a, b) => (b.avg_days_running ?? 0) - (a.avg_days_running ?? 0));
-  if (key === 'usage')     return copy.sort((a, b) => (a.usage_count ?? a.count ?? 0) - (b.usage_count ?? b.count ?? 0));
-  if (key === 'count')     return copy.sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
-  return copy;
+  const c = [...items];
+  switch (key) {
+    case 'score':     return c.sort((a,b)=>(b.scaling_score??0)-(a.scaling_score??0));
+    case 'ads':       return c.sort((a,b)=>(b.ads_count??0)-(a.ads_count??0));
+    case 'days':      return c.sort((a,b)=>(b.avg_days_running??0)-(a.avg_days_running??0));
+    case 'prods':     return c.sort((a,b)=>(b.products?.length??0)-(a.products?.length??0));
+    case 'viability': return c.sort((a,b)=>(b.viability_score??0)-(a.viability_score??0));
+    case 'usage':     return c.sort((a,b)=>(a.usage_count??0)-(b.usage_count??0));
+    case 'count':     return c.sort((a,b)=>(b.count??0)-(a.count??0));
+    default:          return c;
+  }
+}
+function filterItems(items, q, fields=['angle','name']) {
+  if (!q) return items;
+  const lq = q.toLowerCase();
+  return items.filter(it => fields.some(f => (it[f]||'').toLowerCase().includes(lq)));
 }
 
-function filterItems(items, query) {
-  if (!query) return items;
-  const q = query.toLowerCase();
-  return items.filter(item => (item.angle || '').toLowerCase().includes(q));
-}
+// ── Advertisers ────────────────────────────────────────────────────────────
+function renderAdvertisers(advertisers) {
+  document.getElementById('advertisersCount').textContent = advertisers.length;
+  let items = sortItems(filterItems(advertisers, state.filters.adv, ['name','domain']), state.sorts.adv);
+  const grid = document.getElementById('advertisersGrid');
 
-// Gap cards
-// ── Shops qui scalent ─────────────────────────────────────────────────────────
-function renderShops(shops) {
-  const grid = document.getElementById('shopsGrid');
-  document.getElementById('shopsCount').textContent = shops.length;
-
-  if (!shops.length) {
-    grid.innerHTML = '<div class="state-msg" style="grid-column:1/-1">⚡ Lance une analyse pour découvrir les shops qui scalent sur cette niche.<br><span style="font-size:0.75rem">Les shops apparaissent uniquement après scraping réel — les données vérifiées en direct.</span></div>';
+  if (!items.length) {
+    grid.innerHTML = `<div class="state-msg">
+      ⚡ Lance une analyse pour voir les advertisers qui scalent sur cette niche.<br>
+      <span style="font-size:0.75rem;display:block;margin-top:0.35rem">
+        Les shops réels apparaissent après le premier scrape.
+      </span></div>`;
     return;
   }
-
-  grid.innerHTML = shops.map(s => buildShopCard(s)).join('');
-  grid.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => c.classList.toggle('open')));
+  grid.innerHTML = items.map(buildAdvCard).join('');
+  grid.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('click', e => { if (!e.target.closest('a')) c.classList.toggle('open'); });
+  });
 }
 
-function buildShopCard(shop) {
-  const sourceLabel = shop.source === 'meta_ads' ? '📡 Meta ads' : '🔍 Recherche';
-  const days  = shop.max_days_running || 0;
-  const spend = shop.total_spend || 0;
-  const count = shop.ads_count || 0;
+function buildAdvCard(adv) {
+  const score    = adv.scaling_score ?? 0;
+  const domain   = adv.domain || '';
+  const storeUrl = adv.store_url || (domain ? 'https://' + domain : '');
+  const dominant = adv.dominant_angle || '';
+  const others   = (adv.angles_used||[]).filter(a=>a!==dominant);
+  const gaps     = adv.angle_gaps || [];
 
-  const anglesUsed = (shop.angles_used || []).map(a =>
-    `<span class="angle-chip">${escHtml(a)}</span>`
+  const anglesHtml = [
+    dominant ? `<span class="chip chip-dominant">★ ${esc(dominant)}</span>` : '',
+    ...others.slice(0,3).map(a=>`<span class="chip chip-blue">${esc(a)}</span>`),
+    others.length>3 ? `<span class="chip chip-blue" style="opacity:.6">+${others.length-3}</span>` : '',
+  ].filter(Boolean).join('');
+
+  const gapsHtml = gaps.slice(0,3).map(g=>
+    `<span class="chip chip-yellow" title="Angle non exploité">🟡 ${esc(g)}</span>`
   ).join('');
 
-  const angleGaps = (shop.angle_gaps || []).slice(0, 3).map(g =>
-    `<span class="angle-chip angle-gap-chip">🟡 ${escHtml(g.angle)}</span>`
-  ).join('');
+  const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge">${esc(p)}</span>`).join('');
 
-  const products = (shop.products || []).slice(0, 8);
-  const prodsHtml = products.length ? `
-    <div class="shop-products-grid">
-      ${products.map(p => `
-        <a class="prod-card" href="${escHtml(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-          ${p.image ? `<img src="${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
-          <div class="prod-title">${escHtml(p.title)}</div>
-          <div class="prod-price">${escHtml(p.price ? p.price + ' €' : '')}</div>
-        </a>`).join('')}
-    </div>` : '<p style="font-size:0.75rem;color:var(--muted)">Catalogue non disponible.</p>';
+  const products  = (adv.products||[]).slice(0,8);
+  const prodsHtml = products.length
+    ? `<div class="prods-grid">${products.map(p=>`
+        <a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
+          ${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
+          <div class="prod-tile-title">${esc(p.title)}</div>
+          ${p.price?`<div class="prod-tile-price">${esc(p.price)} €</div>`:''}
+        </a>`).join('')}</div>`
+    : `<p style="font-size:.73rem;color:var(--muted)">Catalogue non disponible après scrape réel.</p>`;
+
+  const examplesHtml = (adv.ad_examples||[]).slice(0,3).map(ex=>`
+    <div class="copy-item">
+      <div class="copy-text">${esc((ex.copy||'').slice(0,240))}${(ex.copy||'').length>240?'…':''}</div>
+      <div class="copy-meta">
+        ${ex.angle?`<strong>${esc(ex.angle)}</strong> · `:''}${ex.days_running??0}j
+        ${ex.snapshot_url?` · <a href="${esc(ex.snapshot_url)}" target="_blank" rel="noopener">Voir la pub</a>`:''}
+      </div>
+    </div>`).join('');
 
   return `
-    <div class="card shop-card">
-      <div class="shop-header">
-        <span class="shop-domain">${escHtml(shop.domain)}</span>
-        <span class="shop-source">${sourceLabel}</span>
+    <div class="card adv-card">
+      <div class="adv-top">
+        <div>
+          <div class="adv-name">${esc(adv.name)}</div>
+          ${storeUrl
+            ? `<a class="adv-domain" href="${esc(storeUrl)}" target="_blank" rel="noopener">${esc(domain||storeUrl)}</a>`
+            : `<span class="adv-domain" style="color:var(--muted)">—</span>`}
+        </div>
+        <span class="score-pill">⚡ ${score}</span>
       </div>
-      <div class="shop-meta">
-        ${days ? `<span>Ads actives depuis <strong>${days}j</strong></span>` : ''}
-        ${count ? `<span><strong>${count}</strong> pubs trouvées</span>` : ''}
-        ${spend ? `<span>Spend ~<strong>${spend}$</strong></span>` : ''}
-        <span><strong>${(shop.products||[]).length}</strong> produits</span>
+      <div class="adv-meta">
+        ${adv.ads_count?`<span><strong>${adv.ads_count}</strong> pubs</span>`:''}
+        ${adv.max_days_running?`<span>Jusqu'à <strong>${adv.max_days_running}j</strong></span>`:''}
+        ${adv.avg_days_running?`<span>Moy. <strong>${adv.avg_days_running}j</strong></span>`:''}
+        ${adv.estimated_spend?`<span>~<strong>$${adv.estimated_spend}</strong></span>`:''}
+        ${products.length?`<span><strong>${products.length}</strong> produits</span>`:''}
       </div>
-      <div class="angles-used">
-        ${anglesUsed}
-        ${angleGaps ? `<span style="font-size:0.68rem;color:var(--muted);align-self:center">Gaps →</span>${angleGaps}` : ''}
-      </div>
-      <div class="shop-products">
-        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem">Produits best-sellers :</p>
-        ${prodsHtml}
+      ${anglesHtml?`<div class="chips-row">${anglesHtml}</div>`:''}
+      ${gapsHtml?`<div class="chips-row"><span class="chips-label">Gaps →</span>${gapsHtml}</div>`:''}
+      ${platforms?`<div class="platform-row">${platforms}</div>`:''}
+      <div class="expand-hint">▼ produits &amp; exemples de pubs</div>
+      <div class="card-detail">
+        ${products.length?`<div class="detail-label">Produits best-sellers</div>${prodsHtml}`:''}
+        ${(adv.ad_examples||[]).length?`<div class="detail-label" style="margin-top:.6rem">Exemples de pubs</div>${examplesHtml}`:''}
+        ${!products.length&&!(adv.ad_examples||[]).length?'<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>':''}
       </div>
     </div>`;
 }
 
+// ── Gaps ───────────────────────────────────────────────────────────────────
 function renderGaps(gaps, recommendations) {
-  const recoByAngle = Object.fromEntries(recommendations.map(r => [r.angle, r]));
-  let items = sortItems(filterItems(gaps, state.gapFilter), state.gapSort);
+  const reco = Object.fromEntries((recommendations||[]).map(r=>[r.angle,r]));
   document.getElementById('gapCount').textContent = gaps.length;
-
+  let items = sortItems(filterItems(gaps, state.filters.gap), state.sorts.gap);
+  const grid = document.getElementById('gapGrid');
   if (!items.length) {
-    document.getElementById('gapGrid').innerHTML =
-      '<div class="state-msg" style="grid-column:1/-1">Aucun gap détecté pour cette niche.</div>';
+    grid.innerHTML = '<div class="state-msg">Aucun gap détecté pour cette niche.</div>';
     return;
   }
-  document.getElementById('gapGrid').innerHTML = items.map(g =>
-    buildGapCard(g, recoByAngle[g.angle])
-  ).join('');
-
-  // Expand/collapse on click
-  document.querySelectorAll('#gapGrid .card').forEach(card => {
-    card.addEventListener('click', () => card.classList.toggle('open'));
-  });
+  grid.innerHTML = items.map(g=>buildGapCard(g,reco[g.angle])).join('');
+  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
 }
 
 function buildGapCard(gap, reco) {
-  const products = (reco?.products || []).slice(0, 3);
-  const prodHTML = products.length
-    ? `<div class="product-list">${products.map(p => `
-        <a class="product-item" href="${escHtml(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-          <img class="product-thumb" src="${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />
-          <div>
-            <div class="product-name">${escHtml(p.title)}</div>
-            <div class="product-price">${escHtml(p.price ? p.price + ' €' : '')}</div>
-          </div>
-        </a>`).join('')}</div>`
-    : '<p style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem">Aucun produit trouvé.</p>';
-
-  const examples = (gap.examples || []).slice(0, 3).map(ex => `
+  const examples = (gap.examples||[]).slice(0,3).map(ex=>`
     <div class="example-item">
-      <div class="example-hook">${escHtml(ex.hook || '—')}</div>
-      <div class="example-meta">
-        ${escHtml(ex.store)} · ${ex.days_running ?? 0}j
-        ${ex.landing_page_url ? `· <a href="${escHtml(ex.landing_page_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Voir</a>` : ''}
-      </div>
+      <div class="example-hook">${esc(ex.hook||'—')}</div>
+      <div class="example-meta">${esc(ex.store)} · ${ex.days_running??0}j</div>
     </div>`).join('');
-
   return `
     <div class="card gap-card">
       <div class="card-title">
-        <span>${escHtml(gap.angle)}</span>
-        <span class="viability-pill">${gap.viability_score ?? 0}% viab.</span>
+        <span>${esc(gap.angle)}</span>
+        <span class="viability-pill">${gap.viability_score??0}% viab.</span>
       </div>
       <div class="card-meta">
-        <span>Utilisé <strong>${gap.usage_count ?? 0}</strong> fois</span>
-        <span>Moy. <strong>${gap.avg_days_running ?? 0}j</strong></span>
-        <span>${escHtml(gap.primary_audience || '')}</span>
+        <span>Utilisé <strong>${gap.usage_count??0}×</strong></span>
+        <span>Moy. <strong>${gap.avg_days_running??0}j</strong></span>
+        <span>${esc(gap.primary_audience||'')}</span>
       </div>
       <div class="card-detail">
-        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem">Exemples :</p>
-        ${examples || '<p style="color:var(--muted);font-size:0.75rem">—</p>'}
-        <p style="font-size:0.75rem;color:var(--muted);margin:0.75rem 0 0.35rem">Produits à tester :</p>
-        ${prodHTML}
+        ${examples||'<p style="color:var(--muted);font-size:.75rem">—</p>'}
       </div>
     </div>`;
 }
 
-// All-angles cards
+// ── All angles ─────────────────────────────────────────────────────────────
 function renderAllAngles(kpis) {
-  let items = sortItems(filterItems(kpis, state.allFilter), state.allSort);
   document.getElementById('allCount').textContent = kpis.length;
-
+  let items = sortItems(filterItems(kpis, state.filters.all), state.sorts.all);
+  const grid = document.getElementById('allGrid');
   if (!items.length) {
-    document.getElementById('allGrid').innerHTML =
-      '<div class="state-msg" style="grid-column:1/-1">Aucune donnée pour cette niche.</div>';
+    grid.innerHTML = '<div class="state-msg">Aucune donnée.</div>';
     return;
   }
-  document.getElementById('allGrid').innerHTML = items.map(k => buildAngleCard(k)).join('');
-  document.querySelectorAll('#allGrid .card').forEach(card => {
-    card.addEventListener('click', () => card.classList.toggle('open'));
-  });
-}
-
-function buildAngleCard(kpi) {
-  const examples = (kpi.examples || []).slice(0, 3).map(ex => `
-    <div class="example-item">
-      <div class="example-hook">${escHtml(ex.hook || '—')}</div>
-      <div class="example-meta">${escHtml(ex.store)} · ${ex.days_running ?? 0}j</div>
-    </div>`).join('');
-
-  return `
+  grid.innerHTML = items.map(k=>`
     <div class="card">
       <div class="card-title">
-        <span>${escHtml(kpi.angle)}</span>
-        <span class="viability-pill">${kpi.viability_score ?? 0}%</span>
+        <span>${esc(k.angle)}</span>
+        <span class="viability-pill">${k.viability_score??0}%</span>
       </div>
       <div class="card-meta">
-        <span><strong>${kpi.count ?? 0}</strong> ads</span>
-        <span>Moy. <strong>${kpi.avg_days_running ?? 0}j</strong></span>
-        <span>Méd. <strong>${kpi.median_days_running ?? 0}j</strong></span>
+        <span><strong>${k.count??0}</strong> ads</span>
+        <span>Moy. <strong>${k.avg_days_running??0}j</strong></span>
+        <span>Méd. <strong>${k.median_days_running??0}j</strong></span>
       </div>
       <div class="card-detail">
-        ${examples || '<p style="color:var(--muted);font-size:0.75rem">Pas d\'exemples.</p>'}
+        ${(k.examples||[]).slice(0,3).map(ex=>`
+          <div class="example-item">
+            <div class="example-hook">${esc(ex.hook||'—')}</div>
+            <div class="example-meta">${esc(ex.store)} · ${ex.days_running??0}j</div>
+          </div>`).join('')||'<p style="color:var(--muted);font-size:.75rem">—</p>'}
       </div>
-    </div>`;
+    </div>`).join('');
+  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
 }
 
 // ── Utils ──────────────────────────────────────────────────────────────────
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Event wiring ───────────────────────────────────────────────────────────
-document.getElementById('refreshBtn').addEventListener('click', () => loadData(true));
+// ── Sidebar ────────────────────────────────────────────────────────────────
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('burgerBtn').addEventListener('click', openSidebar);
+document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
+document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
-document.getElementById('themeBtn').addEventListener('click', () => {
-  const el = document.body;
-  const next = el.dataset.theme === 'dark' ? 'light' : 'dark';
-  el.dataset.theme = next;
-  localStorage.setItem('theme', next);
-});
+// Active nav item on scroll
+const sections = ['advertisers','gaps','angles'];
+const navIds   = ['nav-adv','nav-gap','nav-all'];
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 100;
+  let active = 0;
+  sections.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) active = i;
+  });
+  navIds.forEach((id,i) => {
+    document.getElementById(id)?.classList.toggle('active', i === active);
+  });
+}, { passive: true });
 
-document.getElementById('gapSearch').addEventListener('input', e => {
-  state.gapFilter = e.target.value;
-  const nicheData = (state.data?.results || [])[state.activeNiche] || {};
-  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
-});
-
-document.getElementById('allSearch').addEventListener('input', e => {
-  state.allFilter = e.target.value;
-  const nicheData = (state.data?.results || [])[state.activeNiche] || {};
-  renderAllAngles(nicheData.angle_kpis || []);
-});
-
+// ── Sort buttons ───────────────────────────────────────────────────────────
 document.querySelectorAll('.sort-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const section = btn.dataset.section;
-    const sort    = btn.dataset.sort;
-    document.querySelectorAll(`.sort-btn[data-section="${section}"]`)
-      .forEach(b => b.classList.remove('active'));
+    const { section, sort } = btn.dataset;
+    document.querySelectorAll(`.sort-btn[data-section="${section}"]`).forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    const nicheData = (state.data?.results || [])[state.activeNiche] || {};
-    if (section === 'gap') {
-      state.gapSort = sort;
-      renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
-    } else {
-      state.allSort = sort;
-      renderAllAngles(nicheData.angle_kpis || []);
-    }
+    state.sorts[section] = sort;
+    const nd = (state.data?.results||[])[state.activeNiche]||{};
+    if (section==='adv') renderAdvertisers(nd.advertisers||[]);
+    if (section==='gap') renderGaps(nd.gaps||[], nd.recommendations||[]);
+    if (section==='all') renderAllAngles(nd.angle_kpis||[]);
   });
 });
 
-// ── GitHub Actions trigger ─────────────────────────────────────────────────
-const GH_OWNER    = GITHUB_USER;
-const GH_REPO     = GITHUB_REPO;
-const WORKFLOW_ID = 'scrape_and_analyze.yml';
-const GH_API      = 'https://api.github.com';
+// ── Search inputs ──────────────────────────────────────────────────────────
+['adv','gap','all'].forEach(section => {
+  const inputId = { adv:'advSearch', gap:'gapSearch', all:'allSearch' }[section];
+  document.getElementById(inputId).addEventListener('input', e => {
+    state.filters[section] = e.target.value;
+    const nd = (state.data?.results||[])[state.activeNiche]||{};
+    if (section==='adv') renderAdvertisers(nd.advertisers||[]);
+    if (section==='gap') renderGaps(nd.gaps||[], nd.recommendations||[]);
+    if (section==='all') renderAllAngles(nd.angle_kpis||[]);
+  });
+});
 
+// ── Theme ──────────────────────────────────────────────────────────────────
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = next;
+  document.getElementById('themeColor').content = next === 'dark' ? '#0f172a' : '#6366f1';
+  localStorage.setItem('theme', next);
+});
+
+// Refresh
+document.getElementById('refreshBtn').addEventListener('click', () => loadData(true));
+document.getElementById('refreshBtnMob').addEventListener('click', () => loadData(true));
+
+// ── GitHub Actions ─────────────────────────────────────────────────────────
+const GH_API      = 'https://api.github.com';
+const WORKFLOW_ID = 'scrape_and_analyze.yml';
 let pollTimer = null;
 
-function ghHeaders(pat) {
-  return {
-    'Authorization': `token ${pat}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json',
-  };
+function ghH(pat) {
+  return { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
 }
-
 async function triggerWorkflow(pat, niche, country) {
-  const res = await fetch(
-    `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
-    {
-      method: 'POST',
-      headers: ghHeaders(pat),
-      body: JSON.stringify({
-        ref: 'main',
-        inputs: { niche: niche || '', country: country || 'FR', max_ads: '100' },
-      }),
-    }
-  );
-  return res.status === 204;
+  const r = await fetch(`${GH_API}/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+    { method:'POST', headers: ghH(pat), body: JSON.stringify({ ref:'main', inputs:{ niche: niche||'', country: country||'FR', max_ads:'100' }}) });
+  return r.status === 204;
 }
-
 async function getLatestRun(pat) {
-  const res = await fetch(
-    `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/actions/runs?per_page=1`,
-    { headers: ghHeaders(pat) }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.workflow_runs?.[0] || null;
+  const r = await fetch(`${GH_API}/repos/${GITHUB_USER}/${GITHUB_REPO}/actions/runs?per_page=1`, { headers: ghH(pat) });
+  if (!r.ok) return null;
+  return (await r.json()).workflow_runs?.[0] || null;
 }
-
 function setBadge(status, text) {
-  const badge = document.getElementById('runBadge');
-  badge.className = `run-badge show ${status}`;
-  const spin = (status === 'running' || status === 'queued')
-    ? '<span class="run-spinner"></span>' : '';
-  badge.innerHTML = `${spin}${escHtml(text)}`;
+  const b = document.getElementById('runBadge');
+  b.className = `run-badge-sb show ${status}`;
+  const spin = (status==='running'||status==='queued') ? '<span class="run-spinner-sm"></span>' : '';
+  b.innerHTML = `${spin}${esc(text)}`;
 }
-
 function startPolling(pat) {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(async () => {
@@ -856,91 +1171,67 @@ function startPolling(pat) {
       const run = await getLatestRun(pat);
       if (!run) return;
       const { status, conclusion } = run;
-      if (status === 'queued')     { setBadge('queued',  '⏳ En attente…'); return; }
-      if (status === 'in_progress'){ setBadge('running', '⚙️ Analyse en cours…'); return; }
-      // completed
-      clearInterval(pollTimer);
-      pollTimer = null;
-      if (conclusion === 'success') {
-        setBadge('success', '✅ Terminé — actualisation…');
+      if (status==='queued')      { setBadge('queued','En attente…'); return; }
+      if (status==='in_progress') { setBadge('running','Analyse…'); return; }
+      clearInterval(pollTimer); pollTimer = null;
+      if (conclusion==='success') {
+        setBadge('success','✅ Terminé');
         setTimeout(() => loadData(true), 3000);
-        setTimeout(() => { document.getElementById('runBadge').classList.remove('show'); }, 12000);
+        setTimeout(() => document.getElementById('runBadge').classList.remove('show'), 12000);
       } else {
-        setBadge('failure', `❌ Échec (${conclusion})`);
+        setBadge('failure',`❌ ${conclusion}`);
       }
-    } catch (e) { console.warn('Polling error:', e); }
+    } catch(e) { console.warn(e); }
   }, 8000);
 }
 
-// Modal wiring
-document.getElementById('launchBtn').addEventListener('click', () => {
-  const saved = localStorage.getItem('gh_pat') || '';
-  document.getElementById('patInput').value = saved;
+// Modal
+function openModal() {
+  document.getElementById('patInput').value = localStorage.getItem('gh_pat')||'';
   document.getElementById('launchModal').classList.add('open');
-});
-document.getElementById('modalCancel').addEventListener('click', () => {
-  document.getElementById('launchModal').classList.remove('open');
-});
+}
+document.getElementById('launchBtn').addEventListener('click', openModal);
+document.getElementById('launchBtnMob').addEventListener('click', openModal);
+document.getElementById('modalCancel').addEventListener('click',() => document.getElementById('launchModal').classList.remove('open'));
 document.getElementById('launchModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('launchModal'))
-    document.getElementById('launchModal').classList.remove('open');
+  if (e.target===document.getElementById('launchModal')) document.getElementById('launchModal').classList.remove('open');
 });
-
 document.getElementById('modalLaunch').addEventListener('click', async () => {
   const pat     = document.getElementById('patInput').value.trim();
   const niche   = document.getElementById('nicheInput').value.trim();
   const country = document.getElementById('countryInput').value;
   const btn     = document.getElementById('modalLaunch');
-
-  if (!pat) {
-    alert('Entre ton GitHub Token (PAT) avec le scope workflow.');
-    return;
-  }
-
+  if (!pat) { alert('Entre ton GitHub Token PAT avec le scope "workflow".'); return; }
   localStorage.setItem('gh_pat', pat);
-  btn.disabled = true;
-  btn.textContent = 'Lancement…';
-
+  btn.disabled = true; btn.textContent = 'Lancement…';
   try {
     const ok = await triggerWorkflow(pat, niche, country);
-    if (!ok) {
-      alert('Erreur lors du déclenchement. Vérifie que le token a le scope "workflow".');
-      btn.disabled = false;
-      btn.textContent = '🚀 Lancer';
-      return;
-    }
+    if (!ok) { alert('Erreur. Vérifie que le token a le scope "workflow".'); btn.disabled=false; btn.textContent='🚀 Lancer'; return; }
     document.getElementById('launchModal').classList.remove('open');
-    setBadge('queued', '⏳ Workflow lancé…');
-    // Wait 5s before first poll (GitHub needs a moment to register the run)
+    setBadge('queued','⏳ Lancé…');
     setTimeout(() => startPolling(pat), 5000);
-  } catch (err) {
-    alert(`Erreur réseau: ${err.message}`);
-  }
-  btn.disabled = false;
-  btn.textContent = '🚀 Lancer';
+  } catch(err) { alert(`Erreur: ${err.message}`); }
+  btn.disabled = false; btn.textContent = '🚀 Lancer';
 });
 
-// Resume polling if a run was in progress (page reload)
+// Resume polling on reload
 (function resumePolling() {
   const pat = localStorage.getItem('gh_pat');
   if (!pat) return;
   getLatestRun(pat).then(run => {
-    if (run && (run.status === 'queued' || run.status === 'in_progress')) {
-      setBadge('running', '⚙️ Analyse en cours…');
+    if (run && (run.status==='queued'||run.status==='in_progress')) {
+      setBadge('running','⚙️ Analyse…');
       startPolling(pat);
     }
-  }).catch(() => {});
+  }).catch(()=>{});
 })();
 
 // ── Init ───────────────────────────────────────────────────────────────────
 (function init() {
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  document.body.dataset.theme = savedTheme;
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(console.warn);
-  }
-
+  const theme = localStorage.getItem('theme') || 'dark';
+  document.body.dataset.theme = theme;
+  document.getElementById('themeColor').content = theme === 'dark' ? '#0f172a' : '#6366f1';
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
   loadData();
 })();
 </script>
