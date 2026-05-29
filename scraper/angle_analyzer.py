@@ -1,15 +1,19 @@
-"""Claude API-powered ad angle classifier."""
+"""Groq-powered ad angle classifier (drop-in replacement for Claude API)."""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 from typing import Any
 
-import anthropic
+from groq import AsyncGroq
 
 logger = logging.getLogger(__name__)
+
+# Best free Groq model for classification tasks
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-70b-versatile")
 
 SYSTEM_PROMPT = """Tu es un expert en copywriting e-commerce et marketing direct.
 Analyse la pub suivante et identifie précisément son ANGLE MARKETING.
@@ -45,24 +49,27 @@ Angles courants (non exhaustif) :
 """
 
 
-async def _call_claude(
-    client: anthropic.AsyncAnthropic,
+async def _call_groq(
+    client: AsyncGroq,
     ad_copy: str,
     semaphore: asyncio.Semaphore,
 ) -> dict:
-    """Call Claude to classify a single ad's angle. Returns angle dict."""
+    """Call Groq to classify a single ad's angle. Returns angle dict."""
     async with semaphore:
         try:
             resp = await asyncio.wait_for(
-                client.messages.create(
-                    model="claude-sonnet-4-6",
+                client.chat.completions.create(
+                    model=GROQ_MODEL,
                     max_tokens=512,
-                    system=SYSTEM_PROMPT,
-                    messages=[{"role": "user", "content": f"AD COPY:\n{ad_copy}"}],
+                    temperature=0.2,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": f"AD COPY:\n{ad_copy}"},
+                    ],
                 ),
                 timeout=20.0,
             )
-            raw = resp.content[0].text.strip()
+            raw = resp.choices[0].message.content.strip()
             # Strip markdown fences if present
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
@@ -70,20 +77,17 @@ async def _call_claude(
                     raw = raw[4:]
             return _parse_angle_json(raw)
         except asyncio.TimeoutError:
-            logger.warning("Claude timeout — classifying as Unknown")
+            logger.warning("Groq timeout — classifying as Unknown")
             return _unknown_angle()
         except Exception as exc:
-            logger.warning("Claude error: %s — classifying as Unknown", exc)
+            logger.warning("Groq error: %s — classifying as Unknown", exc)
             return _unknown_angle()
 
 
 def _parse_angle_json(raw: str) -> dict:
-    """Parse Claude's JSON output; fall back gracefully."""
-    import json
-
+    """Parse Groq's JSON output; fall back gracefully."""
     try:
         data = json.loads(raw)
-        # Ensure required keys exist
         return {
             "angle": data.get("angle", "Unknown"),
             "sub_angle": data.get("sub_angle", ""),
@@ -117,17 +121,17 @@ def _unknown_angle() -> dict:
 
 
 class AngleAnalyzer:
-    """Batch-async Claude-powered angle classifier for Meta ads."""
+    """Batch-async Groq-powered angle classifier for Meta ads."""
 
     def __init__(
         self,
         api_key: str | None = None,
         concurrency: int = 5,
     ) -> None:
-        key = api_key or os.getenv("CLAUDE_API_KEY") or os.getenv("ANTHROPIC_API_KEY", "")
+        key = api_key or os.getenv("GROQ_API_KEY", "")
         if not key:
-            raise ValueError("CLAUDE_API_KEY environment variable is required")
-        self._client = anthropic.AsyncAnthropic(api_key=key)
+            raise ValueError("GROQ_API_KEY environment variable is required")
+        self._client = AsyncGroq(api_key=key)
         self._sem = asyncio.Semaphore(concurrency)
 
     async def batch_analyze_ads(self, ads: list[dict]) -> list[dict]:
@@ -140,9 +144,9 @@ class AngleAnalyzer:
         if not ads:
             return []
 
-        logger.info("Analysing %d ads with Claude…", len(ads))
+        logger.info("Analysing %d ads with Groq (%s)…", len(ads), GROQ_MODEL)
         tasks = [
-            _call_claude(self._client, ad.get("ad_copy", ""), self._sem)
+            _call_groq(self._client, ad.get("ad_copy", ""), self._sem)
             for ad in ads
         ]
         results: list[Any] = await asyncio.gather(*tasks, return_exceptions=True)

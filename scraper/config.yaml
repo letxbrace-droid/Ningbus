@@ -16,8 +16,9 @@ niches:
 # Max ads to scrape per niche per run (pragmatic limit)
 max_ads_per_niche: 100
 
-# Claude model to use for angle analysis
-claude_model: "claude-sonnet-4-6"
+# Groq model to use for angle analysis (free)
+# Options: llama-3.1-70b-versatile | llama-3.3-70b-versatile | mixtral-8x7b-32768
+groq_model: "llama-3.1-70b-versatile"
 
 # Angle gap thresholds
 gap_usage_threshold: 0.10       # < 10% market share
