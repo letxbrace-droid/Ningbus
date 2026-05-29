@@ -1,8 +1,4 @@
-# Core
-playwright>=1.44.0
 groq>=0.9.0
 aiohttp>=3.9.0
 pyyaml>=6.0
-
-# Data & utils
 python-dateutil>=2.9.0
