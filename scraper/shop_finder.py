@@ -81,6 +81,21 @@ async def _ddg_shopify_search(
 
 # ── Shopify product fetch ─────────────────────────────────────────────────────
 
+async def _verify_shop_accessible(
+    session: aiohttp.ClientSession, base: str
+) -> bool:
+    """Quick check: is the shop alive and does it have products?"""
+    url = f"{base.rstrip('/')}/products.json?limit=1"
+    try:
+        async with session.get(url, headers=HEADERS, timeout=aiohttp.ClientTimeout(total=6)) as resp:
+            if resp.status != 200:
+                return False
+            data = await resp.json(content_type=None)
+            return len(data.get("products", [])) > 0
+    except Exception:
+        return False
+
+
 async def _fetch_products(
     session: aiohttp.ClientSession, base: str
 ) -> list[dict]:
@@ -219,8 +234,17 @@ async def find_scaling_shops(
                         "angles_used": [],
                     }
 
-        # ── Step 3: fetch product catalogs concurrently ───────────────────────
-        tasks = [_enrich_shop(session, s) for s in list(scaling.values())[:MAX_SHOPS]]
+        # ── Step 3: verify shops are accessible then fetch catalogs ──────────
+        candidates = list(scaling.values())[:MAX_SHOPS]
+
+        # Verify concurrently first (skip dead/private stores)
+        verify_tasks = [_verify_shop_accessible(session, s["base_url"]) for s in candidates]
+        alive_flags  = await asyncio.gather(*verify_tasks, return_exceptions=True)
+        alive = [s for s, ok in zip(candidates, alive_flags) if ok is True]
+        logger.info("%d/%d shops passed accessibility check", len(alive), len(candidates))
+
+        # Fetch full product catalogs only for live stores
+        tasks    = [_enrich_shop(session, s) for s in alive]
         enriched = await asyncio.gather(*tasks, return_exceptions=True)
 
     results = [s for s in enriched if isinstance(s, dict) and s.get("products")]

@@ -592,7 +592,7 @@ function renderShops(shops) {
   document.getElementById('shopsCount').textContent = shops.length;
 
   if (!shops.length) {
-    grid.innerHTML = '<div class="state-msg" style="grid-column:1/-1">Aucun shop détecté — relance l\'analyse pour trouver des shops actifs.</div>';
+    grid.innerHTML = '<div class="state-msg" style="grid-column:1/-1">⚡ Lance une analyse pour découvrir les shops qui scalent sur cette niche.<br><span style="font-size:0.75rem">Les shops apparaissent uniquement après scraping réel — les données vérifiées en direct.</span></div>';
     return;
   }
 
