@@ -14,9 +14,11 @@ from pathlib import Path
 
 import yaml
 
+from .alert_system import send_alerts
 from .angle_aggregator import AngleAggregator
 from .angle_analyzer import AngleAnalyzer
 from .meta_scraper import MetaScraper
+from .price_signals import enrich_products_with_margins
 from .shop_finder import find_scaling_shops
 from .utils import Timer, setup_logging
 
@@ -165,6 +167,7 @@ def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
             scaling_score=scaling_score,
         ),
         "landing_analysis":   shop.get("landing_analysis"),
+        "scaling_signals":    shop.get("scaling_signals") or [],
     }
 
 
@@ -196,6 +199,12 @@ async def run_niche(
         logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)
         with Timer("shop_finder_fallback"):
             shops = await find_scaling_shops([], niche, country)
+        # Price/margin enrichment on fallback shops
+        with Timer("price_signals_fallback"):
+            try:
+                await asyncio.wait_for(enrich_products_with_margins(shops), timeout=45.0)
+            except asyncio.TimeoutError:
+                logger.warning("Fallback price signals timed out, skipping")
         advertisers = [_shop_to_advertiser(s, []) for s in shops]
         logger.info("shop_finder fallback: %d advertisers from real shops", len(advertisers))
         return {
@@ -261,6 +270,14 @@ async def run_niche(
         if domain in landing_data:
             shop["landing_analysis"] = landing_data[domain]
 
+    # 4.6 Aliexpress margin enrichment — hard timeout 45s
+    with Timer("price_signals"):
+        try:
+            await asyncio.wait_for(enrich_products_with_margins(shops), timeout=45.0)
+        except asyncio.TimeoutError:
+            logger.warning("Step 4.6 — price signals timed out, skipping")
+    logger.info("Step 4.6 — margin enrichment done")
+
     # 5. Convert shops → advertiser profiles (needed before gap detection for product recs)
     advertisers = [_shop_to_advertiser(s, []) for s in shops]
 
@@ -273,6 +290,13 @@ async def run_niche(
     advertisers = [_shop_to_advertiser(s, gaps) for s in shops]
 
     market_revenue_est = sum(a.get("revenue_estimate", {}).get("monthly_revenue_est", 0) for a in advertisers)
+
+    # 8. Send Discord alerts for strong-signal gaps
+    with Timer("alerts"):
+        try:
+            await asyncio.wait_for(send_alerts(niche, gaps), timeout=15.0)
+        except asyncio.TimeoutError:
+            logger.warning("Step 8 — alerts timed out")
 
     elapsed = time.perf_counter() - t0
     logger.info("Pipeline '%s' done in %.1fs", niche, elapsed)
@@ -310,18 +334,28 @@ async def main_async(args: argparse.Namespace) -> None:
     else:
         niches = config.get("niches", ["foot wellness"])
 
-    logger.info("Processing %d niche(s): %s", len(niches), niches)
+    # Multi-country: if config has `countries` list, run each niche for each country
+    countries_cfg = config.get("countries", [])
+    countries = countries_cfg if countries_cfg else [country]
+
+    # Build (niche, country) task list
+    tasks = [(n, c) for n in niches for c in countries]
+    label = "niche" if len(countries) == 1 else "niche×country"
+    logger.info("Processing %d %s(s): %s × %s", len(tasks), label, niches, countries)
 
     analyzer   = AngleAnalyzer()
     aggregator = AngleAggregator()
 
     all_results: list[dict] = []
-    for niche in niches:
+    for niche, c in tasks:
         try:
-            result = await run_niche(niche, country, max_ads, analyzer, aggregator)
+            result = await run_niche(niche, c, max_ads, analyzer, aggregator)
+            # Disambiguate niche name when multiple countries
+            if len(countries) > 1:
+                result["niche"] = f"{niche} ({c})"
             all_results.append(result)
         except Exception as exc:
-            logger.error("Niche '%s' failed: %s", niche, exc, exc_info=True)
+            logger.error("Niche '%s' [%s] failed: %s", niche, c, exc, exc_info=True)
 
     all_ads = [ad for r in all_results for ad in r.get("ads", [])]
     _write_json(DATA_DIR / "latest.json", {"generated_at": _now(), "ads": all_ads})

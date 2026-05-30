@@ -800,8 +800,10 @@
         <div class="toolbar">
           <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
           <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
+          <button class="sort-btn" data-section="all" data-sort="opportunity">Opportunité</button>
           <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
           <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
+          <button class="sort-btn" data-section="all" data-sort="saturation">Saturation ↑</button>
         </div>
         <div class="cards-grid" id="allGrid"></div>
       </div>
@@ -1037,10 +1039,12 @@ function sortItems(items, key) {
     case 'days':      return c.sort((a,b)=>(b.avg_days_running??0)-(a.avg_days_running??0));
     case 'prods':     return c.sort((a,b)=>(b.products?.length??0)-(a.products?.length??0));
     case 'revenue':   return c.sort((a,b)=>(b.revenue_estimate?.monthly_revenue_est??0)-(a.revenue_estimate?.monthly_revenue_est??0));
-    case 'priority':  return c.sort((a,b)=>(b.priority_score??b.viability_score??0)-(a.priority_score??a.viability_score??0));
-    case 'viability': return c.sort((a,b)=>(b.viability_score??0)-(a.viability_score??0));
-    case 'usage':     return c.sort((a,b)=>(a.usage_count??0)-(b.usage_count??0));
-    case 'count':     return c.sort((a,b)=>(b.count??0)-(a.count??0));
+    case 'priority':    return c.sort((a,b)=>(b.priority_score??b.viability_score??0)-(a.priority_score??a.viability_score??0));
+    case 'viability':   return c.sort((a,b)=>(b.viability_score??0)-(a.viability_score??0));
+    case 'opportunity': return c.sort((a,b)=>(b.opportunity_score??b.viability_score??0)-(a.opportunity_score??a.viability_score??0));
+    case 'saturation':  return c.sort((a,b)=>(a.saturation_index??100)-(b.saturation_index??100));
+    case 'usage':       return c.sort((a,b)=>(a.usage_count??0)-(b.usage_count??0));
+    case 'count':       return c.sort((a,b)=>(b.count??0)-(a.count??0));
     default:          return c;
   }
 }
@@ -1109,14 +1113,24 @@ function buildAdvCard(adv) {
       ${land.star_rating ? ` · ${land.star_rating}/5` : ''}
     </div>` : '';
 
+  const scalingSignals = adv.scaling_signals || [];
+  const scalingHtml = scalingSignals.length
+    ? `<div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.35rem">
+        ${scalingSignals.slice(0,6).map(s=>`<span class="chip chip-blue" style="font-size:.64rem">⚙️ ${esc(s)}</span>`).join('')}
+      </div>` : '';
+
   const products  = (adv.products||[]).slice(0,8);
   const prodsHtml = products.length
-    ? `<div class="prods-grid">${products.map(p=>`
-        <a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
+    ? `<div class="prods-grid">${products.map(p => {
+        const marginMap = { excellent: ['🔥 ×'+p.margin_multiplier, '#22c55e'], good: ['✅ ×'+p.margin_multiplier, '#f59e0b'], low: ['⚠️ ×'+(p.margin_multiplier||'?'), '#ef4444'] };
+        const mInfo = p.margin_signal ? marginMap[p.margin_signal] : null;
+        return `<a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
           ${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
           <div class="prod-tile-title">${esc(p.title)}</div>
           ${p.price?`<div class="prod-tile-price">${esc(p.price)} €</div>`:''}
-        </a>`).join('')}</div>`
+          ${mInfo?`<div style="font-size:.62rem;font-weight:600;color:${mInfo[1]}">${mInfo[0]}</div>`:''}
+        </a>`;
+      }).join('')}</div>`
     : `<p style="font-size:.73rem;color:var(--muted)">Catalogue non disponible après scrape réel.</p>`;
 
   const examplesHtml = (adv.ad_examples||[]).slice(0,3).map(ex=>`
@@ -1150,6 +1164,7 @@ function buildAdvCard(adv) {
       ${anglesHtml?`<div class="chips-row">${anglesHtml}</div>`:''}
       ${gapsHtml?`<div class="chips-row"><span class="chips-label">Gaps →</span>${gapsHtml}</div>`:''}
       ${platforms?`<div class="platform-row">${platforms}</div>`:''}
+      ${scalingHtml}
       ${(revHtml||landHtml)?`<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem">${revHtml}${landHtml}</div>`:''}
       <div class="expand-hint">▼ produits &amp; exemples de pubs</div>
       <div class="card-detail">
@@ -1214,11 +1229,13 @@ function buildGapCard(gap) {
       </div>
       <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
         ${velBadge(gap)}
+        ${gap.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">🪝 ${esc(gap.dominant_hook)}</span>` : ''}
       </div>
       ${signalsBadge(gap)}
       <div class="card-meta">
         <span>Utilisé <strong>${gap.usage_count??0}×</strong> seulement</span>
         <span>Moy. <strong>${gap.avg_days_running??0}j</strong> actif</span>
+        ${gap.saturation_index != null ? `<span>Sat. <strong>${gap.saturation_index}%</strong></span>` : ''}
         ${gap.primary_audience ? `<span>${esc(gap.primary_audience)}</span>` : ''}
       </div>
       ${hasDetail ? '<div class="expand-hint">▼ produits à lancer avec cet angle</div>' : ''}
@@ -1306,26 +1323,40 @@ function renderAllAngles(kpis) {
     grid.innerHTML = '<div class="state-msg">Aucune donnée.</div>';
     return;
   }
-  grid.innerHTML = items.map(k=>`
+  grid.innerHTML = items.map(k => {
+    const sat = k.saturation_index ?? 0;
+    const satColor = sat >= 70 ? '#ef4444' : sat >= 40 ? '#f59e0b' : '#22c55e';
+    const hookHtml = k.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">🪝 ${esc(k.dominant_hook)}</span>` : '';
+    const hookPatternsHtml = k.hook_patterns && Object.keys(k.hook_patterns).length
+      ? `<div style="margin-top:.4rem;font-size:.65rem;color:var(--muted)">Hooks: ${Object.entries(k.hook_patterns).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([h,c])=>`<b>${esc(h)}</b> ${c}`).join(' · ')}</div>` : '';
+    return `
     <div class="card">
       <div class="card-title">
         <span>${esc(k.angle)}</span>
-        <span class="viability-pill">${k.viability_score??0}%</span>
+        <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
+          ${k.opportunity_score != null ? `<span class="priority-pill">💡 ${k.opportunity_score}</span>` : ''}
+          <span class="viability-pill">${k.viability_score??0}%</span>
+        </div>
       </div>
       <div class="card-meta">
         <span><strong>${k.count??0}</strong> ads</span>
         <span>Moy. <strong>${k.avg_days_running??0}j</strong></span>
-        <span>Méd. <strong>${k.median_days_running??0}j</strong></span>
+        <span style="color:${satColor}">Sat. <strong>${sat}%</strong></span>
+      </div>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.35rem;align-items:center">
+        ${velBadge(k)}${hookHtml}
       </div>
       ${signalsBadge(k)}
       <div class="card-detail">
+        ${hookPatternsHtml}
         ${(k.examples||[]).slice(0,3).map(ex=>`
           <div class="example-item">
             <div class="example-hook">${esc(ex.hook||'—')}</div>
             <div class="example-meta">${esc(ex.store)} · ${ex.days_running??0}j</div>
           </div>`).join('')||'<p style="color:var(--muted);font-size:.75rem">—</p>'}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
 }
 
