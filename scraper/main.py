@@ -44,6 +44,22 @@ def _load_config() -> dict:
         return yaml.safe_load(fh) or {}
 
 
+def _load_prev_niche_data(niche: str) -> dict:
+    """Load angle_kpis and advertisers from the most recent history file for this niche."""
+    if not HISTORY_DIR.exists():
+        return {}
+    files = sorted(HISTORY_DIR.glob("*.json"), reverse=True)
+    for fpath in files[:15]:
+        try:
+            data = json.loads(fpath.read_text(encoding="utf-8"))
+            for r in data.get("results", []):
+                if r.get("niche") == niche:
+                    return r
+        except Exception:
+            continue
+    return {}
+
+
 def _now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -96,6 +112,11 @@ async def run_niche(
     logger.info("=" * 60)
     t0 = time.perf_counter()
 
+    # Load previous analysis for velocity and new entrant comparison
+    prev_data        = _load_prev_niche_data(niche)
+    prev_kpis        = prev_data.get("angle_kpis", [])
+    prev_advertisers = prev_data.get("advertisers", [])
+
     # 1. Scrape Meta ads
     with Timer("scrape"):
         scraper = MetaScraper(max_ads=max_ads)
@@ -132,6 +153,10 @@ async def run_niche(
         angle_kpis = aggregator.aggregate(analyzed_ads)
     logger.info("Step 3 — %d distinct angles", len(angle_kpis))
 
+    # Enrich with velocity vs previous analysis
+    from .angle_aggregator import enrich_with_velocity
+    enrich_with_velocity(angle_kpis, prev_kpis)
+
     # 4. Find scaling shops (concurrent with step 3 logically, but we need angle_kpis first)
     with Timer("shop_finder"):
         shops = await find_scaling_shops(analyzed_ads, niche, country)
@@ -142,7 +167,7 @@ async def run_niche(
 
     # 6. Detect angle gaps — attach product recommendations from active advertisers
     with Timer("gap_detection"):
-        gaps = aggregator.detect_gaps(angle_kpis, advertisers)
+        gaps = aggregator.detect_gaps(angle_kpis, advertisers, prev_advertisers)
     logger.info("Step 6 — %d gap opportunities", len(gaps))
 
     # 7. Enrich advertiser profiles with their gap angles
@@ -162,6 +187,7 @@ async def run_niche(
             "unique_angles":     len(angle_kpis),
             "gaps_found":        len(gaps),
             "advertisers_found": len(advertisers),
+            "trending_angles":   sum(1 for k in angle_kpis if k.get("trend") == "up"),
         },
     }
 

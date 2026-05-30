@@ -86,6 +86,7 @@ class AngleAggregator:
         self,
         angle_kpis: list[dict],
         advertisers: list[dict] | None = None,
+        prev_advertisers: list[dict] | None = None,
     ) -> list[dict]:
         """
         Identify angles with high viability but low market saturation.
@@ -124,8 +125,27 @@ class AngleAggregator:
                         "primary_audience":    kpi.get("primary_audience", ""),
                         "potential":           "HIGH",
                         "recommended_products": recommended_products[:4],
+                        "velocity_pct":        kpi.get("velocity_pct"),
+                        "trend":               kpi.get("trend", "stable"),
                     }
                 )
+
+        # New entrant signal: advertisers absent from previous analysis
+        prev_names = {a.get("name", "") for a in (prev_advertisers or [])}
+        new_by_angle: dict[str, int] = {}
+        for adv in (advertisers or []):
+            if adv.get("name") and adv["name"] not in prev_names:
+                for angle in adv.get("angles_used", []):
+                    new_by_angle[angle] = new_by_angle.get(angle, 0) + 1
+
+        for gap in gaps:
+            n = new_by_angle.get(gap["angle"], 0)
+            gap["new_entrants_7d"] = n
+            gap["signal"] = "strong" if n >= 3 else "moderate" if n >= 1 else "none"
+            vel_bonus = min(max(gap.get("velocity_pct") or 0, 0), 100)
+            gap["priority_score"] = round(
+                gap["viability_score"] * (1 + vel_bonus / 100) * (1 + n * 0.1), 1
+            )
 
         gaps.sort(key=lambda g: g["viability_score"], reverse=True)
         logger.info("Detected %d gap angles", len(gaps))
@@ -141,3 +161,24 @@ def _most_common(items: list[str]) -> str:
     if not counts:
         return ""
     return max(counts, key=lambda k: counts[k])
+
+
+def enrich_with_velocity(
+    current_kpis: list[dict],
+    prev_kpis: list[dict],
+) -> list[dict]:
+    """Add velocity_pct, trend, and priority_score to KPI dicts in place."""
+    prev_map = {k["angle"]: k for k in prev_kpis}
+    for kpi in current_kpis:
+        prev = prev_map.get(kpi["angle"])
+        if prev is None:
+            kpi["velocity_pct"] = None
+            kpi["trend"] = "new"
+        else:
+            prev_count = max(prev.get("count", 0), 1)
+            delta = round((kpi["count"] - prev_count) / prev_count * 100, 1)
+            kpi["velocity_pct"] = delta
+            kpi["trend"] = "up" if delta > 15 else "down" if delta < -15 else "stable"
+        vel_bonus = min(max(kpi.get("velocity_pct") or 0, 0), 100)
+        kpi["priority_score"] = round(kpi["viability_score"] * (1 + vel_bonus / 100), 1)
+    return current_kpis

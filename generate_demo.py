@@ -182,6 +182,24 @@ def make_niche_data(niche: str) -> dict:
         med_d     = avg_d * random.uniform(0.85, 1.05)
         viability = min(avg_d, 100.0)
 
+        # Simulate velocity (varies each week via random seed)
+        vel_roll = random.random()
+        if vel_roll < 0.25:
+            velocity_pct = round(random.uniform(25, 120), 1)
+            trend = "up"
+        elif vel_roll < 0.45:
+            velocity_pct = round(random.uniform(-40, -16), 1)
+            trend = "down"
+        elif vel_roll < 0.52:
+            velocity_pct = None
+            trend = "new"
+        else:
+            velocity_pct = round(random.uniform(-15, 25), 1)
+            trend = "stable"
+
+        vel_bonus = min(max(velocity_pct or 0, 0), 100)
+        priority_score = round(viability * (1 + vel_bonus / 100), 1)
+
         examples = [
             {
                 "hook":             hook,
@@ -202,12 +220,16 @@ def make_niche_data(niche: str) -> dict:
             "examples":           examples,
             "sub_angles":         [sub_angle],
             "primary_audience":   _audience(niche),
+            "velocity_pct":       velocity_pct,
+            "trend":              trend,
+            "priority_score":     priority_score,
         }
         angle_kpis.append(kpi)
 
         if usage_pct < 0.10 and viability > 60:
             # Recommend 2-3 products from this niche for this gap angle
             rec_products = random.sample(products, min(3, len(products)))
+            new_entrants = random.choices([0, 0, 0, 1, 2, 3, 4], weights=[40,20,15,10,8,5,2])[0]
             gaps.append({
                 "angle":                angle,
                 "viability_score":      round(viability, 1),
@@ -218,6 +240,13 @@ def make_niche_data(niche: str) -> dict:
                 "primary_audience":     _audience(niche),
                 "potential":            "HIGH",
                 "recommended_products": rec_products,
+                "velocity_pct":         velocity_pct,
+                "trend":                trend,
+                "new_entrants_7d":      new_entrants,
+                "signal":               "strong" if new_entrants >= 3 else "moderate" if new_entrants >= 1 else "none",
+                "priority_score":       round(
+                    viability * (1 + vel_bonus / 100) * (1 + new_entrants * 0.1), 1
+                ),
             })
 
     angle_kpis.sort(key=lambda k: k["viability_score"], reverse=True)
@@ -240,6 +269,7 @@ def make_niche_data(niche: str) -> dict:
             "products":         random.sample(products, min(3, len(products))),
             "ad_examples":      [],
             "platforms":        random.sample(["facebook", "instagram", "audience_network"], 2),
+            "is_new_entrant":   random.random() < 0.35,
         }
         for i in range(3)
     ]

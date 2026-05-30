@@ -454,6 +454,38 @@
       background: var(--border); color: var(--muted); text-transform: capitalize;
     }
 
+    /* Velocity & signal badges */
+    .vel-badge {
+      font-size: 0.65rem; font-weight: 700;
+      padding: 1px 7px; border-radius: 999px;
+      white-space: nowrap;
+    }
+    .vel-up     { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .vel-down   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+    .vel-new    { background: rgba(99,102,241,0.2);  color: #818cf8; }
+    .vel-stable { background: rgba(148,163,184,0.12);color: var(--muted); }
+
+    .signal-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.68rem; font-weight: 700;
+      padding: 2px 9px; border-radius: 999px;
+    }
+    .signal-strong   { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .signal-moderate { background: rgba(99,102,241,0.15); color: #818cf8; }
+
+    .priority-pill {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff; white-space: nowrap;
+    }
+
+    .new-entrant-badge {
+      font-size: 0.62rem; padding: 1px 6px; border-radius: 4px;
+      background: rgba(99,102,241,0.2); color: #818cf8;
+      font-weight: 700;
+    }
+
     /* Expand hint */
     .expand-hint {
       font-size: 0.68rem; color: var(--muted); margin-top: 0.5rem;
@@ -683,8 +715,8 @@
           <div class="stat-value" id="statAds">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Angles</div>
-          <div class="stat-value" id="statAngles">—</div>
+          <div class="stat-label">📈 En hausse</div>
+          <div class="stat-value" id="statTrending">—</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Gaps</div>
@@ -694,6 +726,15 @@
           <div class="stat-label">Advertisers</div>
           <div class="stat-value" id="statAdverts">—</div>
         </div>
+      </div>
+
+      <!-- TRENDING NOW -->
+      <div id="trendingNow" style="display:none;margin-bottom:1.5rem">
+        <div class="section-header" style="margin-top:0">
+          <span class="section-title">🔥 Tendances en ce moment</span>
+          <span class="badge badge-adv" id="trendingCount">0</span>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="trendingList"></div>
       </div>
 
       <!-- ADVERTISERS -->
@@ -719,7 +760,8 @@
       </div>
       <div class="toolbar">
         <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
-        <button class="sort-btn active" data-section="gap" data-sort="viability">Viabilité ↓</button>
+        <button class="sort-btn active" data-section="gap" data-sort="priority">Priorité ↓</button>
+        <button class="sort-btn" data-section="gap" data-sort="viability">Viabilité</button>
         <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
         <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
       </div>
@@ -785,7 +827,7 @@ const IDB_KEY     = 'analysis';
 const state = {
   data: null,
   activeNiche: 0,
-  sorts: { adv: 'score', gap: 'viability', all: 'viability' },
+  sorts: { adv: 'score', gap: 'priority', all: 'viability' },
   filters: { adv: '', gap: '', all: '' },
 };
 
@@ -853,9 +895,11 @@ function render() {
   document.getElementById('statDate').textContent =
     isNaN(d) ? '—' : d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
   document.getElementById('statAds').textContent     = total_ads ?? '—';
-  document.getElementById('statAngles').textContent  = results.flatMap(r => r.angle_kpis || []).length;
+  const trendingAngles = results.flatMap(r => (r.angle_kpis||[]).filter(k => k.trend === 'up' || (k.velocity_pct !== null && k.velocity_pct > 30)));
+  document.getElementById('statTrending').textContent = trendingAngles.length;
   document.getElementById('statGaps').textContent    = results.flatMap(r => r.gaps || []).length;
   document.getElementById('statAdverts').textContent = results.flatMap(r => r.advertisers || []).length;
+  renderTrending(results);
 
   // Niche list in sidebar
   renderNicheList(results);
@@ -897,6 +941,7 @@ function sortItems(items, key) {
     case 'ads':       return c.sort((a,b)=>(b.ads_count??0)-(a.ads_count??0));
     case 'days':      return c.sort((a,b)=>(b.avg_days_running??0)-(a.avg_days_running??0));
     case 'prods':     return c.sort((a,b)=>(b.products?.length??0)-(a.products?.length??0));
+    case 'priority':  return c.sort((a,b)=>(b.priority_score??b.viability_score??0)-(a.priority_score??a.viability_score??0));
     case 'viability': return c.sort((a,b)=>(b.viability_score??0)-(a.viability_score??0));
     case 'usage':     return c.sort((a,b)=>(a.usage_count??0)-(b.usage_count??0));
     case 'count':     return c.sort((a,b)=>(b.count??0)-(a.count??0));
@@ -948,6 +993,7 @@ function buildAdvCard(adv) {
   ).join('');
 
   const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge">${esc(p)}</span>`).join('');
+  const newBadge = adv.is_new_entrant ? '<span class="new-entrant-badge">🆕 Nouvel entrant</span>' : '';
 
   const products  = (adv.products||[]).slice(0,8);
   const prodsHtml = products.length
@@ -979,6 +1025,7 @@ function buildAdvCard(adv) {
         </div>
         <span class="score-pill">⚡ ${score}</span>
       </div>
+      ${newBadge ? `<div style="margin-top:.3rem">${newBadge}</div>` : ''}
       <div class="adv-meta">
         ${adv.ads_count?`<span><strong>${adv.ads_count}</strong> pubs</span>`:''}
         ${adv.max_days_running?`<span>Jusqu'à <strong>${adv.max_days_running}j</strong></span>`:''}
@@ -1014,6 +1061,12 @@ function renderGaps(gaps) {
 }
 
 function buildGapCard(gap) {
+  const signalHtml = gap.signal === 'strong'
+    ? `<span class="signal-badge signal-strong">🔥 ${gap.new_entrants_7d} nouveaux advertisers</span>`
+    : gap.signal === 'moderate'
+    ? `<span class="signal-badge signal-moderate">📡 ${gap.new_entrants_7d} nouvel advertiser</span>`
+    : '';
+
   const products = (gap.recommended_products || []).slice(0, 4);
 
   const prodsHtml = products.length
@@ -1037,7 +1090,14 @@ function buildGapCard(gap) {
     <div class="card gap-card">
       <div class="card-title">
         <span>${esc(gap.angle)}</span>
-        <span class="viability-pill">${gap.viability_score??0}% viab.</span>
+        <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
+          ${signalHtml}
+          <span class="priority-pill">⚡ ${gap.priority_score ?? gap.viability_score}</span>
+          <span class="viability-pill">${gap.viability_score??0}%</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
+        ${velBadge(gap)}
       </div>
       <div class="card-meta">
         <span>Utilisé <strong>${gap.usage_count??0}×</strong> seulement</span>
@@ -1055,6 +1115,41 @@ function buildGapCard(gap) {
         ${!hasDetail ? '<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>' : ''}
       </div>
     </div>`;
+}
+
+// ── Trending Now ───────────────────────────────────────────────────────────
+function renderTrending(results) {
+  const all = results.flatMap(r =>
+    (r.angle_kpis||[])
+      .filter(k => k.velocity_pct > 30 || k.trend === 'new')
+      .map(k => ({...k, niche: r.niche}))
+  ).sort((a,b) => (b.priority_score??0)-(a.priority_score??0)).slice(0, 6);
+
+  const box  = document.getElementById('trendingNow');
+  const list = document.getElementById('trendingList');
+  document.getElementById('trendingCount').textContent = all.length;
+
+  if (!all.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  list.innerHTML = all.map(k => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;min-width:180px;flex:1">
+      <div style="font-size:.75rem;font-weight:700">${esc(k.angle)}</div>
+      <div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">${esc(k.niche)}</div>
+      <div style="display:flex;gap:.35rem;margin-top:.35rem;flex-wrap:wrap;align-items:center">
+        ${velBadge(k)}
+        <span class="priority-pill">⚡ ${k.priority_score??k.viability_score}</span>
+      </div>
+    </div>`).join('');
+}
+
+function velBadge(k) {
+  if (k.trend === 'new' || k.velocity_pct === null || k.velocity_pct === undefined)
+    return '<span class="vel-badge vel-new">🆕 Nouveau</span>';
+  if (k.velocity_pct > 15)
+    return `<span class="vel-badge vel-up">▲ +${k.velocity_pct}%</span>`;
+  if (k.velocity_pct < -15)
+    return `<span class="vel-badge vel-down">▼ ${k.velocity_pct}%</span>`;
+  return `<span class="vel-badge vel-stable">→ ${k.velocity_pct > 0 ? '+' : ''}${k.velocity_pct}%</span>`;
 }
 
 // ── All angles ─────────────────────────────────────────────────────────────
