@@ -626,6 +626,21 @@
       .top-header { display: none !important; }
     }
 
+    /* Revenue & landing badges */
+    .rev-badge { font-size:.7rem; background:#e8f5e9; color:#2e7d32; border-radius:.25rem; padding:.15rem .4rem; font-weight:600; }
+    .land-badge { font-size:.7rem; border-radius:.25rem; padding:.15rem .4rem; font-weight:600; }
+    .land-high { background:#e8f5e9; color:#2e7d32; }
+    .land-med  { background:#fff8e1; color:#f57f17; }
+    .land-low  { background:#ffebee; color:#c62828; }
+
+    /* Matrix table */
+    .matrix-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    .matrix-table th { background:var(--surface-2); padding:.4rem .6rem; text-align:center; font-weight:600; font-size:.72rem; white-space:nowrap; border-bottom:2px solid var(--border); }
+    .matrix-table td { padding:.35rem .5rem; border:1px solid var(--border); text-align:center; }
+    .matrix-product { text-align:left !important; font-weight:600; background:var(--surface-2); }
+    .matrix-cell { min-width:60px; }
+    .matrix-empty { color:var(--muted); }
+
     /* Trend signals */
     .signals-row { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.5rem; }
     .sig-badge {
@@ -666,6 +681,9 @@
       </a>
       <a class="nav-item" id="nav-all" href="#angles">
         <span class="nav-icon">📊</span> Performances
+      </a>
+      <a class="nav-item" id="nav-mat" href="#matrix" onclick="closeSidebar()">
+        <span class="nav-icon">📊</span> Matrice
       </a>
     </nav>
 
@@ -722,6 +740,10 @@
           <div class="stat-label">Advertisers</div>
           <div class="stat-value" id="statAdverts">—</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-label">Marché estimé</div>
+          <div class="stat-value" id="statRevenue">—</div>
+        </div>
       </div>
 
       <!-- TRENDING NOW -->
@@ -744,6 +766,7 @@
         <button class="sort-btn" data-section="adv" data-sort="ads">Ads</button>
         <button class="sort-btn" data-section="adv" data-sort="days">Jours</button>
         <button class="sort-btn" data-section="adv" data-sort="prods">Produits</button>
+        <button class="sort-btn" data-section="adv" data-sort="revenue">Revenu</button>
       </div>
       <div class="cards-grid" id="advertisersGrid">
         <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
@@ -775,6 +798,13 @@
         <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
       </div>
       <div class="cards-grid" id="allGrid"></div>
+
+      <!-- MATRIX -->
+      <div class="section-header" id="matrix">
+        <span class="section-title">📊 Matrice Produit × Angle</span>
+        <span class="badge badge-adv" id="matrixCount">0</span>
+      </div>
+      <div id="matrixGrid"></div>
     </main>
   </div>
 </div>
@@ -948,6 +978,8 @@ function render() {
   document.getElementById('statTrending').textContent = trendingAngles.length;
   document.getElementById('statGaps').textContent    = results.flatMap(r => r.gaps || []).length;
   document.getElementById('statAdverts').textContent = results.flatMap(r => r.advertisers || []).length;
+  const totalRevenue = results.reduce((s, r) => s + (r.market_revenue_est || 0), 0);
+  document.getElementById('statRevenue').textContent = totalRevenue > 0 ? `~${(totalRevenue/1000).toFixed(0)}k€` : '—';
   renderTrending(results);
 
   // Niche list in sidebar
@@ -980,6 +1012,7 @@ function renderNiche() {
   renderAdvertisers(nicheData.advertisers || []);
   renderGaps(nicheData.gaps || []);
   renderAllAngles(nicheData.angle_kpis || []);
+  renderMatrix(nicheData.product_angle_matrix || []);
 }
 
 // ── Sort / filter ──────────────────────────────────────────────────────────
@@ -990,6 +1023,7 @@ function sortItems(items, key) {
     case 'ads':       return c.sort((a,b)=>(b.ads_count??0)-(a.ads_count??0));
     case 'days':      return c.sort((a,b)=>(b.avg_days_running??0)-(a.avg_days_running??0));
     case 'prods':     return c.sort((a,b)=>(b.products?.length??0)-(a.products?.length??0));
+    case 'revenue':   return c.sort((a,b)=>(b.revenue_estimate?.monthly_revenue_est??0)-(a.revenue_estimate?.monthly_revenue_est??0));
     case 'priority':  return c.sort((a,b)=>(b.priority_score??b.viability_score??0)-(a.priority_score??a.viability_score??0));
     case 'viability': return c.sort((a,b)=>(b.viability_score??0)-(a.viability_score??0));
     case 'usage':     return c.sort((a,b)=>(a.usage_count??0)-(b.usage_count??0));
@@ -1044,6 +1078,24 @@ function buildAdvCard(adv) {
   const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge">${esc(p)}</span>`).join('');
   const newBadge = adv.is_new_entrant ? '<span class="new-entrant-badge">🆕 Nouvel entrant</span>' : '';
 
+  const rev = adv.revenue_estimate;
+  const revHtml = rev ? `<span class="rev-badge">💰 ~${(rev.monthly_revenue_est/1000).toFixed(0)}k€/mois</span>` : '';
+
+  const land = adv.landing_analysis;
+  const landHtml = land ? (() => {
+    const score = land.conversion_score ?? 0;
+    const cls = score >= 70 ? 'land-high' : score >= 40 ? 'land-med' : 'land-low';
+    return `<span class="land-badge ${cls}">🎯 Conv. ${score}/100</span>`;
+  })() : '';
+
+  const landDetail = land ? `
+    <div style="margin-top:.5rem;font-size:.75rem;color:var(--muted)">
+      ${land.price ? `💶 Prix: <b>€${land.price}</b>` : ''}
+      ${land.guarantee_days ? ` · 🛡️ Garantie: <b>${land.guarantee_days}j</b>` : ''}
+      ${land.review_count ? ` · ⭐ <b>${land.review_count}</b> avis` : ''}
+      ${land.star_rating ? ` · ${land.star_rating}/5` : ''}
+    </div>` : '';
+
   const products  = (adv.products||[]).slice(0,8);
   const prodsHtml = products.length
     ? `<div class="prods-grid">${products.map(p=>`
@@ -1085,10 +1137,12 @@ function buildAdvCard(adv) {
       ${anglesHtml?`<div class="chips-row">${anglesHtml}</div>`:''}
       ${gapsHtml?`<div class="chips-row"><span class="chips-label">Gaps →</span>${gapsHtml}</div>`:''}
       ${platforms?`<div class="platform-row">${platforms}</div>`:''}
+      ${(revHtml||landHtml)?`<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem">${revHtml}${landHtml}</div>`:''}
       <div class="expand-hint">▼ produits &amp; exemples de pubs</div>
       <div class="card-detail">
         ${products.length?`<div class="detail-label">Produits best-sellers</div>${prodsHtml}`:''}
         ${(adv.ad_examples||[]).length?`<div class="detail-label" style="margin-top:.6rem">Exemples de pubs</div>${examplesHtml}`:''}
+        ${landDetail}
         ${!products.length&&!(adv.ad_examples||[]).length?'<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>':''}
       </div>
     </div>`;
@@ -1262,6 +1316,35 @@ function renderAllAngles(kpis) {
   grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
 }
 
+// ── Matrix ────────────────────────────────────────────────────────────────
+function renderMatrix(matrix) {
+  if (!matrix || !matrix.length) {
+    document.getElementById('matrixGrid').innerHTML = '<div class="state-msg">—</div>';
+    document.getElementById('matrixCount').textContent = '0';
+    return;
+  }
+  document.getElementById('matrixCount').textContent = matrix.length;
+  // Get all unique angles from first row
+  const angles = matrix[0]?.cells?.map(c => c.angle) || [];
+  let html = `<div style="overflow-x:auto"><table class="matrix-table">
+    <thead><tr><th>Produit</th>${angles.map(a => `<th>${esc(a)}</th>`).join('')}</tr></thead>
+    <tbody>`;
+  for (const row of matrix) {
+    html += `<tr><td class="matrix-product">${esc(row.product_kw)}<br/><span style="color:var(--muted);font-size:.7rem">${row.total_ads} ads</span></td>`;
+    for (const cell of row.cells) {
+      if (cell.count === 0) {
+        html += `<td class="matrix-cell matrix-empty">—</td>`;
+      } else {
+        const intensity = Math.min(cell.count * 25, 100);
+        html += `<td class="matrix-cell" style="background:rgba(245,158,11,${intensity/100 * 0.4 + 0.1})" title="${cell.avg_days}j moy."><b>${cell.count}</b><br/><span style="font-size:.65rem">${cell.avg_days}j</span></td>`;
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  document.getElementById('matrixGrid').innerHTML = html;
+}
+
 // ── Utils ──────────────────────────────────────────────────────────────────
 function esc(s) {
   if (!s) return '';
@@ -1284,8 +1367,8 @@ document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
 // Active nav item on scroll
-const sections = ['advertisers','gaps','angles'];
-const navIds   = ['nav-adv','nav-gap','nav-all'];
+const sections = ['advertisers','gaps','angles','matrix'];
+const navIds   = ['nav-adv','nav-gap','nav-all','nav-mat'];
 window.addEventListener('scroll', () => {
   const scrollY = window.scrollY + 100;
   let active = 0;

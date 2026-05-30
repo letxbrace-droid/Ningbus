@@ -64,6 +64,68 @@ def _now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _estimate_revenue(ads_count: int, avg_days: float, products: list, scaling_score: float) -> dict:
+    # Assume avg €40/day spend per active ad, 3.5x ROAS
+    daily_spend = ads_count * 40
+    monthly_spend = round(daily_spend * 30, 0)
+    monthly_revenue = round(monthly_spend * 3.5, 0)
+    # Confidence based on data availability
+    confidence = "high" if ads_count >= 3 and avg_days >= 20 else "medium" if ads_count >= 1 else "low"
+    return {
+        "monthly_spend_est":   int(monthly_spend),
+        "monthly_revenue_est": int(monthly_revenue),
+        "confidence":          confidence,
+    }
+
+
+def _build_product_angle_matrix(advertisers: list[dict], angle_kpis: list[dict]) -> list[dict]:
+    """
+    For each product keyword (from advertiser products), show which angles use it.
+    Returns list of rows sorted by total_ads DESC.
+    """
+    from collections import defaultdict
+
+    # Extract product keyword = first 3 words of product title, lowercased
+    def _kw(title: str) -> str:
+        return " ".join(title.lower().split()[:3]) if title else ""
+
+    # Build matrix: product_kw -> angle -> {count, total_days}
+    matrix: dict[str, dict[str, dict]] = defaultdict(lambda: defaultdict(lambda: {"count": 0, "total_days": 0}))
+
+    for adv in advertisers:
+        for product in (adv.get("products") or []):
+            kw = _kw(product.get("title", ""))
+            if not kw:
+                continue
+            for angle in (adv.get("angles_used") or []):
+                matrix[kw][angle]["count"] += 1
+                matrix[kw][angle]["total_days"] += adv.get("avg_days_running", 0)
+
+    # Top angles by viability
+    top_angles = [k["angle"] for k in sorted(angle_kpis, key=lambda x: x.get("viability_score", 0), reverse=True)[:6]]
+
+    rows = []
+    for product_kw, angle_data in matrix.items():
+        total_ads = sum(v["count"] for v in angle_data.values())
+        cells = []
+        for angle in top_angles:
+            cell = angle_data.get(angle, {"count": 0, "total_days": 0})
+            avg_days = round(cell["total_days"] / cell["count"], 1) if cell["count"] > 0 else 0
+            cells.append({
+                "angle":    angle,
+                "count":    cell["count"],
+                "avg_days": avg_days,
+            })
+        rows.append({
+            "product_kw": product_kw,
+            "total_ads":  total_ads,
+            "cells":      cells,
+        })
+
+    rows.sort(key=lambda r: r["total_ads"], reverse=True)
+    return rows[:12]  # top 12 products
+
+
 def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
     """Convert a shop dict to an advertiser profile dict for the dashboard."""
     angles_used = shop.get("angles_used") or []
@@ -96,6 +158,13 @@ def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
         "products":           products,
         "ad_examples":        [],
         "platforms":          list({p for a in ads for p in (a.get("publisher_platforms") or [])}),
+        "revenue_estimate":   _estimate_revenue(
+            ads_count=shop.get("ads_count", len(ads)),
+            avg_days=avg_days,
+            products=products,
+            scaling_score=scaling_score,
+        ),
+        "landing_analysis":   shop.get("landing_analysis"),
     }
 
 
@@ -168,6 +237,18 @@ async def run_niche(
         shops = await find_scaling_shops(analyzed_ads, niche, country)
     logger.info("Step 4 — %d scaling shops found", len(shops))
 
+    # 4.5 Analyse landing pages
+    from .landing_analyzer import analyze_shops
+    with Timer("landing_analysis"):
+        landing_data = await analyze_shops(shops)
+    logger.info("Step 4.5 — %d landing pages analyzed", len(landing_data))
+
+    # Enrich shops with landing analysis
+    for shop in shops:
+        domain = shop.get("domain", "")
+        if domain in landing_data:
+            shop["landing_analysis"] = landing_data[domain]
+
     # 5. Convert shops → advertiser profiles (needed before gap detection for product recs)
     advertisers = [_shop_to_advertiser(s, []) for s in shops]
 
@@ -179,15 +260,19 @@ async def run_niche(
     # 7. Enrich advertiser profiles with their gap angles
     advertisers = [_shop_to_advertiser(s, gaps) for s in shops]
 
+    market_revenue_est = sum(a.get("revenue_estimate", {}).get("monthly_revenue_est", 0) for a in advertisers)
+
     elapsed = time.perf_counter() - t0
     logger.info("Pipeline '%s' done in %.1fs", niche, elapsed)
 
     return {
-        "niche":       niche,
-        "ads":         analyzed_ads,
-        "angle_kpis":  angle_kpis,
-        "gaps":        gaps,
-        "advertisers": advertisers,
+        "niche":                niche,
+        "ads":                  analyzed_ads,
+        "angle_kpis":           angle_kpis,
+        "gaps":                 gaps,
+        "advertisers":          advertisers,
+        "market_revenue_est":   market_revenue_est,
+        "product_angle_matrix": _build_product_angle_matrix(advertisers, angle_kpis),
         "stats": {
             "total_ads":         len(analyzed_ads),
             "unique_angles":     len(angle_kpis),
