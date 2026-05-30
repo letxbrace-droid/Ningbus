@@ -226,6 +226,17 @@ def make_niche_data(niche: str) -> dict:
         }
         angle_kpis.append(kpi)
 
+        # Simulate Priority 3 signals (plausible random values)
+        gt_score = random.randint(20, 95) if random.random() > 0.15 else None
+        gt_dir = random.choice(["rising", "rising", "stable", "stable", "falling"])
+        tiktok_level = random.choice(["high", "medium", "medium", "low", "none"])
+        amz_level = random.choice(["saturated", "high", "medium", "low"])
+        kpi["trend_signals"] = {
+            "google_trends":  {"score": gt_score, "direction": gt_dir},
+            "tiktok_organic": {"result_count": random.randint(0, 12) if tiktok_level != "none" else 0, "level": tiktok_level},
+            "amazon":         {"result_count": random.randint(0, 10), "competition_level": amz_level},
+        }
+
         if usage_pct < 0.10 and viability > 60:
             # Recommend 2-3 products from this niche for this gap angle
             rec_products = random.sample(products, min(3, len(products)))
@@ -247,6 +258,7 @@ def make_niche_data(niche: str) -> dict:
                 "priority_score":       round(
                     viability * (1 + vel_bonus / 100) * (1 + new_entrants * 0.1), 1
                 ),
+                "trend_signals":        kpi.get("trend_signals"),
             })
 
     angle_kpis.sort(key=lambda k: k["viability_score"], reverse=True)

@@ -640,6 +640,22 @@
       .sidebar-close { display: none !important; }
       .top-header { display: none !important; }
     }
+
+    /* Trend signals */
+    .signals-row { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.5rem; }
+    .sig-badge {
+      font-size:.65rem; padding:.2rem .45rem; border-radius:.25rem;
+      font-weight:600; white-space:nowrap;
+    }
+    .sig-gt   { background:#e8f0fe; color:#1a73e8; }
+    .sig-tt-high   { background:#fce4ec; color:#c62828; }
+    .sig-tt-medium { background:#fff3e0; color:#e65100; }
+    .sig-tt-low    { background:#f3e5f5; color:#6a1b9a; }
+    .sig-tt-none   { background:#f5f5f5; color:#9e9e9e; }
+    .sig-amz-sat   { background:#ffebee; color:#b71c1c; }
+    .sig-amz-high  { background:#fff8e1; color:#f57f17; }
+    .sig-amz-med   { background:#e8f5e9; color:#2e7d32; }
+    .sig-amz-low   { background:#e0f7fa; color:#006064; }
   </style>
 </head>
 <body data-theme="dark">
@@ -1142,6 +1158,7 @@ function buildGapCard(gap) {
       <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
         ${velBadge(gap)}
       </div>
+      ${signalsBadge(gap)}
       <div class="card-meta">
         <span>Utilisé <strong>${gap.usage_count??0}×</strong> seulement</span>
         <span>Moy. <strong>${gap.avg_days_running??0}j</strong> actif</span>
@@ -1195,6 +1212,34 @@ function velBadge(k) {
   return `<span class="vel-badge vel-stable">→ ${k.velocity_pct > 0 ? '+' : ''}${k.velocity_pct}%</span>`;
 }
 
+function signalsBadge(kpi) {
+  const s = kpi?.trend_signals;
+  if (!s) return '';
+  const parts = [];
+  // Google Trends
+  const gt = s.google_trends;
+  if (gt && gt.score != null) {
+    const arrow = gt.direction === 'rising' ? '↑' : gt.direction === 'falling' ? '↓' : '→';
+    parts.push(`<span class="sig-badge sig-gt">📊 ${gt.score} ${arrow}</span>`);
+  }
+  // TikTok organic
+  const tt = s.tiktok_organic;
+  if (tt && tt.level && tt.level !== 'unknown') {
+    const lvlMap = { high: 'sig-tt-high', medium: 'sig-tt-medium', low: 'sig-tt-low', none: 'sig-tt-none' };
+    const label = tt.level === 'high' ? '🔥 Viral TikTok' : tt.level === 'medium' ? '🎵 TikTok actif' : tt.level === 'low' ? '🎵 TikTok faible' : '🎵 Absent TikTok';
+    parts.push(`<span class="sig-badge ${lvlMap[tt.level]||'sig-tt-none'}">${label}</span>`);
+  }
+  // Amazon competition
+  const amz = s.amazon;
+  if (amz && amz.competition_level && amz.competition_level !== 'unknown') {
+    const lvlMap = { saturated: 'sig-amz-sat', high: 'sig-amz-high', medium: 'sig-amz-med', low: 'sig-amz-low' };
+    const label = amz.competition_level === 'saturated' ? '📦 Saturé Amazon' : amz.competition_level === 'high' ? '📦 Amazon dense' : amz.competition_level === 'medium' ? '📦 Amazon moyen' : '📦 Amazon libre';
+    parts.push(`<span class="sig-badge ${lvlMap[amz.competition_level]||'sig-amz-med'}">${label}</span>`);
+  }
+  if (!parts.length) return '';
+  return `<div class="signals-row">${parts.join('')}</div>`;
+}
+
 // ── All angles ─────────────────────────────────────────────────────────────
 function renderAllAngles(kpis) {
   document.getElementById('allCount').textContent = kpis.length;
@@ -1215,6 +1260,7 @@ function renderAllAngles(kpis) {
         <span>Moy. <strong>${k.avg_days_running??0}j</strong></span>
         <span>Méd. <strong>${k.median_days_running??0}j</strong></span>
       </div>
+      ${signalsBadge(k)}
       <div class="card-detail">
         ${(k.examples||[]).slice(0,3).map(ex=>`
           <div class="example-item">

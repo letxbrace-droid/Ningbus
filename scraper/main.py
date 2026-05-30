@@ -157,6 +157,12 @@ async def run_niche(
     from .angle_aggregator import enrich_with_velocity
     enrich_with_velocity(angle_kpis, prev_kpis)
 
+    # 3.5 Enrich with external trend signals (Priority 3)
+    from .trend_signals import enrich_with_trend_signals
+    with Timer("trend_signals"):
+        angle_kpis = await enrich_with_trend_signals(angle_kpis, country=country)
+    logger.info("Step 3.5 — trend signals enriched")
+
     # 4. Find scaling shops (concurrent with step 3 logically, but we need angle_kpis first)
     with Timer("shop_finder"):
         shops = await find_scaling_shops(analyzed_ads, niche, country)
