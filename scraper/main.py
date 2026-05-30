@@ -184,14 +184,19 @@ def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
         "products":           products,
         "ad_examples":        [],
         "platforms":          list({p for a in ads for p in (a.get("publisher_platforms") or [])}),
-        "revenue_estimate":   _estimate_revenue(
+        "revenue_estimate":          _estimate_revenue(
             ads_count=shop.get("ads_count", len(ads)),
             avg_days=avg_days,
             products=products,
             scaling_score=scaling_score,
         ),
-        "landing_analysis":   shop.get("landing_analysis"),
-        "scaling_signals":    shop.get("scaling_signals") or [],
+        "landing_analysis":          shop.get("landing_analysis"),
+        "scaling_signals":           shop.get("scaling_signals") or [],
+        "collections_count":         shop.get("collections_count"),
+        "avg_product_price":         shop.get("avg_product_price"),
+        "products_with_discount":    shop.get("products_with_discount", 0),
+        "products_with_reviews":     shop.get("products_with_reviews", 0),
+        "avg_product_rating":        shop.get("avg_product_rating"),
     }
 
 
