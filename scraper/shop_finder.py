@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 import re
 from urllib.parse import urlparse, quote_plus
 
@@ -37,31 +38,67 @@ def _clean_domain(url: str) -> str:
         return ""
 
 
-async def _ddg_shopify_search(niche: str) -> list[str]:
-    """Return myshopify.com domains found via DuckDuckGo HTML search."""
-    queries = [
+def _build_query_variants(niche: str, country: str = "FR") -> list[str]:
+    """Generate diverse search query variants to discover different shops each run."""
+    country_qualifier = {
+        "FR": "france",
+        "US": "usa",
+        "GB": "uk",
+        "DE": "germany",
+        "ES": "spain",
+    }.get(country, "")
+
+    variants = [
         f'site:myshopify.com {niche}',
         f'site:myshopify.com "{niche}" buy',
+        f'site:myshopify.com {niche} "add to cart"',
+        f'site:myshopify.com {niche} "free shipping"',
+        f'"{niche}" shopify store online',
+        f'{niche} boutique shopify',
+        f'{niche} shop dropshipping',
+        f'buy {niche} online store shopify',
     ]
+    if country_qualifier:
+        variants += [
+            f'site:myshopify.com {niche} {country_qualifier}',
+            f'{niche} {country_qualifier} shopify',
+        ]
+    # Shuffle so different variants are tried first on each run
+    random.shuffle(variants)
+    return variants
+
+
+async def _ddg_shopify_search(niche: str, country: str = "FR", exclude: set[str] | None = None) -> list[str]:
+    """Return myshopify.com domains found via DuckDuckGo HTML search."""
+    exclude = exclude or set()
+    queries = _build_query_variants(niche, country)
     found: set[str] = set()
 
     async with aiohttp.ClientSession(headers=_DDG_HEADERS) as session:
         for query in queries:
+            if len(found) >= 18:
+                break
             try:
                 url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
                 async with session.get(url, timeout=REQUEST_TIMEOUT) as resp:
                     if resp.status != 200:
                         continue
                     html = await resp.text()
+                    # Extract myshopify.com domains
                     matches = re.findall(r'([a-z0-9][a-z0-9\-]{1,62}\.myshopify\.com)', html, re.I)
                     for m in matches:
-                        found.add(m.lower())
-                    if len(found) >= 12:
-                        break
+                        d = m.lower()
+                        if d not in exclude:
+                            found.add(d)
+                    # Also grab custom domains linked near Shopify context
+                    for m in re.findall(r'href="https?://([^/"]+)"[^>]*>[^<]*(?:shop|store|buy)', html, re.I):
+                        d = _clean_domain(m)
+                        if d and "." in d and d not in exclude and "duckduckgo" not in d:
+                            found.add(d)
             except Exception as exc:
                 logger.debug("DDG search failed for '%s': %s", query, exc)
 
-            await asyncio.sleep(0.8)
+            await asyncio.sleep(0.8 + random.random() * 0.4)  # 0.8–1.2s jitter
 
     return list(found)
 
@@ -180,14 +217,16 @@ async def find_scaling_shops(
     ads: list[dict],
     niche: str,
     country: str = "FR",
+    exclude_domains: set[str] | None = None,
 ) -> list[dict]:
     """
     Find active Shopify shops for a niche.
     1. Extract domains from ad landing pages (if any).
-    2. Supplement with DuckDuckGo `site:myshopify.com` search.
+    2. Supplement with DuckDuckGo diversified queries.
     3. Verify each shop is accessible and has products.
     Returns up to 10 shops sorted by product count.
     """
+    exclude = exclude_domains or set()
     domains: set[str] = set()
 
     for ad in ads:
@@ -198,17 +237,24 @@ async def find_scaling_shops(
             domains.add(d)
 
     if len(domains) < 8:
-        logger.info("shop_finder: DDG search for niche '%s'", niche)
-        ddg = await _ddg_shopify_search(niche)
-        domains.update(ddg)
-        logger.info("shop_finder: %d candidate domains total", len(domains))
+        logger.info("shop_finder: DDG search for niche '%s' (excluding %d known domains)", niche, len(exclude))
+        ddg = await _ddg_shopify_search(niche, country=country, exclude=exclude)
+        # Prioritise freshly discovered domains (not in exclude) — add known ones last as fallback
+        new_domains = [d for d in ddg if d not in exclude]
+        old_domains = [d for d in ddg if d in exclude]
+        domains.update(new_domains)
+        if len(domains) < 5:
+            domains.update(old_domains)
+        logger.info("shop_finder: %d candidate domains (%d new, %d known-excluded)", len(domains), len(new_domains), len(old_domains))
+
+    ad_domains = {
+        _clean_domain(a.get("store_domain") or a.get("landing_page_url") or "")
+        for a in ads
+    }
 
     async with aiohttp.ClientSession(headers=_DDG_HEADERS) as session:
         tasks = [
-            _build_shop_entry(session, d, "meta_ads" if d in {
-                _clean_domain(a.get("store_domain") or a.get("landing_page_url") or "")
-                for a in ads
-            } else "shopify_search")
+            _build_shop_entry(session, d, "meta_ads" if d in ad_domains else "shopify_search")
             for d in list(domains)[:20]
         ]
         results = await asyncio.gather(*tasks, return_exceptions=True)
