@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import random
 from datetime import datetime, timezone
 from typing import Any
@@ -110,17 +111,39 @@ def _normalise(node: dict) -> dict | None:
     snapshot = node.get("ad_snapshot_url") or ""
     domain   = extract_domain(snapshot) if snapshot else ""
 
+    # Engagement signals (Meta may return these)
+    reactions = 0
+    comments  = 0
+    shares    = 0
+    if isinstance(node.get("engagement"), dict):
+        eng = node["engagement"]
+        reactions = int(eng.get("reaction_count") or eng.get("likes") or 0)
+        comments  = int(eng.get("comment_count") or eng.get("comments") or 0)
+        shares    = int(eng.get("share_count") or eng.get("shares") or 0)
+    # Also check top-level keys
+    reactions = reactions or int(node.get("reaction_count") or node.get("likes_count") or 0)
+    comments  = comments  or int(node.get("comment_count") or 0)
+    shares    = shares    or int(node.get("share_count") or 0)
+
+    engagement_score = reactions + comments * 2 + shares * 3
+
+    if days == 0 and engagement_score > 0:
+        days = min(int(math.sqrt(engagement_score) * 4), 90)
+
     return {
-        "ad_copy":         ad_copy,
-        "creative_id":     creative_id,
-        "page_name":       node.get("page_name", ""),
-        "start_date":      start,
-        "days_running":    days,
-        "estimated_spend": spend,
-        "landing_page_url": snapshot,
-        "store_domain":    domain,
-        "country":         "",
-        "platform":        "meta",
+        "ad_copy":            ad_copy,
+        "creative_id":        creative_id,
+        "page_name":          node.get("page_name", ""),
+        "start_date":         start,
+        "days_running":       days,
+        "estimated_spend":    spend,
+        "landing_page_url":   snapshot,
+        "store_domain":       domain,
+        "country":            "",
+        "platform":           "meta",
+        "engagement_score":   engagement_score,
+        "reactions":          reactions,
+        "publisher_platforms": node.get("publisher_platforms") or [],
     }
 
 

@@ -77,8 +77,30 @@ class AngleAggregator:
                     "primary_audience": _most_common(
                         [a.get("angle_data", {}).get("audience", "") for a in ads]
                     ),
+                    # Hook patterns — filled in post-processing pass below
+                    "hook_patterns": {},
                 }
             )
+
+        # Saturation index: each angle's count relative to max count across all angles
+        max_count = max((k["count"] for k in kpis), default=1)
+        for kpi in kpis:
+            saturation = round(kpi["count"] / max_count * 100, 1)
+            kpi["saturation_index"] = saturation
+            # Opportunity = viability × (1 - saturation×0.4/100) × (1 + vel_bonus/100)
+            vel_bonus = min(max(kpi.get("velocity_pct") or 0, 0), 100)
+            kpi["opportunity_score"] = round(
+                kpi["viability_score"] * (1 - saturation * 0.4 / 100) * (1 + vel_bonus / 100), 1
+            )
+            # Hook pattern breakdown: count per pattern
+            hook_counts: dict[str, int] = {}
+            for ad in buckets[kpi["angle"]]:
+                hp = ad.get("angle_data", {}).get("hook_pattern", "")
+                if hp:
+                    hook_counts[hp] = hook_counts.get(hp, 0) + 1
+            kpi["hook_patterns"] = hook_counts
+            # Top hook for this angle
+            kpi["dominant_hook"] = max(hook_counts, key=lambda k: hook_counts[k]) if hook_counts else ""
 
         kpis.sort(key=lambda k: k["viability_score"], reverse=True)
         logger.info("Aggregated %d distinct angles from %d ads", len(kpis), total_ads)
@@ -129,6 +151,9 @@ class AngleAggregator:
                         "recommended_products": recommended_products[:4],
                         "velocity_pct":        kpi.get("velocity_pct"),
                         "trend":               kpi.get("trend", "stable"),
+                        "opportunity_score":   kpi.get("opportunity_score", kpi["viability_score"]),
+                        "saturation_index":    kpi.get("saturation_index", 0),
+                        "dominant_hook":       kpi.get("dominant_hook", ""),
                     }
                 )
 
@@ -183,4 +208,9 @@ def enrich_with_velocity(
             kpi["trend"] = "up" if delta > 15 else "down" if delta < -15 else "stable"
         vel_bonus = min(max(kpi.get("velocity_pct") or 0, 0), 100)
         kpi["priority_score"] = round(kpi["viability_score"] * (1 + vel_bonus / 100), 1)
+        # Update opportunity_score with velocity too
+        sat = kpi.get("saturation_index", 0)
+        kpi["opportunity_score"] = round(
+            kpi["viability_score"] * (1 - sat * 0.4 / 100) * (1 + vel_bonus / 100), 1
+        )
     return current_kpis

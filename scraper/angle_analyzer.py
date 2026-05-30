@@ -31,6 +31,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans explication, avec cette 
   "social_proof_type": "testimonial | stats | authority | none",
   "urgency_type": "scarcity | time | none",
   "audience": "cible implicite (ex: femmes 35-50, hommes sportifs...)",
+  "hook_pattern": "fear | curiosity | testimonial | comparison | social_proof | urgency | authority | transformation | specific_result | contre_intuitive | price_anchor",
   "confidence": 0.9
 }
 
@@ -46,6 +47,19 @@ Angles courants (non exhaustif) :
 - Us vs them
 - Price anchoring
 - Naturalness / Clean label
+
+Patterns de hook :
+- fear : peur d'une conséquence négative
+- curiosity : intrigue, question sans réponse immédiate
+- testimonial : histoire personnelle ou avis client
+- comparison : avant/après ou vs concurrent
+- social_proof : chiffres, nombre de clients
+- urgency : temps limité, stock limité
+- authority : expert, scientifique, médecin
+- transformation : changement de vie visible
+- specific_result : chiffre précis (perdre 5kg en 3 semaines)
+- contre_intuitive : affirme l'inverse de ce qu'on attend
+- price_anchor : prix barré, économie mise en avant
 """
 
 
@@ -98,6 +112,7 @@ def _parse_angle_json(raw: str) -> dict:
             "social_proof_type": data.get("social_proof_type", "none"),
             "urgency_type": data.get("urgency_type", "none"),
             "audience": data.get("audience", ""),
+            "hook_pattern": data.get("hook_pattern", ""),
             "confidence": float(data.get("confidence", 0.5)),
         }
     except Exception as exc:
@@ -116,6 +131,7 @@ def _unknown_angle() -> dict:
         "social_proof_type": "none",
         "urgency_type": "none",
         "audience": "",
+        "hook_pattern": "",
         "confidence": 0.0,
     }
 
