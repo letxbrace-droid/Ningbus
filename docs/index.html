@@ -46,6 +46,10 @@
 
     html { scroll-behavior: smooth; }
 
+    /* ── Page views (multi-page nav) ────────────────────────── */
+    .page-view { display: none; }
+    .page-view.active { display: block; }
+
     body {
       font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
@@ -319,7 +323,6 @@
       align-items: center;
       gap: 0.5rem;
       margin: 2rem 0 0.85rem;
-      scroll-margin-top: calc(var(--header-h) + 1rem);
     }
     .section-title {
       font-size: 1rem;
@@ -672,17 +675,17 @@
 
     <!-- Navigation -->
     <nav class="sidebar-nav">
-      <a class="nav-item active" id="nav-adv" href="#advertisers">
+      <a class="nav-item active" id="nav-adv" onclick="showPage('advertisers')">
         <span class="nav-icon">🏆</span> Advertisers
         <span class="run-badge-sb" id="runBadge"></span>
       </a>
-      <a class="nav-item" id="nav-gap" href="#gaps">
+      <a class="nav-item" id="nav-gap" onclick="showPage('gaps')">
         <span class="nav-icon">🟡</span> Angles inexploités
       </a>
-      <a class="nav-item" id="nav-all" href="#angles">
+      <a class="nav-item" id="nav-all" onclick="showPage('angles')">
         <span class="nav-icon">📊</span> Performances
       </a>
-      <a class="nav-item" id="nav-mat" href="#matrix" onclick="closeSidebar()">
+      <a class="nav-item" id="nav-mat" onclick="showPage('matrix')">
         <span class="nav-icon">📊</span> Matrice
       </a>
     </nav>
@@ -746,65 +749,71 @@
         </div>
       </div>
 
-      <!-- TRENDING NOW -->
-      <div id="trendingNow" style="display:none;margin-bottom:1.5rem">
-        <div class="section-header" style="margin-top:0">
-          <span class="section-title">🔥 Tendances en ce moment</span>
-          <span class="badge badge-adv" id="trendingCount">0</span>
+      <!-- PAGE: ADVERTISERS -->
+      <div class="page-view active" id="page-advertisers">
+        <div id="trendingNow" style="display:none;margin-bottom:1.5rem">
+          <div class="section-header" style="margin-top:0">
+            <span class="section-title">🔥 Tendances en ce moment</span>
+            <span class="badge badge-adv" id="trendingCount">0</span>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="trendingList"></div>
         </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="trendingList"></div>
+        <div class="section-header">
+          <span class="section-title">🏆 Advertisers qui scalent</span>
+          <span class="badge badge-adv" id="advertisersCount">0</span>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="advSearch" placeholder="Rechercher un advertiser…" />
+          <button class="sort-btn active" data-section="adv" data-sort="score">Score ↓</button>
+          <button class="sort-btn" data-section="adv" data-sort="ads">Ads</button>
+          <button class="sort-btn" data-section="adv" data-sort="days">Jours</button>
+          <button class="sort-btn" data-section="adv" data-sort="prods">Produits</button>
+          <button class="sort-btn" data-section="adv" data-sort="revenue">Revenu</button>
+        </div>
+        <div class="cards-grid" id="advertisersGrid">
+          <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
+        </div>
       </div>
 
-      <!-- ADVERTISERS -->
-      <div class="section-header" id="advertisers">
-        <span class="section-title">🏆 Advertisers qui scalent</span>
-        <span class="badge badge-adv" id="advertisersCount">0</span>
-      </div>
-      <div class="toolbar">
-        <input type="search" id="advSearch" placeholder="Rechercher un advertiser…" />
-        <button class="sort-btn active" data-section="adv" data-sort="score">Score ↓</button>
-        <button class="sort-btn" data-section="adv" data-sort="ads">Ads</button>
-        <button class="sort-btn" data-section="adv" data-sort="days">Jours</button>
-        <button class="sort-btn" data-section="adv" data-sort="prods">Produits</button>
-        <button class="sort-btn" data-section="adv" data-sort="revenue">Revenu</button>
-      </div>
-      <div class="cards-grid" id="advertisersGrid">
-        <div class="state-msg"><div class="spinner"></div><br/>Chargement…</div>
+      <!-- PAGE: GAPS -->
+      <div class="page-view" id="page-gaps">
+        <div class="section-header">
+          <span class="section-title">🟡 Angles inexploités</span>
+          <span class="badge badge-gap" id="gapCount">0</span>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
+          <button class="sort-btn active" data-section="gap" data-sort="priority">Priorité ↓</button>
+          <button class="sort-btn" data-section="gap" data-sort="viability">Viabilité</button>
+          <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
+          <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
+        </div>
+        <div class="cards-grid" id="gapGrid"></div>
       </div>
 
-      <!-- GAPS -->
-      <div class="section-header" id="gaps">
-        <span class="section-title">🟡 Angles inexploités</span>
-        <span class="badge badge-gap" id="gapCount">0</span>
+      <!-- PAGE: ANGLES -->
+      <div class="page-view" id="page-angles">
+        <div class="section-header">
+          <span class="section-title">📊 Performances par angle</span>
+          <span class="badge badge-all" id="allCount">0</span>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
+          <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
+          <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
+          <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
+        </div>
+        <div class="cards-grid" id="allGrid"></div>
       </div>
-      <div class="toolbar">
-        <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
-        <button class="sort-btn active" data-section="gap" data-sort="priority">Priorité ↓</button>
-        <button class="sort-btn" data-section="gap" data-sort="viability">Viabilité</button>
-        <button class="sort-btn" data-section="gap" data-sort="days">Jours</button>
-        <button class="sort-btn" data-section="gap" data-sort="usage">Utilisation</button>
-      </div>
-      <div class="cards-grid" id="gapGrid"></div>
 
-      <!-- ALL ANGLES -->
-      <div class="section-header" id="angles">
-        <span class="section-title">📊 Performances par angle</span>
-        <span class="badge badge-all" id="allCount">0</span>
+      <!-- PAGE: MATRIX -->
+      <div class="page-view" id="page-matrix">
+        <div class="section-header">
+          <span class="section-title">📊 Matrice Produit × Angle</span>
+          <span class="badge badge-adv" id="matrixCount">0</span>
+        </div>
+        <div id="matrixGrid"></div>
       </div>
-      <div class="toolbar">
-        <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
-        <button class="sort-btn active" data-section="all" data-sort="viability">Viabilité ↓</button>
-        <button class="sort-btn" data-section="all" data-sort="days">Jours</button>
-        <button class="sort-btn" data-section="all" data-sort="count">Volume</button>
-      </div>
-      <div class="cards-grid" id="allGrid"></div>
-
-      <!-- MATRIX -->
-      <div class="section-header" id="matrix">
-        <span class="section-title">📊 Matrice Produit × Angle</span>
-        <span class="badge badge-adv" id="matrixCount">0</span>
-      </div>
-      <div id="matrixGrid"></div>
     </main>
   </div>
 </div>
@@ -854,6 +863,7 @@ const IDB_KEY     = 'analysis';
 const state = {
   data: null,
   activeNiche: 0,
+  page: 'advertisers',
   sorts: { adv: 'score', gap: 'priority', all: 'viability' },
   filters: { adv: '', gap: '', all: '' },
 };
@@ -1366,20 +1376,18 @@ document.getElementById('burgerBtn').addEventListener('click', openSidebar);
 document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
-// Active nav item on scroll
-const sections = ['advertisers','gaps','angles','matrix'];
-const navIds   = ['nav-adv','nav-gap','nav-all','nav-mat'];
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY + 100;
-  let active = 0;
-  sections.forEach((id,i) => {
-    const el = document.getElementById(id);
-    if (el && el.offsetTop <= scrollY) active = i;
-  });
-  navIds.forEach((id,i) => {
-    document.getElementById(id)?.classList.toggle('active', i === active);
-  });
-}, { passive: true });
+// ── Multi-page navigation ───────────────────────────────────────────────────
+const PAGE_NAV = { advertisers: 'nav-adv', gaps: 'nav-gap', angles: 'nav-all', matrix: 'nav-mat' };
+
+function showPage(name) {
+  document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  Object.values(PAGE_NAV).forEach(id => document.getElementById(id)?.classList.remove('active'));
+  document.getElementById(PAGE_NAV[name])?.classList.add('active');
+  window.scrollTo(0, 0);
+  state.page = name;
+  closeSidebar();
+}
 
 // ── Sort buttons ───────────────────────────────────────────────────────────
 document.querySelectorAll('.sort-btn').forEach(btn => {
