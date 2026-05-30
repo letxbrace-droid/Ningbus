@@ -17,6 +17,7 @@ import yaml
 from .alert_system import send_alerts
 from .angle_aggregator import AngleAggregator
 from .angle_analyzer import AngleAnalyzer
+from .market_research import research_niche, validate_gap_angles
 from .meta_scraper import MetaScraper
 from .price_signals import enrich_products_with_margins
 from .shop_finder import find_scaling_shops
@@ -206,6 +207,7 @@ async def run_niche(
     max_ads: int,
     analyzer: AngleAnalyzer,
     aggregator: AngleAggregator,
+    gemini_model: str = "gemini-2.0-flash",
 ) -> dict:
     """Full pipeline for one niche. Returns result dict."""
     logger.info("=" * 60)
@@ -220,6 +222,14 @@ async def run_niche(
 
     # Known domains from last 5 runs — used to prioritise fresh discoveries
     known_domains = _load_known_domains(niche, lookback=5)
+
+    # G0. Start Gemini market research in background (runs concurrently with steps 1-4)
+    gemini_research_task = asyncio.ensure_future(
+        asyncio.wait_for(
+            research_niche(niche, country, model=gemini_model),
+            timeout=75.0,
+        )
+    )
 
     # 1. Scrape Meta ads
     with Timer("scrape"):
@@ -318,6 +328,28 @@ async def run_niche(
         gaps = aggregator.detect_gaps(angle_kpis, advertisers, prev_advertisers, total_ads=len(analyzed_ads))
     logger.info("Step 6 — %d gap opportunities", len(gaps))
 
+    # 6.5 Collect Gemini market research (started at G0, should be ready by now)
+    with Timer("gemini_research"):
+        try:
+            market_research = await gemini_research_task
+        except (asyncio.TimeoutError, Exception) as exc:
+            logger.warning("Step G0 — Gemini research unavailable: %s", exc)
+            market_research = {}
+    logger.info("Step G0 — market research: trend=%s, opp=%s",
+                market_research.get("market_trend"), market_research.get("opportunity_score"))
+
+    # 6.6 Validate top gap angles with Gemini web search
+    if gaps:
+        with Timer("gemini_gap_validation"):
+            try:
+                gaps = await asyncio.wait_for(
+                    validate_gap_angles(niche, gaps, country=country, model=gemini_model),
+                    timeout=45.0,
+                )
+            except asyncio.TimeoutError:
+                logger.warning("Step G1 — Gemini gap validation timed out")
+    logger.info("Step G1 — gap validation done (%d gaps)", len(gaps))
+
     # 7. Enrich advertiser profiles with their gap angles
     advertisers = [_shop_to_advertiser(s, gaps) for s in shops]
 
@@ -339,6 +371,7 @@ async def run_niche(
         "angle_kpis":           angle_kpis,
         "gaps":                 gaps,
         "advertisers":          advertisers,
+        "market_research":      market_research,
         "market_revenue_est":   market_revenue_est,
         "product_angle_matrix": _build_product_angle_matrix(advertisers, angle_kpis),
         "stats": {
@@ -375,13 +408,14 @@ async def main_async(args: argparse.Namespace) -> None:
     label = "niche" if len(countries) == 1 else "niche×country"
     logger.info("Processing %d %s(s): %s × %s", len(tasks), label, niches, countries)
 
-    analyzer   = AngleAnalyzer()
-    aggregator = AngleAggregator()
+    analyzer      = AngleAnalyzer()
+    aggregator    = AngleAggregator()
+    gemini_model  = os.getenv("GEMINI_MODEL") or config.get("gemini_model", "gemini-2.0-flash")
 
     all_results: list[dict] = []
     for niche, c in tasks:
         try:
-            result = await run_niche(niche, c, max_ads, analyzer, aggregator)
+            result = await run_niche(niche, c, max_ads, analyzer, aggregator, gemini_model=gemini_model)
             # Disambiguate niche name when multiple countries
             if len(countries) > 1:
                 result["niche"] = f"{niche} ({c})"
@@ -402,6 +436,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 "angle_kpis":           r["angle_kpis"],
                 "gaps":                 r["gaps"],
                 "advertisers":          r["advertisers"],
+                "market_research":      r.get("market_research", {}),
                 "market_revenue_est":   r.get("market_revenue_est", 0),
                 "product_angle_matrix": r.get("product_angle_matrix", []),
                 "stats":                r["stats"],
