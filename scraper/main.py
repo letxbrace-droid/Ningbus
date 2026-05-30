@@ -199,11 +199,13 @@ async def run_niche(
         advertisers = [_shop_to_advertiser(s, []) for s in shops]
         logger.info("shop_finder fallback: %d advertisers from real shops", len(advertisers))
         return {
-            "niche":       niche,
-            "ads":         [],
-            "angle_kpis":  [],
-            "gaps":        [],
-            "advertisers": advertisers,
+            "niche":                niche,
+            "ads":                  [],
+            "angle_kpis":           [],
+            "gaps":                 [],
+            "advertisers":          advertisers,
+            "market_revenue_est":   sum(a.get("revenue_estimate", {}).get("monthly_revenue_est", 0) for a in advertisers),
+            "product_angle_matrix": [],
             "stats": {
                 "total_ads":         0,
                 "unique_angles":     0,
@@ -226,21 +228,31 @@ async def run_niche(
     from .angle_aggregator import enrich_with_velocity
     enrich_with_velocity(angle_kpis, prev_kpis)
 
-    # 3.5 Enrich with external trend signals (Priority 3)
+    # 3.5 Enrich with external trend signals (Priority 3) — hard timeout 90s
     from .trend_signals import enrich_with_trend_signals
     with Timer("trend_signals"):
-        angle_kpis = await enrich_with_trend_signals(angle_kpis, country=country)
-    logger.info("Step 3.5 — trend signals enriched")
+        try:
+            angle_kpis = await asyncio.wait_for(
+                enrich_with_trend_signals(angle_kpis, country=country),
+                timeout=90.0,
+            )
+        except asyncio.TimeoutError:
+            logger.warning("Step 3.5 — trend signals timed out, skipping")
+    logger.info("Step 3.5 — trend signals done")
 
     # 4. Find scaling shops (concurrent with step 3 logically, but we need angle_kpis first)
     with Timer("shop_finder"):
         shops = await find_scaling_shops(analyzed_ads, niche, country)
     logger.info("Step 4 — %d scaling shops found", len(shops))
 
-    # 4.5 Analyse landing pages
+    # 4.5 Analyse landing pages — hard timeout 60s
     from .landing_analyzer import analyze_shops
     with Timer("landing_analysis"):
-        landing_data = await analyze_shops(shops)
+        try:
+            landing_data = await asyncio.wait_for(analyze_shops(shops), timeout=60.0)
+        except asyncio.TimeoutError:
+            logger.warning("Step 4.5 — landing analysis timed out, skipping")
+            landing_data = {}
     logger.info("Step 4.5 — %d landing pages analyzed", len(landing_data))
 
     # Enrich shops with landing analysis
@@ -320,11 +332,13 @@ async def main_async(args: argparse.Namespace) -> None:
         "total_ads":        len(all_ads),
         "results": [
             {
-                "niche":       r["niche"],
-                "angle_kpis":  r["angle_kpis"],
-                "gaps":        r["gaps"],
-                "advertisers": r["advertisers"],
-                "stats":       r["stats"],
+                "niche":                r["niche"],
+                "angle_kpis":           r["angle_kpis"],
+                "gaps":                 r["gaps"],
+                "advertisers":          r["advertisers"],
+                "market_revenue_est":   r.get("market_revenue_est", 0),
+                "product_angle_matrix": r.get("product_angle_matrix", []),
+                "stats":                r["stats"],
             }
             for r in all_results
         ],

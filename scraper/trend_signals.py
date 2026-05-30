@@ -40,12 +40,15 @@ async def google_trends_scores(keywords: list[str], geo: str = "FR") -> dict[str
             return k, {"score": round(recent), "direction": direction}
 
         try:
-            k, v = await loop.run_in_executor(None, _fetch)
+            k, v = await asyncio.wait_for(
+                loop.run_in_executor(None, _fetch),
+                timeout=35.0,
+            )
             results[k] = v
-        except Exception as exc:
-            logger.warning("Google Trends error for '%s': %s", kw, exc)
+        except (asyncio.TimeoutError, Exception) as exc:
+            logger.warning("Google Trends skipped for '%s': %s", kw, exc)
             results[kw] = {"score": None, "direction": "stable"}
-        await asyncio.sleep(1.2)  # avoid rate-limit
+        await asyncio.sleep(1.0)
 
     return results
 
