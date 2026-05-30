@@ -1410,7 +1410,7 @@ function setBadge(status, text) {
   const b = document.getElementById('runBadge');
   b.className = `run-badge-sb show ${status}`;
   const spin = (status==='running'||status==='queued') ? '<span class="run-spinner-sm"></span>' : '';
-  b.innerHTML = `${spin}${esc(text)}`;
+  b.innerHTML = `${spin}${text}`;
 }
 function startPolling(pat) {
   if (pollTimer) clearInterval(pollTimer);
