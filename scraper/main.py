@@ -62,6 +62,30 @@ def _load_prev_niche_data(niche: str) -> dict:
     return {}
 
 
+def _load_known_domains(niche: str, lookback: int = 5) -> set[str]:
+    """Return set of domains seen in the last N history files for this niche."""
+    if not HISTORY_DIR.exists():
+        return set()
+    known: set[str] = set()
+    files = sorted(HISTORY_DIR.glob("*.json"), reverse=True)
+    found_count = 0
+    for fpath in files[:20]:
+        try:
+            data = json.loads(fpath.read_text(encoding="utf-8"))
+            for r in data.get("results", []):
+                if r.get("niche") == niche:
+                    for adv in r.get("advertisers", []):
+                        d = adv.get("domain", "")
+                        if d:
+                            known.add(d)
+                    found_count += 1
+                    if found_count >= lookback:
+                        return known
+        except Exception:
+            continue
+    return known
+
+
 def _now() -> str:
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -189,6 +213,9 @@ async def run_niche(
     prev_kpis        = prev_data.get("angle_kpis", [])
     prev_advertisers = prev_data.get("advertisers", [])
 
+    # Known domains from last 5 runs — used to prioritise fresh discoveries
+    known_domains = _load_known_domains(niche, lookback=5)
+
     # 1. Scrape Meta ads
     with Timer("scrape"):
         scraper = MetaScraper(max_ads=max_ads)
@@ -198,7 +225,7 @@ async def run_niche(
     if not ads:
         logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)
         with Timer("shop_finder_fallback"):
-            shops = await find_scaling_shops([], niche, country)
+            shops = await find_scaling_shops([], niche, country, exclude_domains=known_domains)
         # Price/margin enrichment on fallback shops
         with Timer("price_signals_fallback"):
             try:
@@ -251,7 +278,7 @@ async def run_niche(
 
     # 4. Find scaling shops (concurrent with step 3 logically, but we need angle_kpis first)
     with Timer("shop_finder"):
-        shops = await find_scaling_shops(analyzed_ads, niche, country)
+        shops = await find_scaling_shops(analyzed_ads, niche, country, exclude_domains=known_domains)
     logger.info("Step 4 — %d scaling shops found", len(shops))
 
     # 4.5 Analyse landing pages — hard timeout 60s
