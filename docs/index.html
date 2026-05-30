@@ -903,7 +903,10 @@ async function fetchFreshData() {
       const r = await fetch(CONTENTS_API, { headers: ghH(pat) });
       if (r.ok) {
         const meta = await r.json();
-        return JSON.parse(atob(meta.content.replace(/\n/g, '')));
+        // atob gives Latin-1 binary string — decode as UTF-8 properly
+        const raw   = atob(meta.content.replace(/\n/g, ''));
+        const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+        return JSON.parse(new TextDecoder('utf-8').decode(bytes));
       }
     } catch(e) {}
   }

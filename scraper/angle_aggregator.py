@@ -9,13 +9,15 @@ from collections import defaultdict
 logger = logging.getLogger(__name__)
 
 # An angle is "underused" if its share is below this threshold
-USAGE_THRESHOLD = 0.10  # 10%
+USAGE_THRESHOLD = 0.20  # 20% — more permissive with few ads
 # An angle is "viable" if its viability score exceeds this
-VIABILITY_THRESHOLD = 60.0
+VIABILITY_THRESHOLD = 30.0  # lowered: Meta often returns 0 days_running
 
 
 def _viability(avg_days: float) -> float:
-    """Proxy for profitability: capped at 100, linear with avg days running."""
+    """Proxy for profitability. Returns 50 baseline when days data is unavailable."""
+    if avg_days <= 0:
+        return 50.0  # ad is live but duration unknown
     return min(avg_days, 100.0)
 
 

@@ -65,12 +65,12 @@ def _now() -> str:
 
 
 def _estimate_revenue(ads_count: int, avg_days: float, products: list, scaling_score: float) -> dict:
-    # Assume avg €40/day spend per active ad, 3.5x ROAS
-    daily_spend = ads_count * 40
+    # When ads_count is 0 (shop found via DDG, not Meta), use scaling_score proxy
+    effective_count = ads_count or max(1, round(scaling_score / 15))
+    daily_spend = effective_count * 40
     monthly_spend = round(daily_spend * 30, 0)
     monthly_revenue = round(monthly_spend * 3.5, 0)
-    # Confidence based on data availability
-    confidence = "high" if ads_count >= 3 and avg_days >= 20 else "medium" if ads_count >= 1 else "low"
+    confidence = "high" if ads_count >= 3 and avg_days >= 20 else "medium" if effective_count >= 2 else "low"
     return {
         "monthly_spend_est":   int(monthly_spend),
         "monthly_revenue_est": int(monthly_revenue),
