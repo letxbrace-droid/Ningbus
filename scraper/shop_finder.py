@@ -111,6 +111,40 @@ async def _fetch_products(
         return []
 
 
+_SCALING_APPS = {
+    "klaviyo":    "Email marketing (Klaviyo)",
+    "reconvert":  "Post-purchase upsell (ReConvert)",
+    "yotpo":      "Reviews (Yotpo)",
+    "judge.me":   "Reviews (Judge.me)",
+    "okendo":     "Reviews (Okendo)",
+    "loox":       "Photo reviews (Loox)",
+    "recharge":   "Abonnements (Recharge)",
+    "privy":      "Popups/Email (Privy)",
+    "omnisend":   "Email marketing (Omnisend)",
+    "gorgias":    "Support client (Gorgias)",
+    "carthook":   "Checkout upsell (CartHook)",
+    "zipify":     "Checkout upsell (Zipify)",
+    "triplewhale": "Attribution (Triple Whale)",
+    "northbeam":  "Attribution (Northbeam)",
+}
+
+async def _detect_scaling_signals(session: aiohttp.ClientSession, domain: str) -> list[str]:
+    """Fetch store homepage and detect installed scaling apps."""
+    signals = []
+    try:
+        url = f"https://{domain}"
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=8), allow_redirects=True) as r:
+            if r.status != 200:
+                return signals
+            html = (await r.content.read(65536)).decode("utf-8", errors="replace").lower()
+            for key, label in _SCALING_APPS.items():
+                if key in html:
+                    signals.append(label)
+    except Exception:
+        pass
+    return signals
+
+
 async def _build_shop_entry(
     session: aiohttp.ClientSession,
     domain: str,
@@ -122,11 +156,13 @@ async def _build_shop_entry(
     products = await _fetch_products(session, domain)
     if not products:
         return None
+    scaling_signals = await _detect_scaling_signals(session, domain)
     return {
         "domain":             domain,
         "store_url":          f"https://{domain}",
         "source":             source,
         "products":           products,
+        "scaling_signals":    scaling_signals,
         "angles_used":        [],
         "angle_gaps":         [],
         "ads_count":          0,
