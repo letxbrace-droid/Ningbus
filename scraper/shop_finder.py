@@ -6,6 +6,7 @@ import asyncio
 import logging
 import random
 import re
+from datetime import datetime, timezone
 from urllib.parse import urlparse, quote_plus
 
 import aiohttp
@@ -119,33 +120,164 @@ async def _verify_shop_accessible(
         return False
 
 
+def _strip_html(html: str) -> str:
+    text = re.sub(r'<[^>]+>', ' ', html or "")
+    return re.sub(r'\s+', ' ', text).strip()
+
+
 async def _fetch_products(
     session: aiohttp.ClientSession,
     domain: str,
 ) -> list[dict]:
-    """Fetch best-selling products from Shopify /products.json."""
+    """Fetch best-selling products from Shopify /products.json — full field extraction."""
     try:
-        url = f"https://{domain}/products.json?limit=20&sort_by=best-selling"
+        url = f"https://{domain}/products.json?limit=30&sort_by=best-selling"
         async with session.get(url, timeout=REQUEST_TIMEOUT) as resp:
             if resp.status != 200:
                 return []
             data = await resp.json(content_type=None)
             products = []
-            for p in data.get("products", [])[:12]:
+            now = datetime.now(timezone.utc)
+
+            for p in data.get("products", [])[:15]:
                 variants = p.get("variants") or []
-                price = variants[0].get("price", "") if variants else ""
-                images  = p.get("images") or []
-                img     = images[0].get("src", "") if images else ""
+                images   = p.get("images") or []
+
+                # ── Pricing ──────────────────────────────────────────
+                prices = []
+                compare_prices = []
+                for v in variants:
+                    try:
+                        if v.get("price"):
+                            prices.append(float(v["price"]))
+                        if v.get("compare_at_price"):
+                            compare_prices.append(float(v["compare_at_price"]))
+                    except (ValueError, TypeError):
+                        pass
+                price_min = min(prices) if prices else 0.0
+                price_max = max(prices) if prices else 0.0
+                compare_at = max(compare_prices) if compare_prices else 0.0
+                discount_pct = (
+                    round((compare_at - price_min) / compare_at * 100)
+                    if compare_at > price_min > 0 else 0
+                )
+
+                # ── Availability ─────────────────────────────────────
+                available = any(v.get("available", True) for v in variants)
+                in_stock_count = sum(1 for v in variants if v.get("available", True))
+
+                # ── Product age ───────────────────────────────────────
+                published_days: int | None = None
+                pub_str = p.get("published_at") or p.get("created_at") or ""
+                if pub_str:
+                    try:
+                        pub = datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
+                        published_days = max(0, (now - pub).days)
+                    except Exception:
+                        pass
+
+                # ── Description ───────────────────────────────────────
+                description = _strip_html(p.get("body_html") or "")[:400]
+
+                # ── Variant options ────────────────────────────────────
+                options = [
+                    o["name"] for o in (p.get("options") or [])
+                    if o.get("name") and o["name"].lower() != "title"
+                ]
+
+                # ── Tags ───────────────────────────────────────────────
+                tags = [t.strip() for t in (p.get("tags") or "").split(",") if t.strip()][:12]
+
                 products.append({
-                    "title": p.get("title", ""),
-                    "price": price,
-                    "image": img,
-                    "url":   f"https://{domain}/products/{p.get('handle', '')}",
+                    "title":            p.get("title", ""),
+                    "vendor":           p.get("vendor", ""),
+                    "product_type":     p.get("product_type", ""),
+                    "tags":             tags,
+                    "price":            str(round(price_min, 2)) if price_min else "",
+                    "price_max":        str(round(price_max, 2)) if price_max != price_min else "",
+                    "compare_at_price": str(round(compare_at, 2)) if compare_at else "",
+                    "discount_pct":     discount_pct,
+                    "available":        available,
+                    "in_stock_variants": in_stock_count,
+                    "variants_count":   len(variants),
+                    "options":          options,
+                    "images_count":     len(images),
+                    "image":            images[0].get("src", "") if images else "",
+                    "url":              f"https://{domain}/products/{p.get('handle', '')}",
+                    "published_days":   published_days,
+                    "description":      description,
                 })
             return products
     except Exception as exc:
         logger.debug("Products fetch failed for %s: %s", domain, exc)
         return []
+
+
+async def _fetch_product_reviews(
+    session: aiohttp.ClientSession,
+    product_url: str,
+) -> dict:
+    """Scrape product page for review count + rating (supports Judge.me, Yotpo, Loox, SPR, schema.org)."""
+    try:
+        async with session.get(
+            product_url,
+            timeout=aiohttp.ClientTimeout(total=8),
+            allow_redirects=True,
+        ) as r:
+            if r.status != 200:
+                return {}
+            html = (await r.content.read(60000)).decode("utf-8", errors="replace")
+
+            # Judge.me widget attributes
+            m = re.search(
+                r'jdgm-prev-badge[^>]*data-average-rating="([0-9.]+)"[^>]*data-number-of-reviews="(\d+)"',
+                html, re.I,
+            )
+            if m:
+                return {"star_rating": float(m.group(1)), "review_count": int(m.group(2)), "review_app": "judge.me"}
+
+            # Yotpo
+            m = re.search(r'average_score["\s:]+([0-9.]+)', html)
+            n = re.search(r'total_reviews["\s:]+(\d+)', html)
+            if m:
+                return {"star_rating": round(float(m.group(1)), 1), "review_count": int(n.group(1)) if n else None, "review_app": "yotpo"}
+
+            # Loox
+            m = re.search(r'loox[^>]*data-rating="([0-9.]+)"[^>]*data-count="(\d+)"', html, re.I)
+            if m:
+                return {"star_rating": float(m.group(1)), "review_count": int(m.group(2)), "review_app": "loox"}
+
+            # Shopify native SPR
+            m = re.search(r'data-rating="([0-9.]+)"', html)
+            n = re.search(r'(\d+)\s*(?:review|avis|évaluation)', html, re.I)
+            if m:
+                return {"star_rating": float(m.group(1)), "review_count": int(n.group(1)) if n else None, "review_app": "shopify_spr"}
+
+            # schema.org AggregateRating (most universal)
+            m = re.search(r'"ratingValue"\s*:\s*"?([0-9.]+)"?', html)
+            n = re.search(r'"reviewCount"\s*:\s*"?(\d+)"?', html)
+            if m:
+                return {"star_rating": float(m.group(1)), "review_count": int(n.group(1)) if n else None, "review_app": "schema.org"}
+
+            return {}
+    except Exception:
+        return {}
+
+
+async def _fetch_collections_count(
+    session: aiohttp.ClientSession,
+    domain: str,
+) -> int | None:
+    """Count published collections — proxy for catalog breadth."""
+    try:
+        url = f"https://{domain}/collections.json?limit=250"
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=8)) as r:
+            if r.status != 200:
+                return None
+            data = await r.json(content_type=None)
+            return len(data.get("collections", []))
+    except Exception:
+        return None
 
 
 _SCALING_APPS = {
@@ -193,23 +325,60 @@ async def _build_shop_entry(
     products = await _fetch_products(session, domain)
     if not products:
         return None
-    scaling_signals = await _detect_scaling_signals(session, domain)
+
+    # Enrich top 4 products with review data concurrently
+    _review_sem = asyncio.Semaphore(4)
+
+    async def _add_reviews(p: dict) -> None:
+        async with _review_sem:
+            rev = await _fetch_product_reviews(session, p["url"])
+            p.update(rev)
+
+    reviews_tasks = [_add_reviews(p) for p in products[:4]]
+
+    # Run reviews + scaling signals + collections count concurrently
+    scaling_signals, collections_count, *_ = await asyncio.gather(
+        _detect_scaling_signals(session, domain),
+        _fetch_collections_count(session, domain),
+        *reviews_tasks,
+        return_exceptions=True,
+    )
+    if isinstance(scaling_signals, Exception):
+        scaling_signals = []
+    if isinstance(collections_count, Exception):
+        collections_count = None
+
+    # Derived shop-level stats from product data
+    prices = [float(p["price"]) for p in products if p.get("price")]
+    avg_product_price = round(sum(prices) / len(prices), 2) if prices else 0.0
+    discounted = sum(1 for p in products if p.get("discount_pct", 0) > 0)
+    reviewed = sum(1 for p in products if p.get("review_count"))
+    avg_rating = None
+    ratings = [p["star_rating"] for p in products if p.get("star_rating")]
+    if ratings:
+        avg_rating = round(sum(ratings) / len(ratings), 1)
+
     return {
-        "domain":             domain,
-        "store_url":          f"https://{domain}",
-        "source":             source,
-        "products":           products,
-        "scaling_signals":    scaling_signals,
-        "angles_used":        [],
-        "angle_gaps":         [],
-        "ads_count":          0,
-        "max_days_running":   0,
-        "avg_days_running":   0.0,
-        "estimated_spend":    0,
-        "scaling_score":      round(len(products) * 5.0, 1),
-        "dominant_angle":     "",
-        "platforms":          [],
-        "ad_examples":        [],
+        "domain":               domain,
+        "store_url":            f"https://{domain}",
+        "source":               source,
+        "products":             products,
+        "scaling_signals":      scaling_signals or [],
+        "collections_count":    collections_count,
+        "avg_product_price":    avg_product_price,
+        "products_with_discount": discounted,
+        "products_with_reviews":  reviewed,
+        "avg_product_rating":   avg_rating,
+        "angles_used":          [],
+        "angle_gaps":           [],
+        "ads_count":            0,
+        "max_days_running":     0,
+        "avg_days_running":     0.0,
+        "estimated_spend":      0,
+        "scaling_score":        round(len(products) * 5.0 + (collections_count or 0) * 0.5, 1),
+        "dominant_angle":       "",
+        "platforms":            [],
+        "ad_examples":          [],
     }
 
 

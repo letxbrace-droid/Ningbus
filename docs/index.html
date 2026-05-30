@@ -1119,15 +1119,32 @@ function buildAdvCard(adv) {
         ${scalingSignals.slice(0,6).map(s=>`<span class="chip chip-blue" style="font-size:.64rem">⚙️ ${esc(s)}</span>`).join('')}
       </div>` : '';
 
+  // Shop-level stats from product data
+  const shopStatParts = [];
+  if (adv.avg_product_price) shopStatParts.push(`Prix moy. <b>€${adv.avg_product_price}</b>`);
+  if (adv.collections_count) shopStatParts.push(`<b>${adv.collections_count}</b> collections`);
+  if (adv.avg_product_rating) shopStatParts.push(`⭐ <b>${adv.avg_product_rating}/5</b>`);
+  if (adv.products_with_discount > 0) shopStatParts.push(`🏷️ <b>${adv.products_with_discount}</b> en promo`);
+  if (adv.products_with_reviews > 0) shopStatParts.push(`💬 <b>${adv.products_with_reviews}</b> avec avis`);
+  const shopStatsHtml = shopStatParts.length
+    ? `<div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">${shopStatParts.join(' · ')}</div>` : '';
+
   const products  = (adv.products||[]).slice(0,8);
   const prodsHtml = products.length
     ? `<div class="prods-grid">${products.map(p => {
         const marginMap = { excellent: ['🔥 ×'+p.margin_multiplier, '#22c55e'], good: ['✅ ×'+p.margin_multiplier, '#f59e0b'], low: ['⚠️ ×'+(p.margin_multiplier||'?'), '#ef4444'] };
         const mInfo = p.margin_signal ? marginMap[p.margin_signal] : null;
+        const discountHtml = p.discount_pct > 0 ? `<div style="font-size:.6rem;color:#f59e0b">-${p.discount_pct}%</div>` : '';
+        const reviewHtml = p.review_count ? `<div style="font-size:.6rem;color:var(--muted)">⭐ ${p.star_rating ?? ''} (${p.review_count})</div>` : '';
+        const variantsHtml = (p.variants_count > 1 || p.options?.length) ? `<div style="font-size:.6rem;color:var(--muted)">${(p.options||[]).join(', ') || p.variants_count+' variantes'}</div>` : '';
+        const tagsHtml = p.tags?.length ? `<div style="font-size:.58rem;color:var(--muted);opacity:.75">${p.tags.slice(0,3).map(t=>esc(t)).join(', ')}</div>` : '';
+        const ageBadge = p.published_days != null ? (p.published_days < 60 ? `<div style="font-size:.58rem;color:#22c55e">🆕 ${p.published_days}j</div>` : `<div style="font-size:.58rem;color:var(--muted)">${p.published_days}j</div>`) : '';
         return `<a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
           ${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
           <div class="prod-tile-title">${esc(p.title)}</div>
-          ${p.price?`<div class="prod-tile-price">${esc(p.price)} €</div>`:''}
+          ${p.vendor?`<div style="font-size:.6rem;color:var(--muted);font-style:italic">${esc(p.vendor)}</div>`:''}
+          ${p.price?`<div class="prod-tile-price">${esc(p.price)}€${p.price_max?' – '+esc(p.price_max)+'€':''}</div>`:''}
+          ${discountHtml}${reviewHtml}${variantsHtml}${tagsHtml}${ageBadge}
           ${mInfo?`<div style="font-size:.62rem;font-weight:600;color:${mInfo[1]}">${mInfo[0]}</div>`:''}
         </a>`;
       }).join('')}</div>`
@@ -1165,10 +1182,14 @@ function buildAdvCard(adv) {
       ${gapsHtml?`<div class="chips-row"><span class="chips-label">Gaps →</span>${gapsHtml}</div>`:''}
       ${platforms?`<div class="platform-row">${platforms}</div>`:''}
       ${scalingHtml}
+      ${shopStatsHtml}
       ${(revHtml||landHtml)?`<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem">${revHtml}${landHtml}</div>`:''}
       <div class="expand-hint">▼ produits &amp; exemples de pubs</div>
       <div class="card-detail">
-        ${products.length?`<div class="detail-label">Produits best-sellers</div>${prodsHtml}`:''}
+        ${products.length?`<div class="detail-label">Produits best-sellers</div>${prodsHtml}
+          <div style="margin-top:.5rem;font-size:.68rem;color:var(--muted)">
+            ${products.filter(p=>p.description).slice(0,1).map(p=>`<details style="cursor:pointer"><summary style="color:var(--accent)">Description: ${esc(p.title)}</summary><p style="margin-top:.25rem">${esc(p.description)}</p></details>`).join('')}
+          </div>`:''}
         ${(adv.ad_examples||[]).length?`<div class="detail-label" style="margin-top:.6rem">Exemples de pubs</div>${examplesHtml}`:''}
         ${landDetail}
         ${!products.length&&!(adv.ad_examples||[]).length?'<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>':''}
