@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-30T13:21:14Z",
+  "generated_at": "2026-05-30T16:17:23Z",
   "ads": [
     {
       "ad_copy": "Fitness Posture Corrector Training Straps",
@@ -14,14 +14,14 @@
       "platform": "meta",
       "angle_data": {
         "angle": "Posture Correction",
-        "sub_angle": "Physical Improvement",
-        "hook": "Correct your posture",
-        "pain_point": "Back pain, poor posture",
-        "desire": "Improved confidence, better health",
-        "mechanism": "Training straps for posture correction",
+        "sub_angle": "Back Pain Relief",
+        "hook": "Améliorez votre posture",
+        "pain_point": "Douleur de dos et mauvaise posture",
+        "desire": "Meilleure santé et confiance en soi",
+        "mechanism": "Utilisation de sangles de formation pour corriger la posture",
         "social_proof_type": "none",
         "urgency_type": "none",
-        "audience": "Adults with back pain or poor posture",
+        "audience": "Personnes souffrant de problèmes de dos",
         "confidence": 0.8
       }
     },
@@ -41,7 +41,7 @@
         "sub_angle": "Soulagement du mal de dos",
         "hook": "Banish Pain",
         "pain_point": "Douleur et mauvaise posture",
-        "desire": "Soulagement et bonne posture",
+        "desire": "Meilleure posture et soulagement de la douleur",
         "mechanism": "Amélioration de la posture",
         "social_proof_type": "none",
         "urgency_type": "none",
