@@ -51,7 +51,7 @@ jobs:
         run: playwright install chromium --with-deps
 
       - name: Check imports
-        run: python -c "import groq, aiohttp, yaml, playwright; print('All imports OK')"
+        run: python -c "import groq, aiohttp, yaml, playwright, pytrends; print('All imports OK')"
 
       - name: Run scraper
         env:
@@ -67,14 +67,8 @@ jobs:
           else
             python -m scraper.main --country "${COUNTRY_OVERRIDE:-FR}" --max-ads "${MAX_ADS:-100}"
           fi
-          # Fallback: si 0 ads scrappés → données démo pour garder le dashboard vivant
           TOTAL=$(python -c "import json; d=json.load(open('data/latest_analysis.json')); print(d.get('total_ads',0))" 2>/dev/null || echo "0")
-          if [ "$TOTAL" = "0" ]; then
-            echo "⚠️  0 ads récupérés — injection données démo"
-            python generate_demo.py
-          else
-            echo "✅ Vrais ads scrappés: $TOTAL"
-          fi
+          echo "✅ Ads scrappés: $TOTAL"
 
       - name: Commit and push data
         run: |
