@@ -297,21 +297,6 @@
       padding: 1.5rem 1.25rem 3rem;
     }
 
-    /* ── Demo banner ─────────────────────────────────────────── */
-    .demo-banner {
-      background: rgba(245,158,11,0.1);
-      border: 1px solid rgba(245,158,11,0.3);
-      border-radius: var(--radius);
-      padding: 0.65rem 1rem;
-      font-size: 0.78rem;
-      color: var(--orange);
-      margin-bottom: 1.25rem;
-      display: none;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .demo-banner.show { display: flex; }
-
     /* ── Stat bar ────────────────────────────────────────────── */
     .stat-bar {
       display: grid;
@@ -715,11 +700,6 @@
     </header>
 
     <main>
-      <!-- Demo banner -->
-      <div class="demo-banner" id="demoBanner">
-        📊 Mode démonstration — Lance une analyse réelle pour voir les shops qui scalent en ce moment.
-      </div>
-
       <!-- Stats bar -->
       <div class="stat-bar">
         <div class="stat-card">
@@ -836,7 +816,7 @@ const GITHUB_USER = 'letxbrace-droid';
 const GITHUB_REPO = 'Ningbus';
 const DATA_URL    = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/latest_analysis.json`;
 const CONTENTS_API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/data/latest_analysis.json`;
-const IDB_NAME    = 'trendtrack-v3';
+const IDB_NAME    = 'trendtrack-v4';
 const IDB_STORE   = 'cache';
 const IDB_KEY     = 'analysis';
 
@@ -896,22 +876,26 @@ async function fetchFreshData() {
 async function loadData(force = false) {
   if (!force) {
     const cached = await idbGet(IDB_KEY).catch(() => null);
-    if (cached) { state.data = cached; render(); return; }
+    if (cached && cached.results?.length) { state.data = cached; render(); return; }
   }
   document.getElementById('advertisersGrid').innerHTML =
     '<div class="state-msg"><div class="spinner"></div><br/>Chargement des données…</div>';
   try {
     const json = await fetchFreshData();
+    if (!json.results?.length) {
+      // Empty data in repo — show launch prompt, don't cache
+      state.data = json;
+      render();
+      return;
+    }
     state.data = json;
     await idbSet(IDB_KEY, json).catch(() => {});
     render();
   } catch (err) {
     const cached = await idbGet(IDB_KEY).catch(() => null);
-    if (cached) { state.data = cached; render(); return; }
+    if (cached && cached.results?.length) { state.data = cached; render(); return; }
     state.data = { generated_at: null, total_ads: 0, results: [] };
     render();
-    document.getElementById('advertisersGrid').innerHTML =
-      '<div class="state-msg">⚠️ Aucune donnée. Lance le workflow pour démarrer le premier scrape.</div>';
   }
 }
 
@@ -924,8 +908,7 @@ async function waitForNewData(prevGeneratedAt, attempt = 0) {
   try {
     const json = await fetchFreshData();
     const isNew = json.generated_at && json.generated_at !== prevGeneratedAt;
-    const isReal = !json.demo;
-    if (isNew || isReal) {
+    if (isNew) {
       state.data = json;
       await idbSet(IDB_KEY, json).catch(() => {});
       render();
@@ -944,10 +927,17 @@ async function waitForNewData(prevGeneratedAt, attempt = 0) {
 // ── Render ─────────────────────────────────────────────────────────────────
 function render() {
   if (!state.data) return;
-  const { results = [], generated_at, total_ads, demo } = state.data;
+  const { results = [], generated_at, total_ads } = state.data;
 
-  // Demo banner
-  document.getElementById('demoBanner').classList.toggle('show', !!demo);
+  if (!results.length) {
+    document.getElementById('advertisersGrid').innerHTML =
+      '<div class="state-msg" style="padding:2rem;text-align:center">' +
+      '<div style="font-size:2rem;margin-bottom:.75rem">🚀</div>' +
+      '<strong>Aucune donnée réelle disponible</strong><br/>' +
+      '<span style="color:var(--muted);font-size:.85rem">Lance une analyse via le bouton <b>Lancer l\'analyse</b> pour obtenir des données en temps réel.</span>' +
+      '</div>';
+    return;
+  }
 
   // Stats
   const d = new Date(generated_at);

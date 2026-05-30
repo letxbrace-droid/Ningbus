@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trendtrack-v4';
+const CACHE_NAME = 'trendtrack-v5';
 const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
