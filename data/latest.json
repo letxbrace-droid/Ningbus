@@ -1,4 +1,61 @@
 {
-  "generated_at": "2026-05-30T21:37:23Z",
-  "ads": []
+  "generated_at": "2026-05-30T21:46:00Z",
+  "ads": [
+    {
+      "ad_copy": "Support stamina and heart health every day",
+      "creative_id": "",
+      "page_name": "Essential Health Finds",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "engagement_score": 0,
+      "reactions": 0,
+      "publisher_platforms": [],
+      "angle_data": {
+        "angle": "Santé cardiaque",
+        "sub_angle": "Endurance et bien-être",
+        "hook": "Support stamina and heart health",
+        "pain_point": "Fatigue et problèmes cardiaques",
+        "desire": "Meilleure santé et endurance",
+        "mechanism": "Suppléments ou produits pour le cœur",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Personnes âgées de 40-65 ans",
+        "hook_pattern": "specific_result",
+        "confidence": 0.8
+      }
+    },
+    {
+      "ad_copy": "{{product.name}}",
+      "creative_id": "",
+      "page_name": "Vegetology",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "engagement_score": 0,
+      "reactions": 0,
+      "publisher_platforms": [],
+      "angle_data": {
+        "angle": "Produit innovant",
+        "sub_angle": "Découvrez le nouveau",
+        "hook": "Découvrez {{product.name}}",
+        "pain_point": "Recherche d'un produit efficace",
+        "desire": "Améliorer sa vie quotidienne",
+        "mechanism": "Technologie de pointe",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Consommateurs curieux",
+        "hook_pattern": "curiosity",
+        "confidence": 0.5
+      }
+    }
+  ]
 }
