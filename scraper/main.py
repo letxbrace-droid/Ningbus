@@ -315,7 +315,7 @@ async def run_niche(
 
     # 6. Detect angle gaps — attach product recommendations from active advertisers
     with Timer("gap_detection"):
-        gaps = aggregator.detect_gaps(angle_kpis, advertisers, prev_advertisers)
+        gaps = aggregator.detect_gaps(angle_kpis, advertisers, prev_advertisers, total_ads=len(analyzed_ads))
     logger.info("Step 6 — %d gap opportunities", len(gaps))
 
     # 7. Enrich advertiser profiles with their gap angles
