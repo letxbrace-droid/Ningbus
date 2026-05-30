@@ -82,12 +82,32 @@ class AngleAggregator:
         logger.info("Aggregated %d distinct angles from %d ads", len(kpis), total_ads)
         return kpis
 
-    def detect_gaps(self, angle_kpis: list[dict]) -> list[dict]:
+    def detect_gaps(
+        self,
+        angle_kpis: list[dict],
+        advertisers: list[dict] | None = None,
+    ) -> list[dict]:
         """
         Identify angles with high viability but low market saturation.
+        If advertisers are provided, attach their products as recommendations.
 
         Returns gaps sorted by viability DESC.
         """
+        # Build a deduplicated product pool from active advertisers
+        recommended_products: list[dict] = []
+        if advertisers:
+            seen_titles: set[str] = set()
+            for adv in sorted(advertisers, key=lambda a: a.get("scaling_score", 0), reverse=True):
+                for p in (adv.get("products") or [])[:3]:
+                    title = p.get("title", "")
+                    if title and title not in seen_titles:
+                        seen_titles.add(title)
+                        recommended_products.append(p)
+                    if len(recommended_products) >= 8:
+                        break
+                if len(recommended_products) >= 8:
+                    break
+
         gaps: list[dict] = []
         for kpi in angle_kpis:
             low_usage = kpi["usage_pct"] < USAGE_THRESHOLD
@@ -95,14 +115,15 @@ class AngleAggregator:
             if low_usage and high_viability:
                 gaps.append(
                     {
-                        "angle": kpi["angle"],
-                        "viability_score": kpi["viability_score"],
-                        "usage_count": kpi["count"],
-                        "usage_pct": kpi["usage_pct"],
-                        "avg_days_running": kpi["avg_days_running"],
-                        "examples": kpi["examples"],
-                        "primary_audience": kpi.get("primary_audience", ""),
-                        "potential": "HIGH",
+                        "angle":               kpi["angle"],
+                        "viability_score":     kpi["viability_score"],
+                        "usage_count":         kpi["count"],
+                        "usage_pct":           kpi["usage_pct"],
+                        "avg_days_running":    kpi["avg_days_running"],
+                        "examples":            kpi["examples"],
+                        "primary_audience":    kpi.get("primary_audience", ""),
+                        "potential":           "HIGH",
+                        "recommended_products": recommended_products[:4],
                     }
                 )
 

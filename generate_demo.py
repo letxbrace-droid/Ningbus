@@ -105,8 +105,72 @@ ANGLE_TEMPLATES: dict[str, list[tuple]] = {
 }
 
 
+# Produits réels-types par niche (titre, prix €, type)
+NICHE_PRODUCTS: dict[str, list[dict]] = {
+    "foot wellness": [
+        {"title": "Semelles orthopédiques gel anti-fatigue", "price": "29.90", "image": "", "url": "#"},
+        {"title": "Correcteur d'hallux valgus nuit", "price": "19.90", "image": "", "url": "#"},
+        {"title": "Crème réparatrice talons fissurés 75ml", "price": "15.90", "image": "", "url": "#"},
+        {"title": "Bande kinésiologique pieds x5", "price": "12.50", "image": "", "url": "#"},
+    ],
+    "posture corrector": [
+        {"title": "Correcteur de posture magnétique dos", "price": "34.90", "image": "", "url": "#"},
+        {"title": "Coussin lombaire ergonomique bureau", "price": "45.00", "image": "", "url": "#"},
+        {"title": "Appui-tête cervical voiture", "price": "22.90", "image": "", "url": "#"},
+    ],
+    "sleep supplement": [
+        {"title": "Mélatonine + Magnésium 60 gélules", "price": "24.90", "image": "", "url": "#"},
+        {"title": "Spray sommeil CBD 30ml", "price": "39.90", "image": "", "url": "#"},
+        {"title": "Masque yeux refroidissant + lavande", "price": "17.90", "image": "", "url": "#"},
+        {"title": "Tisane sommeil profond bio x20", "price": "12.90", "image": "", "url": "#"},
+    ],
+    "hair loss": [
+        {"title": "Sérum repousse biotine + kératine 50ml", "price": "44.90", "image": "", "url": "#"},
+        {"title": "Shampooing anti-chute DHT-Block 250ml", "price": "28.90", "image": "", "url": "#"},
+        {"title": "Complément alimentaire cheveux 90 cp", "price": "34.90", "image": "", "url": "#"},
+        {"title": "Dermaroller scalp 0.5mm titanium", "price": "19.90", "image": "", "url": "#"},
+    ],
+    "joint pain": [
+        {"title": "Collagène type II + glucosamine 120 cp", "price": "39.90", "image": "", "url": "#"},
+        {"title": "Genouillère compression sport", "price": "24.90", "image": "", "url": "#"},
+        {"title": "Baume articulaire chaud/froid 100ml", "price": "18.90", "image": "", "url": "#"},
+        {"title": "Complexe curcuma + poivre noir 60 gél", "price": "29.90", "image": "", "url": "#"},
+    ],
+    "weight loss": [
+        {"title": "Brûle-graisses thermogénique 90 cp", "price": "39.90", "image": "", "url": "#"},
+        {"title": "Coupe-faim psyllium blond 200g", "price": "22.90", "image": "", "url": "#"},
+        {"title": "Programme detox 21 jours tisanes", "price": "49.90", "image": "", "url": "#"},
+        {"title": "Ceinture sudation néoprène mixte", "price": "29.90", "image": "", "url": "#"},
+    ],
+    "gut health": [
+        {"title": "Probiotiques 50 milliards UFC 60 gél", "price": "34.90", "image": "", "url": "#"},
+        {"title": "Bouillon os collagène intestinal 500g", "price": "27.90", "image": "", "url": "#"},
+        {"title": "L-Glutamine poudre 300g", "price": "24.90", "image": "", "url": "#"},
+        {"title": "Kéfir fermenté bio 1L", "price": "12.90", "image": "", "url": "#"},
+    ],
+    "collagen": [
+        {"title": "Collagène marin hydrolysé poudre 300g", "price": "44.90", "image": "", "url": "#"},
+        {"title": "Sérum vitamine C + collagène 30ml", "price": "39.90", "image": "", "url": "#"},
+        {"title": "Boisson beauté collagène + acide hyaluronique", "price": "34.90", "image": "", "url": "#"},
+    ],
+    "anti aging": [
+        {"title": "Crème rétinol nuit 0.3% 50ml", "price": "49.90", "image": "", "url": "#"},
+        {"title": "Sérum acide hyaluronique multi-couches 30ml", "price": "39.90", "image": "", "url": "#"},
+        {"title": "Masque LED anti-âge 7 couleurs", "price": "89.90", "image": "", "url": "#"},
+        {"title": "NMN + Resvératrol 60 gélules", "price": "59.90", "image": "", "url": "#"},
+    ],
+    "teeth whitening": [
+        {"title": "Kit blanchiment LED + 6 seringues gel", "price": "34.90", "image": "", "url": "#"},
+        {"title": "Bandes blanchissantes 3D sans peroxyde x14", "price": "22.90", "image": "", "url": "#"},
+        {"title": "Charbon actif poudre blanchissante 60g", "price": "14.90", "image": "", "url": "#"},
+        {"title": "Dentifrice remineralisant nano-hydroxyapatite", "price": "18.90", "image": "", "url": "#"},
+    ],
+}
+
+
 def make_niche_data(niche: str) -> dict:
     templates  = ANGLE_TEMPLATES.get(niche, ANGLE_TEMPLATES["foot wellness"])
+    products   = NICHE_PRODUCTS.get(niche, NICHE_PRODUCTS["foot wellness"])
     total_ads  = random.randint(45, 95)
     angle_kpis = []
     gaps       = []
@@ -142,31 +206,55 @@ def make_niche_data(niche: str) -> dict:
         angle_kpis.append(kpi)
 
         if usage_pct < 0.10 and viability > 60:
+            # Recommend 2-3 products from this niche for this gap angle
+            rec_products = random.sample(products, min(3, len(products)))
             gaps.append({
-                "angle":           angle,
-                "viability_score": round(viability, 1),
-                "usage_count":     count,
-                "usage_pct":       usage_pct,
-                "avg_days_running":round(avg_d, 1),
-                "examples":        examples,
-                "primary_audience":_audience(niche),
-                "potential":       "HIGH",
+                "angle":                angle,
+                "viability_score":      round(viability, 1),
+                "usage_count":          count,
+                "usage_pct":            usage_pct,
+                "avg_days_running":     round(avg_d, 1),
+                "examples":             examples,
+                "primary_audience":     _audience(niche),
+                "potential":            "HIGH",
+                "recommended_products": rec_products,
             })
 
     angle_kpis.sort(key=lambda k: k["viability_score"], reverse=True)
     gaps.sort(key=lambda g: g["viability_score"], reverse=True)
 
+    # Build minimal advertiser entries so demo shows product recommendations in gaps
+    advertisers = [
+        {
+            "name":             f"Boutique {niche.title()} #{i+1}",
+            "domain":           "",
+            "store_url":        "",
+            "scaling_score":    round(random.uniform(40, 180), 1),
+            "ads_count":        random.randint(2, 8),
+            "max_days_running": random.randint(20, 90),
+            "avg_days_running": round(random.uniform(15, 70), 1),
+            "estimated_spend":  random.randint(200, 2000),
+            "angles_used":      [t[0] for t in random.sample(templates, min(3, len(templates)))],
+            "dominant_angle":   templates[0][0],
+            "angle_gaps":       [g["angle"] for g in gaps[:2]],
+            "products":         random.sample(products, min(3, len(products))),
+            "ad_examples":      [],
+            "platforms":        random.sample(["facebook", "instagram", "audience_network"], 2),
+        }
+        for i in range(3)
+    ]
+    advertisers.sort(key=lambda a: a["scaling_score"], reverse=True)
+
     return {
-        "niche":      niche,
-        "angle_kpis": angle_kpis,
-        "gaps":       gaps,
-        # No fake shops in demo — shops only appear after real scraping
-        "shops":      [],
+        "niche":       niche,
+        "angle_kpis":  angle_kpis,
+        "gaps":        gaps,
+        "advertisers": advertisers,
         "stats": {
-            "total_ads":     total_ads,
-            "unique_angles": len(angle_kpis),
-            "gaps_found":    len(gaps),
-            "shops_found":   0,
+            "total_ads":         total_ads,
+            "unique_angles":     len(angle_kpis),
+            "gaps_found":        len(gaps),
+            "advertisers_found": len(advertisers),
         },
     }
 

@@ -885,7 +885,7 @@ function renderNicheList(results) {
 function renderNiche() {
   const nicheData = (state.data?.results || [])[state.activeNiche] || {};
   renderAdvertisers(nicheData.advertisers || []);
-  renderGaps(nicheData.gaps || [], nicheData.recommendations || []);
+  renderGaps(nicheData.gaps || []);
   renderAllAngles(nicheData.angle_kpis || []);
 }
 
@@ -999,8 +999,7 @@ function buildAdvCard(adv) {
 }
 
 // ── Gaps ───────────────────────────────────────────────────────────────────
-function renderGaps(gaps, recommendations) {
-  const reco = Object.fromEntries((recommendations||[]).map(r=>[r.angle,r]));
+function renderGaps(gaps) {
   document.getElementById('gapCount').textContent = gaps.length;
   let items = sortItems(filterItems(gaps, state.filters.gap), state.sorts.gap);
   const grid = document.getElementById('gapGrid');
@@ -1008,16 +1007,32 @@ function renderGaps(gaps, recommendations) {
     grid.innerHTML = '<div class="state-msg">Aucun gap détecté pour cette niche.</div>';
     return;
   }
-  grid.innerHTML = items.map(g=>buildGapCard(g,reco[g.angle])).join('');
-  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
+  grid.innerHTML = items.map(buildGapCard).join('');
+  grid.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('click', e => { if (!e.target.closest('a')) c.classList.toggle('open'); });
+  });
 }
 
-function buildGapCard(gap, reco) {
-  const examples = (gap.examples||[]).slice(0,3).map(ex=>`
+function buildGapCard(gap) {
+  const products = (gap.recommended_products || []).slice(0, 4);
+
+  const prodsHtml = products.length
+    ? `<div class="prods-grid">${products.map(p => `
+        <a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
+          ${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
+          <div class="prod-tile-title">${esc(p.title)}</div>
+          ${p.price ? `<div class="prod-tile-price">${esc(p.price)} €</div>` : ''}
+        </a>`).join('')}</div>`
+    : `<p style="font-size:.73rem;color:var(--muted)">Produits disponibles après scrape réel.</p>`;
+
+  const examples = (gap.examples||[]).slice(0,2).map(ex=>`
     <div class="example-item">
       <div class="example-hook">${esc(ex.hook||'—')}</div>
-      <div class="example-meta">${esc(ex.store)} · ${ex.days_running??0}j</div>
+      <div class="example-meta">${esc(ex.store||'')}${ex.store?' · ':''}${ex.days_running??0}j actif</div>
     </div>`).join('');
+
+  const hasDetail = products.length || examples;
+
   return `
     <div class="card gap-card">
       <div class="card-title">
@@ -1025,12 +1040,19 @@ function buildGapCard(gap, reco) {
         <span class="viability-pill">${gap.viability_score??0}% viab.</span>
       </div>
       <div class="card-meta">
-        <span>Utilisé <strong>${gap.usage_count??0}×</strong></span>
-        <span>Moy. <strong>${gap.avg_days_running??0}j</strong></span>
-        <span>${esc(gap.primary_audience||'')}</span>
+        <span>Utilisé <strong>${gap.usage_count??0}×</strong> seulement</span>
+        <span>Moy. <strong>${gap.avg_days_running??0}j</strong> actif</span>
+        ${gap.primary_audience ? `<span>${esc(gap.primary_audience)}</span>` : ''}
       </div>
+      ${hasDetail ? '<div class="expand-hint">▼ produits à lancer avec cet angle</div>' : ''}
       <div class="card-detail">
-        ${examples||'<p style="color:var(--muted);font-size:.75rem">—</p>'}
+        ${products.length ? `
+          <div class="detail-label">🛒 Produits à lancer avec cet angle</div>
+          ${prodsHtml}` : ''}
+        ${examples ? `
+          <div class="detail-label" style="margin-top:.75rem">📌 Exemples de pubs existants</div>
+          ${examples}` : ''}
+        ${!hasDetail ? '<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>' : ''}
       </div>
     </div>`;
 }
@@ -1111,7 +1133,7 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
     state.sorts[section] = sort;
     const nd = (state.data?.results||[])[state.activeNiche]||{};
     if (section==='adv') renderAdvertisers(nd.advertisers||[]);
-    if (section==='gap') renderGaps(nd.gaps||[], nd.recommendations||[]);
+    if (section==='gap') renderGaps(nd.gaps||[]);
     if (section==='all') renderAllAngles(nd.angle_kpis||[]);
   });
 });
@@ -1123,7 +1145,7 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
     state.filters[section] = e.target.value;
     const nd = (state.data?.results||[])[state.activeNiche]||{};
     if (section==='adv') renderAdvertisers(nd.advertisers||[]);
-    if (section==='gap') renderGaps(nd.gaps||[], nd.recommendations||[]);
+    if (section==='gap') renderGaps(nd.gaps||[]);
     if (section==='all') renderAllAngles(nd.angle_kpis||[]);
   });
 });

@@ -132,17 +132,20 @@ async def run_niche(
         angle_kpis = aggregator.aggregate(analyzed_ads)
     logger.info("Step 3 — %d distinct angles", len(angle_kpis))
 
-    # 4. Detect angle gaps
-    with Timer("gap_detection"):
-        gaps = aggregator.detect_gaps(angle_kpis)
-    logger.info("Step 4 — %d gap opportunities", len(gaps))
-
-    # 5. Find scaling shops + their product catalogs
+    # 4. Find scaling shops (concurrent with step 3 logically, but we need angle_kpis first)
     with Timer("shop_finder"):
         shops = await find_scaling_shops(analyzed_ads, niche, country)
-    logger.info("Step 5 — %d scaling shops found", len(shops))
+    logger.info("Step 4 — %d scaling shops found", len(shops))
 
-    # 6. Convert shops to advertiser profiles with gap analysis
+    # 5. Convert shops → advertiser profiles (needed before gap detection for product recs)
+    advertisers = [_shop_to_advertiser(s, []) for s in shops]
+
+    # 6. Detect angle gaps — attach product recommendations from active advertisers
+    with Timer("gap_detection"):
+        gaps = aggregator.detect_gaps(angle_kpis, advertisers)
+    logger.info("Step 6 — %d gap opportunities", len(gaps))
+
+    # 7. Enrich advertiser profiles with their gap angles
     advertisers = [_shop_to_advertiser(s, gaps) for s in shops]
 
     elapsed = time.perf_counter() - t0
