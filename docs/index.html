@@ -18,6 +18,17 @@
     /* ── Reset ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── SVG icons ──────────────────────────────────────────── */
+    .ico { display: inline-block; vertical-align: -0.13em; width: 1em; height: 1em; flex-shrink: 0; }
+    .nav-icon .ico { width: 15px; height: 15px; vertical-align: -3px; }
+    .sb-btn .ico   { width: 14px; height: 14px; vertical-align: -2px; }
+    .icon-btn .ico { width: 15px; height: 15px; }
+    .burger-btn .ico { width: 18px; height: 18px; }
+    .stat-label .ico { width: 11px; height: 11px; vertical-align: -1px; }
+    .section-title .ico { width: 14px; height: 14px; vertical-align: -2px; }
+    h2 .ico { width: 18px; height: 18px; vertical-align: -3px; }
+    .btn .ico { width: 14px; height: 14px; vertical-align: -2px; }
+
     /* ── Design tokens ──────────────────────────────────────── */
     :root {
       --bg:          #070C17;
@@ -526,17 +537,17 @@
     <!-- Navigation -->
     <nav class="sidebar-nav">
       <a class="nav-item active" id="nav-adv" onclick="showPage('advertisers')">
-        <span class="nav-icon">◈</span> Advertisers
+        <span class="nav-icon"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14v-1.3A2.7 2.7 0 0 0 8.3 10H4.7A2.7 2.7 0 0 0 2 12.7V14"/><circle cx="6.5" cy="5.5" r="2.5"/><path d="M14 14v-1.1a2.5 2.5 0 0 0-1.9-2.4"/><path d="M11.1 3.1a2.5 2.5 0 0 1 0 4.8"/></svg></span> Advertisers
         <span class="run-badge-sb" id="runBadge"></span>
       </a>
       <a class="nav-item" id="nav-gap" onclick="showPage('gaps')">
-        <span class="nav-icon">◉</span> Gaps d'angles
+        <span class="nav-icon"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/></svg></span> Gaps d'angles
       </a>
       <a class="nav-item" id="nav-all" onclick="showPage('angles')">
-        <span class="nav-icon">◫</span> Performances
+        <span class="nav-icon"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="9" width="3" height="5.5" rx=".5"/><rect x="6.5" y="5" width="3" height="9.5" rx=".5"/><rect x="11.5" y="2" width="3" height="12.5" rx=".5"/></svg></span> Performances
       </a>
       <a class="nav-item" id="nav-mat" onclick="showPage('matrix')">
-        <span class="nav-icon">▦</span> Matrice
+        <span class="nav-icon"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1"/><rect x="9" y="9" width="5.5" height="5.5" rx="1"/></svg></span> Matrice
       </a>
     </nav>
 
@@ -548,9 +559,9 @@
 
     <!-- Footer actions -->
     <div class="sidebar-footer">
-      <button class="sb-btn accent-btn" id="launchBtn">⚡ Lancer une analyse</button>
-      <button class="sb-btn" id="refreshBtn">↻ Actualiser les données</button>
-      <button class="sb-btn" id="themeBtn">◑ Basculer le thème</button>
+      <button class="sb-btn accent-btn" id="launchBtn"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5 2.5 9h5.5L5.5 14.5 13 7H7.5L9 1.5z"/></svg> Lancer une analyse</button>
+      <button class="sb-btn" id="refreshBtn"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 5.5A6 6 0 1 0 13 10.5"/><polyline points="13.5,2.5 13.5,5.5 10.5,5.5"/></svg> Actualiser les données</button>
+      <button class="sb-btn" id="themeBtn"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" stroke="none"/></svg> Basculer le thème</button>
     </div>
   </aside>
 
@@ -562,11 +573,11 @@
 
     <!-- Mobile sticky header -->
     <header class="top-header">
-      <button class="burger-btn" id="burgerBtn" aria-label="Menu">☰</button>
+      <button class="burger-btn" id="burgerBtn" aria-label="Menu"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><line x1="2" y1="4.5" x2="14" y2="4.5"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="11.5" x2="14" y2="11.5"/></svg></button>
       <span class="header-logo">TrendTrack</span>
       <div class="header-right">
-        <button class="icon-btn" id="refreshBtnMob" title="Refresh">↻</button>
-        <button class="icon-btn" id="launchBtnMob" title="Analyser">⚡</button>
+        <button class="icon-btn" id="refreshBtnMob" title="Refresh"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 5.5A6 6 0 1 0 13 10.5"/><polyline points="13.5,2.5 13.5,5.5 10.5,5.5"/></svg></button>
+        <button class="icon-btn" id="launchBtnMob" title="Analyser"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5 2.5 9h5.5L5.5 14.5 13 7H7.5L9 1.5z"/></svg></button>
       </div>
     </header>
 
@@ -582,7 +593,7 @@
           <div class="stat-value" id="statAds">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">📈 En hausse</div>
+          <div class="stat-label"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,12 5.5,7 9,10 15,4"/><polyline points="10.5,4 15,4 15,8.5"/></svg> En hausse</div>
           <div class="stat-value" id="statTrending">—</div>
         </div>
         <div class="stat-card">
@@ -603,13 +614,13 @@
       <div class="page-view active" id="page-advertisers">
         <div id="trendingNow" style="display:none;margin-bottom:1.5rem">
           <div class="section-header" style="margin-top:0">
-            <span class="section-title">🔥 Tendances en ce moment</span>
+            <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c-3 0-5-2.2-5-5 0-1.8 1-3.6 2.5-4.5 0 1.2.5 2.2 1.5 2.8C7 5.5 7.5 3.5 8.5 2c1.5 2 2.5 4 1 6 .8-.3 1.5-.8 2-1.5C12 8.5 12 10 11 11.5c.3-.3.5-.7.5-1.2C13 11.5 13 14 8 14z"/></svg> Tendances en ce moment</span>
             <span class="badge badge-adv" id="trendingCount">0</span>
           </div>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="trendingList"></div>
         </div>
         <div class="section-header">
-          <span class="section-title">🏆 Advertisers qui scalent</span>
+          <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11v3M5.5 14h5"/><path d="M4 2h8v5a4 4 0 0 1-8 0V2z"/><path d="M4 4H1.5v2a2.5 2.5 0 0 0 2.5 2.5"/><path d="M12 4h2.5v2A2.5 2.5 0 0 1 12 8.5"/></svg> Advertisers qui scalent</span>
           <span class="badge badge-adv" id="advertisersCount">0</span>
         </div>
         <div class="toolbar">
@@ -628,7 +639,7 @@
       <!-- PAGE: GAPS -->
       <div class="page-view" id="page-gaps">
         <div class="section-header">
-          <span class="section-title">🟡 Angles inexploités</span>
+          <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/></svg> Angles inexploités</span>
           <span class="badge badge-gap" id="gapCount">0</span>
         </div>
         <div class="toolbar">
@@ -644,7 +655,7 @@
       <!-- PAGE: ANGLES -->
       <div class="page-view" id="page-angles">
         <div class="section-header">
-          <span class="section-title">📊 Performances par angle</span>
+          <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="9" width="3" height="5.5" rx=".5"/><rect x="6.5" y="5" width="3" height="9.5" rx=".5"/><rect x="11.5" y="2" width="3" height="12.5" rx=".5"/></svg> Performances par angle</span>
           <span class="badge badge-all" id="allCount">0</span>
         </div>
         <div class="toolbar">
@@ -661,7 +672,7 @@
       <!-- PAGE: MATRIX -->
       <div class="page-view" id="page-matrix">
         <div class="section-header">
-          <span class="section-title">📊 Matrice Produit × Angle</span>
+          <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1"/><rect x="9" y="9" width="5.5" height="5.5" rx="1"/></svg> Matrice Produit × Angle</span>
           <span class="badge badge-adv" id="matrixCount">0</span>
         </div>
         <div id="matrixGrid"></div>
@@ -673,7 +684,7 @@
 <!-- Launch modal -->
 <div class="modal-overlay" id="launchModal">
   <div class="modal">
-    <h2>⚡ Lancer une analyse</h2>
+    <h2><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5 2.5 9h5.5L5.5 14.5 13 7H7.5L9 1.5z"/></svg> Lancer une analyse</h2>
     <label>GitHub Token (PAT)
       <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" autocomplete="current-password" />
     </label>
@@ -696,12 +707,47 @@
     </label>
     <div class="modal-actions">
       <button class="btn" id="modalCancel">Annuler</button>
-      <button class="btn btn-primary" id="modalLaunch">🚀 Lancer</button>
+      <button class="btn btn-primary" id="modalLaunch"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5c1 1.2 3.5 4.2 3.5 7.5H4.5C4.5 5.7 7 2.7 8 1.5z"/><path d="M5 9v3l3 2 3-2V9"/><line x1="5.5" y1="7.5" x2="10.5" y2="7.5"/></svg> Lancer</button>
     </div>
   </div>
 </div>
 
 <script>
+// ── SVG icon map ────────────────────────────────────────────────────────────
+const ICO = {
+  zap:           `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5 2.5 9h5.5L5.5 14.5 13 7H7.5L9 1.5z"/></svg>`,
+  refresh:       `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 5.5A6 6 0 1 0 13 10.5"/><polyline points="13.5,2.5 13.5,5.5 10.5,5.5"/></svg>`,
+  contrast:      `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" stroke="none"/></svg>`,
+  users:         `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14v-1.3A2.7 2.7 0 0 0 8.3 10H4.7A2.7 2.7 0 0 0 2 12.7V14"/><circle cx="6.5" cy="5.5" r="2.5"/><path d="M14 14v-1.1a2.5 2.5 0 0 0-1.9-2.4"/><path d="M11.1 3.1a2.5 2.5 0 0 1 0 4.8"/></svg>`,
+  target:        `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/></svg>`,
+  barChart:      `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="9" width="3" height="5.5" rx=".5"/><rect x="6.5" y="5" width="3" height="9.5" rx=".5"/><rect x="11.5" y="2" width="3" height="12.5" rx=".5"/></svg>`,
+  grid:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1"/><rect x="9" y="9" width="5.5" height="5.5" rx="1"/></svg>`,
+  trendUp:       `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,12 5.5,7 9,10 15,4"/><polyline points="10.5,4 15,4 15,8.5"/></svg>`,
+  flame:         `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c-3 0-5-2.2-5-5 0-1.8 1-3.6 2.5-4.5 0 1.2.5 2.2 1.5 2.8C7 5.5 7.5 3.5 8.5 2c1.5 2 2.5 4 1 6 .8-.3 1.5-.8 2-1.5C12 8.5 12 10 11 11.5c.3-.3.5-.7.5-1.2C13 11.5 13 14 8 14z"/></svg>`,
+  music:         `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13V4l8-2v9"/><circle cx="4" cy="13" r="2"/><circle cx="12" cy="11" r="2"/></svg>`,
+  star:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l1.8 3.6L14 5.6l-3 2.9.7 4.1L8 10.5l-3.7 2.1.7-4.1-3-2.9 4.2-.5L8 1.5z"/></svg>`,
+  settings:      `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.2"/><path d="M12.7 8a4.9 4.9 0 0 0-.1-1l1.5-1.2-1.4-2.5-1.8.8A5 5 0 0 0 9.2 3l-.4-1.7H7.2L6.8 3A5 5 0 0 0 5.1 4.1L3.3 3.3 1.9 5.8l1.5 1.2A4.9 4.9 0 0 0 3.3 8c0 .35.03.7.1 1L1.9 10.2l1.4 2.5 1.8-.8A5 5 0 0 0 6.8 13l.4 1.7h1.6l.4-1.7a5 5 0 0 0 1.7-1.1l1.8.8 1.4-2.5-1.5-1.2c.07-.33.1-.67.1-1z"/></svg>`,
+  tag:           `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h5.4l7.1 7.1-5.4 5.4L2 7.4V2z"/><circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/></svg>`,
+  dollar:        `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5v13M5.5 11.5c0 1.4 1.1 2 2.5 2s2.5-.7 2.5-2-1-1.8-2.5-2.3S5.5 7.5 5.5 6c0-1.3 1.1-2 2.5-2s2.5.7 2.5 2"/></svg>`,
+  crosshair:     `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="4.5"/><line x1="8" y1="1" x2="8" y2="3.5"/><line x1="8" y1="12.5" x2="8" y2="15"/><line x1="1" y1="8" x2="3.5" y2="8"/><line x1="12.5" y1="8" x2="15" y2="8"/></svg>`,
+  euro:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4.5A5.5 5.5 0 0 0 4 8.5a5.5 5.5 0 0 0 8 4"/><line x1="2" y1="7" x2="9" y2="7"/><line x1="2" y1="10" x2="9" y2="10"/></svg>`,
+  shield:        `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5 2.5 4v5a6 6 0 0 0 5.5 5.4A6 6 0 0 0 13.5 9V4L8 1.5z"/></svg>`,
+  package:       `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5 8 2 2 5v6l6 3 6-3V5z"/><path d="M2 5l6 3 6-3"/><line x1="8" y1="8" x2="8" y2="14"/></svg>`,
+  check:         `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5l3.5 3.5 7.5-7.5"/></svg>`,
+  checkCircle:   `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.5l2 2 4-4"/></svg>`,
+  xCircle:       `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M10.5 5.5l-5 5M5.5 5.5l5 5"/></svg>`,
+  alertTriangle: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2 1.5 13.5h13L8 2z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg>`,
+  hook:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8.5A3.5 3.5 0 1 1 4.5 7H7"/></svg>`,
+  lightbulb:     `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M6.5 14h3M8 1.5A4.5 4.5 0 0 0 5 9.5c0 .8.5 1.5 1 2.5h4c.5-1 1-1.7 1-2.5A4.5 4.5 0 0 0 8 1.5z"/></svg>`,
+  signal:        `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 12.5a8.5 8.5 0 0 1 13 0"/><path d="M4 10a5.5 5.5 0 0 1 8 0"/><path d="M6.5 7.5a2.5 2.5 0 0 1 3 0"/><circle cx="8" cy="14" r=".8" fill="currentColor" stroke="none"/></svg>`,
+  newEntry:      `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg>`,
+  rocket:        `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5c1 1.2 3.5 4.2 3.5 7.5H4.5C4.5 5.7 7 2.7 8 1.5z"/><path d="M5 9v3l3 2 3-2V9"/><line x1="5.5" y1="7.5" x2="10.5" y2="7.5"/></svg>`,
+  hourglass:     `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 1.5h9M3.5 14.5h9M4.5 1.5v3l3 3-3 3v3M11.5 1.5v3l-3 3 3 3v3"/></svg>`,
+  cart:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5h1.8l1.5 7h7l1.4-4.5H4.5"/><circle cx="6.5" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></svg>`,
+  pin:           `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2H5a1 1 0 0 0-1 1v9l4-2.5L12 12V3a1 1 0 0 0-1-1z"/></svg>`,
+  chat:          `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8a6 6 0 0 1-8.2 5.5L2 14.5l1-3.8A6 6 0 1 1 14 8z"/></svg>`,
+};
+
 // ── Config ─────────────────────────────────────────────────────────────────
 const GITHUB_USER = 'letxbrace-droid';
 const GITHUB_REPO = 'Ningbus';
@@ -798,7 +844,7 @@ async function loadData(force = false) {
 async function waitForNewData(prevGeneratedAt, attempt = 0) {
   const MAX_ATTEMPTS = 12; // 12 × 20s ≈ 4 min
   const delay = attempt === 0 ? 8000 : 20000;
-  setBadge('running', `⏳ Sync données${attempt ? ` (${attempt}/${MAX_ATTEMPTS})` : ''}…`);
+  setBadge('running', `${ICO.hourglass} Sync données${attempt ? ` (${attempt}/${MAX_ATTEMPTS})` : ''}…`);
   await new Promise(r => setTimeout(r, delay));
   try {
     const json = await fetchFreshData();
@@ -807,7 +853,7 @@ async function waitForNewData(prevGeneratedAt, attempt = 0) {
       state.data = json;
       await idbSet(IDB_KEY, json).catch(() => {});
       render();
-      setBadge('success', '✅ Données mises à jour !');
+      setBadge('success', `${ICO.checkCircle} Données mises à jour !`);
       setTimeout(() => document.getElementById('runBadge').classList.remove('show'), 8000);
       return;
     }
@@ -815,7 +861,7 @@ async function waitForNewData(prevGeneratedAt, attempt = 0) {
   if (attempt < MAX_ATTEMPTS) {
     waitForNewData(prevGeneratedAt, attempt + 1);
   } else {
-    setBadge('failure', '⚠️ Rafraîchissez manuellement');
+    setBadge('failure', `${ICO.alertTriangle} Rafraîchissez manuellement`);
   }
 }
 
@@ -827,7 +873,7 @@ function render() {
   if (!results.length) {
     document.getElementById('advertisersGrid').innerHTML =
       '<div class="state-msg" style="padding:2rem;text-align:center">' +
-      '<div style="font-size:2rem;margin-bottom:.75rem">🚀</div>' +
+      `<div style="margin-bottom:.75rem;opacity:.35">${ICO.rocket}</div>` +
       '<strong>Aucune donnée réelle disponible</strong><br/>' +
       '<span style="color:var(--muted);font-size:.85rem">Lance une analyse via le bouton <b>Lancer l\'analyse</b> pour obtenir des données en temps réel.</span>' +
       '</div>';
@@ -922,7 +968,7 @@ function renderAdvertisers(advertisers) {
 
   if (!items.length) {
     grid.innerHTML = `<div class="state-msg">
-      ⚡ Lance une analyse pour voir les advertisers qui scalent sur cette niche.<br>
+      ${ICO.zap} Lance une analyse pour voir les advertisers qui scalent sur cette niche.<br>
       <span style="font-size:0.75rem;display:block;margin-top:0.35rem">
         Les shops réels apparaissent après le premier scrape.
       </span></div>`;
@@ -949,56 +995,56 @@ function buildAdvCard(adv) {
   ].filter(Boolean).join('');
 
   const gapsHtml = gaps.slice(0,3).map(g=>
-    `<span class="chip chip-yellow" title="Angle non exploité">🟡 ${esc(g)}</span>`
+    `<span class="chip chip-yellow" title="Angle non exploité">${ICO.target} ${esc(g)}</span>`
   ).join('');
 
   const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge">${esc(p)}</span>`).join('');
-  const newBadge = adv.is_new_entrant ? '<span class="new-entrant-badge">🆕 Nouvel entrant</span>' : '';
+  const newBadge = adv.is_new_entrant ? `<span class="new-entrant-badge">${ICO.newEntry} Nouvel entrant</span>` : '';
 
   const rev = adv.revenue_estimate;
-  const revHtml = rev ? `<span class="rev-badge">💰 ~${(rev.monthly_revenue_est/1000).toFixed(0)}k€/mois</span>` : '';
+  const revHtml = rev ? `<span class="rev-badge">${ICO.dollar} ~${(rev.monthly_revenue_est/1000).toFixed(0)}k€/mois</span>` : '';
 
   const land = adv.landing_analysis;
   const landHtml = land ? (() => {
     const score = land.conversion_score ?? 0;
     const cls = score >= 70 ? 'land-high' : score >= 40 ? 'land-med' : 'land-low';
-    return `<span class="land-badge ${cls}">🎯 Conv. ${score}/100</span>`;
+    return `<span class="land-badge ${cls}">${ICO.crosshair} Conv. ${score}/100</span>`;
   })() : '';
 
   const landDetail = land ? `
     <div style="margin-top:.5rem;font-size:.75rem;color:var(--muted)">
-      ${land.price ? `💶 Prix: <b>€${land.price}</b>` : ''}
-      ${land.guarantee_days ? ` · 🛡️ Garantie: <b>${land.guarantee_days}j</b>` : ''}
-      ${land.review_count ? ` · ⭐ <b>${land.review_count}</b> avis` : ''}
+      ${land.price ? `${ICO.euro} Prix: <b>€${land.price}</b>` : ''}
+      ${land.guarantee_days ? ` · ${ICO.shield} Garantie: <b>${land.guarantee_days}j</b>` : ''}
+      ${land.review_count ? ` · ${ICO.star} <b>${land.review_count}</b> avis` : ''}
       ${land.star_rating ? ` · ${land.star_rating}/5` : ''}
     </div>` : '';
 
   const scalingSignals = adv.scaling_signals || [];
   const scalingHtml = scalingSignals.length
     ? `<div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.35rem">
-        ${scalingSignals.slice(0,6).map(s=>`<span class="chip chip-blue" style="font-size:.64rem">⚙️ ${esc(s)}</span>`).join('')}
+        ${scalingSignals.slice(0,6).map(s=>`<span class="chip chip-blue" style="font-size:.64rem">${ICO.settings} ${esc(s)}</span>`).join('')}
       </div>` : '';
 
   // Shop-level stats from product data
   const shopStatParts = [];
   if (adv.avg_product_price) shopStatParts.push(`Prix moy. <b>€${adv.avg_product_price}</b>`);
   if (adv.collections_count) shopStatParts.push(`<b>${adv.collections_count}</b> collections`);
-  if (adv.avg_product_rating) shopStatParts.push(`⭐ <b>${adv.avg_product_rating}/5</b>`);
-  if (adv.products_with_discount > 0) shopStatParts.push(`🏷️ <b>${adv.products_with_discount}</b> en promo`);
-  if (adv.products_with_reviews > 0) shopStatParts.push(`💬 <b>${adv.products_with_reviews}</b> avec avis`);
+  if (adv.avg_product_rating) shopStatParts.push(`${ICO.star} <b>${adv.avg_product_rating}/5</b>`);
+  if (adv.products_with_discount > 0) shopStatParts.push(`${ICO.tag} <b>${adv.products_with_discount}</b> en promo`);
+  if (adv.products_with_reviews > 0) shopStatParts.push(`${ICO.chat} <b>${adv.products_with_reviews}</b> avec avis`);
   const shopStatsHtml = shopStatParts.length
     ? `<div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">${shopStatParts.join(' · ')}</div>` : '';
 
   const products  = (adv.products||[]).slice(0,8);
   const prodsHtml = products.length
     ? `<div class="prods-grid">${products.map(p => {
-        const marginMap = { excellent: ['🔥 ×'+p.margin_multiplier, '#22c55e'], good: ['✅ ×'+p.margin_multiplier, '#f59e0b'], low: ['⚠️ ×'+(p.margin_multiplier||'?'), '#ef4444'] };
+        const marginMap = { excellent: [ICO.flame+' ×'+p.margin_multiplier, '#22c55e'], good: [ICO.check+' ×'+p.margin_multiplier, '#f59e0b'], low: [ICO.alertTriangle+' ×'+(p.margin_multiplier||'?'), '#ef4444'] };
         const mInfo = p.margin_signal ? marginMap[p.margin_signal] : null;
         const discountHtml = p.discount_pct > 0 ? `<div style="font-size:.6rem;color:#f59e0b">-${p.discount_pct}%</div>` : '';
-        const reviewHtml = p.review_count ? `<div style="font-size:.6rem;color:var(--muted)">⭐ ${p.star_rating ?? ''} (${p.review_count})</div>` : '';
+        const reviewHtml = p.review_count ? `<div style="font-size:.6rem;color:var(--muted)">${ICO.star} ${p.star_rating ?? ''} (${p.review_count})</div>` : '';
         const variantsHtml = (p.variants_count > 1 || p.options?.length) ? `<div style="font-size:.6rem;color:var(--muted)">${(p.options||[]).join(', ') || p.variants_count+' variantes'}</div>` : '';
         const tagsHtml = p.tags?.length ? `<div style="font-size:.58rem;color:var(--muted);opacity:.75">${p.tags.slice(0,3).map(t=>esc(t)).join(', ')}</div>` : '';
-        const ageBadge = p.published_days != null ? (p.published_days < 60 ? `<div style="font-size:.58rem;color:#22c55e">🆕 ${p.published_days}j</div>` : `<div style="font-size:.58rem;color:var(--muted)">${p.published_days}j</div>`) : '';
+        const ageBadge = p.published_days != null ? (p.published_days < 60 ? `<div style="font-size:.58rem;color:#22c55e">${ICO.newEntry} ${p.published_days}j</div>` : `<div style="font-size:.58rem;color:var(--muted)">${p.published_days}j</div>`) : '';
         return `<a class="prod-tile" href="${esc(p.url||'#')}" target="_blank" rel="noopener">
           ${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
           <div class="prod-tile-title">${esc(p.title)}</div>
@@ -1028,7 +1074,7 @@ function buildAdvCard(adv) {
             ? `<a class="adv-domain" href="${esc(storeUrl)}" target="_blank" rel="noopener">${esc(domain||storeUrl)}</a>`
             : `<span class="adv-domain" style="color:var(--muted)">—</span>`}
         </div>
-        <span class="score-pill">⚡ ${score}</span>
+        <span class="score-pill">${ICO.zap} ${score}</span>
       </div>
       ${newBadge ? `<div style="margin-top:.3rem">${newBadge}</div>` : ''}
       <div class="adv-meta">
@@ -1074,9 +1120,9 @@ function renderGaps(gaps) {
 
 function buildGapCard(gap) {
   const signalHtml = gap.signal === 'strong'
-    ? `<span class="signal-badge signal-strong">🔥 ${gap.new_entrants_7d} nouveaux advertisers</span>`
+    ? `<span class="signal-badge signal-strong">${ICO.flame} ${gap.new_entrants_7d} nouveaux advertisers</span>`
     : gap.signal === 'moderate'
-    ? `<span class="signal-badge signal-moderate">📡 ${gap.new_entrants_7d} nouvel advertiser</span>`
+    ? `<span class="signal-badge signal-moderate">${ICO.signal} ${gap.new_entrants_7d} nouvel advertiser</span>`
     : '';
 
   const products = (gap.recommended_products || []).slice(0, 4);
@@ -1104,13 +1150,13 @@ function buildGapCard(gap) {
         <span>${esc(gap.angle)}</span>
         <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
           ${signalHtml}
-          <span class="priority-pill">⚡ ${gap.priority_score ?? gap.viability_score}</span>
+          <span class="priority-pill">${ICO.zap} ${gap.priority_score ?? gap.viability_score}</span>
           <span class="viability-pill">${gap.viability_score??0}%</span>
         </div>
       </div>
       <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
         ${velBadge(gap)}
-        ${gap.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">🪝 ${esc(gap.dominant_hook)}</span>` : ''}
+        ${gap.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">${ICO.hook} ${esc(gap.dominant_hook)}</span>` : ''}
       </div>
       ${signalsBadge(gap)}
       <div class="card-meta">
@@ -1122,10 +1168,10 @@ function buildGapCard(gap) {
       ${hasDetail ? '<div class="expand-hint">▼ produits à lancer avec cet angle</div>' : ''}
       <div class="card-detail">
         ${products.length ? `
-          <div class="detail-label">🛒 Produits à lancer avec cet angle</div>
+          <div class="detail-label">${ICO.cart} Produits à lancer avec cet angle</div>
           ${prodsHtml}` : ''}
         ${examples ? `
-          <div class="detail-label" style="margin-top:.75rem">📌 Exemples de pubs existants</div>
+          <div class="detail-label" style="margin-top:.75rem">${ICO.pin} Exemples de pubs existants</div>
           ${examples}` : ''}
         ${!hasDetail ? '<p style="color:var(--muted);font-size:.75rem">Détails après scrape réel.</p>' : ''}
       </div>
@@ -1152,14 +1198,14 @@ function renderTrending(results) {
       <div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">${esc(k.niche)}</div>
       <div style="display:flex;gap:.35rem;margin-top:.35rem;flex-wrap:wrap;align-items:center">
         ${velBadge(k)}
-        <span class="priority-pill">⚡ ${k.priority_score??k.viability_score}</span>
+        <span class="priority-pill">${ICO.zap} ${k.priority_score??k.viability_score}</span>
       </div>
     </div>`).join('');
 }
 
 function velBadge(k) {
   if (k.trend === 'new' || k.velocity_pct === null || k.velocity_pct === undefined)
-    return '<span class="vel-badge vel-new">🆕 Nouveau</span>';
+    return `<span class="vel-badge vel-new">${ICO.newEntry} Nouveau</span>`;
   if (k.velocity_pct > 15)
     return `<span class="vel-badge vel-up">▲ +${k.velocity_pct}%</span>`;
   if (k.velocity_pct < -15)
@@ -1175,20 +1221,20 @@ function signalsBadge(kpi) {
   const gt = s.google_trends;
   if (gt && gt.score != null) {
     const arrow = gt.direction === 'rising' ? '↑' : gt.direction === 'falling' ? '↓' : '→';
-    parts.push(`<span class="sig-badge sig-gt">📊 ${gt.score} ${arrow}</span>`);
+    parts.push(`<span class="sig-badge sig-gt">${ICO.barChart} ${gt.score} ${arrow}</span>`);
   }
   // TikTok organic
   const tt = s.tiktok_organic;
   if (tt && tt.level && tt.level !== 'unknown') {
     const lvlMap = { high: 'sig-tt-high', medium: 'sig-tt-medium', low: 'sig-tt-low', none: 'sig-tt-none' };
-    const label = tt.level === 'high' ? '🔥 Viral TikTok' : tt.level === 'medium' ? '🎵 TikTok actif' : tt.level === 'low' ? '🎵 TikTok faible' : '🎵 Absent TikTok';
+    const label = tt.level === 'high' ? `${ICO.flame} Viral TikTok` : tt.level === 'medium' ? `${ICO.music} TikTok actif` : tt.level === 'low' ? `${ICO.music} TikTok faible` : `${ICO.music} Absent TikTok`;
     parts.push(`<span class="sig-badge ${lvlMap[tt.level]||'sig-tt-none'}">${label}</span>`);
   }
   // Amazon competition
   const amz = s.amazon;
   if (amz && amz.competition_level && amz.competition_level !== 'unknown') {
     const lvlMap = { saturated: 'sig-amz-sat', high: 'sig-amz-high', medium: 'sig-amz-med', low: 'sig-amz-low' };
-    const label = amz.competition_level === 'saturated' ? '📦 Saturé Amazon' : amz.competition_level === 'high' ? '📦 Amazon dense' : amz.competition_level === 'medium' ? '📦 Amazon moyen' : '📦 Amazon libre';
+    const label = amz.competition_level === 'saturated' ? `${ICO.package} Saturé Amazon` : amz.competition_level === 'high' ? `${ICO.package} Amazon dense` : amz.competition_level === 'medium' ? `${ICO.package} Amazon moyen` : `${ICO.package} Amazon libre`;
     parts.push(`<span class="sig-badge ${lvlMap[amz.competition_level]||'sig-amz-med'}">${label}</span>`);
   }
   if (!parts.length) return '';
@@ -1207,7 +1253,7 @@ function renderAllAngles(kpis) {
   grid.innerHTML = items.map(k => {
     const sat = k.saturation_index ?? 0;
     const satColor = sat >= 70 ? '#ef4444' : sat >= 40 ? '#f59e0b' : '#22c55e';
-    const hookHtml = k.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">🪝 ${esc(k.dominant_hook)}</span>` : '';
+    const hookHtml = k.dominant_hook ? `<span class="chip chip-blue" style="font-size:.64rem">${ICO.hook} ${esc(k.dominant_hook)}</span>` : '';
     const hookPatternsHtml = k.hook_patterns && Object.keys(k.hook_patterns).length
       ? `<div style="margin-top:.4rem;font-size:.65rem;color:var(--muted)">Hooks: ${Object.entries(k.hook_patterns).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([h,c])=>`<b>${esc(h)}</b> ${c}`).join(' · ')}</div>` : '';
     return `
@@ -1215,7 +1261,7 @@ function renderAllAngles(kpis) {
       <div class="card-title">
         <span>${esc(k.angle)}</span>
         <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
-          ${k.opportunity_score != null ? `<span class="priority-pill">💡 ${k.opportunity_score}</span>` : ''}
+          ${k.opportunity_score != null ? `<span class="priority-pill">${ICO.lightbulb} ${k.opportunity_score}</span>` : ''}
           <span class="viability-pill">${k.viability_score??0}%</span>
         </div>
       </div>
@@ -1377,11 +1423,11 @@ function startPolling(pat) {
       if (status==='in_progress') { setBadge('running','Analyse…'); return; }
       clearInterval(pollTimer); pollTimer = null;
       if (conclusion==='success') {
-        setBadge('success','✅ Terminé');
+        setBadge('success',`${ICO.checkCircle} Terminé`);
         const prevGeneratedAt = state.data?.generated_at;
         waitForNewData(prevGeneratedAt);
       } else {
-        setBadge('failure',`❌ ${conclusion}`);
+        setBadge('failure',`${ICO.xCircle} ${conclusion}`);
       }
     } catch(e) { console.warn(e); }
   }, 8000);
@@ -1408,12 +1454,12 @@ document.getElementById('modalLaunch').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Lancement…';
   try {
     const ok = await triggerWorkflow(pat, niche, country);
-    if (!ok) { alert('Erreur. Vérifie que le token a le scope "workflow".'); btn.disabled=false; btn.textContent='🚀 Lancer'; return; }
+    if (!ok) { alert('Erreur. Vérifie que le token a le scope "workflow".'); btn.disabled=false; btn.innerHTML=`${ICO.rocket} Lancer`; return; }
     document.getElementById('launchModal').classList.remove('open');
-    setBadge('queued','⏳ Lancé…');
+    setBadge('queued',`${ICO.hourglass} Lancé…`);
     setTimeout(() => startPolling(pat), 5000);
   } catch(err) { alert(`Erreur: ${err.message}`); }
-  btn.disabled = false; btn.textContent = '🚀 Lancer';
+  btn.disabled = false; btn.innerHTML = `${ICO.rocket} Lancer`;
 });
 
 // Resume polling on reload
@@ -1422,7 +1468,7 @@ document.getElementById('modalLaunch').addEventListener('click', async () => {
   if (!pat) return;
   getLatestRun(pat).then(run => {
     if (run && (run.status==='queued'||run.status==='in_progress')) {
-      setBadge('running','⚙️ Analyse…');
+      setBadge('running',`${ICO.settings} Analyse…`);
       startPolling(pat);
     }
   }).catch(()=>{});
