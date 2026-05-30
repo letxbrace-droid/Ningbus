@@ -1,6 +1,12 @@
 # TrendTrack — niches to track automatically (cron job)
 country: "FR"
 
+# Multi-country: uncomment to run each niche across multiple markets
+# countries:
+#   - "FR"
+#   - "US"
+#   - "GB"
+
 niches:
   - "foot wellness"
   - "posture corrector"
