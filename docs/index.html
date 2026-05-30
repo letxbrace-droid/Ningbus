@@ -988,8 +988,18 @@ function render() {
   const d = new Date(generated_at);
   document.getElementById('statDate').textContent =
     isNaN(d) ? '—' : d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-  document.getElementById('statAds').textContent     = total_ads ?? '—';
-  const trendingAngles = results.flatMap(r => (r.angle_kpis||[]).filter(k => k.trend === 'up' || (k.velocity_pct !== null && k.velocity_pct > 30)));
+  const adsEl = document.getElementById('statAds');
+  adsEl.textContent = total_ads ?? '—';
+  if (total_ads > 0 && total_ads < 15) {
+    adsEl.title = `Seulement ${total_ads} ads — Meta a retourné peu de résultats. Les gaps et tendances utilisent un seuil adaptatif.`;
+    adsEl.style.color = 'var(--orange)';
+  } else {
+    adsEl.style.color = '';
+    adsEl.title = '';
+  }
+  const trendingAngles = results.flatMap(r => (r.angle_kpis||[]).filter(k =>
+    k.trend === 'up' || k.trend === 'new' || (k.velocity_pct !== null && k.velocity_pct > 15)
+  ));
   document.getElementById('statTrending').textContent = trendingAngles.length;
   document.getElementById('statGaps').textContent    = results.flatMap(r => r.gaps || []).length;
   document.getElementById('statAdverts').textContent = results.flatMap(r => r.advertisers || []).length;

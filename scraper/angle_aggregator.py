@@ -8,10 +8,16 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
-# An angle is "underused" if its share is below this threshold
-USAGE_THRESHOLD = 0.20  # 20% — more permissive with few ads
 # An angle is "viable" if its viability score exceeds this
 VIABILITY_THRESHOLD = 30.0  # lowered: Meta often returns 0 days_running
+
+
+def _usage_threshold(total_ads: int) -> float:
+    """Adaptive threshold — with few ads, any angle can be a gap opportunity."""
+    if total_ads < 5:   return 1.0   # 1 ad = 100% usage, still a gap
+    if total_ads < 15:  return 0.60
+    if total_ads < 30:  return 0.35
+    return 0.20
 
 
 def _viability(avg_days: float) -> float:
@@ -111,13 +117,16 @@ class AngleAggregator:
         angle_kpis: list[dict],
         advertisers: list[dict] | None = None,
         prev_advertisers: list[dict] | None = None,
+        total_ads: int = 0,
     ) -> list[dict]:
         """
         Identify angles with high viability but low market saturation.
-        If advertisers are provided, attach their products as recommendations.
+        Uses an adaptive usage threshold so few-ad runs still surface gaps.
 
         Returns gaps sorted by viability DESC.
         """
+        usage_threshold = _usage_threshold(total_ads or sum(k.get("count", 0) for k in angle_kpis))
+
         # Build a deduplicated product pool from active advertisers
         recommended_products: list[dict] = []
         if advertisers:
@@ -135,7 +144,7 @@ class AngleAggregator:
 
         gaps: list[dict] = []
         for kpi in angle_kpis:
-            low_usage = kpi["usage_pct"] < USAGE_THRESHOLD
+            low_usage = kpi["usage_pct"] < usage_threshold
             high_viability = kpi["viability_score"] > VIABILITY_THRESHOLD
             if low_usage and high_viability:
                 gaps.append(
