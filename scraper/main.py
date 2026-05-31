@@ -237,7 +237,18 @@ async def run_niche(
     with Timer("scrape"):
         scraper = MetaScraper(max_ads=max_ads)
         ads = await scraper.scrape_ads(niche=niche, country=country)
-    logger.info("Step 1 — %d ads scraped", len(ads))
+
+    # Tag + clean: drop template placeholders and sub-10 char copies
+    import re as _re
+    ads = [
+        a for a in ads
+        if len(a.get("ad_copy", "")) > 10
+        and not _re.search(r"\{\{|\}\}", a.get("ad_copy", ""))
+    ]
+    for a in ads:
+        a["niche"] = niche
+
+    logger.info("Step 1 — %d clean ads scraped (niche='%s')", len(ads), niche)
 
     if not ads:
         logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)

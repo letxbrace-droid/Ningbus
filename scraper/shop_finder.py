@@ -69,6 +69,48 @@ def _build_query_variants(niche: str, country: str = "FR") -> list[str]:
     return variants
 
 
+async def _ddg_search_html(query: str, session: aiohttp.ClientSession, exclude: set[str]) -> set[str]:
+    """Run one DDG HTML search and return all plausible shop domains found."""
+    found: set[str] = set()
+    try:
+        url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
+        async with session.get(url, timeout=REQUEST_TIMEOUT) as resp:
+            if resp.status != 200:
+                return found
+            html = await resp.text()
+            for m in re.findall(r'([a-z0-9][a-z0-9\-]{1,62}\.myshopify\.com)', html, re.I):
+                d = m.lower()
+                if d not in exclude:
+                    found.add(d)
+            for m in re.findall(r'href="https?://([^/"]+)"[^>]*>[^<]*(?:shop|store|buy)', html, re.I):
+                d = _clean_domain("https://" + m)
+                if d and "." in d and d not in exclude and not any(
+                    s in d for s in ("duckduckgo", "facebook", "instagram", "twitter", "google", "amazon")
+                ):
+                    found.add(d)
+    except Exception as exc:
+        logger.debug("DDG search error for '%s': %s", query[:60], exc)
+    return found
+
+
+async def _search_brand_shops(page_names: list[str], exclude: set[str]) -> set[str]:
+    """
+    Search DDG for each ad's page_name (brand) to find their Shopify store.
+    This is the main way we link ads → shops when landing URLs are absent.
+    """
+    found: set[str] = set()
+    async with aiohttp.ClientSession(headers=_DDG_HEADERS) as session:
+        for brand in page_names[:14]:
+            if not brand or len(brand.strip()) < 3:
+                continue
+            query = f'"{brand}" shopify store OR myshopify.com'
+            hits = await _ddg_search_html(query, session, exclude)
+            found.update(hits)
+            logger.debug("Brand '%s' → %d domains", brand, len(hits))
+            await asyncio.sleep(0.6 + random.random() * 0.4)
+    return found
+
+
 async def _ddg_shopify_search(niche: str, country: str = "FR", exclude: set[str] | None = None) -> list[str]:
     """Return myshopify.com domains found via DuckDuckGo HTML search."""
     exclude = exclude or set()
@@ -398,6 +440,7 @@ async def find_scaling_shops(
     exclude = exclude_domains or set()
     domains: set[str] = set()
 
+    # ── Source 1: landing URLs directly from ad data ────────────────────────
     for ad in ads:
         d = _clean_domain(
             ad.get("store_domain") or ad.get("landing_page_url") or ""
@@ -405,6 +448,20 @@ async def find_scaling_shops(
         if d and "facebook.com" not in d and "instagram.com" not in d:
             domains.add(d)
 
+    # ── Source 2: brand-name search (page_name from ads) ────────────────────
+    # This is the primary discovery path when Meta doesn't return landing URLs.
+    page_names = list({
+        a.get("page_name", "").strip()
+        for a in ads
+        if a.get("page_name", "").strip()
+    })
+    if page_names:
+        logger.info("shop_finder: brand-name search for %d page names", len(page_names))
+        brand_domains = await _search_brand_shops(page_names, exclude)
+        domains.update(brand_domains)
+        logger.info("shop_finder: brand search added %d domains", len(brand_domains))
+
+    # ── Source 3: generic niche DDG search ──────────────────────────────────
     if len(domains) < 8:
         logger.info("shop_finder: DDG search for niche '%s' (excluding %d known domains)", niche, len(exclude))
         ddg = await _ddg_shopify_search(niche, country=country, exclude=exclude)

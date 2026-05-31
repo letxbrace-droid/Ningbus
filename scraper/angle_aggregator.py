@@ -20,11 +20,23 @@ def _usage_threshold(total_ads: int) -> float:
     return 0.20
 
 
-def _viability(avg_days: float) -> float:
-    """Proxy for profitability. Returns 50 baseline when days data is unavailable."""
-    if avg_days <= 0:
-        return 50.0  # ad is live but duration unknown
-    return min(avg_days, 100.0)
+def _normalize_angle(angle: str) -> str:
+    """Normalize angle name: strip, first-letter uppercase → avoids case duplicates."""
+    a = (angle or "Unknown").strip()
+    return (a[0].upper() + a[1:]) if len(a) > 1 else a.upper()
+
+
+def _viability(avg_days: float, count: int = 1, total: int = 1) -> float:
+    """
+    Proxy for profitability.
+    - When days data is available: use duration directly (longer = more profitable).
+    - When days = 0: use ad-volume share as signal (more ads in angle = more validated).
+    """
+    if avg_days > 0:
+        return min(avg_days, 100.0)
+    # No duration — derive from competition volume (0-70 range)
+    volume_pct = count / max(total, 1)
+    return round(30.0 + volume_pct * 70.0, 1)
 
 
 class AngleAggregator:
@@ -41,7 +53,7 @@ class AngleAggregator:
 
         buckets: dict[str, list[dict]] = defaultdict(list)
         for ad in analyzed_ads:
-            angle = ad.get("angle_data", {}).get("angle", "Unknown")
+            angle = _normalize_angle(ad.get("angle_data", {}).get("angle", "Unknown"))
             buckets[angle].append(ad)
 
         total_ads = len(analyzed_ads)
@@ -51,7 +63,7 @@ class AngleAggregator:
             days_list = [a.get("days_running", 0) for a in ads]
             avg_days = statistics.mean(days_list) if days_list else 0.0
             med_days = statistics.median(days_list) if days_list else 0.0
-            score = _viability(avg_days)
+            score = _viability(avg_days, count=len(ads), total=total_ads)
             usage_pct = len(ads) / total_ads
 
             # Top 3 examples: best by days_running
