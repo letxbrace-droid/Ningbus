@@ -616,6 +616,23 @@
       padding: .4rem .6rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
       margin-top: .4rem;
     }
+    /* ── Charts ─────────────────────────────────────────────── */
+    .chart-section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem 1.2rem; margin-bottom: 1rem;
+    }
+    .chart-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1rem;
+    }
+    .chart-box { position: relative; height: 240px; }
+    .chart-title {
+      font-size: .68rem; font-weight: 700; color: var(--text-sec);
+      letter-spacing: .6px; text-transform: uppercase; margin-bottom: .6rem;
+    }
+    @media (max-width: 640px) {
+      .chart-row { grid-template-columns: 1fr; }
+      .chart-box { height: 180px; }
+    }
   </style>
 </head>
 <body data-theme="dark">
@@ -718,6 +735,10 @@
           </div>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="trendingList"></div>
         </div>
+        <div id="advChartSection" class="chart-section" style="display:none">
+          <div class="chart-title">📊 Top Advertisers — Score de Scaling</div>
+          <div class="chart-box"><canvas id="advChart"></canvas></div>
+        </div>
         <div class="section-header">
           <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11v3M5.5 14h5"/><path d="M4 2h8v5a4 4 0 0 1-8 0V2z"/><path d="M4 4H1.5v2a2.5 2.5 0 0 0 2.5 2.5"/><path d="M12 4h2.5v2A2.5 2.5 0 0 1 12 8.5"/></svg> Advertisers qui scalent</span>
           <span class="badge badge-adv" id="advertisersCount">0</span>
@@ -741,6 +762,10 @@
           <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/></svg> Angles inexploités</span>
           <span class="badge badge-gap" id="gapCount">0</span>
         </div>
+        <div id="gapChartSection" class="chart-section" style="display:none">
+          <div class="chart-title">📊 Angles Gap — Score de Priorité</div>
+          <div class="chart-box"><canvas id="gapChart"></canvas></div>
+        </div>
         <div class="toolbar">
           <input type="search" id="gapSearch" placeholder="Rechercher un angle…" />
           <button class="sort-btn active" data-section="gap" data-sort="priority">Priorité ↓</button>
@@ -756,6 +781,16 @@
         <div class="section-header">
           <span class="section-title"><svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="9" width="3" height="5.5" rx=".5"/><rect x="6.5" y="5" width="3" height="9.5" rx=".5"/><rect x="11.5" y="2" width="3" height="12.5" rx=".5"/></svg> Performances par angle</span>
           <span class="badge badge-all" id="allCount">0</span>
+        </div>
+        <div id="anglesChartRow" class="chart-row" style="display:none">
+          <div class="chart-section" style="margin-bottom:0">
+            <div class="chart-title">📈 Viabilité par Angle</div>
+            <div class="chart-box"><canvas id="anglesBarChart"></canvas></div>
+          </div>
+          <div class="chart-section" style="margin-bottom:0">
+            <div class="chart-title">📊 Part de Marché (volume ads)</div>
+            <div class="chart-box"><canvas id="anglesDonutChart"></canvas></div>
+          </div>
         </div>
         <div class="toolbar">
           <input type="search" id="allSearch" placeholder="Rechercher un angle…" />
@@ -811,6 +846,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 // ── SVG icon map ────────────────────────────────────────────────────────────
 const ICO = {
@@ -1141,6 +1177,7 @@ function renderAdvertisers(advertisers) {
     return;
   }
   grid.innerHTML = items.map(buildAdvCard).join('');
+  drawAdvChart(advertisers);
   grid.querySelectorAll('.card').forEach(c => {
     c.addEventListener('click', e => { if (!e.target.closest('a')) c.classList.toggle('open'); });
   });
@@ -1298,6 +1335,7 @@ function renderGaps(gaps) {
   grid.querySelectorAll('.card').forEach(c => {
     c.addEventListener('click', e => { if (!e.target.closest('a')) c.classList.toggle('open'); });
   });
+  drawGapsChart(gaps);
 }
 
 function buildGapCard(gap) {
@@ -1483,6 +1521,7 @@ function renderAllAngles(kpis) {
     </div>`;
   }).join('');
   grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('open')));
+  drawAnglesCharts(kpis);
 }
 
 // ── Matrix ────────────────────────────────────────────────────────────────
@@ -1512,6 +1551,144 @@ function renderMatrix(matrix) {
   }
   html += '</tbody></table></div>';
   document.getElementById('matrixGrid').innerHTML = html;
+}
+
+// ── Charts ───────────────────────────────────────────────────────────────
+const _charts = {};
+function _ch(id, config) {
+  if (!window.Chart) return;
+  if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  _charts[id] = new Chart(canvas.getContext('2d'), config);
+}
+const _CP = ['#3B82F6','#8B5CF6','#10B981','#F59E0B','#EF4444','#06B6D4','#EC4899','#F97316','#84CC16','#A855F7'];
+function _chartOpts(indexAxis = 'x', extra = {}) {
+  const isH = indexAxis === 'y';
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 380 },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0D1626', borderColor: '#1C2E48', borderWidth: 1,
+        titleColor: '#E6EEFF', bodyColor: '#7090B4', padding: 8, cornerRadius: 6,
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: isH ? '#1C2E4880' : 'transparent' },
+        ticks: { color: '#7090B4', font: { size: 10 }, maxTicksLimit: 6 },
+        border: { color: '#1C2E48' },
+      },
+      y: {
+        grid: { color: isH ? 'transparent' : '#1C2E4880' },
+        ticks: { color: '#7090B4', font: { size: 10 } },
+        border: { color: '#1C2E48' },
+      },
+    },
+    ...extra,
+  };
+}
+
+function drawAdvChart(advertisers) {
+  const top = [...advertisers].sort((a,b)=>(b.scaling_score||0)-(a.scaling_score||0)).slice(0,8);
+  if (!top.length) { document.getElementById('advChartSection').style.display='none'; return; }
+  document.getElementById('advChartSection').style.display='';
+  _ch('advChart', {
+    type: 'bar',
+    data: {
+      labels: top.map(a => (a.name||a.domain||'?').slice(0,22)),
+      datasets: [{
+        label: 'Score Scaling',
+        data: top.map(a => a.scaling_score||0),
+        backgroundColor: top.map((_,i) => _CP[i % _CP.length] + 'CC'),
+        borderColor:     top.map((_,i) => _CP[i % _CP.length]),
+        borderWidth: 1, borderRadius: 4,
+      }],
+    },
+    options: { ..._chartOpts('y'), indexAxis: 'y' },
+  });
+}
+
+function drawGapsChart(gaps) {
+  const gs = [...gaps].sort((a,b)=>(b.priority_score||0)-(a.priority_score||0)).slice(0,10);
+  if (!gs.length) { document.getElementById('gapChartSection').style.display='none'; return; }
+  document.getElementById('gapChartSection').style.display='';
+  _ch('gapChart', {
+    type: 'bar',
+    data: {
+      labels: gs.map(g => g.angle.slice(0,28)),
+      datasets: [{
+        label: 'Priorité',
+        data: gs.map(g => g.priority_score||0),
+        backgroundColor: '#F59E0BAA',
+        borderColor: '#F59E0B',
+        borderWidth: 1, borderRadius: 4,
+      }],
+    },
+    options: { ..._chartOpts('y'), indexAxis: 'y' },
+  });
+}
+
+function drawAnglesCharts(kpis) {
+  if (!kpis.length) {
+    document.getElementById('anglesChartRow').style.display = 'none';
+    return;
+  }
+  document.getElementById('anglesChartRow').style.display = '';
+
+  // Bar — viability by angle (color by saturation)
+  const top = [...kpis].sort((a,b)=>(b.viability_score||0)-(a.viability_score||0)).slice(0,10);
+  _ch('anglesBarChart', {
+    type: 'bar',
+    data: {
+      labels: top.map(k => k.angle.slice(0,24)),
+      datasets: [{
+        label: 'Viabilité',
+        data: top.map(k => k.viability_score||0),
+        backgroundColor: top.map(k => {
+          const s = k.saturation_index||0;
+          return s >= 70 ? '#EF444499' : s >= 40 ? '#F59E0B99' : '#10B98199';
+        }),
+        borderColor: top.map(k => {
+          const s = k.saturation_index||0;
+          return s >= 70 ? '#EF4444' : s >= 40 ? '#F59E0B' : '#10B981';
+        }),
+        borderWidth: 1, borderRadius: 4,
+      }],
+    },
+    options: { ..._chartOpts('y'), indexAxis: 'y' },
+  });
+
+  // Donut — market share
+  const share = [...kpis].sort((a,b)=>(b.count||0)-(a.count||0)).slice(0,8);
+  _ch('anglesDonutChart', {
+    type: 'doughnut',
+    data: {
+      labels: share.map(k => k.angle.slice(0,20)),
+      datasets: [{
+        data: share.map(k => k.count||0),
+        backgroundColor: _CP.slice(0, share.length).map(c => c + 'CC'),
+        borderColor: _CP.slice(0, share.length),
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 380 },
+      plugins: {
+        legend: {
+          display: true, position: 'right',
+          labels: { color: '#7090B4', font: { size: 10 }, boxWidth: 12, padding: 8 },
+        },
+        tooltip: {
+          backgroundColor: '#0D1626', borderColor: '#1C2E48', borderWidth: 1,
+          titleColor: '#E6EEFF', bodyColor: '#7090B4', padding: 8, cornerRadius: 6,
+        },
+      },
+    },
+  });
 }
 
 // ── Utils ──────────────────────────────────────────────────────────────────
