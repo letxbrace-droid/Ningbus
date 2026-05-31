@@ -1,4 +1,63 @@
 {
-  "generated_at": "2026-05-31T11:47:17Z",
-  "ads": []
+  "generated_at": "2026-05-31T12:29:42Z",
+  "ads": [
+    {
+      "ad_copy": "Support stamina and heart health every day",
+      "creative_id": "",
+      "page_name": "The Health Haven",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "engagement_score": 0,
+      "reactions": 0,
+      "publisher_platforms": [],
+      "niche": "foot wellness",
+      "angle_data": {
+        "angle": "Santé cardiaque",
+        "sub_angle": "Endurance quotidienne",
+        "hook": "Support stamina and heart health",
+        "pain_point": "Fatigue et problèmes cardiaques",
+        "desire": "Meilleure santé et endurance",
+        "mechanism": "Suppléments ou produits pour le cœur",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Personnes âgées de 40-65 ans",
+        "hook_pattern": "specific_result",
+        "confidence": 0.8
+      }
+    },
+    {
+      "ad_copy": "Detox Your Body Naturally",
+      "creative_id": "",
+      "page_name": "Natural Healing with Dawn Miller",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "engagement_score": 0,
+      "reactions": 0,
+      "publisher_platforms": [],
+      "niche": "foot wellness",
+      "angle_data": {
+        "angle": "Naturalness Detox",
+        "sub_angle": "Clean label",
+        "hook": "Detox Your Body Naturally",
+        "pain_point": "Toxines et polluants dans le corps",
+        "desire": "Corps sain et pur",
+        "mechanism": "Processus naturel de détoxification",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "Personnes soucieuses de leur santé",
+        "hook_pattern": "curiosity",
+        "confidence": 0.8
+      }
+    }
+  ]
 }
