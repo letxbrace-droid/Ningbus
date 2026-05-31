@@ -22,6 +22,7 @@ from .meta_scraper import MetaScraper
 from .price_signals import enrich_products_with_margins
 from .shop_finder import find_scaling_shops
 from .utils import Timer, setup_logging
+from .velocity_tracker import compute_velocity
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +199,7 @@ def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
         "products_with_discount":    shop.get("products_with_discount", 0),
         "products_with_reviews":     shop.get("products_with_reviews", 0),
         "avg_product_rating":        shop.get("avg_product_rating"),
+        "velocity":                  compute_velocity(domain, products),
     }
 
 

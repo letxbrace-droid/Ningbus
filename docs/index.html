@@ -1191,6 +1191,21 @@ function buildAdvCard(adv) {
         ${scalingSignals.slice(0,6).map(s=>`<span class="chip chip-blue" style="font-size:.64rem">${ICO.settings} ${esc(s)}</span>`).join('')}
       </div>` : '';
 
+  const vel = adv.velocity || {};
+  const velSignals = vel.signals || [];
+  const velHtml = velSignals.length ? (() => {
+    const chips = velSignals.map(s => {
+      const isLaunch  = s.startsWith('LAUNCH');
+      const isScaling = s.startsWith('SCALING');
+      const isRemoved = s.includes('retiré');
+      const cls = isLaunch ? 'chip-green' : isScaling ? 'chip-orange' : isRemoved ? 'chip-red' : 'chip-blue';
+      const ico = isLaunch ? ICO.rocket : isScaling ? ICO.trendUp : isRemoved ? ICO.xCircle : ICO.signal;
+      return `<span class="chip ${cls}" style="font-size:.63rem">${ico} ${esc(s)}</span>`;
+    }).join('');
+    const pts = vel.data_points > 1 ? `<span style="font-size:.6rem;color:var(--muted)">${vel.data_points} snapshots</span>` : '';
+    return `<div style="display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;margin-top:.35rem">${chips}${pts}</div>`;
+  })() : '';
+
   // Shop-level stats from product data
   const shopStatParts = [];
   if (adv.avg_product_price) shopStatParts.push(`Prix moy. <b>€${adv.avg_product_price}</b>`);
@@ -1254,6 +1269,7 @@ function buildAdvCard(adv) {
       ${gapsHtml?`<div class="chips-row"><span class="chips-label">Gaps →</span>${gapsHtml}</div>`:''}
       ${platforms?`<div class="platform-row">${platforms}</div>`:''}
       ${scalingHtml}
+      ${velHtml}
       ${shopStatsHtml}
       ${(revHtml||landHtml)?`<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem">${revHtml}${landHtml}</div>`:''}
       <div class="expand-hint">▼ produits &amp; exemples de pubs</div>

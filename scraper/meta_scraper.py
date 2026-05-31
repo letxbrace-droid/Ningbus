@@ -1,4 +1,4 @@
-"""Meta Ad Library scraper — Playwright + Chromium open-source, GraphQL interception."""
+"""Meta Ad Library scraper — official Graph API (primary) + Playwright fallback."""
 
 from __future__ import annotations
 
@@ -6,14 +6,28 @@ import asyncio
 import json
 import logging
 import math
+import os
 import random
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import quote
 
+import aiohttp
 from playwright.async_api import Browser, BrowserContext, Page, Response, async_playwright
 
 from .utils import extract_domain
+
+# ── Official Graph API ───────────────────────────────────────────────────────
+
+_GRAPH_BASE  = "https://graph.facebook.com/v21.0"
+_API_FIELDS  = (
+    "id,page_name,page_id,"
+    "ad_creative_bodies,ad_creative_link_titles,"
+    "ad_creative_link_captions,ad_creative_link_descriptions,"
+    "ad_snapshot_url,publisher_platforms,"
+    "ad_delivery_start_time,ad_delivery_stop_time,"
+    "spend,impressions"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -193,16 +207,65 @@ def _parse_response_body(body: str) -> list[dict]:
 
 class MetaScraper:
     """
-    Scrapes Meta Ad Library using Playwright + Chromium (open source).
+    Scrapes Meta Ad Library.
 
-    Intercepts all GraphQL/XHR responses and extracts ad data from JSON payloads.
-    No external API token needed — uses the public Ad Library website.
+    Primary path  : official Graph API (FB_APP_TOKEN env var) — not rate-limited by IP.
+    Fallback path : Playwright + Chromium — intercepts GraphQL responses.
     """
 
     def __init__(self, max_ads: int = 100, headless: bool = True) -> None:
         self.max_ads  = max_ads
         self.headless = headless
         self._collected: list[dict] = []
+
+    # ── Official API ─────────────────────────────────────────────────────────
+
+    async def _api_scrape(self, niche: str, country: str, token: str) -> list[dict]:
+        """Query graph.facebook.com/ads_archive — no browser, no IP blocks."""
+        ads: list[dict] = []
+        cursor: str | None = None
+
+        async with aiohttp.ClientSession() as session:
+            while len(ads) < self.max_ads:
+                params: dict[str, Any] = {
+                    "search_terms":       niche,
+                    "ad_type":            "ALL",
+                    "ad_reached_countries": json.dumps([country]),
+                    "ad_active_status":   "ACTIVE",
+                    "fields":             _API_FIELDS,
+                    "limit":              min(100, self.max_ads - len(ads)),
+                    "access_token":       token,
+                }
+                if cursor:
+                    params["after"] = cursor
+
+                try:
+                    async with session.get(
+                        f"{_GRAPH_BASE}/ads_archive",
+                        params=params,
+                        timeout=aiohttp.ClientTimeout(total=30),
+                    ) as resp:
+                        data = await resp.json(content_type=None)
+                except Exception as exc:
+                    logger.warning("Meta API request failed: %s", exc)
+                    break
+
+                if "error" in data:
+                    logger.warning("Meta API error: %s", data["error"].get("message", str(data["error"])))
+                    break
+
+                for node in data.get("data", []):
+                    ad = _normalise(node)
+                    if ad:
+                        ads.append(ad)
+
+                paging = data.get("paging", {})
+                next_cursor = paging.get("cursors", {}).get("after")
+                if not next_cursor or not paging.get("next"):
+                    break
+                cursor = next_cursor
+
+        return ads
 
     async def _on_response(self, response: Response) -> None:
         """Intercept network responses and extract ad data."""
@@ -235,13 +298,25 @@ class MetaScraper:
             except Exception:
                 pass
 
+    # ── Playwright fallback ──────────────────────────────────────────────────
+
     async def scrape_ads(self, niche: str, country: str = "FR") -> list[dict]:
         """
         Scrape Meta Ad Library for a niche keyword.
+        Tries the official Graph API first (FB_APP_TOKEN), falls back to Playwright.
         Returns a list of normalised ad dicts, sorted by days_running DESC.
         """
-        self._collected = []
+        token = os.getenv("FB_APP_TOKEN", "")
+        if token:
+            logger.info("Meta API path — niche='%s' country='%s'", niche, country)
+            ads = await self._api_scrape(niche, country, token)
+            if ads:
+                ads.sort(key=lambda a: a["days_running"], reverse=True)
+                logger.info("Meta API: %d ads for '%s'", len(ads), niche)
+                return ads[: self.max_ads]
+            logger.warning("Meta API 0 ads for '%s' — falling back to Playwright", niche)
 
+        self._collected = []
         async with async_playwright() as pw:
             browser: Browser = await pw.chromium.launch(
                 headless=self.headless,
