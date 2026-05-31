@@ -424,16 +424,22 @@ async def main_async(args: argparse.Namespace) -> None:
     aggregator    = AngleAggregator()
     gemini_model  = os.getenv("GEMINI_MODEL") or config.get("gemini_model", "gemini-2.0-flash")
 
-    all_results: list[dict] = []
-    for niche, c in tasks:
-        try:
-            result = await run_niche(niche, c, max_ads, analyzer, aggregator, gemini_model=gemini_model)
-            # Disambiguate niche name when multiple countries
-            if len(countries) > 1:
-                result["niche"] = f"{niche} ({c})"
-            all_results.append(result)
-        except Exception as exc:
-            logger.error("Niche '%s' [%s] failed: %s", niche, c, exc, exc_info=True)
+    # Run niches 2 at a time — parallelises external I/O without hammering Meta/DDG
+    sem = asyncio.Semaphore(2)
+
+    async def _run_with_sem(niche: str, c: str) -> dict | None:
+        async with sem:
+            try:
+                result = await run_niche(niche, c, max_ads, analyzer, aggregator, gemini_model=gemini_model)
+                if len(countries) > 1:
+                    result["niche"] = f"{niche} ({c})"
+                return result
+            except Exception as exc:
+                logger.error("Niche '%s' [%s] failed: %s", niche, c, exc, exc_info=True)
+                return None
+
+    all_results_raw = await asyncio.gather(*[_run_with_sem(n, c) for n, c in tasks])
+    all_results: list[dict] = [r for r in all_results_raw if r is not None]
 
     all_ads = [ad for r in all_results for ad in r.get("ads", [])]
     _write_json(DATA_DIR / "latest.json", {"generated_at": _now(), "ads": all_ads})
