@@ -249,12 +249,24 @@ async def run_niche(
                 logger.warning("Fallback price signals timed out, skipping")
         advertisers = [_shop_to_advertiser(s, []) for s in shops]
         logger.info("shop_finder fallback: %d advertisers from real shops", len(advertisers))
+
+        # Collect Gemini research even in fallback path (task was started at G0)
+        with Timer("gemini_research_fallback"):
+            try:
+                market_research = await gemini_research_task
+            except (asyncio.TimeoutError, Exception) as exc:
+                logger.warning("Fallback G0 — Gemini research unavailable: %s", exc)
+                market_research = {}
+        logger.info("Fallback G0 — market research: trend=%s, opp=%s",
+                    market_research.get("market_trend"), market_research.get("opportunity_score"))
+
         return {
             "niche":                niche,
             "ads":                  [],
             "angle_kpis":           [],
             "gaps":                 [],
             "advertisers":          advertisers,
+            "market_research":      market_research,
             "market_revenue_est":   sum(a.get("revenue_estimate", {}).get("monthly_revenue_est", 0) for a in advertisers),
             "product_angle_matrix": [],
             "stats": {
