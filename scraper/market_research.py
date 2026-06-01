@@ -56,6 +56,90 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
 }}
 """
 
+_ADS_ANALYSIS_PROMPT = """\
+Tu es un analyste compétitif e-commerce de niveau expert — l'équivalent humain d'AdSpy + Minea + BigSpy combinés.
+
+Je te fournis {count} publicités actives scrapées (Facebook + TikTok) pour la niche **{niche}** sur le marché **{country}**.
+
+Format de chaque ligne : COPY | PLATEFORME | JOURS_ACTIF | ENGAGEMENT | PAGE | CTR%
+---
+{ads_table}
+---
+
+Analyse ces données et produis un rapport de compétition complet.
+Réponds UNIQUEMENT en JSON valide, sans markdown.
+
+{{
+  "winning_hooks": [
+    {{
+      "rank": 1,
+      "formula": "structure réutilisable (ex: 'Tu as [PROBLÈME] depuis X ans ? [SOLUTION] en Y jours')",
+      "example": "copie exacte de la meilleure ad de ce type",
+      "trigger": "peur|curiosité|transformation|preuve_sociale|autorité|urgence|contre_intuitif|prix",
+      "why_it_works": "mécanisme psychologique en 1 phrase",
+      "usage_count": 0,
+      "avg_engagement": 0
+    }}
+  ],
+  "top_angles": [
+    {{
+      "angle": "nom",
+      "ads_count": 0,
+      "avg_days_running": 0,
+      "best_performing_copy": "extrait de la meilleure pub",
+      "saturation": "low|medium|high|saturé",
+      "verdict": "scaler_maintenant|tester|éviter",
+      "why": "justification courte"
+    }}
+  ],
+  "audience_insights": {{
+    "primary_demographic": "ex: femmes 35-55, sportifs hommes 25-40",
+    "secondary_demographic": "...",
+    "pain_points_ranked": ["douleur 1", "douleur 2", "douleur 3"],
+    "desires_ranked": ["désir 1", "désir 2", "désir 3"],
+    "language_register": "aspirationnel|urgence|éducatif|emotionnel|direct",
+    "cultural_triggers": ["trigger FR spécifique si pertinent"]
+  }},
+  "market_intelligence": {{
+    "maturity_score": 0,
+    "maturity_label": "vierge|émergent|croissance|mature|saturé",
+    "top_spenders": ["brand1 (estimation dépense)", "brand2"],
+    "emerging_brands": ["brand en montée"],
+    "dominant_platform": "meta|tiktok|both",
+    "avg_ad_lifespan_days": 0,
+    "price_positioning": "budget <20€|mid 20-50€|premium 50€+",
+    "creative_trends": ["UGC dominant", "before/after", "vidéo courte", "etc."]
+  }},
+  "untapped_opportunities": [
+    {{
+      "type": "angle|audience|format|prix|géo",
+      "opportunity": "description précise et actionnable",
+      "evidence": "pourquoi c'est absent des ads actuelles",
+      "urgency": "now|3_months|long_term",
+      "estimated_potential": "faible|moyen|fort|très_fort"
+    }}
+  ],
+  "winning_formula": {{
+    "headline_templates": [
+      "Template 1 : [CHIFFRE] [BÉNÉFICE] en [DÉLAI] sans [FRICTION]",
+      "Template 2 : Pourquoi [AUDIENCE] [FAIT] maintenant"
+    ],
+    "best_cta_patterns": ["CTA 1", "CTA 2", "CTA 3"],
+    "proof_hierarchy": ["preuve 1 (la + efficace)", "preuve 2", "preuve 3"],
+    "recommended_structure": "Hook → Problème aggravé → Solution unique → Preuve → Offre → CTA",
+    "format_recommendation": "video_ugc|carousel|image_statique|reel"
+  }},
+  "competitive_alerts": [
+    {{
+      "alert": "description de la menace ou opportunité",
+      "brand": "nom si identifiable",
+      "severity": "info|warning|urgent"
+    }}
+  ],
+  "market_verdict": "2-3 phrases : état du marché maintenant + action prioritaire + fenêtre d'opportunité"
+}}
+"""
+
 _GAP_PROMPT = """\
 You are an expert in Meta Ads, e-commerce copywriting, and market research.
 
@@ -168,6 +252,75 @@ async def research_niche(
         return data
     except Exception as exc:
         logger.warning("Gemini research failed for '%s': %s", niche, exc)
+        return {}
+
+
+async def analyze_ads(
+    ads: list[dict],
+    niche: str,
+    country: str = "FR",
+    model: str = "gemini-2.0-flash",
+    max_ads: int = 60,
+) -> dict:
+    """
+    AdSpy-style competitive analysis of scraped ads using Gemini.
+
+    Takes the raw ad batch and produces: winning hooks, top angles,
+    audience insights, market intelligence, untapped opportunities,
+    winning formula, competitive alerts, and a market verdict.
+
+    No Google Search grounding — reasons over provided ad data.
+    """
+    if not GEMINI_API_KEY or not ads:
+        return {}
+
+    country_name = _COUNTRY_NAMES.get(country, country)
+
+    # Build compact table: top ads by engagement, then by days_running
+    ranked = sorted(ads, key=lambda a: (a.get("engagement_score", 0) + a.get("days_running", 0) * 5), reverse=True)
+    top_ads = ranked[:max_ads]
+
+    rows: list[str] = []
+    for a in top_ads:
+        copy     = (a.get("ad_copy") or "")[:120].replace("\n", " ").replace("|", "/")
+        platform = a.get("platform", "?")
+        days     = a.get("days_running", 0)
+        eng      = a.get("engagement_score", 0)
+        page     = (a.get("page_name") or "")[:25].replace("|", "/")
+        ctr      = f"{a.get('ctr', 0):.1f}" if a.get("ctr") else "?"
+        rows.append(f"{copy} | {platform} | {days}j | {eng} | {page} | {ctr}%")
+
+    ads_table = "\n".join(rows) if rows else "(aucune donnée)"
+
+    prompt = _ADS_ANALYSIS_PROMPT.format(
+        count=len(top_ads),
+        niche=niche,
+        country=country_name,
+        ads_table=ads_table,
+    )
+
+    try:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        # No Google Search tool here — pure reasoning over provided data
+        cfg = types.GenerateContentConfig(temperature=0.15, max_output_tokens=3000)
+        response = await client.aio.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=cfg,
+        )
+        data = _parse_json(response.text)
+        if data:
+            logger.info(
+                "Gemini ads analysis OK for '%s': %d hooks, verdict='%s'",
+                niche,
+                len(data.get("winning_hooks", [])),
+                str(data.get("market_verdict", ""))[:60],
+            )
+        return data
+    except Exception as exc:
+        logger.warning("Gemini ads analysis failed for '%s': %s", niche, exc)
         return {}
 
 

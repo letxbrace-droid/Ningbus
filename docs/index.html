@@ -1137,7 +1137,63 @@ function renderMarketResearch(mr) {
       </div>
       ${anglesHtml}${audHtml}${painHtml}
       ${mr.summary ? `<div class="mi-summary">${esc(mr.summary)}</div>` : ''}
+    </div>
+    ${renderAdsAnalysis(mr.ads_analysis)}`;
+
+}
+
+// ── AdSpy-style Gemini Ads Analysis panel ─────────────────────────────────
+function renderAdsAnalysis(aa) {
+  if (!aa || !Object.keys(aa).length) return '';
+
+  const verdictHtml = aa.market_verdict
+    ? `<div style="font-size:.78rem;color:var(--text);line-height:1.55;background:var(--surface2);border-left:3px solid var(--accent);padding:.5rem .75rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-top:.6rem">${esc(aa.market_verdict)}</div>` : '';
+
+  const maturity = aa.market_intelligence || {};
+  const maturityColor = {vierge:'#10B981',émergent:'#10B981',croissance:'#3B82F6',mature:'#F59E0B',saturé:'#EF4444'}[maturity.maturity_label] || 'var(--text-sec)';
+  const maturityHtml = maturity.maturity_label
+    ? `<span class="mi-chip" style="background:${maturityColor}22;color:${maturityColor};border-color:${maturityColor}44">${esc(maturity.maturity_label)} · ${maturity.maturity_score??'?'}/100</span>` : '';
+  const platformHtml = maturity.dominant_platform
+    ? `<span class="mi-chip mi-chip-muted">${maturity.dominant_platform==='tiktok'?'🎵':maturity.dominant_platform==='meta'?'📘':'📘🎵'} dominant</span>` : '';
+
+  const hooksHtml = (aa.winning_hooks||[]).slice(0,4).map((h,i) => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;margin-bottom:.4rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text)">#${i+1} ${esc(h.formula||'')}</div>
+        <span class="chip chip-blue" style="font-size:.6rem;white-space:nowrap">${esc(h.trigger||'')}</span>
+      </div>
+      ${h.example?`<div style="font-size:.67rem;color:var(--text-sec);margin-top:.3rem;font-style:italic">"${esc(h.example.slice(0,100))}"</div>`:''}
+      ${h.why_it_works?`<div style="font-size:.64rem;color:var(--muted);margin-top:.2rem">${esc(h.why_it_works)}</div>`:''}
+    </div>`).join('');
+
+  const gapsHtml = (aa.untapped_opportunities||[]).slice(0,4).map(g => {
+    const urgColor = {now:'#EF4444','3_months':'#F59E0B',long_term:'#10B981'}[g.urgency]||'var(--muted)';
+    return `<div style="display:flex;gap:.5rem;align-items:flex-start;padding:.4rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.6rem;font-weight:700;color:${urgColor};white-space:nowrap;padding-top:1px">${{now:'🔥 NOW','3_months':'⏳ 3M',long_term:'📅 LT'}[g.urgency]||'•'}</span>
+      <div>
+        <div style="font-size:.7rem;font-weight:600;color:var(--text)">${esc(g.opportunity||'')}</div>
+        ${g.evidence?`<div style="font-size:.62rem;color:var(--muted)">${esc(g.evidence)}</div>`:''}
+      </div>
     </div>`;
+  }).join('');
+
+  const formulaHtml = aa.winning_formula ? (() => {
+    const wf = aa.winning_formula;
+    return `<div style="font-size:.68rem;color:var(--accent);font-weight:700;margin-bottom:.3rem">Structure gagnante</div>
+      <div style="font-size:.7rem;color:var(--text-sec);line-height:1.6">${esc(wf.recommended_structure||'')}</div>
+      ${(wf.headline_templates||[]).length?`<div style="margin-top:.4rem">${(wf.headline_templates||[]).slice(0,2).map(t=>`<div style="font-size:.66rem;color:var(--text);background:var(--surface3);padding:.3rem .5rem;border-radius:var(--radius-sm);margin-top:.2rem">"${esc(t)}"</div>`).join('')}</div>`:''}`;
+  })() : '';
+
+  return `<div class="mi-card" style="margin-top:.6rem">
+    <div class="mi-header">
+      <div class="mi-title">📊 Analyse Ads · Style AdSpy</div>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap">${maturityHtml}${platformHtml}</div>
+    </div>
+    ${verdictHtml}
+    ${hooksHtml ? `<div class="mi-section-label" style="margin-top:.6rem">${ICO.hook} Hooks gagnants</div>${hooksHtml}` : ''}
+    ${gapsHtml ? `<div class="mi-section-label" style="margin-top:.6rem">${ICO.lightbulb} Opportunités inexploitées</div>${gapsHtml}` : ''}
+    ${formulaHtml ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;margin-top:.6rem">${formulaHtml}</div>` : ''}
+  </div>`;
 }
 
 // ── Sort / filter ──────────────────────────────────────────────────────────

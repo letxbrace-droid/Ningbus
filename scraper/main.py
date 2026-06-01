@@ -17,7 +17,7 @@ import yaml
 from .alert_system import send_alerts
 from .angle_aggregator import AngleAggregator
 from .angle_analyzer import AngleAnalyzer
-from .market_research import research_niche, validate_gap_angles
+from .market_research import analyze_ads, research_niche, validate_gap_angles
 from .meta_cookie_scraper import MetaCookieScraper
 from .meta_scraper import MetaScraper
 from .price_signals import enrich_products_with_margins
@@ -331,10 +331,25 @@ async def run_niche(
             },
         }
 
-    # 2. Analyse angles with Groq
+    # 2. Analyse angles with Groq  +  AdSpy-style Gemini analysis (concurrent)
     with Timer("angle_analysis"):
-        analyzed_ads = await analyzer.batch_analyze_ads(ads)
-    logger.info("Step 2 — %d ads analysed", len(analyzed_ads))
+        analyzed_ads, gemini_ads_report = await asyncio.gather(
+            analyzer.batch_analyze_ads(ads),
+            asyncio.wait_for(
+                analyze_ads(ads, niche, country, model=gemini_model),
+                timeout=60.0,
+            ),
+            return_exceptions=True,
+        )
+        analyzed_ads      = analyzed_ads      if isinstance(analyzed_ads, list) else []
+        gemini_ads_report = gemini_ads_report if isinstance(gemini_ads_report, dict) else {}
+
+    logger.info(
+        "Step 2 — %d ads classified | Gemini report: %d hooks, %d opportunities",
+        len(analyzed_ads),
+        len(gemini_ads_report.get("winning_hooks", [])),
+        len(gemini_ads_report.get("untapped_opportunities", [])),
+    )
 
     # 3. Aggregate angle KPIs
     with Timer("aggregation"):
@@ -430,6 +445,10 @@ async def run_niche(
 
     elapsed = time.perf_counter() - t0
     logger.info("Pipeline '%s' done in %.1fs", niche, elapsed)
+
+    # Merge Gemini ads report into market_research for dashboard access
+    if gemini_ads_report:
+        market_research["ads_analysis"] = gemini_ads_report
 
     return {
         "niche":                niche,
