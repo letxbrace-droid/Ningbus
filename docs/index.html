@@ -397,6 +397,8 @@
     .chip-green    { background: var(--green-bg);  color: var(--green); border-color: rgba(16,185,129,0.2); }
     .platform-row  { display: flex; gap: 0.3rem; margin-top: 0.35rem; flex-wrap: wrap; }
     .platform-badge { font-size: 0.6rem; padding: 2px 7px; border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-sec); text-transform: capitalize; border: 1px solid var(--border); }
+    .platform-badge.tiktok { background: rgba(0,242,234,0.1); color: #00F2EA; border-color: rgba(0,242,234,0.25); }
+    .platform-badge.meta   { background: rgba(59,130,246,0.1); color: #60A5FA; border-color: rgba(59,130,246,0.25); }
 
     /* ── VELOCITY & SIGNAL BADGES ────────────────────────────── */
     .vel-badge { font-size: 0.63rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
@@ -1201,7 +1203,7 @@ function buildAdvCard(adv) {
     `<span class="chip chip-yellow" title="Angle non exploité">${ICO.target} ${esc(g)}</span>`
   ).join('');
 
-  const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge">${esc(p)}</span>`).join('');
+  const platforms = (adv.platforms||[]).map(p=>`<span class="platform-badge ${esc(p.toLowerCase())}">${p==='tiktok'?'🎵 ':p==='meta'?'📘 ':''}${esc(p)}</span>`).join('');
   const newBadge = adv.is_new_entrant ? `<span class="new-entrant-badge">${ICO.newEntry} Nouvel entrant</span>` : '';
 
   const rev = adv.revenue_estimate;
@@ -1276,6 +1278,7 @@ function buildAdvCard(adv) {
 
   const examplesHtml = (adv.ad_examples||[]).slice(0,3).map(ex=>`
     <div class="copy-item">
+      ${ex.platform==='tiktok'?`<div style="font-size:.58rem;color:#00F2EA;margin-bottom:.15rem">🎵 TikTok${ex.ctr?` · CTR <b>${ex.ctr}%</b>`:''}</div>`:''}
       <div class="copy-text">${esc((ex.copy||'').slice(0,240))}${(ex.copy||'').length>240?'…':''}</div>
       <div class="copy-meta">
         ${ex.angle?`<strong>${esc(ex.angle)}</strong> · `:''}${ex.days_running??0}j

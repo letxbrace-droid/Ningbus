@@ -21,6 +21,7 @@ from .market_research import research_niche, validate_gap_angles
 from .meta_scraper import MetaScraper
 from .price_signals import enrich_products_with_margins
 from .shop_finder import find_scaling_shops
+from .tiktok_scraper import TikTokScraper
 from .utils import Timer, setup_logging
 from .velocity_tracker import compute_velocity
 
@@ -184,7 +185,17 @@ def _shop_to_advertiser(shop: dict, gaps: list[dict]) -> dict:
         "dominant_angle":     dominant,
         "angle_gaps":         gap_angles,
         "products":           products,
-        "ad_examples":        [],
+        "ad_examples":        [
+            {
+                "copy":         a.get("ad_copy", "")[:300],
+                "angle":        (a.get("angle_data") or {}).get("angle", ""),
+                "days_running": a.get("days_running", 0),
+                "snapshot_url": a.get("landing_page_url", ""),
+                "platform":     a.get("platform", ""),
+                "ctr":          round(a.get("ctr", 0), 2) if a.get("ctr") else None,
+            }
+            for a in sorted(ads, key=lambda x: x.get("engagement_score", 0), reverse=True)[:5]
+        ],
         "platforms":          list({p for a in ads for p in (a.get("publisher_platforms") or [])}),
         "revenue_estimate":          _estimate_revenue(
             ads_count=shop.get("ads_count", len(ads)),
@@ -233,10 +244,20 @@ async def run_niche(
         )
     )
 
-    # 1. Scrape Meta ads
+    # 1. Scrape Meta + TikTok concurrently
     with Timer("scrape"):
-        scraper = MetaScraper(max_ads=max_ads)
-        ads = await scraper.scrape_ads(niche=niche, country=country)
+        meta_scraper   = MetaScraper(max_ads=max_ads)
+        tiktok_scraper = TikTokScraper(max_ads=max_ads)
+        meta_ads, tiktok_ads = await asyncio.gather(
+            meta_scraper.scrape_ads(niche=niche, country=country),
+            tiktok_scraper.scrape_ads(niche=niche, country=country),
+            return_exceptions=True,
+        )
+        meta_ads   = meta_ads   if isinstance(meta_ads,   list) else []
+        tiktok_ads = tiktok_ads if isinstance(tiktok_ads, list) else []
+        ads = meta_ads + tiktok_ads
+
+    logger.info("Step 1 — Meta: %d ads | TikTok: %d ads", len(meta_ads), len(tiktok_ads))
 
     # Tag + clean: drop template placeholders and sub-10 char copies
     import re as _re
@@ -248,7 +269,7 @@ async def run_niche(
     for a in ads:
         a["niche"] = niche
 
-    logger.info("Step 1 — %d clean ads scraped (niche='%s')", len(ads), niche)
+    logger.info("Step 1 — %d clean ads total (niche='%s')", len(ads), niche)
 
     if not ads:
         logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)
