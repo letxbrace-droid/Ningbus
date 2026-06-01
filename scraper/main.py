@@ -18,6 +18,7 @@ from .alert_system import send_alerts
 from .angle_aggregator import AngleAggregator
 from .angle_analyzer import AngleAnalyzer
 from .market_research import research_niche, validate_gap_angles
+from .meta_cookie_scraper import MetaCookieScraper
 from .meta_scraper import MetaScraper
 from .price_signals import enrich_products_with_margins
 from .shop_finder import find_scaling_shops
@@ -244,20 +245,39 @@ async def run_niche(
         )
     )
 
-    # 1. Scrape Meta + TikTok concurrently
+    # 1. Scrape — three sources in parallel, best-effort
+    #    Priority: cookie (full data) > API token > Playwright fallback
+    #    TikTok Creative Center always runs alongside Meta.
     with Timer("scrape"):
-        meta_scraper   = MetaScraper(max_ads=max_ads)
+        cookie_scraper = MetaCookieScraper(max_ads=max_ads)
         tiktok_scraper = TikTokScraper(max_ads=max_ads)
-        meta_ads, tiktok_ads = await asyncio.gather(
-            meta_scraper.scrape_ads(niche=niche, country=country),
-            tiktok_scraper.scrape_ads(niche=niche, country=country),
-            return_exceptions=True,
-        )
+
+        if cookie_scraper.available():
+            # Cookie + TikTok concurrently (fastest path with real metadata)
+            meta_ads, tiktok_ads = await asyncio.gather(
+                cookie_scraper.scrape_ads(niche=niche, country=country),
+                tiktok_scraper.scrape_ads(niche=niche, country=country),
+                return_exceptions=True,
+            )
+            meta_src = "cookie"
+        else:
+            # Playwright/API + TikTok concurrently
+            meta_scraper = MetaScraper(max_ads=max_ads)
+            meta_ads, tiktok_ads = await asyncio.gather(
+                meta_scraper.scrape_ads(niche=niche, country=country),
+                tiktok_scraper.scrape_ads(niche=niche, country=country),
+                return_exceptions=True,
+            )
+            meta_src = "playwright/api"
+
         meta_ads   = meta_ads   if isinstance(meta_ads,   list) else []
         tiktok_ads = tiktok_ads if isinstance(tiktok_ads, list) else []
         ads = meta_ads + tiktok_ads
 
-    logger.info("Step 1 — Meta: %d ads | TikTok: %d ads", len(meta_ads), len(tiktok_ads))
+    logger.info(
+        "Step 1 — Meta[%s]: %d ads | TikTok: %d ads | total: %d",
+        meta_src, len(meta_ads), len(tiktok_ads), len(ads),
+    )
 
     # Tag + clean: drop template placeholders and sub-10 char copies
     import re as _re

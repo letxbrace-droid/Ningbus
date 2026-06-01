@@ -59,6 +59,7 @@ jobs:
           GROQ_MODEL: ${{ vars.GROQ_MODEL || 'llama-3.1-70b-versatile' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.0-flash' }}
+          FB_COOKIE: ${{ secrets.FB_COOKIE }}
           FB_APP_TOKEN: ${{ secrets.FB_APP_TOKEN }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           NICHE_OVERRIDE: ${{ github.event.inputs.niche }}
