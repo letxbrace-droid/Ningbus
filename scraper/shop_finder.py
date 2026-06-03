@@ -387,6 +387,7 @@ async def find_scaling_shops(
     niche: str,
     country: str = "FR",
     exclude_domains: set[str] | None = None,
+    seed_domains: set[str] | None = None,
 ) -> list[dict]:
     """
     Find active Shopify shops for a niche.
@@ -394,10 +395,19 @@ async def find_scaling_shops(
     2. Supplement with DuckDuckGo diversified queries.
     3. Verify each shop is accessible and has products.
     Returns up to 10 shops sorted by product count.
+    seed_domains are always checked regardless of DDG results (history fallback).
     """
     exclude = exclude_domains or set()
     domains: set[str] = set()
 
+    # ── Source 0: forced seeds (history / caller-supplied) ──────────────────
+    # Seeds bypass the exclusion list — they are known-good shops from history
+    # that we always want to re-verify when DDG returns nothing.
+    if seed_domains:
+        domains.update(seed_domains)
+        logger.info("shop_finder: seeded %d domains from caller", len(seed_domains))
+
+    # ── Source 1: landing URLs directly from ad data ────────────────────────
     for ad in ads:
         d = _clean_domain(
             ad.get("store_domain") or ad.get("landing_page_url") or ""
@@ -415,6 +425,14 @@ async def find_scaling_shops(
         if len(domains) < 5:
             domains.update(old_domains)
         logger.info("shop_finder: %d candidate domains (%d new, %d known-excluded)", len(domains), len(new_domains), len(old_domains))
+
+    # ── Source 4: history seed (when DDG is blocked / returns nothing) ──────
+    # If we still have fewer than 3 candidates, fall back to previously verified
+    # domains from the exclusion list (they were live in a previous run).
+    if len(domains) < 3 and exclude:
+        seed = list(exclude)[:15]
+        logger.info("shop_finder: DDG returned no results — seeding with %d known domains from history", len(seed))
+        domains.update(seed)
 
     ad_domains = {
         _clean_domain(a.get("store_domain") or a.get("landing_page_url") or "")

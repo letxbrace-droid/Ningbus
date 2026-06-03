@@ -229,8 +229,14 @@ async def run_niche(
 
     if not ads:
         logger.warning("No Meta ads for '%s' — falling back to DDG shop finder", niche)
+        # Seed with previously verified domains so we always have data even when DDG is blocked
+        prev_seed = {a["domain"] for a in prev_advertisers if a.get("domain")}
         with Timer("shop_finder_fallback"):
-            shops = await find_scaling_shops([], niche, country, exclude_domains=known_domains)
+            shops = await find_scaling_shops(
+                [], niche, country,
+                exclude_domains=known_domains,
+                seed_domains=prev_seed or None,
+            )
         # Price/margin enrichment on fallback shops
         with Timer("price_signals_fallback"):
             try:
@@ -285,6 +291,23 @@ async def run_niche(
     with Timer("shop_finder"):
         shops = await find_scaling_shops(analyzed_ads, niche, country, exclude_domains=known_domains)
     logger.info("Step 4 — %d scaling shops found", len(shops))
+
+    # Fallback: if DDG / Meta returned nothing, re-verify domains from the most
+    # recent history run that had real shop data (prev_advertisers).
+    if len(shops) < 2 and prev_advertisers:
+        seed_domains = {a["domain"] for a in prev_advertisers if a.get("domain")}
+        if seed_domains:
+            logger.warning(
+                "Step 4 — 0 shops from shop_finder; re-verifying %d history domains",
+                len(seed_domains),
+            )
+            with Timer("shop_finder_history_seed"):
+                shops = await find_scaling_shops(
+                    analyzed_ads, niche, country,
+                    exclude_domains=set(),
+                    seed_domains=seed_domains,
+                )
+            logger.info("Step 4 (history seed) — %d shops", len(shops))
 
     # 4.5 Analyse landing pages — hard timeout 60s
     from .landing_analyzer import analyze_shops
