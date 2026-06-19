@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ningbus — Suivi des défauts</title>
+  <title>RATP Cap Saclay — Suivi des défauts</title>
   <style>
     :root {
       --vert:    #16a34a;
@@ -20,13 +20,15 @@
 
     /* ── En-tête fixe ── */
     header {
-      background: #1e293b; color: white;
+      background: #ffffff; color: #1e293b;
       padding: 10px 20px;
       display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
       position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 6px rgba(0,0,0,.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,.12);
+      border-bottom: 3px solid #2ec4b6;
     }
-    header h1 { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+    header h1 { font-size: .85rem; font-weight: 700; white-space: nowrap; color: #2d2f7e; }
+    .logo-header { height: 38px; width: auto; display: block; }
 
     /* Compteurs */
     .compteurs { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -34,6 +36,17 @@
     .cpt.dispo  { background: var(--vert);   color: white; }
     .cpt.bloque { background: var(--rouge);  color: white; }
     .cpt.repair { background: var(--orange); color: white; }
+    /* Champ nom adapté au fond blanc */
+    .champ-nom input {
+      border-color: #d1d5db !important; background: #f9fafb !important;
+      color: #1e293b !important;
+    }
+    .champ-nom input::placeholder { color: #9ca3af !important; }
+    /* Onglets sur fond blanc */
+    .nav-roles button {
+      border-color: #d1d5db !important; color: #374151 !important;
+    }
+    .nav-roles button.actif { background: #2d2f7e !important; color: white !important; border-color: #2d2f7e !important; }
 
     /* Champ nom */
     .champ-nom { display: flex; align-items: center; gap: 5px; font-size: .8rem; }
@@ -241,7 +254,10 @@
 
 <!-- ══════════════ EN-TÊTE ══════════════ -->
 <header>
-  <h1>🚌 Ningbus — Défauts</h1>
+  <a href="index.html" title="Accueil">
+    <img src="logo-ratpcap.png" alt="RATP Cap Saclay" class="logo-header">
+  </a>
+  <h1>Suivi des défauts</h1>
 
   <!-- Compteurs mis à jour à chaque action -->
   <div class="compteurs">
