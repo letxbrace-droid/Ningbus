@@ -134,6 +134,9 @@
       min-height: 40px;
     }
     .nav-roles button svg { flex-shrink: 0; }
+    .nav-roles button .nav-ico {
+      display: inline-flex; align-items: center; justify-content: center;
+    }
     .nav-roles button:hover  { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
     .nav-roles button.actif  { background: var(--navy); color: #fff; border-color: var(--navy); }
     .nav-txt { display: inline; }
@@ -148,15 +151,19 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
 
     .section-titre {
-      font-size: 1.05rem; font-weight: 700; color: var(--navy);
-      margin-bottom: 18px;
-      display: flex; align-items: center; gap: 10px;
+      font-size: 1.15rem; font-weight: 800; color: var(--navy);
+      margin-bottom: 20px; letter-spacing: -.01em;
+      display: flex; align-items: center; gap: 11px;
     }
-    .section-titre::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    /* Accent vertical teal avant le titre — repère visuel net */
+    .section-titre::before {
+      content: ''; width: 4px; height: 1.05em; border-radius: 4px;
+      background: var(--teal); flex-shrink: 0;
+    }
 
     .card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--r-md); padding: 24px;
+      border-radius: var(--r-lg); padding: 24px;
       box-shadow: var(--shadow-md); margin-bottom: 16px;
     }
 
@@ -538,30 +545,39 @@
         padding: 7px 6px; font-size: .8rem;
       }
 
-      /* Navigation des rôles → barre fixe en bas */
+      /* ── Navigation des rôles → barre fixe en bas (Material 3) ── */
       .nav-roles {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
         display: flex; gap: 0;
-        background: #fff;
+        background: rgba(255,255,255,.94);
+        backdrop-filter: saturate(1.4) blur(10px);
+        -webkit-backdrop-filter: saturate(1.4) blur(10px);
         border-top: 1px solid var(--border);
-        box-shadow: 0 -2px 12px rgba(0,0,0,.08);
-        padding: 6px 8px;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -3px 16px rgba(20,30,60,.07);
+        padding: 8px 10px;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
       }
       .nav-roles button {
-        flex: 1; flex-direction: column; gap: 3px;
-        border: none; border-radius: var(--r-md);
-        padding: 7px 4px; min-height: 54px;
-        font-size: .7rem; font-weight: 700;
+        flex: 1; flex-direction: column; gap: 4px;
+        border: none; background: transparent;
+        padding: 4px; min-height: 56px;
+        font-size: .7rem; font-weight: 600; color: var(--text-3);
+        -webkit-tap-highlight-color: transparent;
       }
-      .nav-roles button svg { width: 20px; height: 20px; }
-      .nav-roles button:hover { background: #f0f0fa; color: var(--navy); }
-      .nav-roles button.actif {
-        background: #eef0fa; color: var(--navy); border: none;
+      /* Pastille derrière l'icône — se remplit à l'état actif */
+      .nav-roles button .nav-ico {
+        width: 56px; height: 30px; border-radius: 16px;
+        transition: background .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
       }
+      .nav-roles button svg { width: 21px; height: 21px; }
+      .nav-roles button:active .nav-ico { transform: scale(.9); }
+      .nav-roles button:hover  { background: transparent; color: var(--navy); }
+      .nav-roles button.actif  { color: var(--navy); font-weight: 700; }
+      .nav-roles button.actif .nav-ico { background: #dfe3f7; }
+      .nav-roles button.actif svg { stroke-width: 2.3; }
 
       /* Laisser respirer le contenu au-dessus de la barre du bas */
-      main { padding: 18px 14px calc(78px + env(safe-area-inset-bottom, 0px)); }
+      main { padding: 18px 14px calc(84px + env(safe-area-inset-bottom, 0px)); }
     }
 
     /* Mobile portrait */
@@ -743,15 +759,15 @@
   <!-- Navigation des rôles -->
   <nav class="nav-roles">
     <button data-role="chauffeur" class="actif" onclick="changerRole('chauffeur')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M10.3 10.7 4.6 8M13.7 10.7 19.4 8"/></svg>
+      <span class="nav-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M10.3 10.7 4.6 8M13.7 10.7 19.4 8"/></svg></span>
       <span class="nav-txt">Chauffeur</span>
     </button>
     <button data-role="mecano" onclick="changerRole('mecano')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <span class="nav-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
       <span class="nav-txt">Atelier</span>
     </button>
     <button data-role="regulateur" onclick="changerRole('regulateur')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+      <span class="nav-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></span>
       <span class="nav-txt">Régulateur</span>
     </button>
   </nav>
