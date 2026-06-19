@@ -85,12 +85,14 @@
     /* Onglets rôles */
     .nav-roles { display: flex; gap: 4px; margin-left: auto; }
     .nav-roles button {
-      padding: 6px 16px; border: 1.5px solid var(--border);
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border: 1.5px solid var(--border);
       background: transparent; color: var(--text-2);
       border-radius: 7px; cursor: pointer;
       font-size: .82rem; font-weight: 600;
       transition: all .15s; white-space: nowrap;
     }
+    .nav-roles button svg { flex-shrink: 0; }
     .nav-roles button:hover { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
     .nav-roles button.actif {
       background: var(--navy); color: #fff;
@@ -488,9 +490,18 @@
 
   <!-- Sélecteur de rôle -->
   <nav class="nav-roles">
-    <button data-role="chauffeur"  class="actif" onclick="changerRole('chauffeur')">🚍 Chauffeur</button>
-    <button data-role="mecano"                   onclick="changerRole('mecano')">🔧 Mécano</button>
-    <button data-role="regulateur"               onclick="changerRole('regulateur')">📋 Régulateur</button>
+    <button data-role="chauffeur" class="actif" onclick="changerRole('chauffeur')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M10.3 10.7 4.6 8M13.7 10.7 19.4 8"/></svg>
+      Chauffeur
+    </button>
+    <button data-role="mecano" onclick="changerRole('mecano')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Atelier
+    </button>
+    <button data-role="regulateur" onclick="changerRole('regulateur')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+      Régulateur
+    </button>
   </nav>
 </header>
 
@@ -526,6 +537,8 @@
             <option>Portes</option>
             <option>Rampe PMR</option>
             <option>Éclairage</option>
+            <option>Girouette</option>
+            <option>Biellette</option>
             <option>Propreté</option>
             <option value="Autre">Autre (préciser)</option>
           </select>
