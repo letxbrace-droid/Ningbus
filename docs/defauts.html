@@ -553,6 +553,94 @@
       .gravite-opts { grid-template-columns: 1fr; }
       .nav-roles button { padding: 6px 8px; }
     }
+
+    /* ═══════════════════════════════════════
+       PHOTOS — saisie & vignettes
+    ═══════════════════════════════════════ */
+    .btn-photo-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 16px; background: var(--bg);
+      border: 1.5px dashed var(--border); border-radius: var(--r-sm);
+      cursor: pointer; font-size: .85rem; font-weight: 600; color: var(--text-2);
+      transition: border-color .15s, color .15s;
+      min-height: 44px; margin-top: 8px;
+    }
+    .btn-photo-label:hover { border-color: var(--teal); color: var(--teal); }
+    .btn-photo-label.sm {
+      padding: 7px 12px; font-size: .8rem; min-height: 38px; margin-top: 0;
+    }
+
+    .apercu-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+    .photo-thumb-wrap { position: relative; display: inline-block; }
+    .photo-thumb {
+      width: 72px; height: 72px; object-fit: cover;
+      border-radius: var(--r-sm); cursor: pointer;
+      border: 2px solid var(--border);
+      transition: border-color .15s, transform .12s; display: block;
+    }
+    .photo-thumb:hover { border-color: var(--teal); transform: scale(1.05); }
+    .photo-suppr {
+      position: absolute; top: -5px; right: -5px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--rouge); color: #fff; border: none;
+      font-size: .65rem; cursor: pointer; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    }
+
+    .photos-section { margin: 8px 0; }
+    .photos-label {
+      font-size: .75rem; font-weight: 700; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px;
+    }
+
+    .actions-photos-at {
+      padding-top: 10px; border-top: 1px solid var(--border); margin-top: 8px;
+    }
+
+    /* ═══════════════════════════════════════
+       LIGHTBOX PHOTO
+    ═══════════════════════════════════════ */
+    #lightbox .lightbox-content {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      max-width: min(90vw, 900px);
+    }
+    .lightbox-img {
+      max-width: 100%; max-height: 80vh;
+      object-fit: contain; border-radius: var(--r-md);
+      box-shadow: 0 8px 40px rgba(0,0,0,.5);
+    }
+    .lightbox-fermer {
+      position: absolute; top: -44px; right: 0;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      color: #fff; width: 34px; height: 34px; border-radius: 50%;
+      cursor: pointer; font-size: .95rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .lightbox-fermer:hover { background: rgba(255,255,255,.3); }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      color: #fff; width: 42px; height: 42px; border-radius: 50%;
+      cursor: pointer; font-size: 1.5rem;
+      display: none; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,.3); }
+    .lightbox-nav.prev { left: -58px; }
+    .lightbox-nav.next { right: -58px; }
+    .lightbox-info {
+      color: rgba(255,255,255,.75); font-size: .83rem;
+      margin-top: 10px; text-align: center;
+    }
+    @media (max-width: 600px) {
+      .lightbox-nav.prev { left: -46px; }
+      .lightbox-nav.next { right: -46px; }
+      .photo-thumb { width: 60px; height: 60px; }
+    }
   </style>
 </head>
 <body>
@@ -570,6 +658,17 @@
       <button class="btn-sec" onclick="fermerModal()">Annuler</button>
       <button class="btn-danger" onclick="confirmerAttribution()">Attribuer quand même</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal lightbox photo -->
+<div class="overlay" id="lightbox" onclick="fermerLightbox()">
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <button class="lightbox-fermer" onclick="fermerLightbox()" aria-label="Fermer">✕</button>
+    <button class="lightbox-nav prev" id="lb-prev" onclick="naviguerPhoto(-1)" aria-label="Précédente">‹</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="Photo du défaut">
+    <button class="lightbox-nav next" id="lb-next" onclick="naviguerPhoto(1)" aria-label="Suivante">›</button>
+    <p class="lightbox-info" id="lightbox-info"></p>
   </div>
 </div>
 
@@ -687,6 +786,17 @@
           <textarea id="comm-ch" placeholder="Détails supplémentaires…" maxlength="500"></textarea>
         </div>
 
+        <div class="fg">
+          <label>Photos du défaut <span class="opt">(3 max — galerie ou appareil photo)</span></label>
+          <label class="btn-photo-label" for="photos-ch-input">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span id="lbl-photos-ch">Ajouter des photos (0/3)</span>
+          </label>
+          <input type="file" id="photos-ch-input" accept="image/*" multiple style="display:none"
+                 onchange="ajouterPhotosCh(this)">
+          <div class="apercu-photos" id="apercu-photos-ch"></div>
+        </div>
+
         <div class="meta-auto">
           <span>📅 <strong id="apercu-date">—</strong></span>
           <span>👤 <strong id="apercu-nom">—</strong></span>
@@ -756,6 +866,8 @@
      mecano          string   nom du mécano/atelier
      commentaireTech string   note technique atelier
      recurrent       boolean  vrai si même type sur même bus ≤ 14 j
+     photos          array    base64 JPEG — photos chauffeur (≤ 3)
+     photosTech      array    base64 JPEG — photos atelier   (≤ 3)
 ════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -892,11 +1004,13 @@ async function soumettreDefaut(e) {
       gravite, commentaire: comm, horodatage: new Date().toISOString(),
       declarant: nom, statut: 'ouvert',
       horodatageRep: null, mecano: null, commentaireTech: null, recurrent: false,
+      photos: [...photosChTemp], photosTech: [],
     };
     defaut.recurrent = estRecurrent(defaut, liste);
     await ajouterDefaut(defaut);
     document.getElementById('form-defaut').reset();
     toggleAutre();
+    photosChTemp = []; rendreAperçuCh();
     await majCompteurs();
     const msg = defaut.recurrent
       ? `✅ Défaut enregistré. <strong>⚠️ Défaut récurrent sur le bus ${esc(numBus)}.</strong>`
@@ -935,16 +1049,53 @@ async function rendreDefauts() {
     return;
   }
   ct.innerHTML = [...actifs, ...repares].map(htmlDefaut).join('');
+
+  /* Charger les src base64 après innerHTML (évite d'embarquer les grandes chaînes en HTML) */
+  ct.querySelectorAll('img[data-ph-key]').forEach(img => {
+    const arr = _photos[img.dataset.phKey];
+    if (arr?.[+img.dataset.phIdx]) img.src = arr[+img.dataset.phIdx];
+  });
 }
 
 function htmlDefaut(d) {
   const typeLabel = d.typeDefaut === 'Autre' && d.detailAutre
     ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
 
+  /* Alimenter le registre lightbox pour les photos déjà en IDB */
+  if ((d.photos     ||[]).length) _photos[`${d.id}_ch`] = d.photos;
+  if ((d.photosTech ||[]).length) _photos[`${d.id}_at`] = d.photosTech;
+
   const bRec  = d.recurrent ? `<span class="badge recurrent">♻ Récurrent</span>` : '';
-  const commC = d.commentaire    ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
+  const commC = d.commentaire
+    ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
   const commT = d.commentaireTech
     ? `<div class="dcomm tech">🔧 ${esc(d.commentaireTech)} — <em>${esc(d.mecano||'')}</em></div>` : '';
+
+  /* Vignettes photos chauffeur — src chargé après innerHTML (data-ph-key) */
+  const photosChHtml = (d.photos||[]).length ? `
+    <div class="photos-section">
+      <div class="photos-label">📷 Photos chauffeur</div>
+      <div class="apercu-photos">
+        ${(d.photos||[]).map((_, i) =>
+          `<img class="photo-thumb" data-ph-key="${d.id}_ch" data-ph-idx="${i}"
+               onclick="ouvrirLightboxKey('${d.id}_ch',${i})" alt="Photo chauffeur ${i+1}">`
+        ).join('')}
+      </div>
+    </div>` : '';
+
+  /* Vignettes photos atelier déjà sauvegardées */
+  const photosAtHtml = (d.photosTech||[]).length ? `
+    <div class="photos-section">
+      <div class="photos-label">🔧 Photos atelier</div>
+      <div class="apercu-photos">
+        ${(d.photosTech||[]).map((_, i) =>
+          `<img class="photo-thumb" data-ph-key="${d.id}_at" data-ph-idx="${i}"
+               onclick="ouvrirLightboxKey('${d.id}_at',${i})" alt="Photo atelier ${i+1}">`
+        ).join('')}
+      </div>
+    </div>` : '';
+
+  const svgCam = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
 
   const actions = d.statut !== 'reparé' ? `
     <div class="actions-mec">
@@ -954,6 +1105,15 @@ function htmlDefaut(d) {
       <button class="btn-mec repare"  onclick="majStatut(${d.id},'reparé')">✅ Réparé</button>
       <button class="btn-mec encours" onclick="majStatut(${d.id},'en_cours')">🔧 En cours</button>
       <button class="btn-mec piece"   onclick="majStatut(${d.id},'piece_manquante')">⏳ Pièce manquante</button>
+    </div>
+    <div class="actions-photos-at">
+      <label class="btn-photo-label sm" for="photos-at-${d.id}">
+        ${svgCam}
+        <span id="lbl-photos-at-${d.id}">Photo technique (0/3)</span>
+      </label>
+      <input type="file" id="photos-at-${d.id}" accept="image/*" multiple style="display:none"
+             onchange="ajouterPhotosAt(this,${d.id})">
+      <div class="apercu-photos" id="apercu-photos-at-${d.id}"></div>
     </div>` : '';
 
   return `
@@ -973,7 +1133,7 @@ function htmlDefaut(d) {
           ${bRec}
         </div>
       </div>
-      ${commC}${commT}${actions}
+      ${commC}${commT}${photosChHtml}${photosAtHtml}${actions}
     </div>`;
 }
 
@@ -988,6 +1148,12 @@ async function majStatut(id, nvStatut) {
   defaut.horodatageRep = new Date().toISOString();
   defaut.mecano        = nom;
   if (it?.value.trim()) defaut.commentaireTech = it.value.trim();
+  /* Ajouter les nouvelles photos atelier aux photos existantes */
+  const nvPhotos = photosAtTemp[id] || [];
+  if (nvPhotos.length) {
+    defaut.photosTech = [...(defaut.photosTech || []), ...nvPhotos];
+    delete photosAtTemp[id];
+  }
   await majDefaut(defaut);
   const labels = { reparé:'Réparé ✅', en_cours:'En cours 🔧', piece_manquante:'Pièce manquante ⏳' };
   toast(labels[nvStatut] || nvStatut);
@@ -1194,6 +1360,136 @@ function cap(s)       { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
 function iconeGrav(g) { return {bloquant:'🔴','gênant':'🟠',mineur:'🟡'}[g]||''; }
 function labelStatut(s) {
   return {ouvert:'🔴 Ouvert',en_cours:'🔧 En cours',reparé:'✅ Réparé',piece_manquante:'⏳ Pièce manquante'}[s]||s;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PHOTOS
+──────────────────────────────────────────────────────────────── */
+
+/* Registre en mémoire des photos déjà sauvegardées (pour le lightbox) */
+const _photos = {};
+
+/* Photos chauffeur en attente (avant soumission du formulaire) */
+let photosChTemp = [];
+
+/* Photos atelier en attente par id-défaut (avant clic "Réparé" / etc.) */
+const photosAtTemp = {};
+
+/* Compression canvas → JPEG ≤ 1024 px, 82 % qualité ≈ 150-300 Ko */
+function compresserImage(file) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const maxPx = 1024, q = 0.82;
+      const ratio = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const w = Math.round(img.width  * ratio);
+      const h = Math.round(img.height * ratio);
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      ok(cv.toDataURL('image/jpeg', q));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(new Error('Lecture impossible')); };
+    img.src = url;
+  });
+}
+
+/* ── Photos chauffeur ── */
+async function ajouterPhotosCh(input) {
+  const reste = 3 - photosChTemp.length;
+  const files = Array.from(input.files).slice(0, reste);
+  input.value = '';
+  for (const f of files) {
+    try { photosChTemp.push(await compresserImage(f)); }
+    catch { toast('❌ Impossible de lire une image.'); }
+  }
+  rendreAperçuCh();
+}
+
+function rendreAperçuCh() {
+  const zone = document.getElementById('apercu-photos-ch');
+  const lbl  = document.getElementById('lbl-photos-ch');
+  if (!zone) return;
+  zone.innerHTML = photosChTemp.map((src, i) => `
+    <div class="photo-thumb-wrap">
+      <img class="photo-thumb" src="${src}" alt="Photo ${i+1}"
+           onclick="ouvrirLightbox(photosChTemp,${i},'📷 Chauffeur')">
+      <button class="photo-suppr" onclick="supprimerPhotoCh(${i})" title="Supprimer">✕</button>
+    </div>`).join('');
+  if (lbl) lbl.textContent = `Ajouter des photos (${photosChTemp.length}/3)`;
+}
+
+function supprimerPhotoCh(idx) { photosChTemp.splice(idx, 1); rendreAperçuCh(); }
+
+/* ── Photos atelier ── */
+async function ajouterPhotosAt(input, id) {
+  if (!photosAtTemp[id]) photosAtTemp[id] = [];
+  const reste = 3 - photosAtTemp[id].length;
+  const files = Array.from(input.files).slice(0, reste);
+  input.value = '';
+  for (const f of files) {
+    try { photosAtTemp[id].push(await compresserImage(f)); }
+    catch { toast('❌ Impossible de lire une image.'); }
+  }
+  rendreAperçuAt(id);
+}
+
+function rendreAperçuAt(id) {
+  const zone = document.getElementById(`apercu-photos-at-${id}`);
+  const lbl  = document.getElementById(`lbl-photos-at-${id}`);
+  if (!zone) return;
+  const arr = photosAtTemp[id] || [];
+  zone.innerHTML = arr.map((src, i) => `
+    <div class="photo-thumb-wrap">
+      <img class="photo-thumb" src="${src}" alt="Photo atelier ${i+1}"
+           onclick="ouvrirLightbox(photosAtTemp[${id}],${i},'🔧 Atelier')">
+      <button class="photo-suppr" onclick="supprimerPhotoAt(${id},${i})" title="Supprimer">✕</button>
+    </div>`).join('');
+  if (lbl) lbl.textContent = `Photo technique (${arr.length}/3)`;
+}
+
+function supprimerPhotoAt(id, idx) {
+  if (photosAtTemp[id]) { photosAtTemp[id].splice(idx, 1); rendreAperçuAt(id); }
+}
+
+/* ── Lightbox ── */
+let _lbArr = [], _lbIdx = 0, _lbTitre = '';
+
+function ouvrirLightbox(arr, idx, titre) {
+  if (!arr || !arr.length) return;
+  _lbArr = arr; _lbIdx = Math.min(idx, arr.length - 1); _lbTitre = titre || 'Photo';
+  document.getElementById('lightbox').classList.add('show');
+  majLightbox();
+}
+
+function majLightbox() {
+  if (!_lbArr.length) { fermerLightbox(); return; }
+  _lbIdx = Math.min(_lbIdx, _lbArr.length - 1);
+  document.getElementById('lightbox-img').src = _lbArr[_lbIdx];
+  document.getElementById('lightbox-info').textContent =
+    `${_lbTitre} — ${_lbIdx + 1} / ${_lbArr.length}`;
+  const multi = _lbArr.length > 1;
+  document.getElementById('lb-prev').style.display = multi ? 'flex' : 'none';
+  document.getElementById('lb-next').style.display = multi ? 'flex' : 'none';
+}
+
+function naviguerPhoto(dir) {
+  _lbIdx = (_lbIdx + dir + _lbArr.length) % _lbArr.length;
+  majLightbox();
+}
+
+function fermerLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+  document.getElementById('lightbox-img').src = '';
+  _lbArr = []; _lbIdx = 0;
+}
+
+/* Ouvre le lightbox depuis le registre _photos (photos sauvegardées en IDB) */
+function ouvrirLightboxKey(key, idx) {
+  const titre = key.endsWith('_ch') ? '📷 Chauffeur' : '🔧 Atelier';
+  ouvrirLightbox(_photos[key] || [], idx, titre);
 }
 
 /* ────────────────────────────────────────────────────────────────
