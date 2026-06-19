@@ -67,37 +67,37 @@
     }
 
     /* ═══════════════════════════════════════
-       EN-TÊTE STICKY — layout 2 lignes mobile
+       EN-TÊTE STICKY
+       Bureau  : 1 ligne  → logo · compteurs · nom · nav
+       Mobile   : header compact (logo + nom + compteurs)
+                  nav déplacée en BARRE DU BAS (pattern app natif)
     ═══════════════════════════════════════ */
     header {
       background: #fff;
-      border-bottom: 3px solid var(--teal);
-      box-shadow: 0 2px 10px rgba(0,0,0,.09);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
       position: sticky; top: 0; z-index: 200;
-      /* Grille : 1 ligne bureau, 2 lignes mobile */
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      grid-template-rows: auto;
+      grid-template-columns: auto auto 1fr auto;
       align-items: center;
       gap: 0 16px;
-      padding: 0 24px;
-      min-height: 62px;
+      padding: 0 20px;
+      min-height: 60px;
     }
-    /* Logo — colonne 1 */
     .logo-header { height: 34px; width: auto; display: block; grid-column: 1; }
-    /* Compteurs + nom — colonne 2 */
-    .header-mid  { grid-column: 2; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    /* Nav — colonne 3 */
-    .nav-roles   { grid-column: 3; display: flex; gap: 4px; }
+    .compteurs   { grid-column: 2; }
+    .champ-nom   { grid-column: 3; justify-self: end; }
+    .nav-roles   { grid-column: 4; }
 
     /* ── Compteurs ── */
     .compteurs { display: flex; gap: 6px; flex-wrap: nowrap; }
     .cpt {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 10px; border-radius: 20px;
+      padding: 5px 11px; border-radius: 20px;
       font-size: .75rem; font-weight: 700; letter-spacing: .02em;
       white-space: nowrap;
     }
+    .cpt-num { font-weight: 800; }
     .cpt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .cpt.dispo  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .cpt.dispo .cpt-dot  { background: var(--vert); }
@@ -109,32 +109,33 @@
     /* ── Champ nom ── */
     .champ-nom {
       display: flex; align-items: center; gap: 6px;
-      font-size: .83rem; color: var(--text-2); margin-left: auto;
+      font-size: .83rem; color: var(--text-2);
     }
     .champ-nom svg { flex-shrink: 0; color: var(--text-3); }
     .champ-nom input {
-      padding: 5px 10px; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+      padding: 7px 11px; border: 1.5px solid var(--border); border-radius: var(--r-sm);
       font-size: .83rem; color: var(--text); background: var(--bg);
-      width: 140px; outline: none; transition: border-color .15s, box-shadow .15s;
+      width: 150px; outline: none; transition: border-color .15s, box-shadow .15s;
+      min-height: 38px;
     }
     .champ-nom input:focus {
       border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.14);
     }
 
     /* ── Onglets de rôle ── */
+    .nav-roles { display: flex; gap: 4px; }
     .nav-roles button {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px; border: 1.5px solid var(--border);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 14px; border: 1.5px solid var(--border);
       background: transparent; color: var(--text-2);
       border-radius: var(--r-sm); cursor: pointer;
       font-size: .83rem; font-weight: 600;
       transition: all .15s; white-space: nowrap;
-      min-height: 36px;
+      min-height: 40px;
     }
     .nav-roles button svg { flex-shrink: 0; }
     .nav-roles button:hover  { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
     .nav-roles button.actif  { background: var(--navy); color: #fff; border-color: var(--navy); }
-    /* Texte caché sur petit écran — voir media query */
     .nav-txt { display: inline; }
 
     /* ═══════════════════════════════════════
@@ -506,59 +507,90 @@
        RESPONSIVE
     ═══════════════════════════════════════ */
 
-    /* Tablette : header reste sur une ligne, on réduit les espaces */
-    @media (max-width: 860px) {
-      header { gap: 0 10px; padding: 0 16px; }
-      .champ-nom input { width: 110px; }
+    /* Tablette : on resserre, le header tient encore sur une ligne */
+    @media (max-width: 880px) {
+      header { gap: 0 10px; padding: 0 14px; }
+      .champ-nom input { width: 120px; }
+      .nav-roles button { padding: 8px 11px; }
     }
 
-    /* Mobile paysage / petite tablette */
-    @media (max-width: 680px) {
-      /* Header 2 lignes */
+    /* ─────────────────────────────────────────────────────────────
+       MOBILE (≤ 760px) — refonte de la composition
+       · Header compact : logo + nom (ligne 1) · compteurs (ligne 2)
+       · Navigation des rôles → BARRE FIXE EN BAS (thumb-reachable)
+    ───────────────────────────────────────────────────────────── */
+    @media (max-width: 760px) {
       header {
         grid-template-columns: auto 1fr;
         grid-template-rows: auto auto;
-        padding: 8px 14px;
-        gap: 6px 0;
+        padding: 8px 14px 10px;
+        gap: 8px 10px;
         min-height: unset;
       }
-      .logo-header { grid-column: 1; grid-row: 1; }
-      .nav-roles   { grid-column: 2; grid-row: 1; justify-content: flex-end; }
-      .header-mid  { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; padding-bottom: 4px; }
+      .logo-header { grid-column: 1; grid-row: 1; height: 30px; }
+      .champ-nom   { grid-column: 2; grid-row: 1; justify-self: end; }
+      .champ-nom input { width: 100%; max-width: 160px; }
 
-      /* Compteurs abrégés : cacher le texte, garder dot + chiffre */
-      .cpt-txt    { display: none; }
-      .cpt        { padding: 3px 8px; }
+      /* Compteurs : bande pleine largeur, 3 colonnes égales */
+      .compteurs   { grid-column: 1 / -1; grid-row: 2; gap: 6px; }
+      .cpt {
+        flex: 1; justify-content: center; gap: 5px;
+        padding: 7px 6px; font-size: .8rem;
+      }
 
-      /* Nav : réduire le padding, garder le texte visible */
-      .nav-roles button { padding: 6px 9px; gap: 4px; font-size: .75rem; }
+      /* Navigation des rôles → barre fixe en bas */
+      .nav-roles {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
+        display: flex; gap: 0;
+        background: #fff;
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+        padding: 6px 8px;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+      }
+      .nav-roles button {
+        flex: 1; flex-direction: column; gap: 3px;
+        border: none; border-radius: var(--r-md);
+        padding: 7px 4px; min-height: 54px;
+        font-size: .7rem; font-weight: 700;
+      }
+      .nav-roles button svg { width: 20px; height: 20px; }
+      .nav-roles button:hover { background: #f0f0fa; color: var(--navy); }
+      .nav-roles button.actif {
+        background: #eef0fa; color: var(--navy); border: none;
+      }
 
-      main { padding: 16px 14px; }
+      /* Laisser respirer le contenu au-dessus de la barre du bas */
+      main { padding: 18px 14px calc(78px + env(safe-area-inset-bottom, 0px)); }
     }
 
     /* Mobile portrait */
     @media (max-width: 480px) {
-      .filtres-bar input { width: 100%; }
       .filtres-bar { flex-direction: column; align-items: stretch; }
-      .filtres-bar select { width: 100%; }
+      .filtres-bar input, .filtres-bar select { width: 100%; }
+      .barre-reg input { width: 100%; }
 
-      /* Gravité : 3 colonnes → rester en 3, mais plus compact */
-      .gravite-opts label { padding: 10px 4px; min-height: 70px; font-size: .72rem; }
+      /* Gravité : rester en 3 colonnes, plus compact */
+      .gravite-opts label { padding: 10px 4px; min-height: 72px; font-size: .72rem; }
       .grav-icon { font-size: 1.4rem; }
 
-      /* Actions Atelier : input pleine largeur d'abord */
+      /* Actions Atelier : input pleine largeur d'abord, boutons centrés */
       .actions-mec { flex-direction: column; align-items: stretch; }
       .input-tech  { min-width: unset; }
-      .btn-mec     { justify-content: center; }
+      .btn-mec     { justify-content: center; min-height: 42px; }
 
-      /* Grille bus plus petite */
-      .grille-bus { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+      /* Carte : un peu moins de padding */
+      .card { padding: 18px 16px; }
+
+      /* Grille bus plus dense */
+      .grille-bus { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
     }
 
     /* Très petit écran */
     @media (max-width: 360px) {
       .gravite-opts { grid-template-columns: 1fr; }
-      .nav-roles button { padding: 6px 8px; }
+      .cpt { font-size: .72rem; padding: 6px 4px; }
+      .nav-roles button { font-size: .65rem; }
     }
 
     /* ═══════════════════════════════════════
@@ -683,29 +715,29 @@
 <header>
   <img src="logo-ratpcap.png" alt="RATP Cap Saclay" class="logo-header">
 
-  <!-- Ligne du milieu : compteurs + nom -->
-  <div class="header-mid">
-    <div class="compteurs">
-      <span class="cpt dispo">
-        <span class="cpt-dot"></span>
-        <span id="cpt-dispo-txt">—</span>
-        <span class="cpt-txt"> dispo</span>
-      </span>
-      <span class="cpt bloque">
-        <span class="cpt-dot"></span>
-        <span id="cpt-bloque-txt">—</span>
-        <span class="cpt-txt"> bloqués</span>
-      </span>
-      <span class="cpt repair">
-        <span class="cpt-dot"></span>
-        <span id="cpt-repair-txt">—</span>
-        <span class="cpt-txt"> en réparation</span>
-      </span>
-    </div>
-    <div class="champ-nom">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40" oninput="sauvegarderNom()">
-    </div>
+  <!-- Compteurs de flotte -->
+  <div class="compteurs">
+    <span class="cpt dispo">
+      <span class="cpt-dot"></span>
+      <span class="cpt-num" id="cpt-dispo-txt">—</span>
+      <span class="cpt-txt">dispo</span>
+    </span>
+    <span class="cpt bloque">
+      <span class="cpt-dot"></span>
+      <span class="cpt-num" id="cpt-bloque-txt">—</span>
+      <span class="cpt-txt">bloqués</span>
+    </span>
+    <span class="cpt repair">
+      <span class="cpt-dot"></span>
+      <span class="cpt-num" id="cpt-repair-txt">—</span>
+      <span class="cpt-txt">répar.</span>
+    </span>
+  </div>
+
+  <!-- Champ nom -->
+  <div class="champ-nom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40" oninput="sauvegarderNom()">
   </div>
 
   <!-- Navigation des rôles -->
