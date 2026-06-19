@@ -5,233 +5,442 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RATP Cap Saclay — Suivi des défauts</title>
   <style>
+    /* ═══════════════════════════════════════
+       VARIABLES & RESET
+    ═══════════════════════════════════════ */
     :root {
+      --navy:    #2d2f7e;
+      --teal:    #2ec4b6;
+      --teal-lt: #e6faf8;
       --vert:    #16a34a;
+      --vert-lt: #dcfce7;
       --rouge:   #dc2626;
+      --rouge-lt:#fee2e2;
       --orange:  #ea580c;
-      --bg:      #f3f4f6;
+      --orange-lt:#ffedd5;
+      --jaune:   #ca8a04;
+      --violet:  #7c3aed;
+      --bg:      #f4f6f9;
       --surface: #ffffff;
-      --border:  #e5e7eb;
-      --text:    #111827;
-      --text-2:  #6b7280;
+      --border:  #e2e8f0;
+      --text:    #1e293b;
+      --text-2:  #64748b;
+      --text-3:  #94a3b8;
+      --radius:  10px;
+      --shadow:  0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; line-height: 1.5;
+    }
 
-    /* ── En-tête fixe ── */
+    /* ═══════════════════════════════════════
+       EN-TÊTE
+    ═══════════════════════════════════════ */
     header {
-      background: #ffffff; color: #1e293b;
-      padding: 10px 20px;
-      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 6px rgba(0,0,0,.12);
-      border-bottom: 3px solid #2ec4b6;
+      background: #fff;
+      border-bottom: 3px solid var(--teal);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      padding: 0 24px;
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap; min-height: 60px;
     }
-    header h1 { font-size: .85rem; font-weight: 700; white-space: nowrap; color: #2d2f7e; }
-    .logo-header { height: 38px; width: auto; display: block; }
+    .logo-header { height: 36px; width: auto; display: block; flex-shrink: 0; }
+
+    /* Séparateur vertical */
+    .sep { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
 
     /* Compteurs */
     .compteurs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .cpt { padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
-    .cpt.dispo  { background: var(--vert);   color: white; }
-    .cpt.bloque { background: var(--rouge);  color: white; }
-    .cpt.repair { background: var(--orange); color: white; }
-    /* Champ nom adapté au fond blanc */
-    .champ-nom input {
-      border-color: #d1d5db !important; background: #f9fafb !important;
-      color: #1e293b !important;
+    .cpt {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: .78rem; font-weight: 700; letter-spacing: .02em;
     }
-    .champ-nom input::placeholder { color: #9ca3af !important; }
-    /* Onglets sur fond blanc */
-    .nav-roles button {
-      border-color: #d1d5db !important; color: #374151 !important;
-    }
-    .nav-roles button.actif { background: #2d2f7e !important; color: white !important; border-color: #2d2f7e !important; }
+    .cpt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cpt.dispo  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .cpt.dispo  .cpt-dot { background: var(--vert); }
+    .cpt.bloque { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .cpt.bloque .cpt-dot { background: var(--rouge); }
+    .cpt.repair { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .cpt.repair .cpt-dot { background: var(--orange); }
 
     /* Champ nom */
-    .champ-nom { display: flex; align-items: center; gap: 5px; font-size: .8rem; }
+    .champ-nom {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .82rem; color: var(--text-2);
+    }
+    .champ-nom svg { flex-shrink: 0; color: var(--text-3); }
     .champ-nom input {
-      padding: 4px 8px; border-radius: 4px;
-      border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1);
-      color: white; font-size: .8rem; width: 130px;
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .82rem; color: var(--text); background: var(--bg);
+      width: 140px; outline: none; transition: border-color .15s;
     }
-    .champ-nom input::placeholder { color: rgba(255,255,255,.4); }
+    .champ-nom input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.12); }
 
-    /* Onglets de rôle */
-    .nav-roles { display: flex; gap: 6px; margin-left: auto; }
+    /* Onglets rôles */
+    .nav-roles { display: flex; gap: 4px; margin-left: auto; }
     .nav-roles button {
-      padding: 6px 14px; border: 1px solid rgba(255,255,255,.3);
-      background: transparent; color: rgba(255,255,255,.65);
-      border-radius: 6px; cursor: pointer; font-size: .82rem; transition: all .15s;
+      padding: 6px 16px; border: 1.5px solid var(--border);
+      background: transparent; color: var(--text-2);
+      border-radius: 7px; cursor: pointer;
+      font-size: .82rem; font-weight: 600;
+      transition: all .15s; white-space: nowrap;
     }
-    .nav-roles button.actif { background: white; color: #1e293b; font-weight: 700; }
+    .nav-roles button:hover { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
+    .nav-roles button.actif {
+      background: var(--navy); color: #fff;
+      border-color: var(--navy);
+    }
 
-    /* ── Contenu ── */
-    main { max-width: 960px; margin: 0 auto; padding: 20px; }
+    /* ═══════════════════════════════════════
+       CONTENU
+    ═══════════════════════════════════════ */
+    main { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+
     .vue { display: none; }
-    .vue.active { display: block; }
+    .vue.active { display: block; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-    /* Carte générique */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
-    .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: #374151; }
+    /* Titre de section */
+    .section-titre {
+      font-size: 1.1rem; font-weight: 700; color: var(--navy);
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-titre::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
 
-    /* Formulaire */
-    .fg { margin-bottom: 14px; }
-    .fg label { display: block; font-size: .85rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    /* Carte */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow); margin-bottom: 16px;
+    }
+
+    /* ═══════════════════════════════════════
+       FORMULAIRE CHAUFFEUR
+    ═══════════════════════════════════════ */
+    .fg { margin-bottom: 18px; }
+    .fg label {
+      display: block; font-size: .83rem; font-weight: 700;
+      color: var(--text-2); margin-bottom: 6px; text-transform: uppercase;
+      letter-spacing: .04em;
+    }
     .fg input, .fg select, .fg textarea {
-      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-      border-radius: 6px; font-size: .9rem; outline: none; transition: border-color .15s;
-      background: white;
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: .95rem; color: var(--text); background: #fff;
+      outline: none; transition: border-color .15s, box-shadow .15s;
+      appearance: auto;
     }
     .fg input:focus, .fg select:focus, .fg textarea:focus {
-      border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.15);
+    }
+    .fg textarea { resize: vertical; min-height: 80px; }
+
+    /* Champ numéro de bus — mis en valeur */
+    .num-bus-wrap { position: relative; }
+    .num-bus-wrap input {
+      padding-left: 42px; font-size: 1.1rem; font-weight: 700;
+      letter-spacing: .05em;
+    }
+    .num-bus-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      font-size: 1.1rem; pointer-events: none;
     }
 
     /* Boutons gravité */
-    .gravite-opts { display: flex; gap: 8px; }
+    .gravite-opts { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .gravite-opts label {
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 9px; border: 2px solid var(--border); border-radius: 6px;
-      cursor: pointer; font-size: .85rem; font-weight: 600; transition: all .15s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; padding: 14px 8px; border: 2px solid var(--border);
+      border-radius: 10px; cursor: pointer; font-size: .82rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .04em;
+      transition: all .15s; user-select: none; text-align: center;
+      color: var(--text-2);
     }
+    .gravite-opts label .grav-icon { font-size: 1.5rem; }
     .gravite-opts input[type="radio"] { display: none; }
-    .gravite-opts label:has(input[value="bloquant"]:checked) { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
-    .gravite-opts label:has(input[value="gênant"]:checked)  { border-color: #ea580c; background: #fff7ed; color: #ea580c; }
-    .gravite-opts label:has(input[value="mineur"]:checked)  { border-color: #ca8a04; background: #fefce8; color: #ca8a04; }
+    .gravite-opts label:has(input[value="bloquant"]:checked) {
+      border-color: var(--rouge); background: var(--rouge-lt); color: var(--rouge);
+      box-shadow: 0 0 0 3px rgba(220,38,38,.1);
+    }
+    .gravite-opts label:has(input[value="gênant"]:checked) {
+      border-color: var(--orange); background: var(--orange-lt); color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(234,88,12,.1);
+    }
+    .gravite-opts label:has(input[value="mineur"]:checked) {
+      border-color: var(--jaune); background: #fefce8; color: var(--jaune);
+      box-shadow: 0 0 0 3px rgba(202,138,4,.1);
+    }
+    .gravite-opts label:hover { border-color: var(--text-3); }
+
+    /* Bandeau auto (horodatage + déclarant) */
+    .meta-auto {
+      display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+      padding: 10px 14px; background: var(--bg); border-radius: 8px;
+      font-size: .82rem; color: var(--text-2); margin-bottom: 18px;
+    }
+    .meta-auto span { display: flex; align-items: center; gap: 5px; }
 
     /* Bouton principal */
     .btn-primary {
-      width: 100%; padding: 11px; background: #2563eb; color: white;
-      border: none; border-radius: 8px; font-size: .95rem; font-weight: 700;
-      cursor: pointer; transition: background .15s;
+      width: 100%; padding: 13px; background: var(--navy); color: #fff;
+      border: none; border-radius: 9px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background .15s, transform .1s;
+      letter-spacing: .02em;
     }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) { background: #23257a; transform: translateY(-1px); }
+    .btn-primary:active:not(:disabled) { transform: none; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* Alertes inline */
-    .alerte { padding: 11px 14px; border-radius: 8px; font-size: .88rem; font-weight: 500; margin-bottom: 14px; display: none; }
-    .alerte.succes { background: #f0fdf4; border: 1px solid #86efac; color: #166534; display: block; }
-    .alerte.erreur { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; display: block; }
-    .alerte.hidden { display: none; }
+    .alerte {
+      padding: 12px 16px; border-radius: 8px; font-size: .88rem;
+      font-weight: 600; margin-bottom: 16px; display: none; line-height: 1.5;
+    }
+    .alerte.succes { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; display: block; }
+    .alerte.erreur { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; display: block; }
+    .alerte.hidden { display: none !important; }
 
-    /* Badges */
+    /* ═══════════════════════════════════════
+       BADGES
+    ═══════════════════════════════════════ */
     .badge {
-      display: inline-flex; align-items: center; gap: 3px;
-      padding: 2px 8px; border-radius: 12px; font-size: .73rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: .73rem; font-weight: 700; white-space: nowrap;
+      letter-spacing: .03em;
     }
-    .badge.bloquant        { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
-    .badge.genant          { background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; }
-    .badge.mineur          { background: #fefce8; color: #ca8a04; border: 1px solid #fde047; }
-    .badge.recurrent       { background: #fdf4ff; color: #7c3aed; border: 1px solid #c4b5fd; }
-    .badge.s-ouvert        { background: #fef2f2; color: #991b1b; }
-    .badge.s-en_cours      { background: #fffbeb; color: #92400e; }
-    .badge.s-reparé        { background: #f0fdf4; color: #166534; }
-    .badge.s-piece         { background: #f5f3ff; color: #5b21b6; }
+    .badge.bloquant  { background: var(--rouge-lt); color: var(--rouge);  border: 1px solid #fca5a5; }
+    .badge.genant    { background: var(--orange-lt); color: var(--orange); border: 1px solid #fdba74; }
+    .badge.mineur    { background: #fefce8; color: var(--jaune);           border: 1px solid #fde047; }
+    .badge.recurrent { background: #f5f3ff; color: var(--violet);          border: 1px solid #c4b5fd; }
+    .badge.s-ouvert  { background: var(--rouge-lt); color: #b91c1c; }
+    .badge.s-en_cours{ background: #fffbeb; color: #92400e; }
+    .badge.s-reparé  { background: var(--vert-lt);  color: #15803d; }
+    .badge.s-piece   { background: #f5f3ff; color: #5b21b6; }
 
-    /* Carte défaut (Mécano) */
-    .dcard { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
-    .dcard.bloquant { border-left: 4px solid #dc2626; }
-    .dcard.genant   { border-left: 4px solid #ea580c; }
-    .dcard.mineur   { border-left: 4px solid #ca8a04; }
+    /* ═══════════════════════════════════════
+       VUE MÉCANO — cartes défaut
+    ═══════════════════════════════════════ */
+    .filtres-bar {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .filtres-bar input, .filtres-bar select {
+      padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: .85rem; background: #fff; color: var(--text); outline: none;
+      transition: border-color .15s;
+    }
+    .filtres-bar input { width: 160px; }
+    .filtres-bar input:focus, .filtres-bar select:focus { border-color: var(--teal); }
 
-    .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-    .dtitle { font-size: .95rem; font-weight: 700; }
-    .dmeta  { font-size: .8rem; color: var(--text-2); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .dbadges{ display: flex; gap: 5px; flex-wrap: wrap; align-items: flex-start; }
+    .dcard {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      box-shadow: var(--shadow); margin-bottom: 12px;
+      transition: box-shadow .15s;
+    }
+    .dcard:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1), 0 6px 24px rgba(0,0,0,.07); }
+    .dcard.bloquant { border-left: 5px solid var(--rouge); }
+    .dcard.genant   { border-left: 5px solid var(--orange); }
+    .dcard.mineur   { border-left: 5px solid var(--jaune); }
 
-    .dcomm { font-size: .84rem; color: #374151; background: #f9fafb; border: 1px solid var(--border); border-radius: 6px; padding: 7px 11px; margin: 8px 0; }
-    .dcomm.tech { background: #f0f9ff; border-color: #bae6fd; }
+    .dhead {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .dtitle { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .dbus   { font-size: .78rem; font-weight: 700; color: var(--navy); background: #eef0fa; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
+    .dmeta  { font-size: .8rem; color: var(--text-2); display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+    .dbadges{ display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; flex-shrink: 0; }
 
-    /* Actions Mécano */
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: flex-end; }
-    .btn { padding: 6px 13px; border: none; border-radius: 6px; font-size: .8rem; font-weight: 700; cursor: pointer; transition: opacity .15s; }
-    .btn:hover { opacity: .85; }
-    .btn.repare  { background: #16a34a; color: white; }
-    .btn.encours { background: #d97706; color: white; }
-    .btn.piece   { background: #7c3aed; color: white; }
+    .dcomm {
+      font-size: .85rem; color: var(--text); background: #f8fafc;
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 9px 12px; margin: 10px 0; line-height: 1.5;
+    }
+    .dcomm.tech { background: #f0f9ff; border-color: #bae6fd; color: #0c4a6e; }
 
+    /* Actions mécano */
+    .actions-mec {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--border); align-items: center;
+    }
     .input-tech {
-      flex: 1; min-width: 180px; padding: 6px 10px;
-      border: 1px solid var(--border); border-radius: 6px; font-size: .82rem;
+      flex: 1; min-width: 180px; padding: 7px 11px;
+      border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: .83rem; outline: none; transition: border-color .15s;
     }
+    .input-tech:focus { border-color: var(--teal); }
 
-    /* Filtres */
-    .filtres { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-    .filtres input, .filtres select {
-      padding: 7px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: .84rem; background: white;
+    .btn-mec {
+      padding: 7px 16px; border: none; border-radius: 7px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      transition: opacity .15s, transform .1s; white-space: nowrap;
     }
-    .filtres input { width: 150px; }
+    .btn-mec:hover { opacity: .87; transform: translateY(-1px); }
+    .btn-mec:active { transform: none; }
+    .btn-mec.repare  { background: var(--vert);   color: #fff; }
+    .btn-mec.encours { background: var(--orange); color: #fff; }
+    .btn-mec.piece   { background: var(--violet); color: #fff; }
 
-    /* Grille des bus (Régulateur) */
-    .grille-bus { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    /* ═══════════════════════════════════════
+       VUE RÉGULATEUR
+    ═══════════════════════════════════════ */
+    .barre-reg {
+      display: flex; gap: 10px; margin-bottom: 22px;
+      flex-wrap: wrap; align-items: center;
+    }
+    .barre-reg input {
+      padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: .85rem; background: #fff; width: 180px; outline: none;
+      transition: border-color .15s;
+    }
+    .barre-reg input:focus { border-color: var(--teal); }
+
+    .btn-csv {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; background: var(--navy); color: #fff;
+      border: none; border-radius: 7px; font-size: .83rem; font-weight: 700;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-csv:hover { background: #23257a; }
+
+    /* Grille des bus */
+    .grille-bus {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
     .bus-tuile {
-      border-radius: 10px; padding: 14px 8px; text-align: center;
-      cursor: pointer; transition: transform .1s, box-shadow .1s;
+      border-radius: 12px; padding: 16px 10px; text-align: center;
+      cursor: pointer; transition: transform .12s, box-shadow .12s;
       border: 2px solid transparent; user-select: none;
     }
-    .bus-tuile:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.1); }
-    .bus-tuile.sel   { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
-    .bus-tuile.vert  { background: #dcfce7; color: #166534; }
-    .bus-tuile.rouge { background: #fee2e2; color: #991b1b; }
-    .bus-tuile.orange{ background: #ffedd5; color: #9a3412; }
-    .bus-num   { font-size: 1.1rem; font-weight: 800; }
-    .bus-label { font-size: .68rem; font-weight: 700; margin-top: 3px; text-transform: uppercase; }
-    .bus-nb    { font-size: .72rem; margin-top: 2px; }
+    .bus-tuile:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .bus-tuile.sel   { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,47,126,.18); }
+    .bus-tuile.vert  { background: #e6faf5; color: #15803d; }
+    .bus-tuile.rouge { background: #fef2f2; color: #b91c1c; }
+    .bus-tuile.orange{ background: #fff7ed; color: #c2410c; }
+    .bus-tuile .bi   { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .bus-tuile .bn   { font-size: 1rem; font-weight: 800; display: block; }
+    .bus-tuile .bl   { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; opacity: .75; }
+    .bus-tuile .bnd  { font-size: .72rem; margin-top: 3px; font-weight: 600; }
 
     /* Panneau détail bus */
-    .detail-bus { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-    .detail-bus h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .detail-bus {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+      box-shadow: var(--shadow); margin-bottom: 24px;
+    }
+    .detail-head {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .detail-head h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+    .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-    /* Tableau historique */
-    .tablo { width: 100%; border-collapse: collapse; font-size: .81rem; }
-    .tablo th { text-align: left; padding: 8px 10px; background: #f9fafb; border-bottom: 1px solid var(--border); font-weight: 700; color: #374151; }
-    .tablo td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
-    .tablo tr:last-child td { border-bottom: none; }
-
-    /* Barre outils régulateur */
-    .barre { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
-    .barre input { padding: 7px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: .84rem; width: 170px; background: white; }
-
-    /* Boutons secondaires */
-    .btn-sec { padding: 7px 14px; border: 1px solid var(--border); background: white; border-radius: 6px; font-size: .82rem; cursor: pointer; font-weight: 600; }
-    .btn-sec:hover { background: #f9fafb; }
-    .btn-csv { padding: 7px 14px; background: #0f172a; color: white; border: none; border-radius: 6px; font-size: .82rem; font-weight: 700; cursor: pointer; }
-    .btn-csv:hover { background: #1e293b; }
-    .btn-att-rouge { padding: 7px 14px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: .82rem; font-weight: 700; cursor: pointer; }
-    .btn-att-vert  { padding: 7px 14px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: .82rem; font-weight: 700; cursor: pointer; }
+    .btn-att {
+      padding: 8px 16px; border: none; border-radius: 7px;
+      font-size: .83rem; font-weight: 700; cursor: pointer; transition: opacity .15s;
+    }
+    .btn-att:hover { opacity: .87; }
+    .btn-att.rouge { background: var(--rouge); color: #fff; }
+    .btn-att.vert  { background: var(--vert);  color: #fff; }
+    .btn-fermer {
+      padding: 8px 14px; border: 1.5px solid var(--border); background: #fff;
+      border-radius: 7px; font-size: .83rem; font-weight: 600; cursor: pointer; color: var(--text-2);
+    }
+    .btn-fermer:hover { border-color: var(--navy); color: var(--navy); }
 
     /* Alerte récurrence */
-    .alerte-rec { background: #fdf4ff; border: 1px solid #c4b5fd; border-radius: 6px; padding: 8px 12px; font-size: .82rem; color: #5b21b6; font-weight: 700; margin-bottom: 12px; }
-
-    /* Aperçu horodatage */
-    .apercu-auto { font-size: .82rem; color: var(--text-2); margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
-
-    /* Vide */
-    .vide { text-align: center; color: var(--text-2); padding: 36px 20px; font-size: .9rem; }
-
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: #1e293b; color: white; padding: 11px 22px; border-radius: 8px;
-      font-size: .88rem; font-weight: 500; z-index: 999;
-      opacity: 0; transition: opacity .2s; pointer-events: none; white-space: nowrap;
+    .alerte-rec {
+      background: #fdf4ff; border: 1.5px solid #c4b5fd;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: .84rem; color: #5b21b6; font-weight: 700;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
     }
-    .toast.show { opacity: 1; }
 
-    /* Modal */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 500; }
+    /* Tableau historique */
+    .tablo-wrap { overflow-x: auto; }
+    .tablo {
+      width: 100%; border-collapse: collapse; font-size: .82rem;
+    }
+    .tablo th {
+      text-align: left; padding: 9px 12px;
+      background: #f8fafc; border-bottom: 2px solid var(--border);
+      font-weight: 700; color: var(--text-2); white-space: nowrap;
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .tablo td {
+      padding: 9px 12px; border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .tablo tr:last-child td { border-bottom: none; }
+    .tablo tr:hover td { background: #f8fafc; }
+
+    /* ═══════════════════════════════════════
+       TOAST & MODAL
+    ═══════════════════════════════════════ */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: #1e293b; color: #fff;
+      padding: 11px 24px; border-radius: 10px;
+      font-size: .88rem; font-weight: 600; z-index: 999;
+      opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,.45);
+      display: none; align-items: center; justify-content: center; z-index: 500;
+      backdrop-filter: blur(2px);
+    }
     .overlay.show { display: flex; }
-    .modal { background: white; border-radius: 12px; padding: 24px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
-    .modal h3 { font-size: 1.05rem; font-weight: 700; color: #991b1b; margin-bottom: 10px; }
-    .modal p  { font-size: .88rem; color: #374151; margin-bottom: 20px; line-height: 1.5; }
+    .modal {
+      background: #fff; border-radius: 14px; padding: 28px;
+      max-width: 420px; width: 92%;
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-ico  { font-size: 2.2rem; margin-bottom: 10px; }
+    .modal h3   { font-size: 1.05rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
+    .modal p    { font-size: .88rem; color: var(--text-2); margin-bottom: 22px; line-height: 1.6; }
     .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-danger { padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: .88rem; font-weight: 700; cursor: pointer; }
+    .btn-sec    { padding: 9px 18px; border: 1.5px solid var(--border); background: #fff; border-radius: 7px; font-size: .88rem; font-weight: 600; cursor: pointer; color: var(--text-2); }
+    .btn-sec:hover { border-color: var(--navy); color: var(--navy); }
+    .btn-danger { padding: 9px 18px; background: var(--rouge); color: #fff; border: none; border-radius: 7px; font-size: .88rem; font-weight: 700; cursor: pointer; }
+    .btn-danger:hover { background: #b91c1c; }
 
-    @media (max-width: 600px) {
-      header { padding: 8px 12px; }
-      main { padding: 12px; }
-      .nav-roles button { padding: 5px 9px; font-size: .78rem; }
-      .gravite-opts { flex-direction: column; }
+    .vide {
+      text-align: center; color: var(--text-3);
+      padding: 48px 20px; font-size: .9rem;
+    }
+    .vide svg { display: block; margin: 0 auto 12px; opacity: .35; }
+
+    @media (max-width: 640px) {
+      header { padding: 0 14px; gap: 10px; }
+      main   { padding: 16px 14px; }
+      .nav-roles button { padding: 5px 10px; font-size: .78rem; }
+      .gravite-opts { grid-template-columns: 1fr 1fr 1fr; }
+      .sep { display: none; }
+    }
+    @media (max-width: 420px) {
+      .gravite-opts { grid-template-columns: 1fr; }
+      .compteurs { display: none; }
     }
   </style>
 </head>
@@ -243,7 +452,8 @@
 <!-- Modal confirmation bus ROUGE -->
 <div class="overlay" id="modal-rouge">
   <div class="modal">
-    <h3>⚠️ Bus avec défaut bloquant</h3>
+    <div class="modal-ico">⚠️</div>
+    <h3>Bus avec défaut bloquant</h3>
     <p id="modal-texte"></p>
     <div class="modal-btns">
       <button class="btn-sec" onclick="fermerModal()">Annuler</button>
@@ -254,30 +464,33 @@
 
 <!-- ══════════════ EN-TÊTE ══════════════ -->
 <header>
-  <a href="index.html" title="Accueil">
-    <img src="logo-ratpcap.png" alt="RATP Cap Saclay" class="logo-header">
-  </a>
-  <h1>Suivi des défauts</h1>
+  <img src="logo-ratpcap.png" alt="RATP Cap Saclay" class="logo-header">
+  <div class="sep"></div>
 
-  <!-- Compteurs mis à jour à chaque action -->
+  <!-- Compteurs de statut -->
   <div class="compteurs">
-    <span class="cpt dispo"  id="cpt-dispo">— dispo</span>
-    <span class="cpt bloque" id="cpt-bloque">— bloqués</span>
-    <span class="cpt repair" id="cpt-repair">— en réparation</span>
+    <span class="cpt dispo" id="cpt-dispo">
+      <span class="cpt-dot"></span><span id="cpt-dispo-txt">— dispo</span>
+    </span>
+    <span class="cpt bloque" id="cpt-bloque">
+      <span class="cpt-dot"></span><span id="cpt-bloque-txt">— bloqués</span>
+    </span>
+    <span class="cpt repair" id="cpt-repair">
+      <span class="cpt-dot"></span><span id="cpt-repair-txt">— en réparation</span>
+    </span>
   </div>
 
-  <!-- Nom de l'utilisateur (persiste par rôle dans localStorage) -->
+  <!-- Nom de l'utilisateur -->
   <div class="champ-nom">
-    <span>👤</span>
-    <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40"
-           oninput="sauvegarderNom()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40" oninput="sauvegarderNom()">
   </div>
 
   <!-- Sélecteur de rôle -->
   <nav class="nav-roles">
-    <button data-role="chauffeur"  class="actif" onclick="changerRole('chauffeur')">Chauffeur</button>
-    <button data-role="mecano"                   onclick="changerRole('mecano')">Mécano</button>
-    <button data-role="regulateur"               onclick="changerRole('regulateur')">Régulateur</button>
+    <button data-role="chauffeur"  class="actif" onclick="changerRole('chauffeur')">🚍 Chauffeur</button>
+    <button data-role="mecano"                   onclick="changerRole('mecano')">🔧 Mécano</button>
+    <button data-role="regulateur"               onclick="changerRole('regulateur')">📋 Régulateur</button>
   </nav>
 </header>
 
@@ -285,23 +498,25 @@
 
   <!-- ══════════════ VUE CHAUFFEUR ══════════════ -->
   <section id="vue-chauffeur" class="vue active">
+    <p class="section-titre">Déclarer un défaut</p>
     <div class="card">
-      <h2>Déclarer un défaut</h2>
-
-      <!-- Message de retour (succès / erreur) -->
       <div class="alerte hidden" id="alerte-ch"></div>
 
       <form id="form-defaut" onsubmit="soumettreDefaut(event)" novalidate>
 
-        <!-- N° de parc -->
+        <!-- N° de bus -->
         <div class="fg">
-          <label for="num-parc">N° de parc du bus *</label>
-          <input type="text" id="num-parc" placeholder="ex. 2341" required maxlength="20">
+          <label for="num-bus">🚍 N° de bus</label>
+          <div class="num-bus-wrap">
+            <span class="num-bus-icon">🚌</span>
+            <input type="text" id="num-bus" placeholder="ex. 2341" required maxlength="20"
+                   style="text-transform:uppercase">
+          </div>
         </div>
 
-        <!-- Type de défaut (liste prédéfinie + Autre) -->
+        <!-- Type de défaut -->
         <div class="fg">
-          <label for="type-defaut">Type de défaut *</label>
+          <label for="type-defaut">Type de défaut</label>
           <select id="type-defaut" required onchange="toggleAutre()">
             <option value="">— Sélectionner —</option>
             <option>Clim</option>
@@ -316,32 +531,44 @@
           </select>
         </div>
 
-        <!-- Champ libre affiché uniquement si "Autre" -->
+        <!-- Champ libre si "Autre" -->
         <div class="fg" id="fg-autre" style="display:none">
-          <label for="detail-autre">Préciser le défaut *</label>
-          <input type="text" id="detail-autre" placeholder="Description libre…" maxlength="120">
+          <label for="detail-autre">Précisez le défaut</label>
+          <input type="text" id="detail-autre" placeholder="Description du défaut…" maxlength="120">
         </div>
 
-        <!-- Gravité : bloquant / gênant / mineur -->
+        <!-- Gravité -->
         <div class="fg">
-          <label>Niveau de gravité *</label>
+          <label>Niveau de gravité</label>
           <div class="gravite-opts">
-            <label><input type="radio" name="gravite" value="bloquant" required><span>🔴 Bloquant</span></label>
-            <label><input type="radio" name="gravite" value="gênant"><span>🟠 Gênant</span></label>
-            <label><input type="radio" name="gravite" value="mineur"><span>🟡 Mineur</span></label>
+            <label>
+              <input type="radio" name="gravite" value="bloquant" required>
+              <span class="grav-icon">🔴</span>
+              Bloquant
+            </label>
+            <label>
+              <input type="radio" name="gravite" value="gênant">
+              <span class="grav-icon">🟠</span>
+              Gênant
+            </label>
+            <label>
+              <input type="radio" name="gravite" value="mineur">
+              <span class="grav-icon">🟡</span>
+              Mineur
+            </label>
           </div>
         </div>
 
         <!-- Commentaire optionnel -->
         <div class="fg">
-          <label for="comm-ch">Commentaire (optionnel)</label>
-          <textarea id="comm-ch" rows="3" placeholder="Détails supplémentaires…" maxlength="500"></textarea>
+          <label for="comm-ch">Commentaire <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
+          <textarea id="comm-ch" placeholder="Détails supplémentaires…" maxlength="500"></textarea>
         </div>
 
-        <!-- Aperçu horodatage + déclarant (auto) -->
-        <div class="apercu-auto">
-          <span>📅 <span id="apercu-date"></span></span>
-          <span>👤 <span id="apercu-nom">—</span></span>
+        <!-- Aperçu horodatage + déclarant auto -->
+        <div class="meta-auto">
+          <span>📅 <strong id="apercu-date">—</strong></span>
+          <span>👤 <strong id="apercu-nom">—</strong></span>
         </div>
 
         <button type="submit" class="btn-primary" id="btn-submit">Déclarer le défaut</button>
@@ -351,10 +578,10 @@
 
   <!-- ══════════════ VUE MÉCANO ══════════════ -->
   <section id="vue-mecano" class="vue">
+    <p class="section-titre">File des défauts</p>
 
-    <!-- Filtres -->
-    <div class="filtres">
-      <input type="text" id="f-bus-mec" placeholder="Filtrer par n° bus" oninput="rendreDefauts()">
+    <div class="filtres-bar">
+      <input type="text" id="f-bus-mec" placeholder="🔍 N° de bus" oninput="rendreDefauts()">
       <select id="f-statut" onchange="rendreDefauts()">
         <option value="">Tous statuts</option>
         <option value="ouvert">Ouverts</option>
@@ -375,64 +602,63 @@
 
   <!-- ══════════════ VUE RÉGULATEUR ══════════════ -->
   <section id="vue-regulateur" class="vue">
+    <p class="section-titre">État du parc</p>
 
-    <!-- Barre d'outils -->
-    <div class="barre">
-      <input type="text" id="f-bus-reg" placeholder="Filtrer par n° bus" oninput="rendreGrille()">
-      <button class="btn-csv" onclick="exporterCSV()">⬇ Exporter CSV</button>
+    <div class="barre-reg">
+      <input type="text" id="f-bus-reg" placeholder="🔍 Filtrer par n° de bus" oninput="rendreGrille()">
+      <button class="btn-csv" onclick="exporterCSV()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exporter CSV
+      </button>
     </div>
 
-    <!-- Grille des bus (VERT / ROUGE / ORANGE) -->
     <div class="grille-bus" id="grille-bus"></div>
-
-    <!-- Détail du bus sélectionné -->
     <div id="detail-bus"></div>
   </section>
 
 </main>
 
 <script>
-/* ================================================================
-   SCHÉMA INDEXEDDB — ningbus-defauts-v1
+/* ════════════════════════════════════════════════════════════════
+   SCHÉMA INDEXEDDB  ningbus-defauts-v1
    ────────────────────────────────────────────────────────────────
-   Object store : "defauts"  (clé primaire : id, auto-incrément)
-   Index        : numeroParcBus, statut, gravite, horodatage
+   Store « defauts » — clé primaire : id (auto-incrément)
+   Index : numeroParcBus · statut · gravite · horodatage
 
-   Champs d'un enregistrement :
-     id              : number  — clé primaire
-     numeroParcBus   : string  — n° de parc (ex. "2341")
-     typeDefaut      : string  — Clim | Freins | … | Autre
-     detailAutre     : string  — libre si typeDefaut === "Autre"
-     gravite         : string  — "bloquant" | "gênant" | "mineur"
-     commentaire     : string  — note du chauffeur
-     horodatage      : string  — ISO 8601
-     declarant       : string  — nom du chauffeur
-     statut          : string  — "ouvert" | "en_cours" | "piece_manquante" | "reparé"
-     horodatageRep   : string  — ISO 8601, date de dernière mise à jour statut
-     mecano          : string  — nom du mécano ayant agi
-     commentaireTech : string  — note technique du mécano
-     recurrent       : boolean — vrai si même type revient sur ce bus dans les 14 jours
-================================================================ */
+   Champs :
+     id              number   clé primaire
+     numeroParcBus   string   n° de bus (ex. "2341")
+     typeDefaut      string   Clim | Freins | … | Autre
+     detailAutre     string   libre si typeDefaut === "Autre"
+     gravite         string   "bloquant" | "gênant" | "mineur"
+     commentaire     string   note chauffeur
+     horodatage      string   ISO 8601
+     declarant       string   nom chauffeur
+     statut          string   "ouvert" | "en_cours" | "piece_manquante" | "reparé"
+     horodatageRep   string   ISO 8601, date de mise à jour mécano
+     mecano          string   nom du mécano
+     commentaireTech string   note technique mécano
+     recurrent       boolean  vrai si même type sur même bus ≤ 14 j
+════════════════════════════════════════════════════════════════ */
 
 'use strict';
 
-const DB_NOM    = 'ningbus-defauts-v1';
-const DB_VER    = 1;
-const STORE     = 'defauts';
-const FENETRE_MS = 14 * 24 * 60 * 60 * 1000; // 14 jours pour la détection de récurrence
+const DB_NOM     = 'ningbus-defauts-v1';
+const DB_VER     = 1;
+const STORE      = 'defauts';
+const RECUR_MS   = 14 * 24 * 60 * 60 * 1000; // fenêtre de récurrence : 14 jours
 
-let db;                   // instance IDBDatabase (initialisée au démarrage)
-let roleActif = 'chauffeur';
-let busSelectionne = null;        // n° de parc actuellement ouvert dans le panneau détail
-let pendingAttribution = null;    // bus en attente de confirmation modale (statut ROUGE)
+let db;
+let roleActif      = 'chauffeur';
+let busSelectionne = null;
+let pendingBus     = null; // bus en attente de confirmation modale
 
 /* ────────────────────────────────────────────────────────────────
-   INDEXEDDB — ouverture et initialisation du schéma
+   INDEXEDDB
 ──────────────────────────────────────────────────────────────── */
 function ouvrirDB() {
-  return new Promise((resolve, reject) => {
+  return new Promise((ok, ko) => {
     const req = indexedDB.open(DB_NOM, DB_VER);
-
     req.onupgradeneeded = e => {
       const base = e.target.result;
       if (!base.objectStoreNames.contains(STORE)) {
@@ -443,109 +669,67 @@ function ouvrirDB() {
         s.createIndex('horodatage',    'horodatage',    { unique: false });
       }
     };
-
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror   = e => reject(e.target.error);
+    req.onsuccess = e => { db = e.target.result; ok(db); };
+    req.onerror   = e => ko(e.target.error);
   });
 }
 
-/* ────────────────────────────────────────────────────────────────
-   CRUD de base
-──────────────────────────────────────────────────────────────── */
+const tx = (mode = 'readonly') => db.transaction(STORE, mode).objectStore(STORE);
 
-/** Insère un nouveau défaut ; retourne l'id généré */
-function ajouterDefaut(defaut) {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).add(defaut);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-/** Met à jour un défaut existant (l'id doit être présent dans l'objet) */
-function majDefaut(defaut) {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).put(defaut);
-    req.onsuccess = () => resolve();
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-/** Retourne tous les défauts (pas de tri côté DB, on trie en JS) */
-function tousDefauts() {
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
-  });
-}
+const ajouterDefaut = d  => new Promise((ok, ko) => { const r = tx('readwrite').add(d);  r.onsuccess = e => ok(e.target.result); r.onerror = e => ko(e.target.error); });
+const majDefaut     = d  => new Promise((ok, ko) => { const r = tx('readwrite').put(d);  r.onsuccess = () => ok();               r.onerror = e => ko(e.target.error); });
+const tousDefauts   = () => new Promise((ok, ko) => { const r = tx().getAll();           r.onsuccess = e => ok(e.target.result); r.onerror = e => ko(e.target.error); });
 
 /* ────────────────────────────────────────────────────────────────
    LOGIQUE MÉTIER
 ──────────────────────────────────────────────────────────────── */
 
-/**
- * Détecte si le défaut d est récurrent :
- * même bus + même type de défaut + un autre enregistrement dans les 14 jours
- * (compare horodatages, tous statuts confondus — l'historique complet compte)
- */
+/* Détecte la récurrence : même bus + même type dans les 14 jours */
 function estRecurrent(d, liste) {
-  const ref = new Date(d.horodatage).getTime();
-  return liste.some(x => {
-    if (x.id === d.id)                       return false;
-    if (x.numeroParcBus !== d.numeroParcBus) return false;
-    if (x.typeDefaut     !== d.typeDefaut)   return false;
-    return Math.abs(ref - new Date(x.horodatage).getTime()) <= FENETRE_MS;
-  });
+  const t = new Date(d.horodatage).getTime();
+  return liste.some(x =>
+    x.id !== d.id &&
+    x.numeroParcBus === d.numeroParcBus &&
+    x.typeDefaut    === d.typeDefaut &&
+    Math.abs(t - new Date(x.horodatage).getTime()) <= RECUR_MS
+  );
 }
 
-/**
- * Calcule la couleur d'un bus pour la vue Régulateur :
- *   ROUGE  — au moins un défaut bloquant encore actif (pas réparé)
- *   ORANGE — des défauts actifs mais aucun bloquant
- *   VERT   — tous défauts réparés (ou aucun défaut)
- */
-function couleurBus(defautsDuBus) {
-  const actifs = defautsDuBus.filter(d => d.statut !== 'reparé');
+/* Couleur du bus pour la vue Régulateur */
+function couleurBus(defs) {
+  const actifs = defs.filter(d => d.statut !== 'reparé');
   if (actifs.some(d => d.gravite === 'bloquant')) return 'rouge';
   if (actifs.length > 0)                          return 'orange';
   return 'vert';
 }
 
-/**
- * Tri Mécano : gravité décroissante (bloquant > gênant > mineur),
- * puis ancienneté croissante (plus ancien d'abord)
- */
+/* Tri Mécano : gravité desc, ancienneté asc */
 function trierDefauts(liste) {
-  const poids = { bloquant: 0, 'gênant': 1, mineur: 2 };
+  const p = { bloquant: 0, 'gênant': 1, mineur: 2 };
   return [...liste].sort((a, b) => {
-    const dg = (poids[a.gravite] ?? 9) - (poids[b.gravite] ?? 9);
+    const dg = (p[a.gravite] ?? 9) - (p[b.gravite] ?? 9);
     return dg !== 0 ? dg : new Date(a.horodatage) - new Date(b.horodatage);
   });
 }
 
 /* ────────────────────────────────────────────────────────────────
-   GESTION DU NOM UTILISATEUR
+   NOM UTILISATEUR
 ──────────────────────────────────────────────────────────────── */
-
-function obtenirNom() {
-  return document.getElementById('input-nom').value.trim();
-}
+function obtenirNom() { return document.getElementById('input-nom').value.trim(); }
 
 function sauvegarderNom() {
-  localStorage.setItem('ningbus-nom-' + roleActif, obtenirNom());
-  document.getElementById('apercu-nom').textContent = obtenirNom() || '(non renseigné)';
+  localStorage.setItem('ratp-nom-' + roleActif, obtenirNom());
+  document.getElementById('apercu-nom').textContent = obtenirNom() || '—';
 }
 
 function chargerNom(role) {
-  document.getElementById('input-nom').value = localStorage.getItem('ningbus-nom-' + role) || '';
-  document.getElementById('apercu-nom').textContent = obtenirNom() || '(non renseigné)';
+  document.getElementById('input-nom').value = localStorage.getItem('ratp-nom-' + role) || '';
+  document.getElementById('apercu-nom').textContent = obtenirNom() || '—';
 }
 
 /* ────────────────────────────────────────────────────────────────
-   CHANGEMENT DE RÔLE
+   NAVIGATION RÔLES
 ──────────────────────────────────────────────────────────────── */
-
 function changerRole(role) {
   roleActif = role;
   document.querySelectorAll('.nav-roles button').forEach(b =>
@@ -553,7 +737,6 @@ function changerRole(role) {
   document.querySelectorAll('.vue').forEach(v => v.classList.remove('active'));
   document.getElementById('vue-' + role).classList.add('active');
   chargerNom(role);
-
   if (role === 'mecano')     rendreDefauts();
   if (role === 'regulateur') rendreGrille();
 }
@@ -561,8 +744,6 @@ function changerRole(role) {
 /* ────────────────────────────────────────────────────────────────
    VUE CHAUFFEUR
 ──────────────────────────────────────────────────────────────── */
-
-/** Affiche/masque le champ libre "Autre" en fonction de la sélection */
 function toggleAutre() {
   const val   = document.getElementById('type-defaut').value;
   const grp   = document.getElementById('fg-autre');
@@ -578,52 +759,43 @@ async function soumettreDefaut(e) {
   cacherAlerte('alerte-ch');
 
   const nom     = obtenirNom();
-  const numParc = document.getElementById('num-parc').value.trim().toUpperCase();
+  const numBus  = document.getElementById('num-bus').value.trim().toUpperCase();
   const type    = document.getElementById('type-defaut').value;
   const detail  = document.getElementById('detail-autre').value.trim();
   const gravite = document.querySelector('input[name="gravite"]:checked')?.value;
   const comm    = document.getElementById('comm-ch').value.trim();
 
-  // Validations
-  if (!nom)     { afficherAlerte('alerte-ch', '⚠️ Veuillez saisir votre nom en haut de page.', 'erreur'); return; }
-  if (!numParc) { afficherAlerte('alerte-ch', '⚠️ Le n° de parc est obligatoire.', 'erreur'); return; }
-  if (!type)    { afficherAlerte('alerte-ch', '⚠️ Sélectionnez un type de défaut.', 'erreur'); return; }
+  if (!nom)    { afficherAlerte('alerte-ch', '⚠️ Saisissez votre nom en haut de page.', 'erreur'); return; }
+  if (!numBus) { afficherAlerte('alerte-ch', '⚠️ Le n° de bus est obligatoire.', 'erreur'); return; }
+  if (!type)   { afficherAlerte('alerte-ch', '⚠️ Sélectionnez un type de défaut.', 'erreur'); return; }
   if (type === 'Autre' && !detail) { afficherAlerte('alerte-ch', '⚠️ Précisez le défaut.', 'erreur'); return; }
-  if (!gravite) { afficherAlerte('alerte-ch', '⚠️ Sélectionnez un niveau de gravité.', 'erreur'); return; }
+  if (!gravite){ afficherAlerte('alerte-ch', '⚠️ Sélectionnez un niveau de gravité.', 'erreur'); return; }
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
-
   try {
-    const liste   = await tousDefauts();
-    const horodatage = new Date().toISOString();
-
+    const liste = await tousDefauts();
     const defaut = {
-      numeroParcBus   : numParc,
+      numeroParcBus   : numBus,
       typeDefaut      : type,
       detailAutre     : detail,
-      gravite,
-      commentaire     : comm,
-      horodatage,
+      gravite, commentaire: comm,
+      horodatage      : new Date().toISOString(),
       declarant       : nom,
       statut          : 'ouvert',
-      horodatageRep   : null,
-      mecano          : null,
-      commentaireTech : null,
-      recurrent       : false,
+      horodatageRep   : null, mecano: null,
+      commentaireTech : null, recurrent: false,
     };
-    // Détection de récurrence avant insertion (compare aux enregistrements existants)
     defaut.recurrent = estRecurrent(defaut, liste);
-
     await ajouterDefaut(defaut);
     document.getElementById('form-defaut').reset();
     toggleAutre();
     await majCompteurs();
 
-    const msgRec = defaut.recurrent
-      ? ` ⚠️ Ce type de défaut est <strong>récurrent</strong> sur le bus ${esc(numParc)}.`
-      : '';
-    afficherAlerte('alerte-ch', `✅ Défaut déclaré sur le bus ${esc(numParc)}.${msgRec}`, 'succes');
+    const msg = defaut.recurrent
+      ? `✅ Défaut enregistré. <strong>⚠️ Attention : défaut récurrent sur le bus ${esc(numBus)}.</strong>`
+      : `✅ Défaut enregistré sur le bus <strong>${esc(numBus)}</strong>.`;
+    afficherAlerte('alerte-ch', msg, 'succes');
   } catch (err) {
     afficherAlerte('alerte-ch', '❌ Erreur : ' + err.message, 'erreur');
   } finally {
@@ -634,87 +806,85 @@ async function soumettreDefaut(e) {
 /* ────────────────────────────────────────────────────────────────
    VUE MÉCANO
 ──────────────────────────────────────────────────────────────── */
-
 async function rendreDefauts() {
-  const filtreBus  = document.getElementById('f-bus-mec').value.trim().toUpperCase();
-  const filtreS    = document.getElementById('f-statut').value;
-  const filtreG    = document.getElementById('f-gravite').value;
+  const fBus  = document.getElementById('f-bus-mec').value.trim().toUpperCase();
+  const fStat = document.getElementById('f-statut').value;
+  const fGrav = document.getElementById('f-gravite').value;
 
   let liste = await tousDefauts();
+  if (fBus)  liste = liste.filter(d => d.numeroParcBus.includes(fBus));
+  if (fStat) liste = liste.filter(d => d.statut === fStat);
+  if (fGrav) liste = liste.filter(d => d.gravite === fGrav);
 
-  if (filtreBus) liste = liste.filter(d => d.numeroParcBus.includes(filtreBus));
-  if (filtreS)   liste = liste.filter(d => d.statut === filtreS);
-  if (filtreG)   liste = liste.filter(d => d.gravite === filtreG);
-
-  // Actifs triés (gravité + ancienneté), réparés récents en bas
   const actifs  = trierDefauts(liste.filter(d => d.statut !== 'reparé'));
   const repares = liste.filter(d => d.statut === 'reparé')
                        .sort((a, b) => new Date(b.horodatageRep) - new Date(a.horodatageRep));
 
   const ct = document.getElementById('liste-mec');
-  if (liste.length === 0) { ct.innerHTML = '<div class="vide">Aucun défaut trouvé.</div>'; return; }
+  if (liste.length === 0) {
+    ct.innerHTML = `<div class="vide">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+      Aucun défaut trouvé.
+    </div>`;
+    return;
+  }
   ct.innerHTML = [...actifs, ...repares].map(htmlDefaut).join('');
 }
 
-/** Génère le HTML d'une carte de défaut pour la vue Mécano */
 function htmlDefaut(d) {
   const typeLabel = d.typeDefaut === 'Autre' && d.detailAutre
     ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
 
-  const badgeGrav = `<span class="badge ${d.gravite}">${iconeGrav(d.gravite)} ${cap(d.gravite)}</span>`;
-  const badgeStat = `<span class="badge s-${d.statut === 'piece_manquante' ? 'piece' : d.statut}">${labelStatut(d.statut)}</span>`;
-  const badgeRec  = d.recurrent ? `<span class="badge recurrent">♻ Récurrent</span>` : '';
+  const bRec  = d.recurrent ? `<span class="badge recurrent">♻ Récurrent</span>` : '';
+  const commC = d.commentaire   ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
+  const commT = d.commentaireTech
+    ? `<div class="dcomm tech">🔧 ${esc(d.commentaireTech)} — <em>${esc(d.mecano || '')}</em></div>` : '';
 
-  const commCh   = d.commentaire   ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
-  const commTech = d.commentaireTech
-    ? `<div class="dcomm tech">🔧 ${esc(d.commentaireTech)} <em>— ${esc(d.mecano || '')}</em></div>` : '';
-
-  // Boutons d'action uniquement pour les défauts non réparés
   const actions = d.statut !== 'reparé' ? `
-    <div class="actions">
+    <div class="actions-mec">
       <input class="input-tech" type="text" id="tech-${d.id}"
              placeholder="Commentaire technique…" maxlength="200"
              value="${esc(d.commentaireTech || '')}">
-      <button class="btn repare"  onclick="majStatut(${d.id},'reparé')">✅ Réparé</button>
-      <button class="btn encours" onclick="majStatut(${d.id},'en_cours')">🔧 En cours</button>
-      <button class="btn piece"   onclick="majStatut(${d.id},'piece_manquante')">⏳ Pièce manquante</button>
+      <button class="btn-mec repare"  onclick="majStatut(${d.id},'reparé')">✅ Réparé</button>
+      <button class="btn-mec encours" onclick="majStatut(${d.id},'en_cours')">🔧 En cours</button>
+      <button class="btn-mec piece"   onclick="majStatut(${d.id},'piece_manquante')">⏳ Pièce manquante</button>
     </div>` : '';
 
   return `
-    <div class="dcard ${d.gravite}" id="card-${d.id}">
+    <div class="dcard ${d.gravite}">
       <div class="dhead">
         <div>
-          <div class="dtitle">Bus ${esc(d.numeroParcBus)} — ${typeLabel}</div>
+          <div class="dbus">Bus ${esc(d.numeroParcBus)}</div>
+          <div class="dtitle">${typeLabel}</div>
           <div class="dmeta">
             <span>📅 ${fmtDate(d.horodatage)}</span>
             <span>👤 ${esc(d.declarant)}</span>
           </div>
         </div>
-        <div class="dbadges">${badgeGrav}${badgeStat}${badgeRec}</div>
+        <div class="dbadges">
+          <span class="badge ${d.gravite}">${iconeGrav(d.gravite)} ${cap(d.gravite)}</span>
+          <span class="badge s-${d.statut === 'piece_manquante' ? 'piece' : d.statut}">${labelStatut(d.statut)}</span>
+          ${bRec}
+        </div>
       </div>
-      ${commCh}${commTech}${actions}
+      ${commC}${commT}${actions}
     </div>`;
 }
 
-/** Met à jour le statut d'un défaut depuis la vue Mécano */
-async function majStatut(id, nouveauStatut) {
+async function majStatut(id, nvStatut) {
   const nom = obtenirNom();
   if (!nom) { toast('⚠️ Saisissez votre nom en haut de page.'); return; }
-
   const liste  = await tousDefauts();
   const defaut = liste.find(d => d.id === id);
   if (!defaut) return;
-
-  const inputTech     = document.getElementById('tech-' + id);
-  defaut.statut       = nouveauStatut;
+  const it = document.getElementById('tech-' + id);
+  defaut.statut       = nvStatut;
   defaut.horodatageRep = new Date().toISOString();
   defaut.mecano       = nom;
-  if (inputTech?.value.trim()) defaut.commentaireTech = inputTech.value.trim();
-
+  if (it?.value.trim()) defaut.commentaireTech = it.value.trim();
   await majDefaut(defaut);
-
   const labels = { reparé: 'Réparé ✅', en_cours: 'En cours 🔧', piece_manquante: 'Pièce manquante ⏳' };
-  toast(labels[nouveauStatut] || nouveauStatut);
+  toast(labels[nvStatut] || nvStatut);
   await rendreDefauts();
   await majCompteurs();
 }
@@ -722,220 +892,201 @@ async function majStatut(id, nouveauStatut) {
 /* ────────────────────────────────────────────────────────────────
    VUE RÉGULATEUR
 ──────────────────────────────────────────────────────────────── */
-
 async function rendreGrille() {
   const filtre = document.getElementById('f-bus-reg').value.trim().toUpperCase();
   const liste  = await tousDefauts();
-
-  // Liste unique des bus présents dans les enregistrements
-  let buses = [...new Set(liste.map(d => d.numeroParcBus))].sort();
-  if (filtre) buses = buses.filter(b => b.includes(filtre));
+  let buses    = [...new Set(liste.map(d => d.numeroParcBus))].sort();
+  if (filtre)  buses = buses.filter(b => b.includes(filtre));
 
   const grille = document.getElementById('grille-bus');
-
   if (buses.length === 0) {
-    grille.innerHTML = '<div class="vide" style="grid-column:1/-1">Aucun bus avec des défauts enregistrés.</div>';
+    grille.innerHTML = `<div class="vide" style="grid-column:1/-1">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+      Aucun bus enregistré.
+    </div>`;
     document.getElementById('detail-bus').innerHTML = '';
     return;
   }
 
-  const icons  = { vert: '🟢', rouge: '🔴', orange: '🟠' };
-  const labels = { vert: 'Disponible', rouge: 'Bloquant', orange: 'À surveiller' };
+  const ico    = { vert:'🟢', rouge:'🔴', orange:'🟠' };
+  const labels = { vert:'Disponible', rouge:'Bloquant', orange:'À surveiller' };
 
   grille.innerHTML = buses.map(num => {
-    const db   = liste.filter(d => d.numeroParcBus === num);
-    const coul = couleurBus(db);
-    const nb   = db.filter(d => d.statut !== 'reparé').length;
-    const sel  = busSelectionne === num ? ' sel' : '';
-    return `
-      <div class="bus-tuile ${coul}${sel}" onclick="selectionnerBus('${esc(num)}')">
-        <div class="bus-num">${icons[coul]} ${esc(num)}</div>
-        <div class="bus-label">${labels[coul]}</div>
-        <div class="bus-nb">${nb > 0 ? nb + ' défaut(s)' : '✓ OK'}</div>
-      </div>`;
+    const db  = liste.filter(d => d.numeroParcBus === num);
+    const c   = couleurBus(db);
+    const nb  = db.filter(d => d.statut !== 'reparé').length;
+    const sel = busSelectionne === num ? ' sel' : '';
+    return `<div class="bus-tuile ${c}${sel}" onclick="selectionnerBus('${esc(num)}')">
+      <span class="bi">${ico[c]}</span>
+      <span class="bn">${esc(num)}</span>
+      <span class="bl">${labels[c]}</span>
+      <span class="bnd">${nb > 0 ? nb + ' défaut' + (nb > 1 ? 's' : '') : '✓ OK'}</span>
+    </div>`;
   }).join('');
 
-  // Rafraîchit le panneau détail si un bus est déjà sélectionné
   if (busSelectionne) rendreDetailBus(liste);
 }
 
 async function selectionnerBus(num) {
   busSelectionne = num;
-  await rendreGrille(); // rendreGrille appelle rendreDetailBus si busSelectionne est défini
+  await rendreGrille();
 }
 
-/** Affiche l'historique complet et les actions d'attribution pour un bus */
 function rendreDetailBus(liste) {
   if (!busSelectionne) return;
-
-  const db   = liste.filter(d => d.numeroParcBus === busSelectionne);
-  const coul = couleurBus(db);
+  const db     = liste.filter(d => d.numeroParcBus === busSelectionne);
+  const coul   = couleurBus(db);
   const actifs = db.filter(d => d.statut !== 'reparé');
+  const histo  = [...db].sort((a,b) => new Date(b.horodatage) - new Date(a.horodatage));
 
-  // Historique trié du plus récent au plus ancien
-  const histo = [...db].sort((a, b) => new Date(b.horodatage) - new Date(a.horodatage));
-
-  // Types marqués récurrents pour ce bus
   const recTypes = [...new Set(db.filter(d => d.recurrent).map(d => d.typeDefaut))];
-  const alerteRec = recTypes.length > 0
-    ? `<div class="alerte-rec">♻ Défauts récurrents détectés sur ce bus : ${recTypes.map(esc).join(', ')}</div>`
-    : '';
+  const alerteRec = recTypes.length
+    ? `<div class="alerte-rec">♻ Défauts récurrents : ${recTypes.map(esc).join(', ')}</div>` : '';
 
-  // Bouton d'attribution selon la couleur du bus
   const btnAtt = coul === 'rouge'
-    ? `<button class="btn-att-rouge" onclick="demanderConfirmation('${esc(busSelectionne)}')">🚨 Attribuer (défaut bloquant)</button>`
-    : `<button class="btn-att-vert"  onclick="toast('Bus ${esc(busSelectionne)} attribué ✓')">✅ Attribuer</button>`;
+    ? `<button class="btn-att rouge" onclick="demanderConfirmation('${esc(busSelectionne)}')">🚨 Attribuer</button>`
+    : `<button class="btn-att vert"  onclick="toast('Bus ${esc(busSelectionne)} attribué ✓')">✅ Attribuer</button>`;
 
   const lignes = histo.map(d => {
     const tl  = d.typeDefaut === 'Autre' && d.detailAutre ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
-    const rec = d.recurrent ? `<span class="badge recurrent" style="margin-left:4px">♻</span>` : '';
+    const rec = d.recurrent ? `<span class="badge recurrent" style="margin-left:5px">♻</span>` : '';
     return `<tr>
       <td>${fmtDate(d.horodatage)}</td>
       <td>${tl}${rec}</td>
-      <td><span class="badge ${d.gravite}">${cap(d.gravite)}</span></td>
+      <td><span class="badge ${d.gravite}">${iconeGrav(d.gravite)} ${cap(d.gravite)}</span></td>
       <td><span class="badge s-${d.statut === 'piece_manquante' ? 'piece' : d.statut}">${labelStatut(d.statut)}</span></td>
       <td>${esc(d.declarant)}</td>
-      <td>${d.mecano ? esc(d.mecano) : '—'}</td>
+      <td>${d.mecano ? esc(d.mecano) : '<span style="color:var(--text-3)">—</span>'}</td>
     </tr>`;
   }).join('');
 
+  const etatActif = actifs.length === 0
+    ? `<p style="color:var(--vert);font-weight:700;margin-bottom:14px">✓ Aucun défaut actif</p>`
+    : `<p style="font-weight:700;margin-bottom:12px;color:var(--text)">${actifs.length} défaut${actifs.length > 1 ? 's' : ''} actif${actifs.length > 1 ? 's' : ''}</p>`;
+
   document.getElementById('detail-bus').innerHTML = `
     <div class="detail-bus">
-      <h3>
-        <span>Bus ${esc(busSelectionne)}</span>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="detail-head">
+        <h3>🚌 Bus ${esc(busSelectionne)}</h3>
+        <div class="detail-actions">
           ${btnAtt}
-          <button class="btn-sec" onclick="busSelectionne=null;document.getElementById('detail-bus').innerHTML='';rendreGrille()">✕ Fermer</button>
+          <button class="btn-fermer" onclick="fermerDetail()">✕ Fermer</button>
         </div>
-      </h3>
+      </div>
       ${alerteRec}
-      ${actifs.length === 0
-        ? '<p style="color:#16a34a;font-weight:700;margin-bottom:14px">✓ Aucun défaut actif</p>'
-        : `<p style="font-weight:700;margin-bottom:12px">${actifs.length} défaut(s) actif(s)</p>`}
+      ${etatActif}
       ${histo.length > 0 ? `
-        <div style="overflow-x:auto">
+        <div class="tablo-wrap">
           <table class="tablo">
-            <thead><tr><th>Date</th><th>Type</th><th>Gravité</th><th>Statut</th><th>Déclarant</th><th>Mécano</th></tr></thead>
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Gravité</th><th>Statut</th><th>Déclarant</th><th>Mécano</th>
+            </tr></thead>
             <tbody>${lignes}</tbody>
           </table>
         </div>` : '<div class="vide">Aucun historique.</div>'}
     </div>`;
 }
 
-/* ────────────────────────────────────────────────────────────────
-   MODAL CONFIRMATION (bus ROUGE → attribution)
-──────────────────────────────────────────────────────────────── */
+function fermerDetail() {
+  busSelectionne = null;
+  document.getElementById('detail-bus').innerHTML = '';
+  rendreGrille();
+}
 
+/* ────────────────────────────────────────────────────────────────
+   MODAL CONFIRMATION (bus ROUGE)
+──────────────────────────────────────────────────────────────── */
 function demanderConfirmation(num) {
   document.getElementById('modal-texte').textContent =
-    `Le bus ${num} a un défaut bloquant non résolu. L'attribuer peut être dangereux pour les passagers. Confirmez-vous l'attribution ?`;
-  pendingAttribution = num;
+    `Le bus ${num} a un défaut bloquant non résolu. L'attribuer peut mettre les passagers en danger. Confirmez-vous ?`;
+  pendingBus = num;
   document.getElementById('modal-rouge').classList.add('show');
 }
-
 function fermerModal() {
   document.getElementById('modal-rouge').classList.remove('show');
-  pendingAttribution = null;
+  pendingBus = null;
 }
-
 function confirmerAttribution() {
   fermerModal();
-  if (pendingAttribution) toast(`Bus ${pendingAttribution} attribué ⚠️ (défaut bloquant actif)`);
+  if (pendingBus) toast(`⚠️ Bus ${pendingBus} attribué malgré le défaut bloquant`);
 }
 
 /* ────────────────────────────────────────────────────────────────
    COMPTEURS EN-TÊTE
 ──────────────────────────────────────────────────────────────── */
-
 async function majCompteurs() {
   const liste = await tousDefauts();
   const buses = [...new Set(liste.map(d => d.numeroParcBus))];
   let dispo = 0, bloques = 0, enRep = 0;
-
   buses.forEach(num => {
     const c = couleurBus(liste.filter(d => d.numeroParcBus === num));
     if (c === 'vert')   dispo++;
     if (c === 'rouge')  bloques++;
     if (c === 'orange') enRep++;
   });
-
-  document.getElementById('cpt-dispo').textContent  = `${dispo} dispo`;
-  document.getElementById('cpt-bloque').textContent = `${bloques} bloqués`;
-  document.getElementById('cpt-repair').textContent = `${enRep} en réparation`;
+  document.getElementById('cpt-dispo-txt').textContent  = `${dispo} dispo`;
+  document.getElementById('cpt-bloque-txt').textContent = `${bloques} bloqué${bloques > 1 ? 's' : ''}`;
+  document.getElementById('cpt-repair-txt').textContent = `${enRep} en réparation`;
 }
 
 /* ────────────────────────────────────────────────────────────────
    EXPORT CSV
 ──────────────────────────────────────────────────────────────── */
-
 async function exporterCSV() {
   const liste = await tousDefauts();
-  if (liste.length === 0) { toast('Aucun défaut à exporter.'); return; }
-
+  if (!liste.length) { toast('Aucun défaut à exporter.'); return; }
   const ent = ['ID','Bus','Type','Détail Autre','Gravité','Commentaire',
-               'Date déclaration','Déclarant','Statut','Date mise à jour',
-               'Mécano','Commentaire technique','Récurrent'];
-
-  const lignes = liste.map(d => [
-    d.id, d.numeroParcBus, d.typeDefaut, d.detailAutre || '',
-    d.gravite, d.commentaire || '', d.horodatage, d.declarant,
-    d.statut, d.horodatageRep || '', d.mecano || '',
-    d.commentaireTech || '', d.recurrent ? 'oui' : 'non',
-  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
-
-  const csv  = [ent.join(','), ...lignes].join('\r\n');
+               'Date déclaration','Déclarant','Statut','Date MAJ','Mécano','Commentaire technique','Récurrent'];
+  const rows = liste.map(d => [
+    d.id, d.numeroParcBus, d.typeDefaut, d.detailAutre||'', d.gravite,
+    d.commentaire||'', d.horodatage, d.declarant, d.statut,
+    d.horodatageRep||'', d.mecano||'', d.commentaireTech||'',
+    d.recurrent ? 'oui' : 'non',
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv  = [ent.join(','), ...rows].join('\r\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
-  const a    = Object.assign(document.createElement('a'), {
+  Object.assign(document.createElement('a'), {
     href: url,
-    download: `ningbus-defauts-${new Date().toISOString().slice(0,10)}.csv`,
-  });
-  a.click();
+    download: `ratp-defauts-${new Date().toISOString().slice(0,10)}.csv`,
+  }).click();
   URL.revokeObjectURL(url);
   toast('Export CSV téléchargé ✓');
 }
 
 /* ────────────────────────────────────────────────────────────────
-   UTILITAIRES UI
+   UTILITAIRES
 ──────────────────────────────────────────────────────────────── */
-
 function afficherAlerte(id, html, type) {
   const el = document.getElementById(id);
-  el.innerHTML  = html;
-  el.className  = 'alerte ' + type;
+  el.innerHTML = html; el.className = 'alerte ' + type;
 }
-
 function cacherAlerte(id) {
-  const el = document.getElementById(id);
-  el.className = 'alerte hidden';
+  document.getElementById(id).className = 'alerte hidden';
 }
-
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._tid);
-  t._tid = setTimeout(() => t.classList.remove('show'), 3000);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/** Échappe les caractères HTML pour éviter les injections XSS */
+/* Échappe le HTML pour prévenir les injections XSS */
 function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  if (!s && s !== 0) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('fr-FR', {
-    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit',
   });
 }
-
-function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-
+function cap(s)       { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 function iconeGrav(g) { return { bloquant:'🔴', 'gênant':'🟠', mineur:'🟡' }[g] || ''; }
-
 function labelStatut(s) {
   return { ouvert:'🔴 Ouvert', en_cours:'🔧 En cours', reparé:'✅ Réparé', piece_manquante:'⏳ Pièce manquante' }[s] || s;
 }
@@ -944,21 +1095,19 @@ function labelStatut(s) {
    INITIALISATION
 ──────────────────────────────────────────────────────────────── */
 
-// Aperçu horodatage en temps réel dans la vue Chauffeur
+/* Actualise l'horodatage d'aperçu chaque seconde */
 setInterval(() => {
-  document.getElementById('apercu-date').textContent =
-    new Date().toLocaleString('fr-FR');
+  document.getElementById('apercu-date').textContent = new Date().toLocaleString('fr-FR');
 }, 1000);
 
 async function init() {
   await ouvrirDB();
   chargerNom('chauffeur');
-  // Aperçu initial immédiat
   document.getElementById('apercu-date').textContent = new Date().toLocaleString('fr-FR');
   await majCompteurs();
 }
 
-init().catch(err => console.error('Erreur init Ningbus défauts :', err));
+init().catch(err => console.error('Init erreur :', err));
 </script>
 </body>
 </html>
