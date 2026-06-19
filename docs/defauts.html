@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RATP Cap Saclay — Suivi des défauts</title>
+  <!-- PWA -->
+  <link rel="manifest" href="defauts-manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Flotte RATP">
+  <meta name="theme-color" content="#2d2f7e">
+  <link rel="apple-touch-icon" href="icons/defauts-192.png">
   <style>
     /* ═══════════════════════════════════════════════════════════════
        DESIGN SYSTEM
@@ -1507,6 +1515,14 @@ async function init() {
 }
 
 init().catch(err => console.error('Init erreur :', err));
+
+/* ── Enregistrement du Service Worker (PWA hors-ligne) ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/Ningbus/defauts-sw.js')
+      .catch(err => console.warn('SW non enregistré :', err));
+  });
+}
 </script>
 </body>
 </html>

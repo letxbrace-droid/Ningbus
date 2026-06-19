@@ -1,0 +1,28 @@
+{
+  "name": "Suivi Atelier — Flotte RATP Cap Saclay",
+  "short_name": "Flotte RATP",
+  "description": "Suivi des défauts bus RATP Cap Saclay — chauffeur, atelier, régulateur",
+  "start_url": "/Ningbus/defauts.html",
+  "scope": "/Ningbus/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f3f8",
+  "theme_color": "#2d2f7e",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icons/defauts-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/defauts-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": []
+}
