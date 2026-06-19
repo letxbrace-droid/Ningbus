@@ -2,7 +2,7 @@
    Stratégie : cache-first pour les assets statiques.
    Les données métier sont dans IndexedDB → l'app fonctionne 100 % hors-ligne. */
 
-const CACHE = 'ningbus-defauts-v2';
+const CACHE = 'ningbus-defauts-v3';
 const ASSETS = [
   '/Ningbus/defauts.html',
   '/Ningbus/logo-ratpcap.png',
