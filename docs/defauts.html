@@ -5,123 +5,150 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RATP Cap Saclay — Suivi des défauts</title>
   <style>
-    /* ═══════════════════════════════════════
-       VARIABLES & RESET
-    ═══════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════════
+       DESIGN SYSTEM
+       ── Palette ──────────────────────────────────────────────────
+         Navy  #2d2f7e  identité, CTA primaire, nav active
+         Teal  #2ec4b6  accent, actions secondaires, focus ring
+         Vert  #16a34a  disponible / réparé
+         Rouge #dc2626  bloquant / erreur
+         Orange #ea580c gênant / avertissement
+         Jaune #ca8a04  mineur
+         Violet #7c3aed récurrent
+       ── Échelle typo (base 15 px) ─────────────────────────────────
+         xl    1.15rem  titres de section
+         lg    1rem     titre de carte
+         md    .9rem    corps principal
+         sm    .83rem   méta, labels
+         xs    .75rem   badges, compteurs
+         min   .72rem   jamais en dessous (≈ 10.8 px)
+    ═══════════════════════════════════════════════════════════════ */
     :root {
-      --navy:    #2d2f7e;
-      --teal:    #2ec4b6;
-      --teal-lt: #e6faf8;
-      --vert:    #16a34a;
-      --vert-lt: #dcfce7;
-      --rouge:   #dc2626;
-      --rouge-lt:#fee2e2;
-      --orange:  #ea580c;
+      --navy:     #2d2f7e;
+      --navy-dk:  #23257a;
+      --teal:     #2ec4b6;
+      --teal-dk:  #23a99c;
+      --teal-lt:  #e6faf8;
+      --vert:     #16a34a;
+      --vert-lt:  #dcfce7;
+      --rouge:    #dc2626;
+      --rouge-lt: #fee2e2;
+      --orange:   #ea580c;
       --orange-lt:#ffedd5;
-      --jaune:   #ca8a04;
-      --violet:  #7c3aed;
-      --bg:      #f4f6f9;
-      --surface: #ffffff;
-      --border:  #e2e8f0;
-      --text:    #1e293b;
-      --text-2:  #64748b;
-      --text-3:  #94a3b8;
-      --radius:  10px;
-      --shadow:  0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --jaune:    #ca8a04;
+      --violet:   #7c3aed;
+      --bg:       #f0f3f8;
+      --surface:  #ffffff;
+      --border:   #dde3ed;
+      --text:     #1a2234;
+      --text-2:   #5a6a85;
+      --text-3:   #9baabb;
+      --r-sm:     6px;
+      --r-md:     10px;
+      --r-lg:     14px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
+      --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 4px 20px rgba(0,0,0,.05);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 15px; }
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
       background: var(--bg); color: var(--text);
-      min-height: 100vh; line-height: 1.5;
+      min-height: 100dvh; line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* ═══════════════════════════════════════
-       EN-TÊTE
+       EN-TÊTE STICKY — layout 2 lignes mobile
     ═══════════════════════════════════════ */
     header {
       background: #fff;
       border-bottom: 3px solid var(--teal);
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-      padding: 0 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.09);
       position: sticky; top: 0; z-index: 200;
-      display: flex; align-items: center; gap: 16px;
-      flex-wrap: wrap; min-height: 60px;
+      /* Grille : 1 ligne bureau, 2 lignes mobile */
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto;
+      align-items: center;
+      gap: 0 16px;
+      padding: 0 24px;
+      min-height: 62px;
     }
-    .logo-header { height: 36px; width: auto; display: block; flex-shrink: 0; }
+    /* Logo — colonne 1 */
+    .logo-header { height: 34px; width: auto; display: block; grid-column: 1; }
+    /* Compteurs + nom — colonne 2 */
+    .header-mid  { grid-column: 2; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    /* Nav — colonne 3 */
+    .nav-roles   { grid-column: 3; display: flex; gap: 4px; }
 
-    /* Séparateur vertical */
-    .sep { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
-
-    /* Compteurs */
-    .compteurs { display: flex; gap: 8px; flex-wrap: wrap; }
+    /* ── Compteurs ── */
+    .compteurs { display: flex; gap: 6px; flex-wrap: nowrap; }
     .cpt {
-      display: flex; align-items: center; gap: 5px;
-      padding: 4px 12px; border-radius: 20px;
-      font-size: .78rem; font-weight: 700; letter-spacing: .02em;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: .75rem; font-weight: 700; letter-spacing: .02em;
+      white-space: nowrap;
     }
-    .cpt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cpt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .cpt.dispo  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .cpt.dispo  .cpt-dot { background: var(--vert); }
+    .cpt.dispo .cpt-dot  { background: var(--vert); }
     .cpt.bloque { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     .cpt.bloque .cpt-dot { background: var(--rouge); }
     .cpt.repair { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
     .cpt.repair .cpt-dot { background: var(--orange); }
 
-    /* Champ nom */
+    /* ── Champ nom ── */
     .champ-nom {
-      display: flex; align-items: center; gap: 7px;
-      font-size: .82rem; color: var(--text-2);
+      display: flex; align-items: center; gap: 6px;
+      font-size: .83rem; color: var(--text-2); margin-left: auto;
     }
     .champ-nom svg { flex-shrink: 0; color: var(--text-3); }
     .champ-nom input {
-      padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: .82rem; color: var(--text); background: var(--bg);
-      width: 140px; outline: none; transition: border-color .15s;
+      padding: 5px 10px; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+      font-size: .83rem; color: var(--text); background: var(--bg);
+      width: 140px; outline: none; transition: border-color .15s, box-shadow .15s;
     }
-    .champ-nom input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.12); }
+    .champ-nom input:focus {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.14);
+    }
 
-    /* Onglets rôles */
-    .nav-roles { display: flex; gap: 4px; margin-left: auto; }
+    /* ── Onglets de rôle ── */
     .nav-roles button {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border: 1.5px solid var(--border);
+      padding: 7px 14px; border: 1.5px solid var(--border);
       background: transparent; color: var(--text-2);
-      border-radius: 7px; cursor: pointer;
-      font-size: .82rem; font-weight: 600;
+      border-radius: var(--r-sm); cursor: pointer;
+      font-size: .83rem; font-weight: 600;
       transition: all .15s; white-space: nowrap;
+      min-height: 36px;
     }
     .nav-roles button svg { flex-shrink: 0; }
-    .nav-roles button:hover { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
-    .nav-roles button.actif {
-      background: var(--navy); color: #fff;
-      border-color: var(--navy);
-    }
+    .nav-roles button:hover  { border-color: var(--navy); color: var(--navy); background: #f0f0fa; }
+    .nav-roles button.actif  { background: var(--navy); color: #fff; border-color: var(--navy); }
+    /* Texte caché sur petit écran — voir media query */
+    .nav-txt { display: inline; }
 
     /* ═══════════════════════════════════════
-       CONTENU
+       CONTENU PRINCIPAL
     ═══════════════════════════════════════ */
     main { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
 
     .vue { display: none; }
-    .vue.active { display: block; animation: fadeIn .2s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .vue.active { display: block; animation: fadeIn .18s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
 
-    /* Titre de section */
     .section-titre {
-      font-size: 1.1rem; font-weight: 700; color: var(--navy);
-      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+      font-size: 1.05rem; font-weight: 700; color: var(--navy);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .section-titre::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
+    .section-titre::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    /* Carte */
     .card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px;
-      box-shadow: var(--shadow); margin-bottom: 16px;
+      border-radius: var(--r-md); padding: 24px;
+      box-shadow: var(--shadow-md); margin-bottom: 16px;
     }
 
     /* ═══════════════════════════════════════
@@ -129,167 +156,189 @@
     ═══════════════════════════════════════ */
     .fg { margin-bottom: 18px; }
     .fg label {
-      display: block; font-size: .83rem; font-weight: 700;
-      color: var(--text-2); margin-bottom: 6px; text-transform: uppercase;
-      letter-spacing: .04em;
+      display: block; font-size: .75rem; font-weight: 700;
+      color: var(--text-2); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .fg label .opt {
+      font-weight: 400; text-transform: none; letter-spacing: 0;
+      font-size: .78rem; color: var(--text-3);
     }
     .fg input, .fg select, .fg textarea {
       width: 100%; padding: 10px 14px;
-      border: 1.5px solid var(--border); border-radius: 8px;
+      border: 1.5px solid var(--border); border-radius: var(--r-sm);
       font-size: .95rem; color: var(--text); background: #fff;
       outline: none; transition: border-color .15s, box-shadow .15s;
-      appearance: auto;
+      min-height: 44px;
     }
     .fg input:focus, .fg select:focus, .fg textarea:focus {
-      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.15);
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,.14);
     }
-    .fg textarea { resize: vertical; min-height: 80px; }
+    .fg textarea { resize: vertical; min-height: 82px; }
 
-    /* Champ numéro de bus — mis en valeur */
+    /* N° de bus — mis en valeur */
     .num-bus-wrap { position: relative; }
-    .num-bus-wrap input {
-      padding-left: 42px; font-size: 1.1rem; font-weight: 700;
-      letter-spacing: .05em;
-    }
     .num-bus-icon {
-      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-      font-size: 1.1rem; pointer-events: none;
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%); font-size: 1.05rem; pointer-events: none;
     }
+    #num-bus { padding-left: 42px; font-size: 1.1rem; font-weight: 800; letter-spacing: .08em; }
 
-    /* Boutons gravité */
+    /* Boutons de gravité */
     .gravite-opts { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .gravite-opts label {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; padding: 14px 8px; border: 2px solid var(--border);
-      border-radius: 10px; cursor: pointer; font-size: .82rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .04em;
-      transition: all .15s; user-select: none; text-align: center;
-      color: var(--text-2);
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; padding: 14px 6px;
+      border: 2px solid var(--border); border-radius: var(--r-md);
+      cursor: pointer; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .05em;
+      transition: all .15s; user-select: none; color: var(--text-2);
+      min-height: 80px; justify-content: center;
     }
-    .gravite-opts label .grav-icon { font-size: 1.5rem; }
     .gravite-opts input[type="radio"] { display: none; }
-    .gravite-opts label:has(input[value="bloquant"]:checked) {
+    .grav-icon { font-size: 1.6rem; line-height: 1; }
+    .gravite-opts label:has([value="bloquant"]:checked) {
       border-color: var(--rouge); background: var(--rouge-lt); color: var(--rouge);
       box-shadow: 0 0 0 3px rgba(220,38,38,.1);
     }
-    .gravite-opts label:has(input[value="gênant"]:checked) {
+    .gravite-opts label:has([value="gênant"]:checked) {
       border-color: var(--orange); background: var(--orange-lt); color: var(--orange);
       box-shadow: 0 0 0 3px rgba(234,88,12,.1);
     }
-    .gravite-opts label:has(input[value="mineur"]:checked) {
+    .gravite-opts label:has([value="mineur"]:checked) {
       border-color: var(--jaune); background: #fefce8; color: var(--jaune);
       box-shadow: 0 0 0 3px rgba(202,138,4,.1);
     }
-    .gravite-opts label:hover { border-color: var(--text-3); }
+    .gravite-opts label:hover:not(:has(:checked)) { border-color: var(--text-3); background: #f8fafc; }
 
-    /* Bandeau auto (horodatage + déclarant) */
+    /* Bandeau horodatage automatique */
     .meta-auto {
       display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
-      padding: 10px 14px; background: var(--bg); border-radius: 8px;
-      font-size: .82rem; color: var(--text-2); margin-bottom: 18px;
+      padding: 10px 14px; background: var(--bg); border-radius: var(--r-sm);
+      font-size: .83rem; color: var(--text-2); margin-bottom: 18px;
     }
-    .meta-auto span { display: flex; align-items: center; gap: 5px; }
+    .meta-auto span { display: inline-flex; align-items: center; gap: 5px; }
 
-    /* Bouton principal */
+    /* Bouton principal (CTA) — navy = identité */
     .btn-primary {
       width: 100%; padding: 13px; background: var(--navy); color: #fff;
-      border: none; border-radius: 9px; font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: background .15s, transform .1s;
-      letter-spacing: .02em;
+      border: none; border-radius: var(--r-sm); font-size: 1rem; font-weight: 700;
+      cursor: pointer; letter-spacing: .02em;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      min-height: 48px;
     }
-    .btn-primary:hover:not(:disabled) { background: #23257a; transform: translateY(-1px); }
-    .btn-primary:active:not(:disabled) { transform: none; }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--navy-dk); transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(45,47,126,.3);
+    }
+    .btn-primary:active:not(:disabled) { transform: none; box-shadow: none; }
     .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* Alertes inline */
     .alerte {
-      padding: 12px 16px; border-radius: 8px; font-size: .88rem;
-      font-weight: 600; margin-bottom: 16px; display: none; line-height: 1.5;
+      padding: 12px 16px; border-radius: var(--r-sm);
+      font-size: .88rem; font-weight: 600;
+      margin-bottom: 16px; line-height: 1.5; display: none;
     }
     .alerte.succes { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; display: block; }
     .alerte.erreur { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; display: block; }
     .alerte.hidden { display: none !important; }
 
     /* ═══════════════════════════════════════
-       BADGES
+       BADGES SÉMANTIQUES
     ═══════════════════════════════════════ */
     .badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 10px; border-radius: 20px;
-      font-size: .73rem; font-weight: 700; white-space: nowrap;
-      letter-spacing: .03em;
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: .75rem; font-weight: 700;
+      white-space: nowrap; letter-spacing: .02em;
     }
     .badge.bloquant  { background: var(--rouge-lt); color: var(--rouge);  border: 1px solid #fca5a5; }
-    .badge.genant    { background: var(--orange-lt); color: var(--orange); border: 1px solid #fdba74; }
-    .badge.mineur    { background: #fefce8; color: var(--jaune);           border: 1px solid #fde047; }
-    .badge.recurrent { background: #f5f3ff; color: var(--violet);          border: 1px solid #c4b5fd; }
+    .badge.genant    { background: var(--orange-lt);color: var(--orange); border: 1px solid #fdba74; }
+    .badge.mineur    { background: #fefce8;          color: var(--jaune); border: 1px solid #fde047; }
+    .badge.recurrent { background: #f5f3ff;          color: var(--violet);border: 1px solid #c4b5fd; }
     .badge.s-ouvert  { background: var(--rouge-lt); color: #b91c1c; }
-    .badge.s-en_cours{ background: #fffbeb; color: #92400e; }
+    .badge.s-en_cours{ background: #fffbeb;          color: #92400e; }
     .badge.s-reparé  { background: var(--vert-lt);  color: #15803d; }
-    .badge.s-piece   { background: #f5f3ff; color: #5b21b6; }
+    .badge.s-piece   { background: #f5f3ff;          color: #5b21b6; }
 
     /* ═══════════════════════════════════════
-       VUE MÉCANO — cartes défaut
+       VUE ATELIER — cartes défaut
     ═══════════════════════════════════════ */
     .filtres-bar {
-      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+      display: flex; gap: 10px; margin-bottom: 20px;
+      flex-wrap: wrap; align-items: center;
     }
     .filtres-bar input, .filtres-bar select {
-      padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px;
-      font-size: .85rem; background: #fff; color: var(--text); outline: none;
-      transition: border-color .15s;
+      padding: 8px 12px; border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); font-size: .85rem;
+      background: #fff; color: var(--text); outline: none;
+      transition: border-color .15s; min-height: 40px;
     }
     .filtres-bar input { width: 160px; }
     .filtres-bar input:focus, .filtres-bar select:focus { border-color: var(--teal); }
 
+    /* Carte défaut */
     .dcard {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 18px 20px;
-      box-shadow: var(--shadow); margin-bottom: 12px;
+      border-radius: var(--r-md); padding: 16px 18px;
+      box-shadow: var(--shadow-sm); margin-bottom: 10px;
       transition: box-shadow .15s;
     }
-    .dcard:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1), 0 6px 24px rgba(0,0,0,.07); }
+    .dcard:hover { box-shadow: var(--shadow-md); }
     .dcard.bloquant { border-left: 5px solid var(--rouge); }
     .dcard.genant   { border-left: 5px solid var(--orange); }
     .dcard.mineur   { border-left: 5px solid var(--jaune); }
 
     .dhead {
       display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 12px;
-      margin-bottom: 10px; flex-wrap: wrap;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 8px; flex-wrap: wrap;
     }
-    .dtitle { font-size: 1rem; font-weight: 700; color: var(--text); }
-    .dbus   { font-size: .78rem; font-weight: 700; color: var(--navy); background: #eef0fa; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
-    .dmeta  { font-size: .8rem; color: var(--text-2); display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
-    .dbadges{ display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; flex-shrink: 0; }
+    /* Pastille numéro de bus */
+    .dbus {
+      display: inline-block; font-size: .72rem; font-weight: 800;
+      color: var(--navy); background: #eef0fa;
+      padding: 2px 8px; border-radius: 4px; margin-bottom: 4px;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .dtitle { font-size: .95rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .dmeta  {
+      font-size: .8rem; color: var(--text-2);
+      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 5px;
+    }
+    .dbadges { display: flex; gap: 5px; flex-wrap: wrap; flex-shrink: 0; align-items: flex-start; }
 
     .dcomm {
       font-size: .85rem; color: var(--text); background: #f8fafc;
-      border: 1px solid var(--border); border-radius: 6px;
-      padding: 9px 12px; margin: 10px 0; line-height: 1.5;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 9px 12px; margin: 8px 0; line-height: 1.5;
     }
     .dcomm.tech { background: #f0f9ff; border-color: #bae6fd; color: #0c4a6e; }
 
-    /* Actions mécano */
+    /* Zone d'actions Atelier */
     .actions-mec {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      margin-top: 14px; padding-top: 14px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 12px; padding-top: 12px;
       border-top: 1px solid var(--border); align-items: center;
     }
     .input-tech {
-      flex: 1; min-width: 180px; padding: 7px 11px;
-      border: 1.5px solid var(--border); border-radius: 7px;
+      flex: 1; min-width: 160px; padding: 7px 11px;
+      border: 1.5px solid var(--border); border-radius: var(--r-sm);
       font-size: .83rem; outline: none; transition: border-color .15s;
+      min-height: 40px;
     }
     .input-tech:focus { border-color: var(--teal); }
 
     .btn-mec {
-      padding: 7px 16px; border: none; border-radius: 7px;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border: none; border-radius: var(--r-sm);
       font-size: .82rem; font-weight: 700; cursor: pointer;
-      transition: opacity .15s, transform .1s; white-space: nowrap;
+      transition: opacity .15s, transform .1s;
+      white-space: nowrap; min-height: 36px;
     }
-    .btn-mec:hover { opacity: .87; transform: translateY(-1px); }
-    .btn-mec:active { transform: none; }
+    .btn-mec:hover  { opacity: .87; transform: translateY(-1px); }
+    .btn-mec:active { transform: none; opacity: 1; }
     .btn-mec.repare  { background: var(--vert);   color: #fff; }
     .btn-mec.encours { background: var(--orange); color: #fff; }
     .btn-mec.piece   { background: var(--violet); color: #fff; }
@@ -302,91 +351,95 @@
       flex-wrap: wrap; align-items: center;
     }
     .barre-reg input {
-      padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px;
-      font-size: .85rem; background: #fff; width: 180px; outline: none;
-      transition: border-color .15s;
+      padding: 8px 12px; border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); font-size: .85rem;
+      background: #fff; width: 200px; outline: none;
+      transition: border-color .15s; min-height: 40px;
     }
     .barre-reg input:focus { border-color: var(--teal); }
 
+    /* Bouton CSV — teal = action secondaire */
     .btn-csv {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px; background: var(--navy); color: #fff;
-      border: none; border-radius: 7px; font-size: .83rem; font-weight: 700;
-      cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 16px; background: var(--teal); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      font-size: .83rem; font-weight: 700; cursor: pointer;
+      transition: background .15s; min-height: 40px;
     }
-    .btn-csv:hover { background: #23257a; }
+    .btn-csv:hover { background: var(--teal-dk); }
 
     /* Grille des bus */
     .grille-bus {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 12px; margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px; margin-bottom: 24px;
     }
     .bus-tuile {
-      border-radius: 12px; padding: 16px 10px; text-align: center;
-      cursor: pointer; transition: transform .12s, box-shadow .12s;
-      border: 2px solid transparent; user-select: none;
+      border-radius: var(--r-md); padding: 16px 8px; text-align: center;
+      cursor: pointer; border: 2px solid transparent;
+      transition: transform .12s, box-shadow .12s; user-select: none;
     }
-    .bus-tuile:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
-    .bus-tuile.sel   { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,47,126,.18); }
-    .bus-tuile.vert  { background: #e6faf5; color: #15803d; }
-    .bus-tuile.rouge { background: #fef2f2; color: #b91c1c; }
-    .bus-tuile.orange{ background: #fff7ed; color: #c2410c; }
-    .bus-tuile .bi   { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .bus-tuile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.1); }
+    .bus-tuile.sel   { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,47,126,.16); }
+    .bus-tuile.vert  { background: #e8faf5; color: #15803d; }
+    .bus-tuile.rouge { background: var(--rouge-lt); color: #b91c1c; }
+    .bus-tuile.orange{ background: var(--orange-lt); color: #c2410c; }
+    .bus-tuile .bi   { font-size: 1.5rem; display: block; margin-bottom: 5px; }
     .bus-tuile .bn   { font-size: 1rem; font-weight: 800; display: block; }
-    .bus-tuile .bl   { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; opacity: .75; }
-    .bus-tuile .bnd  { font-size: .72rem; margin-top: 3px; font-weight: 600; }
+    .bus-tuile .bl   { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; display: block; margin-top: 3px; opacity: .8; }
+    .bus-tuile .bnd  { font-size: .75rem; font-weight: 600; display: block; margin-top: 3px; }
 
     /* Panneau détail bus */
     .detail-bus {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px 24px;
-      box-shadow: var(--shadow); margin-bottom: 24px;
+      border-radius: var(--r-md); padding: 20px 22px;
+      box-shadow: var(--shadow-md); margin-bottom: 24px;
     }
     .detail-head {
       display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
-      padding-bottom: 16px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
     }
-    .detail-head h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+    .detail-head h3 { font-size: 1.05rem; font-weight: 700; color: var(--navy); }
     .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .btn-att {
-      padding: 8px 16px; border: none; border-radius: 7px;
-      font-size: .83rem; font-weight: 700; cursor: pointer; transition: opacity .15s;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border: none; border-radius: var(--r-sm);
+      font-size: .83rem; font-weight: 700; cursor: pointer;
+      transition: opacity .15s, transform .1s; min-height: 36px;
     }
-    .btn-att:hover { opacity: .87; }
+    .btn-att:hover { opacity: .87; transform: translateY(-1px); }
     .btn-att.rouge { background: var(--rouge); color: #fff; }
     .btn-att.vert  { background: var(--vert);  color: #fff; }
+
     .btn-fermer {
-      padding: 8px 14px; border: 1.5px solid var(--border); background: #fff;
-      border-radius: 7px; font-size: .83rem; font-weight: 600; cursor: pointer; color: var(--text-2);
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 14px; border: 1.5px solid var(--border);
+      background: #fff; border-radius: var(--r-sm);
+      font-size: .83rem; font-weight: 600; cursor: pointer; color: var(--text-2);
+      transition: all .15s; min-height: 36px;
     }
     .btn-fermer:hover { border-color: var(--navy); color: var(--navy); }
 
     /* Alerte récurrence */
     .alerte-rec {
       background: #fdf4ff; border: 1.5px solid #c4b5fd;
-      border-radius: 8px; padding: 10px 14px;
+      border-radius: var(--r-sm); padding: 10px 14px;
       font-size: .84rem; color: #5b21b6; font-weight: 700;
       margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
     }
 
     /* Tableau historique */
-    .tablo-wrap { overflow-x: auto; }
-    .tablo {
-      width: 100%; border-collapse: collapse; font-size: .82rem;
-    }
+    .tablo-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tablo { width: 100%; border-collapse: collapse; font-size: .82rem; }
     .tablo th {
       text-align: left; padding: 9px 12px;
       background: #f8fafc; border-bottom: 2px solid var(--border);
-      font-weight: 700; color: var(--text-2); white-space: nowrap;
-      font-size: .78rem; text-transform: uppercase; letter-spacing: .04em;
+      font-size: .72rem; font-weight: 700; color: var(--text-2);
+      white-space: nowrap; text-transform: uppercase; letter-spacing: .05em;
     }
-    .tablo td {
-      padding: 9px 12px; border-bottom: 1px solid #f1f5f9;
-      vertical-align: middle;
-    }
+    .tablo td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     .tablo tr:last-child td { border-bottom: none; }
     .tablo tr:hover td { background: #f8fafc; }
 
@@ -395,54 +448,110 @@
     ═══════════════════════════════════════ */
     .toast {
       position: fixed; bottom: 28px; left: 50%;
-      transform: translateX(-50%) translateY(6px);
-      background: #1e293b; color: #fff;
-      padding: 11px 24px; border-radius: 10px;
+      transform: translateX(-50%) translateY(8px);
+      background: #1a2234; color: #fff;
+      padding: 11px 24px; border-radius: var(--r-md);
       font-size: .88rem; font-weight: 600; z-index: 999;
       opacity: 0; transition: opacity .2s, transform .2s;
       pointer-events: none; white-space: nowrap;
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      box-shadow: 0 8px 28px rgba(0,0,0,.28);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .overlay {
-      position: fixed; inset: 0; background: rgba(15,23,42,.45);
-      display: none; align-items: center; justify-content: center; z-index: 500;
-      backdrop-filter: blur(2px);
+      position: fixed; inset: 0; background: rgba(15,23,42,.48);
+      display: none; align-items: center; justify-content: center;
+      z-index: 500; padding: 20px;
+      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     }
     .overlay.show { display: flex; }
     .modal {
-      background: #fff; border-radius: 14px; padding: 28px;
-      max-width: 420px; width: 92%;
+      background: #fff; border-radius: var(--r-lg); padding: 28px;
+      max-width: 420px; width: 100%;
       box-shadow: 0 24px 80px rgba(0,0,0,.22);
-      animation: modalIn .2s ease;
+      animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
     }
-    @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .modal-ico  { font-size: 2.2rem; margin-bottom: 10px; }
-    .modal h3   { font-size: 1.05rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
-    .modal p    { font-size: .88rem; color: var(--text-2); margin-bottom: 22px; line-height: 1.6; }
-    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-sec    { padding: 9px 18px; border: 1.5px solid var(--border); background: #fff; border-radius: 7px; font-size: .88rem; font-weight: 600; cursor: pointer; color: var(--text-2); }
+    @keyframes modalIn { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-ico { font-size: 2.4rem; margin-bottom: 10px; }
+    .modal h3  { font-size: 1.05rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
+    .modal p   { font-size: .88rem; color: var(--text-2); margin-bottom: 22px; line-height: 1.6; }
+    .modal-btns{ display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-sec   {
+      padding: 9px 18px; border: 1.5px solid var(--border);
+      background: #fff; border-radius: var(--r-sm);
+      font-size: .88rem; font-weight: 600; cursor: pointer; color: var(--text-2);
+      transition: all .15s; min-height: 40px;
+    }
     .btn-sec:hover { border-color: var(--navy); color: var(--navy); }
-    .btn-danger { padding: 9px 18px; background: var(--rouge); color: #fff; border: none; border-radius: 7px; font-size: .88rem; font-weight: 700; cursor: pointer; }
+    .btn-danger {
+      padding: 9px 18px; background: var(--rouge); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      font-size: .88rem; font-weight: 700; cursor: pointer;
+      transition: background .15s; min-height: 40px;
+    }
     .btn-danger:hover { background: #b91c1c; }
 
-    .vide {
-      text-align: center; color: var(--text-3);
-      padding: 48px 20px; font-size: .9rem;
-    }
-    .vide svg { display: block; margin: 0 auto 12px; opacity: .35; }
+    .vide { text-align: center; color: var(--text-3); padding: 48px 20px; font-size: .9rem; }
+    .vide svg { display: block; margin: 0 auto 12px; opacity: .3; }
 
-    @media (max-width: 640px) {
-      header { padding: 0 14px; gap: 10px; }
-      main   { padding: 16px 14px; }
-      .nav-roles button { padding: 5px 10px; font-size: .78rem; }
-      .gravite-opts { grid-template-columns: 1fr 1fr 1fr; }
-      .sep { display: none; }
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+
+    /* Tablette : header reste sur une ligne, on réduit les espaces */
+    @media (max-width: 860px) {
+      header { gap: 0 10px; padding: 0 16px; }
+      .champ-nom input { width: 110px; }
     }
-    @media (max-width: 420px) {
+
+    /* Mobile paysage / petite tablette */
+    @media (max-width: 680px) {
+      /* Header 2 lignes */
+      header {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        padding: 8px 14px;
+        gap: 6px 0;
+        min-height: unset;
+      }
+      .logo-header { grid-column: 1; grid-row: 1; }
+      .nav-roles   { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+      .header-mid  { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; padding-bottom: 4px; }
+
+      /* Compteurs abrégés : cacher le texte, garder dot + chiffre */
+      .cpt-txt    { display: none; }
+      .cpt        { padding: 3px 8px; }
+
+      /* Nav : cacher le texte, garder icône seulement */
+      .nav-txt    { display: none; }
+      .nav-roles button { padding: 7px 10px; gap: 0; }
+
+      main { padding: 16px 14px; }
+    }
+
+    /* Mobile portrait */
+    @media (max-width: 480px) {
+      .filtres-bar input { width: 100%; }
+      .filtres-bar { flex-direction: column; align-items: stretch; }
+      .filtres-bar select { width: 100%; }
+
+      /* Gravité : 3 colonnes → rester en 3, mais plus compact */
+      .gravite-opts label { padding: 10px 4px; min-height: 70px; font-size: .72rem; }
+      .grav-icon { font-size: 1.4rem; }
+
+      /* Actions Atelier : input pleine largeur d'abord */
+      .actions-mec { flex-direction: column; align-items: stretch; }
+      .input-tech  { min-width: unset; }
+      .btn-mec     { justify-content: center; }
+
+      /* Grille bus plus petite */
+      .grille-bus { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+    }
+
+    /* Très petit écran */
+    @media (max-width: 360px) {
       .gravite-opts { grid-template-columns: 1fr; }
-      .compteurs { display: none; }
+      .nav-roles button { padding: 6px 8px; }
     }
   </style>
 </head>
@@ -467,40 +576,45 @@
 <!-- ══════════════ EN-TÊTE ══════════════ -->
 <header>
   <img src="logo-ratpcap.png" alt="RATP Cap Saclay" class="logo-header">
-  <div class="sep"></div>
 
-  <!-- Compteurs de statut -->
-  <div class="compteurs">
-    <span class="cpt dispo" id="cpt-dispo">
-      <span class="cpt-dot"></span><span id="cpt-dispo-txt">— dispo</span>
-    </span>
-    <span class="cpt bloque" id="cpt-bloque">
-      <span class="cpt-dot"></span><span id="cpt-bloque-txt">— bloqués</span>
-    </span>
-    <span class="cpt repair" id="cpt-repair">
-      <span class="cpt-dot"></span><span id="cpt-repair-txt">— en réparation</span>
-    </span>
+  <!-- Ligne du milieu : compteurs + nom -->
+  <div class="header-mid">
+    <div class="compteurs">
+      <span class="cpt dispo">
+        <span class="cpt-dot"></span>
+        <span id="cpt-dispo-txt">—</span>
+        <span class="cpt-txt"> dispo</span>
+      </span>
+      <span class="cpt bloque">
+        <span class="cpt-dot"></span>
+        <span id="cpt-bloque-txt">—</span>
+        <span class="cpt-txt"> bloqués</span>
+      </span>
+      <span class="cpt repair">
+        <span class="cpt-dot"></span>
+        <span id="cpt-repair-txt">—</span>
+        <span class="cpt-txt"> en réparation</span>
+      </span>
+    </div>
+    <div class="champ-nom">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40" oninput="sauvegarderNom()">
+    </div>
   </div>
 
-  <!-- Nom de l'utilisateur -->
-  <div class="champ-nom">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    <input type="text" id="input-nom" placeholder="Votre nom" maxlength="40" oninput="sauvegarderNom()">
-  </div>
-
-  <!-- Sélecteur de rôle -->
+  <!-- Navigation des rôles -->
   <nav class="nav-roles">
     <button data-role="chauffeur" class="actif" onclick="changerRole('chauffeur')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 14v7M10.3 10.7 4.6 8M13.7 10.7 19.4 8"/></svg>
-      Chauffeur
+      <span class="nav-txt">Chauffeur</span>
     </button>
     <button data-role="mecano" onclick="changerRole('mecano')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-      Atelier
+      <span class="nav-txt">Atelier</span>
     </button>
     <button data-role="regulateur" onclick="changerRole('regulateur')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
-      Régulateur
+      <span class="nav-txt">Régulateur</span>
     </button>
   </nav>
 </header>
@@ -515,9 +629,8 @@
 
       <form id="form-defaut" onsubmit="soumettreDefaut(event)" novalidate>
 
-        <!-- N° de bus -->
         <div class="fg">
-          <label for="num-bus">🚍 N° de bus</label>
+          <label for="num-bus">N° de bus</label>
           <div class="num-bus-wrap">
             <span class="num-bus-icon">🚌</span>
             <input type="text" id="num-bus" placeholder="ex. 2341" required maxlength="20"
@@ -525,7 +638,6 @@
           </div>
         </div>
 
-        <!-- Type de défaut -->
         <div class="fg">
           <label for="type-defaut">Type de défaut</label>
           <select id="type-defaut" required onchange="toggleAutre()">
@@ -544,13 +656,11 @@
           </select>
         </div>
 
-        <!-- Champ libre si "Autre" -->
         <div class="fg" id="fg-autre" style="display:none">
           <label for="detail-autre">Précisez le défaut</label>
           <input type="text" id="detail-autre" placeholder="Description du défaut…" maxlength="120">
         </div>
 
-        <!-- Gravité -->
         <div class="fg">
           <label>Niveau de gravité</label>
           <div class="gravite-opts">
@@ -572,13 +682,11 @@
           </div>
         </div>
 
-        <!-- Commentaire optionnel -->
         <div class="fg">
-          <label for="comm-ch">Commentaire <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
+          <label for="comm-ch">Commentaire <span class="opt">(optionnel)</span></label>
           <textarea id="comm-ch" placeholder="Détails supplémentaires…" maxlength="500"></textarea>
         </div>
 
-        <!-- Aperçu horodatage + déclarant auto -->
         <div class="meta-auto">
           <span>📅 <strong id="apercu-date">—</strong></span>
           <span>👤 <strong id="apercu-nom">—</strong></span>
@@ -589,10 +697,9 @@
     </div>
   </section>
 
-  <!-- ══════════════ VUE MÉCANO ══════════════ -->
+  <!-- ══════════════ VUE ATELIER ══════════════ -->
   <section id="vue-mecano" class="vue">
     <p class="section-titre">File des défauts</p>
-
     <div class="filtres-bar">
       <input type="text" id="f-bus-mec" placeholder="🔍 N° de bus" oninput="rendreDefauts()">
       <select id="f-statut" onchange="rendreDefauts()">
@@ -609,14 +716,12 @@
         <option value="mineur">Mineur</option>
       </select>
     </div>
-
     <div id="liste-mec"></div>
   </section>
 
   <!-- ══════════════ VUE RÉGULATEUR ══════════════ -->
   <section id="vue-regulateur" class="vue">
     <p class="section-titre">État du parc</p>
-
     <div class="barre-reg">
       <input type="text" id="f-bus-reg" placeholder="🔍 Filtrer par n° de bus" oninput="rendreGrille()">
       <button class="btn-csv" onclick="exporterCSV()">
@@ -624,7 +729,6 @@
         Exporter CSV
       </button>
     </div>
-
     <div class="grille-bus" id="grille-bus"></div>
     <div id="detail-bus"></div>
   </section>
@@ -649,22 +753,22 @@
      declarant       string   nom chauffeur
      statut          string   "ouvert" | "en_cours" | "piece_manquante" | "reparé"
      horodatageRep   string   ISO 8601, date de mise à jour mécano
-     mecano          string   nom du mécano
-     commentaireTech string   note technique mécano
+     mecano          string   nom du mécano/atelier
+     commentaireTech string   note technique atelier
      recurrent       boolean  vrai si même type sur même bus ≤ 14 j
 ════════════════════════════════════════════════════════════════ */
 
 'use strict';
 
-const DB_NOM     = 'ningbus-defauts-v1';
-const DB_VER     = 1;
-const STORE      = 'defauts';
-const RECUR_MS   = 14 * 24 * 60 * 60 * 1000; // fenêtre de récurrence : 14 jours
+const DB_NOM   = 'ningbus-defauts-v1';
+const DB_VER   = 1;
+const STORE    = 'defauts';
+const RECUR_MS = 14 * 24 * 60 * 60 * 1000; // 14 jours
 
 let db;
 let roleActif      = 'chauffeur';
 let busSelectionne = null;
-let pendingBus     = null; // bus en attente de confirmation modale
+let pendingBus     = null;
 
 /* ────────────────────────────────────────────────────────────────
    INDEXEDDB
@@ -688,7 +792,6 @@ function ouvrirDB() {
 }
 
 const tx = (mode = 'readonly') => db.transaction(STORE, mode).objectStore(STORE);
-
 const ajouterDefaut = d  => new Promise((ok, ko) => { const r = tx('readwrite').add(d);  r.onsuccess = e => ok(e.target.result); r.onerror = e => ko(e.target.error); });
 const majDefaut     = d  => new Promise((ok, ko) => { const r = tx('readwrite').put(d);  r.onsuccess = () => ok();               r.onerror = e => ko(e.target.error); });
 const tousDefauts   = () => new Promise((ok, ko) => { const r = tx().getAll();           r.onsuccess = e => ok(e.target.result); r.onerror = e => ko(e.target.error); });
@@ -696,8 +799,6 @@ const tousDefauts   = () => new Promise((ok, ko) => { const r = tx().getAll();  
 /* ────────────────────────────────────────────────────────────────
    LOGIQUE MÉTIER
 ──────────────────────────────────────────────────────────────── */
-
-/* Détecte la récurrence : même bus + même type dans les 14 jours */
 function estRecurrent(d, liste) {
   const t = new Date(d.horodatage).getTime();
   return liste.some(x =>
@@ -708,7 +809,6 @@ function estRecurrent(d, liste) {
   );
 }
 
-/* Couleur du bus pour la vue Régulateur */
 function couleurBus(defs) {
   const actifs = defs.filter(d => d.statut !== 'reparé');
   if (actifs.some(d => d.gravite === 'bloquant')) return 'rouge';
@@ -716,7 +816,6 @@ function couleurBus(defs) {
   return 'vert';
 }
 
-/* Tri Mécano : gravité desc, ancienneté asc */
 function trierDefauts(liste) {
   const p = { bloquant: 0, 'gênant': 1, mineur: 2 };
   return [...liste].sort((a, b) => {
@@ -787,26 +886,20 @@ async function soumettreDefaut(e) {
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   try {
-    const liste = await tousDefauts();
+    const liste  = await tousDefauts();
     const defaut = {
-      numeroParcBus   : numBus,
-      typeDefaut      : type,
-      detailAutre     : detail,
-      gravite, commentaire: comm,
-      horodatage      : new Date().toISOString(),
-      declarant       : nom,
-      statut          : 'ouvert',
-      horodatageRep   : null, mecano: null,
-      commentaireTech : null, recurrent: false,
+      numeroParcBus: numBus, typeDefaut: type, detailAutre: detail,
+      gravite, commentaire: comm, horodatage: new Date().toISOString(),
+      declarant: nom, statut: 'ouvert',
+      horodatageRep: null, mecano: null, commentaireTech: null, recurrent: false,
     };
     defaut.recurrent = estRecurrent(defaut, liste);
     await ajouterDefaut(defaut);
     document.getElementById('form-defaut').reset();
     toggleAutre();
     await majCompteurs();
-
     const msg = defaut.recurrent
-      ? `✅ Défaut enregistré. <strong>⚠️ Attention : défaut récurrent sur le bus ${esc(numBus)}.</strong>`
+      ? `✅ Défaut enregistré. <strong>⚠️ Défaut récurrent sur le bus ${esc(numBus)}.</strong>`
       : `✅ Défaut enregistré sur le bus <strong>${esc(numBus)}</strong>.`;
     afficherAlerte('alerte-ch', msg, 'succes');
   } catch (err) {
@@ -817,7 +910,7 @@ async function soumettreDefaut(e) {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   VUE MÉCANO
+   VUE ATELIER
 ──────────────────────────────────────────────────────────────── */
 async function rendreDefauts() {
   const fBus  = document.getElementById('f-bus-mec').value.trim().toUpperCase();
@@ -849,15 +942,15 @@ function htmlDefaut(d) {
     ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
 
   const bRec  = d.recurrent ? `<span class="badge recurrent">♻ Récurrent</span>` : '';
-  const commC = d.commentaire   ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
+  const commC = d.commentaire    ? `<div class="dcomm">💬 ${esc(d.commentaire)}</div>` : '';
   const commT = d.commentaireTech
-    ? `<div class="dcomm tech">🔧 ${esc(d.commentaireTech)} — <em>${esc(d.mecano || '')}</em></div>` : '';
+    ? `<div class="dcomm tech">🔧 ${esc(d.commentaireTech)} — <em>${esc(d.mecano||'')}</em></div>` : '';
 
   const actions = d.statut !== 'reparé' ? `
     <div class="actions-mec">
       <input class="input-tech" type="text" id="tech-${d.id}"
              placeholder="Commentaire technique…" maxlength="200"
-             value="${esc(d.commentaireTech || '')}">
+             value="${esc(d.commentaireTech||'')}">
       <button class="btn-mec repare"  onclick="majStatut(${d.id},'reparé')">✅ Réparé</button>
       <button class="btn-mec encours" onclick="majStatut(${d.id},'en_cours')">🔧 En cours</button>
       <button class="btn-mec piece"   onclick="majStatut(${d.id},'piece_manquante')">⏳ Pièce manquante</button>
@@ -867,7 +960,7 @@ function htmlDefaut(d) {
     <div class="dcard ${d.gravite}">
       <div class="dhead">
         <div>
-          <div class="dbus">Bus ${esc(d.numeroParcBus)}</div>
+          <span class="dbus">Bus ${esc(d.numeroParcBus)}</span>
           <div class="dtitle">${typeLabel}</div>
           <div class="dmeta">
             <span>📅 ${fmtDate(d.horodatage)}</span>
@@ -876,7 +969,7 @@ function htmlDefaut(d) {
         </div>
         <div class="dbadges">
           <span class="badge ${d.gravite}">${iconeGrav(d.gravite)} ${cap(d.gravite)}</span>
-          <span class="badge s-${d.statut === 'piece_manquante' ? 'piece' : d.statut}">${labelStatut(d.statut)}</span>
+          <span class="badge s-${d.statut==='piece_manquante'?'piece':d.statut}">${labelStatut(d.statut)}</span>
           ${bRec}
         </div>
       </div>
@@ -891,12 +984,12 @@ async function majStatut(id, nvStatut) {
   const defaut = liste.find(d => d.id === id);
   if (!defaut) return;
   const it = document.getElementById('tech-' + id);
-  defaut.statut       = nvStatut;
+  defaut.statut        = nvStatut;
   defaut.horodatageRep = new Date().toISOString();
-  defaut.mecano       = nom;
+  defaut.mecano        = nom;
   if (it?.value.trim()) defaut.commentaireTech = it.value.trim();
   await majDefaut(defaut);
-  const labels = { reparé: 'Réparé ✅', en_cours: 'En cours 🔧', piece_manquante: 'Pièce manquante ⏳' };
+  const labels = { reparé:'Réparé ✅', en_cours:'En cours 🔧', piece_manquante:'Pièce manquante ⏳' };
   toast(labels[nvStatut] || nvStatut);
   await rendreDefauts();
   await majCompteurs();
@@ -922,7 +1015,7 @@ async function rendreGrille() {
   }
 
   const ico    = { vert:'🟢', rouge:'🔴', orange:'🟠' };
-  const labels = { vert:'Disponible', rouge:'Bloquant', orange:'À surveiller' };
+  const labels = { vert:'Disponible', rouge:'Bloquant', orange:'Surveiller' };
 
   grille.innerHTML = buses.map(num => {
     const db  = liste.filter(d => d.numeroParcBus === num);
@@ -933,7 +1026,7 @@ async function rendreGrille() {
       <span class="bi">${ico[c]}</span>
       <span class="bn">${esc(num)}</span>
       <span class="bl">${labels[c]}</span>
-      <span class="bnd">${nb > 0 ? nb + ' défaut' + (nb > 1 ? 's' : '') : '✓ OK'}</span>
+      <span class="bnd">${nb > 0 ? nb+' défaut'+(nb>1?'s':'') : '✓ OK'}</span>
     </div>`;
   }).join('');
 
@@ -961,21 +1054,21 @@ function rendreDetailBus(liste) {
     : `<button class="btn-att vert"  onclick="toast('Bus ${esc(busSelectionne)} attribué ✓')">✅ Attribuer</button>`;
 
   const lignes = histo.map(d => {
-    const tl  = d.typeDefaut === 'Autre' && d.detailAutre ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
-    const rec = d.recurrent ? `<span class="badge recurrent" style="margin-left:5px">♻</span>` : '';
+    const tl  = d.typeDefaut==='Autre'&&d.detailAutre ? `Autre : ${esc(d.detailAutre)}` : esc(d.typeDefaut);
+    const rec = d.recurrent ? `<span class="badge recurrent" style="margin-left:4px">♻</span>` : '';
     return `<tr>
       <td>${fmtDate(d.horodatage)}</td>
       <td>${tl}${rec}</td>
       <td><span class="badge ${d.gravite}">${iconeGrav(d.gravite)} ${cap(d.gravite)}</span></td>
-      <td><span class="badge s-${d.statut === 'piece_manquante' ? 'piece' : d.statut}">${labelStatut(d.statut)}</span></td>
+      <td><span class="badge s-${d.statut==='piece_manquante'?'piece':d.statut}">${labelStatut(d.statut)}</span></td>
       <td>${esc(d.declarant)}</td>
-      <td>${d.mecano ? esc(d.mecano) : '<span style="color:var(--text-3)">—</span>'}</td>
+      <td>${d.mecano?esc(d.mecano):'<span style="color:var(--text-3)">—</span>'}</td>
     </tr>`;
   }).join('');
 
   const etatActif = actifs.length === 0
     ? `<p style="color:var(--vert);font-weight:700;margin-bottom:14px">✓ Aucun défaut actif</p>`
-    : `<p style="font-weight:700;margin-bottom:12px;color:var(--text)">${actifs.length} défaut${actifs.length > 1 ? 's' : ''} actif${actifs.length > 1 ? 's' : ''}</p>`;
+    : `<p style="font-weight:700;margin-bottom:12px">${actifs.length} défaut${actifs.length>1?'s':''} actif${actifs.length>1?'s':''}</p>`;
 
   document.getElementById('detail-bus').innerHTML = `
     <div class="detail-bus">
@@ -992,7 +1085,7 @@ function rendreDetailBus(liste) {
         <div class="tablo-wrap">
           <table class="tablo">
             <thead><tr>
-              <th>Date</th><th>Type</th><th>Gravité</th><th>Statut</th><th>Déclarant</th><th>Mécano</th>
+              <th>Date</th><th>Type</th><th>Gravité</th><th>Statut</th><th>Déclarant</th><th>Atelier</th>
             </tr></thead>
             <tbody>${lignes}</tbody>
           </table>
@@ -1007,7 +1100,7 @@ function fermerDetail() {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   MODAL CONFIRMATION (bus ROUGE)
+   MODAL (bus ROUGE)
 ──────────────────────────────────────────────────────────────── */
 function demanderConfirmation(num) {
   document.getElementById('modal-texte').textContent =
@@ -1037,9 +1130,9 @@ async function majCompteurs() {
     if (c === 'rouge')  bloques++;
     if (c === 'orange') enRep++;
   });
-  document.getElementById('cpt-dispo-txt').textContent  = `${dispo} dispo`;
-  document.getElementById('cpt-bloque-txt').textContent = `${bloques} bloqué${bloques > 1 ? 's' : ''}`;
-  document.getElementById('cpt-repair-txt').textContent = `${enRep} en réparation`;
+  document.getElementById('cpt-dispo-txt').textContent  = dispo;
+  document.getElementById('cpt-bloque-txt').textContent = bloques;
+  document.getElementById('cpt-repair-txt').textContent = enRep;
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -1048,16 +1141,17 @@ async function majCompteurs() {
 async function exporterCSV() {
   const liste = await tousDefauts();
   if (!liste.length) { toast('Aucun défaut à exporter.'); return; }
-  const ent = ['ID','Bus','Type','Détail Autre','Gravité','Commentaire',
-               'Date déclaration','Déclarant','Statut','Date MAJ','Mécano','Commentaire technique','Récurrent'];
+  const ent  = ['ID','Bus','Type','Détail Autre','Gravité','Commentaire',
+                'Date déclaration','Déclarant','Statut','Date MAJ','Atelier',
+                'Commentaire technique','Récurrent'];
   const rows = liste.map(d => [
     d.id, d.numeroParcBus, d.typeDefaut, d.detailAutre||'', d.gravite,
     d.commentaire||'', d.horodatage, d.declarant, d.statut,
     d.horodatageRep||'', d.mecano||'', d.commentaireTech||'',
-    d.recurrent ? 'oui' : 'non',
+    d.recurrent?'oui':'non',
   ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
   const csv  = [ent.join(','), ...rows].join('\r\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   Object.assign(document.createElement('a'), {
     href: url,
@@ -1074,9 +1168,8 @@ function afficherAlerte(id, html, type) {
   const el = document.getElementById(id);
   el.innerHTML = html; el.className = 'alerte ' + type;
 }
-function cacherAlerte(id) {
-  document.getElementById(id).className = 'alerte hidden';
-}
+function cacherAlerte(id) { document.getElementById(id).className = 'alerte hidden'; }
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -1084,31 +1177,28 @@ function toast(msg) {
   t._t = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* Échappe le HTML pour prévenir les injections XSS */
+/* Échappement XSS */
 function esc(s) {
-  if (!s && s !== 0) return '';
+  if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
                   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function fmtDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('fr-FR', {
-    day:'2-digit', month:'2-digit', year:'numeric',
-    hour:'2-digit', minute:'2-digit',
+  return new Date(iso).toLocaleString('fr-FR',{
+    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
   });
 }
-function cap(s)       { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-function iconeGrav(g) { return { bloquant:'🔴', 'gênant':'🟠', mineur:'🟡' }[g] || ''; }
+function cap(s)       { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+function iconeGrav(g) { return {bloquant:'🔴','gênant':'🟠',mineur:'🟡'}[g]||''; }
 function labelStatut(s) {
-  return { ouvert:'🔴 Ouvert', en_cours:'🔧 En cours', reparé:'✅ Réparé', piece_manquante:'⏳ Pièce manquante' }[s] || s;
+  return {ouvert:'🔴 Ouvert',en_cours:'🔧 En cours',reparé:'✅ Réparé',piece_manquante:'⏳ Pièce manquante'}[s]||s;
 }
 
 /* ────────────────────────────────────────────────────────────────
    INITIALISATION
 ──────────────────────────────────────────────────────────────── */
-
-/* Actualise l'horodatage d'aperçu chaque seconde */
 setInterval(() => {
   document.getElementById('apercu-date').textContent = new Date().toLocaleString('fr-FR');
 }, 1000);
