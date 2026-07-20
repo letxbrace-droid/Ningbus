@@ -1,4 +1,34 @@
 {
-  "generated_at": "2026-07-19T07:57:56Z",
-  "ads": []
+  "generated_at": "2026-07-20T08:37:53Z",
+  "ads": [
+    {
+      "ad_copy": "Does your neck and shoulder pain get worse at the end of the day?",
+      "creative_id": "",
+      "page_name": "Daily Relief Lab",
+      "start_date": "",
+      "days_running": 0,
+      "estimated_spend": 0,
+      "landing_page_url": "",
+      "store_domain": "",
+      "country": "",
+      "platform": "meta",
+      "engagement_score": 0,
+      "reactions": 0,
+      "publisher_platforms": [],
+      "niche": "posture corrector",
+      "angle_data": {
+        "angle": "Pain Agitation",
+        "sub_angle": "Physical Discomfort",
+        "hook": "Neck and shoulder pain worse at the end of the day",
+        "pain_point": "Neck and shoulder pain",
+        "desire": "Relief from pain",
+        "mechanism": "None mentioned",
+        "social_proof_type": "none",
+        "urgency_type": "none",
+        "audience": "People with neck and shoulder pain",
+        "hook_pattern": "fear",
+        "confidence": 0.9
+      }
+    }
+  ]
 }
