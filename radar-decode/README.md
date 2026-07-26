@@ -2,9 +2,10 @@
 
 Veille automatique de l'actu. Surveille les grands médias français, repère
 les sujets qui montent (une même info chez plusieurs sources) et t'envoie
-une alerte Telegram avec un **post "Décodé" prêt à copier-coller sur X**.
+une alerte Telegram avec un **post "Décodé" prêt à copier-coller sur X**,
+généré par l'API Gemini.
 
-Tourne tout seul via GitHub Actions. Zéro serveur, zéro coût.
+Tourne tout seul via GitHub Actions. Zéro serveur.
 
 Ce sous-projet est indépendant du reste du dépôt `ningbus` :
 il possède son propre workflow, ses propres dépendances et sa propre mémoire.
@@ -16,8 +17,8 @@ il possède son propre workflow, ses propres dépendances et sa propre mémoire.
 1. Toutes les 30 min, il lit les flux RSS de 8 médias.
 2. Il regroupe les articles qui parlent du même sujet.
 3. Si un sujet apparaît chez **au moins 2 sources** → c'est une tendance.
-4. Il génère un **post "Décodé"** prêt à publier sur X (voir plus bas) et
-   te l'envoie dans une alerte Telegram.
+4. Il génère un **post "Décodé"** via Gemini (voir plus bas) et te
+   l'envoie dans une alerte Telegram.
 5. Il retient ce qu'il a déjà envoyé pour ne pas te spammer.
 
 Tu peux aussi taper **`/scan`** dans Telegram pour forcer un passage
@@ -27,36 +28,48 @@ immédiat sans attendre le cron (voir plus bas).
 
 ## Le post "Décodé"
 
-Chaque sujet détecté est transformé en post prêt à copier-coller, sans IA
-et sans API payante — uniquement du texte déjà public (flux RSS + page de
-l'article) passé dans un gabarit fixe :
+Chaque sujet détecté est envoyé à **Gemini** (`gemini-2.0-flash`, tier
+gratuit) avec le titre, les sources qui couvrent déjà le sujet, et le texte
+de l'article (extrait des balises `<p>` de la page). Un prompt système
+strict impose le gabarit et les règles éditoriales :
 
 ```
-{emoji} ZONE — Accroche du sujet
+{emoji} ZONE/THÈME — Accroche factuelle
 
 Où on en est :
-→ fait 1
+→ fait 1 (avec chiffre si disponible)
 → fait 2
 → fait 3
 
-Pourquoi ça compte : enjeu
+Pourquoi ça compte : enjeu, neutre
 
 On suit. 🧩
 ```
 
-- **Emoji** choisi selon le thème détecté dans les mots-clés du sujet :
-  🔴 urgence/drame, 🌍 monde, 🌾 politique, 💶 éco, 🚴 sport, 🧩 par défaut.
-- **ZONE** = la commune/le département repéré en tête du titre (ex. "NICE.",
-  "Loire-Atlantique :"), sinon le mot-clé le plus saillant du sujet.
-- **Faits/enjeu** = extraits du chapô RSS puis, si besoin, de la page de
-  l'article (meta description, sinon premier paragraphe). Les phrases avec
-  un chiffre clé (%, €, km, ha, habitants...) passent toujours en premier.
-- **Aucun hashtag.** Aucun chiffre inventé : ce qui n'est pas trouvé dans le
-  texte source reste `[à compléter]`.
-- Le post vise **moins de 280 caractères** ; au-delà, les lignes sont
-  raccourcies proprement (jamais coupées en plein milieu d'un mot).
+- **Emoji** selon le sujet : 🔴 urgence/drame, 🌾 politique, 🚴 sport,
+  💶 économie, 🌍 international, 🧩 par défaut.
+- **Neutralité imposée** : aucun jugement, aucun adjectif d'opinion.
+- **Aucun chiffre inventé** : Gemini n'utilise que ce qui est dans
+  l'article. S'il manque un fait, il met 2 flèches au lieu de 3 —
+  jamais de `[à compléter]`.
+- **Aucun hashtag.**
+- Post visé sous **280 caractères**.
 - Dans l'alerte Telegram, le post est encadré par `━━━ PRÊT À PUBLIER ━━━`
   et suivi d'un rappel : `⚠️ Vérifie les chiffres avant de publier.`
+
+**Repli automatique** (jamais de plantage du radar) :
+- Article inaccessible (timeout, 403...) → Gemini génère à partir du titre seul.
+- Appel Gemini en échec (quota dépassé, réseau, clé absente) → le post
+  retombe sur le titre brut + le lien de l'article.
+
+### Secret requis : `GEMINI_API_KEY`
+
+1. Crée une clé gratuite sur [Google AI Studio](https://aistudio.google.com/apikey).
+2. Dans le repo → **Settings → Secrets and variables → Actions → New
+   repository secret** : nom `GEMINI_API_KEY`, valeur = la clé.
+
+Sans ce secret, le post retombe systématiquement sur le titre + lien (pas
+d'erreur, juste un post moins riche).
 
 ---
 
@@ -105,9 +118,11 @@ Sans ce secret, `/scan` reçoit une réponse d'avertissement au lieu de lancer l
 
 ### 3. Ajouter tes secrets
 Dans ce repo GitHub → **Settings → Secrets and variables → Actions**
-→ **New repository secret**. Crée trois secrets :
+→ **New repository secret**. Crée ces secrets :
 - `TELEGRAM_TOKEN` = ton token BotFather
 - `TELEGRAM_CHAT_ID` = ton chat id
+- `GEMINI_API_KEY` = ta clé Google AI Studio (voir section post plus haut) —
+  optionnel, sinon repli sur titre + lien.
 - `GH_DISPATCH_TOKEN` = ton token GitHub (voir section `/scan` ci-dessus) —
   optionnel si tu ne veux que le cron automatique.
 
@@ -122,7 +137,7 @@ C'est tout. Il tourne désormais seul, jour et nuit, en parallèle du reste du r
 
 ## Fichiers
 
-- `radar_decode.py` — le script principal (détection + génération du post).
+- `radar_decode.py` — le script principal (détection + génération du post via Gemini).
 - `telegram_listener.py` — l'écouteur de la commande `/scan`.
 - `requirements.txt` — dépendances Python de ce sous-projet.
 - `../.github/workflows/radar_decode.yml` — le workflow principal (cron 30 min).
@@ -138,7 +153,8 @@ C'est tout. Il tourne désormais seul, jour et nuit, en parallèle du reste du r
 |---|---|---|
 | `SEUIL_ALERTE` | Nb de sources mini pour alerter | 2 |
 | `SEUIL_SIMILARITE` | Nb de mots communs = même sujet | 2 |
-| `LONGUEUR_POST_MAX` | Longueur cible du post Décodé | 280 |
+| `GEMINI_MODELE` | Modèle Gemini utilisé | `gemini-2.0-flash` |
+| `GEMINI_DELAI_MIN` | Délai mini (s) entre deux appels Gemini | 4 |
 | `FLUX` | Liste des médias surveillés | 8 sources |
 | cron dans `radar_decode.yml` | Fréquence de scan | 30 min |
 | cron dans `radar_listener.yml` | Fréquence de sondage `/scan` | 5 min |
