@@ -47,7 +47,8 @@ FICHIER_MEMOIRE = "vus.json"
 # Marqueur autour du post généré dans l'alerte Telegram.
 CADRE_POST = "━━━ PRÊT À PUBLIER ━━━"
 
-# Flux RSS surveillés. Sources françaises fiables + agences.
+# Flux RSS surveillés. Sources françaises fiables + agences, plus quelques
+# médias indépendants (non détenus par un grand groupe industriel/financier).
 # Tu peux en ajouter/retirer librement.
 FLUX = {
     "France Info":  "https://www.franceinfo.fr/titres.rss",
@@ -58,6 +59,13 @@ FLUX = {
     "20 Minutes":   "https://www.20minutes.fr/feeds/rss-une.xml",
     "France 24":    "https://www.france24.com/fr/france/rss",
     "Ouest-France": "https://www.ouest-france.fr/rss/une",
+    # Médias indépendants
+    "Mediapart":    "https://www.mediapart.fr/articles/feed",
+    "Reporterre":   "https://reporterre.net/spip.php?page=backend",
+    "Basta!":       "https://basta.media/spip.php?page=backend",
+    "Blast":        "https://www.blast-info.fr/rss",
+    "StreetPress":  "https://www.streetpress.com/feed",
+    "Disclose":     "https://disclose.ngo/fr/feed/",
 }
 
 # Mots vides à ignorer dans la détection de sujet.
