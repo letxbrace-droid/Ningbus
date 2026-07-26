@@ -42,9 +42,15 @@ SEUIL_SIMILARITE = 2
 # Persisté entre les runs via le cache GitHub Actions ou un commit.
 FICHIER_MEMOIRE = "vus.json"
 
-# Longueur max d'une ligne du post généré (titre, fait ou enjeu), pour que
-# le post reste copiable-collable sans être un pavé.
-LONGUEUR_MAX_LIGNE = 140
+# Longueur cible d'un post "Décodé" (norme X classique).
+LONGUEUR_POST_MAX = 280
+
+# Marqueur autour du post généré dans l'alerte Telegram.
+CADRE_POST = "━━━ PRÊT À PUBLIER ━━━"
+
+# Valeur affichée quand un fait/enjeu n'a pas pu être extrait — on ne
+# comble jamais un trou par une supposition.
+A_COMPLETER = "[à compléter]"
 
 # Flux RSS surveillés. Sources françaises fiables + agences.
 # Tu peux en ajouter/retirer librement.
@@ -81,10 +87,12 @@ def nettoyer(texte):
     return re.sub(r"\s+", " ", texte).strip()
 
 
-def tronquer(texte, limite=LONGUEUR_MAX_LIGNE):
+def tronquer(texte, limite):
     """Coupe proprement sur un espace plutôt qu'en plein milieu d'un mot."""
     if len(texte) <= limite:
         return texte
+    if limite <= 1:
+        return "…"
     return texte[:limite].rsplit(" ", 1)[0].rstrip(",.;:") + "…"
 
 
@@ -130,11 +138,16 @@ def collecter():
             for e in flux.entries[:20]:  # 20 derniers par source
                 titre = nettoyer(getattr(e, "title", ""))
                 lien = getattr(e, "link", "")
+                # Le chapô RSS (summary/description) sert de première source
+                # de "faits" pour le post Décodé, avant d'aller chercher sur
+                # la page elle-même.
+                resume = nettoyer(getattr(e, "summary", ""))
                 if titre and lien:
                     articles.append({
                         "source": source,
                         "titre": titre,
                         "lien": lien,
+                        "resume": resume,
                         "mots": mots_cles(titre),
                     })
         except Exception as ex:
@@ -184,16 +197,64 @@ def detecter_sujets(articles):
 # ---------------------------------------------------------------------------
 #
 # Gabarit fixe :
-#   🔴 [ZONE/THÈME] — [accroche]
+#   {emoji} [ZONE] — [accroche]
 #   Où on en est : → fait 1 → fait 2 → fait 3
 #   Pourquoi ça compte : [enjeu]
 #   On suit. 🧩
 #
-# Les "faits" viennent des titres des différentes sources qui couvrent déjà
-# le sujet (donc déjà validés par une rédaction) ; l'enjeu et les faits
-# manquants viennent d'un extrait de texte pris sur la page de l'article
-# principal (meta description, sinon premier paragraphe). Aucun LLM, aucune
-# API tierce : juste requests + du regex sur du HTML déjà en mémoire.
+# - L'emoji dépend du thème détecté dans les mots-clés du sujet.
+# - La ZONE est la commune/le département repéré en tête du titre, sinon
+#   le mot-clé le plus saillant du sujet.
+# - Les faits/l'enjeu viennent du chapô RSS puis, si besoin, d'un extrait
+#   pris sur la page (meta description, sinon premier paragraphe) — jamais
+#   inventés : ce qu'on ne trouve pas reste "[à compléter]".
+# - Les phrases contenant un chiffre clé (%, €, km, ha, personnes...) sont
+#   toujours proposées en premier comme faits.
+#
+# Aucun LLM, aucune API tierce : requests + regex sur du HTML déjà en
+# mémoire, rien d'autre.
+
+EMOJIS_THEME = (
+    # (emoji, mots-clés déclencheurs) — testés dans cet ordre, le premier
+    # thème qui matche l'emporte.
+    ("🔴", {"mort", "morts", "tue", "tues", "tué", "tués", "accident", "incendie",
+            "explosion", "attentat", "urgence", "drame", "blesse", "blesses",
+            "blessé", "blessés", "crash", "disparu", "evacuation", "évacuation",
+            "alerte", "catastrophe", "seisme", "séisme", "tempete", "tempête",
+            "inondation"}),
+    ("🌍", {"guerre", "ukraine", "gaza", "israel", "israël", "otan", "onu",
+            "etats-unis", "chine", "russie", "international", "europe",
+            "monde"}),
+    ("🌾", {"gouvernement", "ministre", "president", "président", "assemblee",
+            "assemblée", "senat", "sénat", "loi", "reforme", "réforme",
+            "election", "élection", "vote", "politique", "maire", "depute",
+            "député", "parti"}),
+    ("💶", {"economie", "économie", "inflation", "prix", "salaire", "emploi",
+            "chomage", "chômage", "entreprise", "bourse", "euro", "euros",
+            "budget", "impot", "impôt", "croissance"}),
+    ("🚴", {"match", "football", "rugby", "olympique", "equipe", "équipe",
+            "championnat", "tournoi", "victoire", "defaite", "défaite",
+            "sport", "cyclisme", "coupe"}),
+)
+EMOJI_DEFAUT = "🧩"
+
+# Chiffres "clés" : unité qui rend un chiffre publiable tel quel (on ignore
+# les nombres nus, trop souvent des dates ou des numéros d'article).
+MOTIF_CHIFFRE_CLE = re.compile(
+    r"\b\d[\d\s.,]*\s?"
+    r"(?:%|€|km²?|ha\b|hectares?|habitants?|personnes?|morts?|blessés?|blesses?)",
+    re.I,
+)
+
+# Repère une commune/un département en tête de titre : "NICE. ...",
+# "Loire-Atlantique : ...", "À Marseille, ...".
+MOTIFS_ZONE = (
+    re.compile(r"^[ÀA]\s+([A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,})\s*,\s+"),
+    re.compile(
+        r"^([A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,}"
+        r"(?:[\s\-][A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,}){0,3})\s*[:.\-–]\s+"
+    ),
+)
 
 MOTIFS_DESCRIPTION = (
     r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']',
@@ -205,9 +266,10 @@ MOTIFS_DESCRIPTION = (
 
 def extraire_texte_article(url):
     """
-    Va chercher un texte exploitable sur la page de l'article : d'abord la
-    meta description (déjà résumée par le média), sinon le premier
-    paragraphe substantiel du corps de page.
+    Va chercher un texte de secours sur la page de l'article, seulement si
+    le chapô RSS n'a rien donné : meta description, sinon premier
+    paragraphe substantiel. Gère proprement timeout/403/page introuvable
+    en renvoyant simplement une chaîne vide (jamais d'exception qui remonte).
     """
     try:
         r = requests.get(
@@ -238,60 +300,105 @@ def extraire_texte_article(url):
 
 def decouper_phrases(texte):
     """Découpe un texte en phrases exploitables (on jette les débris trop courts)."""
+    if not texte:
+        return []
     phrases = re.split(r"(?<=[.!?])\s+", texte)
     return [p.strip() for p in phrases if len(p.strip()) > 15]
 
 
+def choisir_emoji(groupe):
+    """Emoji de tête selon le thème détecté dans les mots-clés du sujet."""
+    for emoji, mots_theme in EMOJIS_THEME:
+        if groupe["mots"] & mots_theme:
+            return emoji
+    return EMOJI_DEFAUT
+
+
+def detecter_zone(titre):
+    """Repère une commune/un département cité en tête du titre, s'il y en a un."""
+    for motif in MOTIFS_ZONE:
+        m = motif.match(titre)
+        if m:
+            return m.group(1).upper()
+    return None
+
+
 def zone_theme(groupe):
-    """Étiquette de zone/thème = le mot-clé le plus saillant du sujet (le plus long)."""
+    """Étiquette de secours = le mot-clé le plus saillant du sujet (le plus long)."""
     mots = sorted(groupe["mots"], key=len, reverse=True)
     return mots[0].upper() if mots else "ACTU"
+
+
+def extraire_faits(principal):
+    """
+    Construit la liste ordonnée de phrases exploitables pour un article :
+    chapô RSS d'abord, puis extrait de la page si le chapô est trop maigre.
+    Les phrases contenant un chiffre clé passent devant les autres.
+    """
+    phrases = decouper_phrases(principal.get("resume", ""))
+    if len(phrases) < 3:
+        phrases += decouper_phrases(extraire_texte_article(principal["lien"]))
+
+    # dédoublonnage en gardant l'ordre
+    vues = set()
+    phrases_uniques = []
+    for p in phrases:
+        if p not in vues:
+            vues.add(p)
+            phrases_uniques.append(p)
+
+    avec_chiffre = [p for p in phrases_uniques if MOTIF_CHIFFRE_CLE.search(p)]
+    sans_chiffre = [p for p in phrases_uniques if p not in avec_chiffre]
+    return avec_chiffre + sans_chiffre
+
+
+def construire_post(emoji, bandeau, accroche, faits, enjeu):
+    """Assemble le gabarit avec des lignes déjà à la bonne longueur."""
+    lignes_faits = "\n".join(f"→ {f}" for f in faits)
+    return (
+        f"{emoji} {bandeau} — {accroche}\n\n"
+        f"Où on en est :\n{lignes_faits}\n\n"
+        f"Pourquoi ça compte : {enjeu}\n\n"
+        f"On suit. 🧩"
+    )
 
 
 def generer_post_decode(groupe):
     """
     Construit un post "Décodé" prêt à copier-coller sur X à partir d'un
-    sujet détecté, en suivant le gabarit maison. Pas d'IA : uniquement le
-    titre, les titres des autres sources et un extrait de l'article.
+    sujet détecté, en suivant le gabarit maison. Aucun LLM : uniquement le
+    titre, la zone repérée dans le titre et un extrait factuel de l'article
+    (chapô RSS, puis page si besoin). Ce qui n'est pas trouvé reste
+    "[à compléter]" — on n'invente jamais un chiffre ou un fait.
     """
     principal = groupe["articles"][0]
-    nb_sources = len(groupe["sources"])
+    emoji = choisir_emoji(groupe)
+    bandeau = detecter_zone(principal["titre"]) or zone_theme(groupe)
 
-    # "Où on en est" : un fait par angle déjà couvert par une source
-    # différente (donc déjà vérifié éditorialement), sans doublon.
-    faits = []
-    for art in groupe["articles"]:
-        t = tronquer(art["titre"].rstrip("."))
-        if t not in faits:
-            faits.append(t)
-        if len(faits) == 3:
-            break
-
-    extrait = extraire_texte_article(principal["lien"])
-    phrases = decouper_phrases(extrait)
-
-    for phrase in phrases:
-        if len(faits) >= 3:
-            break
-        phrase = tronquer(phrase)
-        if phrase not in faits:
-            faits.append(phrase)
+    candidats = extraire_faits(principal)
+    faits = candidats[:3]
+    # L'enjeu est une phrase distincte des faits déjà utilisés, s'il en reste une.
+    enjeu = candidats[3] if len(candidats) > 3 else None
 
     while len(faits) < 3:
-        faits.append("À suivre — les détails arrivent au fil des sources.")
+        faits.append(A_COMPLETER)
+    if enjeu is None:
+        enjeu = A_COMPLETER
 
-    enjeu = tronquer(phrases[0]) if phrases else (
-        f"{nb_sources} rédactions en parlent en même temps, signe que ça va durer."
-    )
+    # On essaie plusieurs longueurs de ligne décroissantes jusqu'à passer
+    # sous la limite d'un post X ; au pire on garde la version la plus
+    # courte obtenue.
+    accroche_brute = principal["titre"]
+    post = None
+    for limite in (140, 100, 70, 50, 35):
+        accroche = tronquer(accroche_brute, limite)
+        faits_tronques = [f if f == A_COMPLETER else tronquer(f, limite) for f in faits]
+        enjeu_tronque = enjeu if enjeu == A_COMPLETER else tronquer(enjeu, limite)
+        post = construire_post(emoji, bandeau, accroche, faits_tronques, enjeu_tronque)
+        if len(post) <= LONGUEUR_POST_MAX:
+            break
 
-    lignes_faits = "\n".join(f"→ {f}" for f in faits)
-
-    return (
-        f"🔴 {zone_theme(groupe)} — {tronquer(principal['titre'])}\n\n"
-        f"Où on en est :\n{lignes_faits}\n\n"
-        f"Pourquoi ça compte : {enjeu}\n\n"
-        f"On suit. 🧩"
-    )
+    return post
 
 
 # ---------------------------------------------------------------------------
@@ -299,7 +406,7 @@ def generer_post_decode(groupe):
 # ---------------------------------------------------------------------------
 
 def formater_alerte(groupe):
-    """Construit le message Telegram avec le post Décodé prêt à copier."""
+    """Construit le message Telegram avec le post Décodé encadré, prêt à copier."""
     principal = groupe["articles"][0]
     nb_sources = len(groupe["sources"])
     sources = ", ".join(sorted(groupe["sources"]))
@@ -318,8 +425,10 @@ def formater_alerte(groupe):
         f"🏷️ Thèmes : {themes_txt}\n"
         f"📰 Repéré chez : {sources}\n"
         f"🔗 {principal['lien']}\n\n"
-        f"✂️ <b>Post prêt à copier sur X :</b>\n"
-        f"<pre>{html.escape(post_decode)}</pre>"
+        f"{CADRE_POST}\n"
+        f"<pre>{html.escape(post_decode)}</pre>\n"
+        f"{CADRE_POST}\n\n"
+        f"⚠️ Vérifie les chiffres avant de publier."
     )
     return msg
 
