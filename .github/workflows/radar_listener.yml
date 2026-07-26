@@ -1,0 +1,45 @@
+name: Radar Décodé — écouteur Telegram
+
+# Sonde Telegram toutes les ~5 minutes pour repérer la commande /scan,
+# et déclenche un run immédiat du radar principal si elle arrive.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+# Nécessaire pour committer le curseur de messages lus (telegram_offset.json)
+permissions:
+  contents: write
+
+jobs:
+  ecoute:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: radar-decode
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier les commandes Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+        run: python telegram_listener.py
+
+      - name: Sauvegarder le curseur des messages lus
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar@decode.local"
+          git add telegram_offset.json || true
+          git commit -m "maj curseur telegram" || echo "rien à committer"
+          git push || echo "push ignoré"
