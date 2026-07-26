@@ -198,7 +198,10 @@ GEMINI_URL = (
 )
 
 # Délai minimal entre deux appels Gemini, pour rester dans le tier gratuit.
-GEMINI_DELAI_MIN = 4
+# Le tier gratuit plafonne autour de 15 requêtes/minute : 7s de marge
+# (~8.5 req/min) évite de retomber pile sur la limite si plusieurs sujets
+# sont détectés dans le même run.
+GEMINI_DELAI_MIN = 7
 
 PROMPT_SYSTEME = """Tu es l'assistant éditorial du média "Décodé", un compte d'actualité
 neutre et factuel. À partir de l'article fourni, génère UN post court
