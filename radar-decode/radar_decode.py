@@ -5,7 +5,7 @@ RADAR DÉCODÉ — Veille automatique de l'actu
 --------------------------------------------
 Surveille les flux RSS des grands médias, détecte les sujets qui
 reviennent chez plusieurs sources (= info qui monte), et envoie une
-alerte Telegram prête à passer en mode Décodé.
+alerte Telegram avec un post "Décodé" prêt à copier-coller sur X.
 
 Conçu pour tourner via GitHub Actions (cron) sans serveur.
 """
@@ -42,6 +42,10 @@ SEUIL_SIMILARITE = 2
 # Persisté entre les runs via le cache GitHub Actions ou un commit.
 FICHIER_MEMOIRE = "vus.json"
 
+# Longueur max d'une ligne du post généré (titre, fait ou enjeu), pour que
+# le post reste copiable-collable sans être un pavé.
+LONGUEUR_MAX_LIGNE = 140
+
 # Flux RSS surveillés. Sources françaises fiables + agences.
 # Tu peux en ajouter/retirer librement.
 FLUX = {
@@ -75,6 +79,13 @@ def nettoyer(texte):
     texte = html.unescape(texte or "")
     texte = re.sub(r"<[^>]+>", " ", texte)
     return re.sub(r"\s+", " ", texte).strip()
+
+
+def tronquer(texte, limite=LONGUEUR_MAX_LIGNE):
+    """Coupe proprement sur un espace plutôt qu'en plein milieu d'un mot."""
+    if len(texte) <= limite:
+        return texte
+    return texte[:limite].rsplit(" ", 1)[0].rstrip(",.;:") + "…"
 
 
 def mots_cles(titre):
@@ -169,11 +180,126 @@ def detecter_sujets(articles):
 
 
 # ---------------------------------------------------------------------------
+# GÉNÉRATEUR DE POST "DÉCODÉ" (sans IA, sans API payante)
+# ---------------------------------------------------------------------------
+#
+# Gabarit fixe :
+#   🔴 [ZONE/THÈME] — [accroche]
+#   Où on en est : → fait 1 → fait 2 → fait 3
+#   Pourquoi ça compte : [enjeu]
+#   On suit. 🧩
+#
+# Les "faits" viennent des titres des différentes sources qui couvrent déjà
+# le sujet (donc déjà validés par une rédaction) ; l'enjeu et les faits
+# manquants viennent d'un extrait de texte pris sur la page de l'article
+# principal (meta description, sinon premier paragraphe). Aucun LLM, aucune
+# API tierce : juste requests + du regex sur du HTML déjà en mémoire.
+
+MOTIFS_DESCRIPTION = (
+    r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']',
+    r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']description["\']',
+    r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']',
+    r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:description["\']',
+)
+
+
+def extraire_texte_article(url):
+    """
+    Va chercher un texte exploitable sur la page de l'article : d'abord la
+    meta description (déjà résumée par le média), sinon le premier
+    paragraphe substantiel du corps de page.
+    """
+    try:
+        r = requests.get(
+            url,
+            timeout=8,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; RadarDecode/1.0)"},
+        )
+        r.raise_for_status()
+        page = r.text
+    except Exception as ex:
+        print(f"[!] Extraction impossible ({url}): {ex}")
+        return ""
+
+    for motif in MOTIFS_DESCRIPTION:
+        m = re.search(motif, page, re.I)
+        if m:
+            texte = nettoyer(m.group(1))
+            if len(texte) > 40:
+                return texte
+
+    for bloc in re.findall(r"<p[^>]*>(.*?)</p>", page, re.S | re.I):
+        texte = nettoyer(bloc)
+        if len(texte) > 60 and "cookie" not in texte.lower():
+            return texte
+
+    return ""
+
+
+def decouper_phrases(texte):
+    """Découpe un texte en phrases exploitables (on jette les débris trop courts)."""
+    phrases = re.split(r"(?<=[.!?])\s+", texte)
+    return [p.strip() for p in phrases if len(p.strip()) > 15]
+
+
+def zone_theme(groupe):
+    """Étiquette de zone/thème = le mot-clé le plus saillant du sujet (le plus long)."""
+    mots = sorted(groupe["mots"], key=len, reverse=True)
+    return mots[0].upper() if mots else "ACTU"
+
+
+def generer_post_decode(groupe):
+    """
+    Construit un post "Décodé" prêt à copier-coller sur X à partir d'un
+    sujet détecté, en suivant le gabarit maison. Pas d'IA : uniquement le
+    titre, les titres des autres sources et un extrait de l'article.
+    """
+    principal = groupe["articles"][0]
+    nb_sources = len(groupe["sources"])
+
+    # "Où on en est" : un fait par angle déjà couvert par une source
+    # différente (donc déjà vérifié éditorialement), sans doublon.
+    faits = []
+    for art in groupe["articles"]:
+        t = tronquer(art["titre"].rstrip("."))
+        if t not in faits:
+            faits.append(t)
+        if len(faits) == 3:
+            break
+
+    extrait = extraire_texte_article(principal["lien"])
+    phrases = decouper_phrases(extrait)
+
+    for phrase in phrases:
+        if len(faits) >= 3:
+            break
+        phrase = tronquer(phrase)
+        if phrase not in faits:
+            faits.append(phrase)
+
+    while len(faits) < 3:
+        faits.append("À suivre — les détails arrivent au fil des sources.")
+
+    enjeu = tronquer(phrases[0]) if phrases else (
+        f"{nb_sources} rédactions en parlent en même temps, signe que ça va durer."
+    )
+
+    lignes_faits = "\n".join(f"→ {f}" for f in faits)
+
+    return (
+        f"🔴 {zone_theme(groupe)} — {tronquer(principal['titre'])}\n\n"
+        f"Où on en est :\n{lignes_faits}\n\n"
+        f"Pourquoi ça compte : {enjeu}\n\n"
+        f"On suit. 🧩"
+    )
+
+
+# ---------------------------------------------------------------------------
 # ALERTE TELEGRAM
 # ---------------------------------------------------------------------------
 
 def formater_alerte(groupe):
-    """Construit le message Telegram prêt à décoder."""
+    """Construit le message Telegram avec le post Décodé prêt à copier."""
     principal = groupe["articles"][0]
     nb_sources = len(groupe["sources"])
     sources = ", ".join(sorted(groupe["sources"]))
@@ -183,6 +309,7 @@ def formater_alerte(groupe):
     themes_txt = ", ".join(themes)
 
     heure = datetime.now(timezone.utc).astimezone().strftime("%H:%M")
+    post_decode = generer_post_decode(groupe)
 
     msg = (
         f"🧩 <b>RADAR DÉCODÉ</b> — {heure}\n"
@@ -191,7 +318,8 @@ def formater_alerte(groupe):
         f"🏷️ Thèmes : {themes_txt}\n"
         f"📰 Repéré chez : {sources}\n"
         f"🔗 {principal['lien']}\n\n"
-        f"<i>➡️ Prêt à passer en mode Décodé ?</i>"
+        f"✂️ <b>Post prêt à copier sur X :</b>\n"
+        f"<pre>{html.escape(post_decode)}</pre>"
     )
     return msg
 
