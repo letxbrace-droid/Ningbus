@@ -5,7 +5,8 @@ RADAR DÉCODÉ — Veille automatique de l'actu
 --------------------------------------------
 Surveille les flux RSS des grands médias, détecte les sujets qui
 reviennent chez plusieurs sources (= info qui monte), et envoie une
-alerte Telegram avec un post "Décodé" prêt à copier-coller sur X.
+alerte Telegram avec un post "Décodé" (généré via l'API Gemini) prêt à
+copier-coller sur X.
 
 Conçu pour tourner via GitHub Actions (cron) sans serveur.
 """
@@ -29,6 +30,7 @@ import feedparser
 # Secrets injectés par GitHub Actions (ne JAMAIS écrire les valeurs ici)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # Nombre de sources différentes qui doivent parler d'un même sujet
 # pour déclencher une alerte "info qui monte".
@@ -42,15 +44,8 @@ SEUIL_SIMILARITE = 2
 # Persisté entre les runs via le cache GitHub Actions ou un commit.
 FICHIER_MEMOIRE = "vus.json"
 
-# Longueur cible d'un post "Décodé" (norme X classique).
-LONGUEUR_POST_MAX = 280
-
 # Marqueur autour du post généré dans l'alerte Telegram.
 CADRE_POST = "━━━ PRÊT À PUBLIER ━━━"
-
-# Valeur affichée quand un fait/enjeu n'a pas pu être extrait — on ne
-# comble jamais un trou par une supposition.
-A_COMPLETER = "[à compléter]"
 
 # Flux RSS surveillés. Sources françaises fiables + agences.
 # Tu peux en ajouter/retirer librement.
@@ -85,15 +80,6 @@ def nettoyer(texte):
     texte = html.unescape(texte or "")
     texte = re.sub(r"<[^>]+>", " ", texte)
     return re.sub(r"\s+", " ", texte).strip()
-
-
-def tronquer(texte, limite):
-    """Coupe proprement sur un espace plutôt qu'en plein milieu d'un mot."""
-    if len(texte) <= limite:
-        return texte
-    if limite <= 1:
-        return "…"
-    return texte[:limite].rsplit(" ", 1)[0].rstrip(",.;:") + "…"
 
 
 def mots_cles(titre):
@@ -138,16 +124,11 @@ def collecter():
             for e in flux.entries[:20]:  # 20 derniers par source
                 titre = nettoyer(getattr(e, "title", ""))
                 lien = getattr(e, "link", "")
-                # Le chapô RSS (summary/description) sert de première source
-                # de "faits" pour le post Décodé, avant d'aller chercher sur
-                # la page elle-même.
-                resume = nettoyer(getattr(e, "summary", ""))
                 if titre and lien:
                     articles.append({
                         "source": source,
                         "titre": titre,
                         "lien": lien,
-                        "resume": resume,
                         "mots": mots_cles(titre),
                     })
         except Exception as ex:
@@ -193,212 +174,116 @@ def detecter_sujets(articles):
 
 
 # ---------------------------------------------------------------------------
-# GÉNÉRATEUR DE POST "DÉCODÉ" (sans IA, sans API payante)
+# GÉNÉRATEUR DE POST "DÉCODÉ" (via l'API Gemini)
 # ---------------------------------------------------------------------------
 #
-# Gabarit fixe :
-#   {emoji} [ZONE] — [accroche]
-#   Où on en est : → fait 1 → fait 2 → fait 3
-#   Pourquoi ça compte : [enjeu]
-#   On suit. 🧩
-#
-# - L'emoji dépend du thème détecté dans les mots-clés du sujet.
-# - La ZONE est la commune/le département repéré en tête du titre, sinon
-#   le mot-clé le plus saillant du sujet.
-# - Les faits/l'enjeu viennent du chapô RSS puis, si besoin, d'un extrait
-#   pris sur la page (meta description, sinon premier paragraphe) — jamais
-#   inventés : ce qu'on ne trouve pas reste "[à compléter]".
-# - Les phrases contenant un chiffre clé (%, €, km, ha, personnes...) sont
-#   toujours proposées en premier comme faits.
-#
-# Aucun LLM, aucune API tierce : requests + regex sur du HTML déjà en
-# mémoire, rien d'autre.
+# Le gabarit lui-même (zone/emoji, faits, enjeu) est imposé à Gemini par un
+# prompt système strict — neutralité, aucun chiffre inventé, zéro hashtag,
+# jamais de flèche vide. Le radar ne fait que : extraire le texte de
+# l'article, appeler l'API REST Gemini (pas de SDK), et retomber sur le
+# titre + lien si l'article est inaccessible ou si l'appel échoue (quota,
+# réseau) — un souci de génération ne doit jamais faire planter le radar.
 
-EMOJIS_THEME = (
-    # (emoji, mots-clés déclencheurs) — testés dans cet ordre, le premier
-    # thème qui matche l'emporte.
-    ("🔴", {"mort", "morts", "tue", "tues", "tué", "tués", "accident", "incendie",
-            "explosion", "attentat", "urgence", "drame", "blesse", "blesses",
-            "blessé", "blessés", "crash", "disparu", "evacuation", "évacuation",
-            "alerte", "catastrophe", "seisme", "séisme", "tempete", "tempête",
-            "inondation"}),
-    ("🌍", {"guerre", "ukraine", "gaza", "israel", "israël", "otan", "onu",
-            "etats-unis", "chine", "russie", "international", "europe",
-            "monde"}),
-    ("🌾", {"gouvernement", "ministre", "president", "président", "assemblee",
-            "assemblée", "senat", "sénat", "loi", "reforme", "réforme",
-            "election", "élection", "vote", "politique", "maire", "depute",
-            "député", "parti"}),
-    ("💶", {"economie", "économie", "inflation", "prix", "salaire", "emploi",
-            "chomage", "chômage", "entreprise", "bourse", "euro", "euros",
-            "budget", "impot", "impôt", "croissance"}),
-    ("🚴", {"match", "football", "rugby", "olympique", "equipe", "équipe",
-            "championnat", "tournoi", "victoire", "defaite", "défaite",
-            "sport", "cyclisme", "coupe"}),
-)
-EMOJI_DEFAUT = "🧩"
-
-# Chiffres "clés" : unité qui rend un chiffre publiable tel quel (on ignore
-# les nombres nus, trop souvent des dates ou des numéros d'article).
-MOTIF_CHIFFRE_CLE = re.compile(
-    r"\b\d[\d\s.,]*\s?"
-    r"(?:%|€|km²?|ha\b|hectares?|habitants?|personnes?|morts?|blessés?|blesses?)",
-    re.I,
+GEMINI_MODELE = "gemini-2.0-flash"
+GEMINI_URL = (
+    f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODELE}:generateContent"
 )
 
-# Repère une commune/un département en tête de titre : "NICE. ...",
-# "Loire-Atlantique : ...", "À Marseille, ...".
-MOTIFS_ZONE = (
-    re.compile(r"^[ÀA]\s+([A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,})\s*,\s+"),
-    re.compile(
-        r"^([A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,}"
-        r"(?:[\s\-][A-ZÉÈÀÂÎÔÛÇ][\wÀ-ÿ\-]{2,}){0,3})\s*[:.\-–]\s+"
-    ),
-)
+# Délai minimal entre deux appels Gemini, pour rester dans le tier gratuit.
+GEMINI_DELAI_MIN = 4
 
-MOTIFS_DESCRIPTION = (
-    r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']',
-    r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']description["\']',
-    r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']',
-    r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:description["\']',
-)
+PROMPT_SYSTEME = """Tu es l'assistant éditorial du média "Décodé", un compte d'actualité
+neutre et factuel. À partir de l'article fourni, génère UN post court
+pour le réseau X, en respectant STRICTEMENT ce format :
+
+🔴 [ZONE ou THÈME EN MAJUSCULES] — [accroche factuelle en une ligne].
+
+Où on en est :
+→ [fait 1, avec chiffre si disponible]
+→ [fait 2]
+→ [fait 3]
+
+Pourquoi ça compte : [une phrase d'enjeu, neutre].
+
+On suit. 🧩
+
+RÈGLES ABSOLUES :
+- Neutralité totale : aucun jugement, aucun adjectif d'opinion.
+- N'invente JAMAIS un chiffre. N'utilise que ce qui est dans l'article.
+- Si tu manques d'un fait, mets seulement 2 flèches au lieu de 3.
+  N'écris jamais "[à compléter]".
+- Zéro hashtag.
+- L'emoji de tête dépend du sujet : 🔴 urgence/drame, 🌾 politique,
+  🚴 sport, 💶 économie, 🌍 international, 🧩 par défaut.
+- Total sous 280 caractères si possible.
+- Réponds UNIQUEMENT avec le post final, sans introduction ni commentaire."""
 
 
-def extraire_texte_article(url):
+def extraire_texte_page(url):
     """
-    Va chercher un texte de secours sur la page de l'article, seulement si
-    le chapô RSS n'a rien donné : meta description, sinon premier
-    paragraphe substantiel. Gère proprement timeout/403/page introuvable
-    en renvoyant simplement une chaîne vide (jamais d'exception qui remonte).
+    Récupère le corps de l'article pour Gemini : concatène les balises <p>.
+    Gère timeout/403/page introuvable en renvoyant une chaîne vide — le
+    post sera alors généré à partir du titre seul.
     """
     try:
         r = requests.get(
             url,
-            timeout=8,
+            timeout=10,
             headers={"User-Agent": "Mozilla/5.0 (compatible; RadarDecode/1.0)"},
         )
         r.raise_for_status()
-        page = r.text
     except Exception as ex:
-        print(f"[!] Extraction impossible ({url}): {ex}")
+        print(f"[!] Article inaccessible ({url}): {ex}")
         return ""
 
-    for motif in MOTIFS_DESCRIPTION:
-        m = re.search(motif, page, re.I)
-        if m:
-            texte = nettoyer(m.group(1))
-            if len(texte) > 40:
-                return texte
-
-    for bloc in re.findall(r"<p[^>]*>(.*?)</p>", page, re.S | re.I):
-        texte = nettoyer(bloc)
-        if len(texte) > 60 and "cookie" not in texte.lower():
-            return texte
-
-    return ""
+    paragraphes = re.findall(r"<p[^>]*>(.*?)</p>", r.text, re.S | re.I)
+    return " ".join(nettoyer(p) for p in paragraphes).strip()
 
 
-def decouper_phrases(texte):
-    """Découpe un texte en phrases exploitables (on jette les débris trop courts)."""
-    if not texte:
-        return []
-    phrases = re.split(r"(?<=[.!?])\s+", texte)
-    return [p.strip() for p in phrases if len(p.strip()) > 15]
+def _appeler_gemini(prompt):
+    """Appel REST direct à Gemini (pas de SDK). Renvoie None si ça échoue."""
+    if not GEMINI_API_KEY:
+        return None
+
+    texte = None
+    try:
+        r = requests.post(
+            GEMINI_URL,
+            params={"key": GEMINI_API_KEY},
+            json={"contents": [{"parts": [{"text": prompt}]}]},
+            timeout=20,
+        )
+        r.raise_for_status()
+        data = r.json()
+        texte = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception as ex:
+        print(f"[!] Erreur appel Gemini: {ex}")
+
+    time.sleep(GEMINI_DELAI_MIN)  # respecte la limite de débit du tier gratuit
+    return texte
 
 
-def choisir_emoji(groupe):
-    """Emoji de tête selon le thème détecté dans les mots-clés du sujet."""
-    for emoji, mots_theme in EMOJIS_THEME:
-        if groupe["mots"] & mots_theme:
-            return emoji
-    return EMOJI_DEFAUT
-
-
-def detecter_zone(titre):
-    """Repère une commune/un département cité en tête du titre, s'il y en a un."""
-    for motif in MOTIFS_ZONE:
-        m = motif.match(titre)
-        if m:
-            return m.group(1).upper()
-    return None
-
-
-def zone_theme(groupe):
-    """Étiquette de secours = le mot-clé le plus saillant du sujet (le plus long)."""
-    mots = sorted(groupe["mots"], key=len, reverse=True)
-    return mots[0].upper() if mots else "ACTU"
-
-
-def extraire_faits(principal):
+def generer_post_decode(titre, url, sources):
     """
-    Construit la liste ordonnée de phrases exploitables pour un article :
-    chapô RSS d'abord, puis extrait de la page si le chapô est trop maigre.
-    Les phrases contenant un chiffre clé passent devant les autres.
+    Génère le post "Décodé" via Gemini à partir du titre, de l'URL de
+    l'article principal et des sources qui couvrent déjà le sujet.
+    Retombe sur le titre + lien si l'article est inaccessible ou si
+    l'appel Gemini échoue (quota, réseau, clé absente) : le radar ne doit
+    jamais planter pour un souci de génération de post.
     """
-    phrases = decouper_phrases(principal.get("resume", ""))
-    if len(phrases) < 3:
-        phrases += decouper_phrases(extraire_texte_article(principal["lien"]))
+    texte_article = extraire_texte_page(url)
 
-    # dédoublonnage en gardant l'ordre
-    vues = set()
-    phrases_uniques = []
-    for p in phrases:
-        if p not in vues:
-            vues.add(p)
-            phrases_uniques.append(p)
+    contexte = f"Titre : {titre}\nSources déjà couvertes : {', '.join(sorted(sources))}\n"
+    if texte_article:
+        contexte += f"\nTexte de l'article :\n{texte_article[:6000]}"
+    else:
+        contexte += "\n(Article inaccessible : génère uniquement à partir du titre.)"
 
-    avec_chiffre = [p for p in phrases_uniques if MOTIF_CHIFFRE_CLE.search(p)]
-    sans_chiffre = [p for p in phrases_uniques if p not in avec_chiffre]
-    return avec_chiffre + sans_chiffre
+    post = _appeler_gemini(f"{PROMPT_SYSTEME}\n\n{contexte}")
+    if post:
+        return post
 
-
-def construire_post(emoji, bandeau, accroche, faits, enjeu):
-    """Assemble le gabarit avec des lignes déjà à la bonne longueur."""
-    lignes_faits = "\n".join(f"→ {f}" for f in faits)
-    return (
-        f"{emoji} {bandeau} — {accroche}\n\n"
-        f"Où on en est :\n{lignes_faits}\n\n"
-        f"Pourquoi ça compte : {enjeu}\n\n"
-        f"On suit. 🧩"
-    )
-
-
-def generer_post_decode(groupe):
-    """
-    Construit un post "Décodé" prêt à copier-coller sur X à partir d'un
-    sujet détecté, en suivant le gabarit maison. Aucun LLM : uniquement le
-    titre, la zone repérée dans le titre et un extrait factuel de l'article
-    (chapô RSS, puis page si besoin). Ce qui n'est pas trouvé reste
-    "[à compléter]" — on n'invente jamais un chiffre ou un fait.
-    """
-    principal = groupe["articles"][0]
-    emoji = choisir_emoji(groupe)
-    bandeau = detecter_zone(principal["titre"]) or zone_theme(groupe)
-
-    candidats = extraire_faits(principal)
-    faits = candidats[:3]
-    # L'enjeu est une phrase distincte des faits déjà utilisés, s'il en reste une.
-    enjeu = candidats[3] if len(candidats) > 3 else None
-
-    while len(faits) < 3:
-        faits.append(A_COMPLETER)
-    if enjeu is None:
-        enjeu = A_COMPLETER
-
-    # On essaie plusieurs longueurs de ligne décroissantes jusqu'à passer
-    # sous la limite d'un post X ; au pire on garde la version la plus
-    # courte obtenue.
-    accroche_brute = principal["titre"]
-    post = None
-    for limite in (140, 100, 70, 50, 35):
-        accroche = tronquer(accroche_brute, limite)
-        faits_tronques = [f if f == A_COMPLETER else tronquer(f, limite) for f in faits]
-        enjeu_tronque = enjeu if enjeu == A_COMPLETER else tronquer(enjeu, limite)
-        post = construire_post(emoji, bandeau, accroche, faits_tronques, enjeu_tronque)
-        if len(post) <= LONGUEUR_POST_MAX:
-            break
-
-    return post
+    return f"🧩 {titre}\n\n{url}"
 
 
 # ---------------------------------------------------------------------------
@@ -416,7 +301,7 @@ def formater_alerte(groupe):
     themes_txt = ", ".join(themes)
 
     heure = datetime.now(timezone.utc).astimezone().strftime("%H:%M")
-    post_decode = generer_post_decode(groupe)
+    post_decode = generer_post_decode(principal["titre"], principal["lien"], groupe["sources"])
 
     msg = (
         f"🧩 <b>RADAR DÉCODÉ</b> — {heure}\n"
