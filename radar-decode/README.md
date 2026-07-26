@@ -20,6 +20,9 @@ il possède son propre workflow, ses propres dépendances et sa propre mémoire.
    te l'envoie dans une alerte Telegram.
 5. Il retient ce qu'il a déjà envoyé pour ne pas te spammer.
 
+Tu peux aussi taper **`/scan`** dans Telegram pour forcer un passage
+immédiat sans attendre le cron (voir plus bas).
+
 ---
 
 ## Le post "Décodé"
@@ -57,6 +60,36 @@ On suit. 🧩
 
 ---
 
+## La commande `/scan`
+
+Le radar n'a pas de serveur, donc pas de vrai webhook Telegram. La commande
+`/scan` marche par **sondage** : une deuxième Action GitHub
+(`radar_listener.yml`) tourne toutes les ~5 minutes, regarde si tu as tapé
+`/scan` depuis le dernier passage, et si oui déclenche immédiatement un run
+de `radar_decode.yml` via l'API GitHub. Compte **jusqu'à ~5 minutes** de
+délai avant le déclenchement (le temps que le sondage passe), puis le scan
+lui-même prend une minute ou deux.
+
+Ça veut dire : **tu n'as jamais besoin de cliquer sur "Run workflow"** — ni
+pour un scan automatique (cron 30 min), ni pour un scan à la demande (`/scan`
+depuis Telegram).
+
+### Secret supplémentaire requis : `GH_DISPATCH_TOKEN`
+
+L'API `workflow_dispatch` refuse le jeton automatique `GITHUB_TOKEN` (pour
+éviter les déclenchements en boucle), il faut donc un jeton personnel :
+
+1. GitHub → **Settings** (ton compte, pas le repo) → **Developer settings**
+   → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+2. Restreins-le à ce repo (`ningbus`), avec la permission **Actions : Read and write**.
+3. Copie le token, puis dans le repo → **Settings → Secrets and variables →
+   Actions → New repository secret** : nom `GH_DISPATCH_TOKEN`, valeur = le token.
+4. Active le workflow **"Radar Décodé — écouteur Telegram"** dans l'onglet Actions.
+
+Sans ce secret, `/scan` reçoit une réponse d'avertissement au lieu de lancer le scan.
+
+---
+
 ## Mise en route (5 min, une seule fois)
 
 ### 1. Créer ton bot Telegram
@@ -72,9 +105,11 @@ On suit. 🧩
 
 ### 3. Ajouter tes secrets
 Dans ce repo GitHub → **Settings → Secrets and variables → Actions**
-→ **New repository secret**. Crée deux secrets :
+→ **New repository secret**. Crée trois secrets :
 - `TELEGRAM_TOKEN` = ton token BotFather
 - `TELEGRAM_CHAT_ID` = ton chat id
+- `GH_DISPATCH_TOKEN` = ton token GitHub (voir section `/scan` ci-dessus) —
+  optionnel si tu ne veux que le cron automatique.
 
 ### 4. Activer
 - Onglet **Actions** du repo → active les workflows.
@@ -88,9 +123,12 @@ C'est tout. Il tourne désormais seul, jour et nuit, en parallèle du reste du r
 ## Fichiers
 
 - `radar_decode.py` — le script principal (détection + génération du post).
+- `telegram_listener.py` — l'écouteur de la commande `/scan`.
 - `requirements.txt` — dépendances Python de ce sous-projet.
-- `../.github/workflows/radar_decode.yml` — le workflow GitHub Actions (cron 30 min).
+- `../.github/workflows/radar_decode.yml` — le workflow principal (cron 30 min).
+- `../.github/workflows/radar_listener.yml` — le workflow d'écoute `/scan` (cron 5 min).
 - `vus.json` — mémoire des alertes déjà envoyées (généré automatiquement).
+- `telegram_offset.json` — curseur des messages Telegram déjà lus (généré automatiquement).
 
 ---
 
@@ -103,6 +141,7 @@ C'est tout. Il tourne désormais seul, jour et nuit, en parallèle du reste du r
 | `LONGUEUR_POST_MAX` | Longueur cible du post Décodé | 280 |
 | `FLUX` | Liste des médias surveillés | 8 sources |
 | cron dans `radar_decode.yml` | Fréquence de scan | 30 min |
+| cron dans `radar_listener.yml` | Fréquence de sondage `/scan` | 5 min |
 
 **Trop d'alertes ?** monte `SEUIL_ALERTE` à 3.
 **Pas assez ?** descends `SEUIL_SIMILARITE` à 1 (plus sensible).
