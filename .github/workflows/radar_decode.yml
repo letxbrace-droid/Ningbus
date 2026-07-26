@@ -1,0 +1,43 @@
+name: Radar Décodé
+
+# Déclenchement automatique toutes les 30 minutes + bouton manuel
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # toutes les 30 min (heure UTC)
+  workflow_dispatch:          # permet de lancer à la main depuis GitHub
+
+# Nécessaire pour que le job puisse committer le fichier mémoire (vus.json)
+permissions:
+  contents: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: radar-decode
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Lancer le radar
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python radar_decode.py
+
+      - name: Sauvegarder la mémoire (évite les doublons)
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar@decode.local"
+          git add vus.json || true
+          git commit -m "maj mémoire radar" || echo "rien à committer"
+          git push || echo "push ignoré"
