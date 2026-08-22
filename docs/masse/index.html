@@ -1642,6 +1642,46 @@ function renderTodayDate(){
   var d=new Date();
   el.textContent=DAYS_L[(d.getDay()+6)%7]+' '+d.getDate()+' '+MOIS[d.getMonth()].toLowerCase();
 }
+/* ================================================================
+   CHANGEMENT DE JOUR
+   ----------------------------------------------------------------
+   Tout ce qui dépend d'« aujourd'hui » était calculé une fois au
+   chargement. Une PWA reste ouverte ou en veille pendant des jours :
+   passé minuit, la date affichée, la séance du jour, la bande de la
+   semaine et le calendrier restaient figés sur la veille.
+   On surveille donc le basculement, au retour au premier plan et par
+   une minuterie calée sur le prochain minuit.
+   ================================================================ */
+var JOUR_AFFICHE=todayKey();
+function verifierJour(){
+  var k=todayKey();
+  if(k===JOUR_AFFICHE) return false;
+  var ancien=JOUR_AFFICHE;
+  JOUR_AFFICHE=k;
+  /* le mois a tourné : le calendrier suit, sauf si l'utilisateur l'avait
+     déjà emmené ailleurs */
+  var d=new Date();
+  if(ancien.slice(0,7)!==k.slice(0,7) && calDate.getFullYear()+'-'+String(calDate.getMonth()+1).padStart(2,'0')===ancien.slice(0,7)){
+    calDate=new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+  renderTodayDate();
+  renderFatigue();          /* la fatigue déclarée hier ne vaut plus */
+  refreshAllStations();     /* séries du jour, conseils, dernière fois */
+  refreshPlan();            /* purge du prévu, bande, calendrier, coach */
+  maybeShowRecapPop();      /* un dimanche vient peut-être de se terminer */
+  /* on ne change pas la séance affichée : quelqu'un qui s'entraîne à
+     minuit passé n'a pas à voir son écran basculer sous ses doigts */
+  return true;
+}
+function armerMinuit(){
+  var n=new Date();
+  var m=new Date(n.getFullYear(), n.getMonth(), n.getDate()+1, 0, 0, 5);
+  setTimeout(function(){ verifierJour(); armerMinuit(); }, Math.max(1000, m-n));
+}
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) verifierJour(); });
+window.addEventListener('focus', verifierJour);
+window.addEventListener('pageshow', verifierJour);
+
 function showFromHash(){
   var id=location.hash.slice(1);
   if(ALIAS[id]) id=ALIAS[id];
@@ -3274,6 +3314,7 @@ refreshAllStations();
 maybeShowRecapPop();
 scheduleSundayNudge();
 renderTodayDate();
+armerMinuit();
 initCoachFold();
 /* l'ancre a le dernier mot, mais l'app prépare d'abord la séance du jour */
 var ancreDepart=location.hash.slice(1);
