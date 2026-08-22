@@ -56,7 +56,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v3';   →   'v4'
+var VERSION = 'v4';   →   'v5'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.

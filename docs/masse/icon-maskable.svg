@@ -1,20 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 1254 1254" role="img" aria-label="I&amp;N RUN Masse">
   <defs>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#3d7dff"/>
-      <stop offset="1" stop-color="#22d3ee"/>
+    <linearGradient id="acier" gradientUnits="userSpaceOnUse" x1="242" y1="0" x2="1012" y2="0">
+      <stop offset="0" stop-color="#0e6bfe"/>
+      <stop offset="1" stop-color="#00d3f6"/>
     </linearGradient>
-    <radialGradient id="halo" cx="28%" cy="18%" r="70%">
-      <stop offset="0" stop-color="#3d7dff" stop-opacity=".45"/>
-      <stop offset="1" stop-color="#3d7dff" stop-opacity="0"/>
-    </radialGradient>
   </defs>
-  <rect width="512" height="512" fill="#0a1524"/>
-  <rect width="512" height="512" fill="url(#halo)"/>
-  <!-- contenu confiné dans la zone sûre (80 % centraux) des icônes maskables -->
-  <circle cx="256" cy="238" r="112" fill="none" stroke="url(#ring)" stroke-width="18"/>
-  <text x="256" y="283" text-anchor="middle"
-        font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="128"
-        fill="#eaf3ff" letter-spacing="3">IN</text>
-  <rect x="215" y="376" width="82" height="12" rx="6" fill="#ff6b35"/>
+  <!-- Fond à bords perdus : Android découpe l'icône à sa guise (cercle, squircle…) -->
+  <rect width="1254" height="1254" fill="#0a1524"/>
+  <!-- Haltère réduit à 92 % : le motif entier tient dans la zone sûre,
+       le disque des 80 % centraux, quelle que soit la forme du masque. -->
+  <g transform="translate(627 627) scale(0.92) translate(-627 -627)">
+    <g fill="#ff6b35">
+      <rect x="164" y="560" width="60" height="131" rx="15"/>
+      <rect x="1030" y="560" width="60" height="131" rx="15"/>
+    </g>
+    <g fill="url(#acier)">
+      <rect x="242" y="461" width="76" height="331" rx="24"/>
+      <rect x="337" y="392" width="111" height="467" rx="33"/>
+      <rect x="463.5" y="581" width="327" height="95" rx="6"/>
+      <rect x="806" y="392" width="111" height="467" rx="33"/>
+      <rect x="936" y="461" width="76" height="331" rx="24"/>
+    </g>
+  </g>
 </svg>
