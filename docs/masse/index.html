@@ -328,8 +328,11 @@ section{padding:26px 0 10px}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;cursor:pointer;
   user-select:none;border-radius:12px;position:relative;transition:background .18s}
 .bn:active{background:rgba(255,255,255,.05)}
-.bn .i{font-size:20px;line-height:1;filter:grayscale(.5);opacity:.55;transition:all .2s}
-.bn .l{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);transition:color .2s}
+.bn .i{font-size:19px;line-height:1;filter:grayscale(.5);opacity:.55;transition:all .2s}
+/* 7 onglets sur 390 px : le libellé doit tenir sans se couper */
+.bn .l{font-family:var(--disp);font-weight:600;font-size:11px;letter-spacing:.02em;text-transform:uppercase;
+  color:var(--dim);transition:color .2s;white-space:nowrap}
+@media (max-width:359px){.bn .l{font-size:9.5px}.bn .i{font-size:17px}}
 .bn.active .i{filter:none;opacity:1;transform:translateY(-1px) scale(1.1)}
 .bn.active .l{color:var(--cyan)}
 .bn.active:before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;
@@ -500,6 +503,8 @@ section{padding:26px 0 10px}
 .cd.s-pull{background:rgba(61,125,255,.28)}
 .cd.s-legs{background:rgba(34,211,238,.22)}
 .cd.s-upper{background:rgba(91,157,255,.26)}
+.cd.s-core{background:rgba(255,200,87,.24)}
+.cd.s-swim{background:rgba(45,212,191,.22)}
 .cd.s-cardio{background:rgba(61,220,151,.18)}
 .cd.s-rest{background:rgba(255,255,255,.06)}
 .cal-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px;justify-content:center;font-size:12px;color:var(--mut)}
@@ -1053,6 +1058,109 @@ section{padding:26px 0 10px}
 </div></section>
 </div>
 
+<!-- ============ PAGE : ABDOS ============ -->
+<div class="day" id="core">
+<header class="pg-hero"><div class="hero-in">
+  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
+  <div class="eyebrow">// Station 5 · Ceinture abdominale</div>
+  <h1>Abdos<span class="o">ceinture complète</span></h1>
+  <p class="lead">La sangle qui tient tout le reste : grands droits, obliques et lombaires. Courte, chargée, à caler en fin de séance ou seule.</p>
+  <div class="gauges">
+    <div class="gauge"><span class="tick"></span><div class="gv">~25<span class="u">′</span></div><div class="gl">Durée</div></div>
+    <div class="gauge"><div class="gv">4</div><div class="gl">Machines</div></div>
+    <div class="gauge"><div class="gv">13</div><div class="gl">Séries</div></div>
+  </div>
+  <div class="targets">
+    <span class="tgt"><span class="e">🎯</span>Grands droits</span>
+    <span class="tgt"><span class="e">🎯</span>Obliques</span>
+    <span class="tgt"><span class="e">🎯</span>Lombaires</span>
+  </div>
+</div></header>
+<section><div class="wrap">
+
+  <div class="fatigue" data-fatigue></div>
+
+  <div class="warmnote"><b>Échauffement · 4 min.</b> Rien de lourd : quelques rotations du bassin et 20 respirations en gainage léger. Les abdos se réveillent vite.</div>
+
+  <div class="tipbox"><span class="e">💡</span><span><b>Une ceinture, pas une tablette.</b> Les lombaires font partie de la sangle : les oublier, c'est se construire un déséquilibre et un mal de dos. Le relief, lui, vient de l'alimentation — pas du nombre de crunchs.</span></div>
+
+  <div class="phase"><span class="num">01</span><span class="tag">Chargé · face avant</span><span class="line"></span></div>
+
+  <div class="station" data-ex="core1">
+    <div class="st-head"><div class="st-no">1</div>
+      <div class="st-tx"><div class="st-cat">Grands droits</div><div class="st-name">Crunch machine</div><div class="st-mus">Grands droits · transverse</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">La machine à abdos, dossier réglé pour que ton nombril soit à hauteur de l'axe. Enroule le buste vers le bassin, souffle en fin de course, remonte lentement. Ce sont des muscles comme les autres : ils grossissent avec de la charge, pas avec 100 répétitions.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=ab+crunch+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="core2">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Bas des abdos</div><div class="st-name">Crunch à la poulie haute</div><div class="st-mus">Grands droits · obliques</div></div>
+      <span class="st-badge">Poulie</span></div>
+    <div class="st-body">
+      <div class="st-desc">À genoux devant la poulie haute, corde derrière la nuque. Descends le buste en enroulant la colonne vertèbre par vertèbre — ce sont les abdos qui tirent, pas les bras ni les hanches. Remonte en contrôle.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=crunch+poulie+haute+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="phase"><span class="num">02</span><span class="tag">Côtés · rotation</span><span class="line"></span></div>
+
+  <div class="station" data-ex="core3">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Obliques</div><div class="st-name">Rotation buste machine</div><div class="st-mus">Obliques · transverse</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Rotary torso. Bassin bloqué, seul le buste tourne. Va léger et lent : c'est une machine où l'ego coûte cher au bas du dos. Même nombre de reps des deux côtés.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <div class="tipbox"><span class="e">⚠️</span><span><b>Reps par côté.</b> Note le total d'un côté, pas des deux : c'est la seule façon de comparer d'une séance à l'autre.</span></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rotary+torso+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="phase"><span class="num">03</span><span class="tag">Face arrière · l'oubliée</span><span class="line"></span></div>
+
+  <div class="station" data-ex="core4">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Lombaires</div><div class="st-name">Extension lombaire au banc</div><div class="st-mus">Lombaires · fessiers · ischios</div></div>
+      <span class="st-badge">Banc</span></div>
+    <div class="st-body">
+      <div class="st-desc">Banc à lombaires réglé aux hanches, disque tenu contre la poitrine quand ça devient facile. Descends jusqu'à sentir l'étirement, remonte jusqu'à l'alignement — jamais en cambrant au-delà. C'est ce qui protège ton dos sur la presse et le rowing.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+lombaire+banc+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="tipbox"><span class="e">⏱️</span><span><b>Le gainage en bonus.</b> Deux planches de 30 à 45 secondes pour finir, si tu as le temps. Elles ne se notent pas ici — le carnet suit des charges, pas des chronos — mais elles complètent bien la séance.</span></div>
+
+  <div class="total"><div class="big">25<small>min</small></div><div class="t">Ceinture complète : face avant chargée, obliques en rotation, lombaires en équilibre. Deux fois par semaine suffisent.</div></div>
+</div></section>
+</div>
+
 <!-- ============ PAGE : PROFIL ============ -->
 <div class="day" id="profil">
 <header class="pg-hero"><div class="hero-in">
@@ -1162,6 +1270,8 @@ section{padding:26px 0 10px}
       <span><i style="background:#3d7dff"></i>Tirage</span>
       <span><i style="background:#22d3ee"></i>Jambes</span>
       <span><i style="background:#5b9dff"></i>Bras</span>
+      <span><i style="background:#ffc857"></i>Abdos</span>
+      <span><i style="background:#2dd4bf"></i>Piscine</span>
       <span><i style="background:#3ddc97"></i>Cardio</span>
       <span><i style="background:rgba(255,255,255,.25)"></i>Repos</span>
     </div>
@@ -1247,6 +1357,8 @@ section{padding:26px 0 10px}
       <div class="pick" onclick="choisirJour('pull')"><span class="pe">🪝</span>Tirage</div>
       <div class="pick" onclick="choisirJour('legs')"><span class="pe">🦵</span>Jambes</div>
       <div class="pick" onclick="choisirJour('upper')"><span class="pe">💪</span>Bras</div>
+      <div class="pick" onclick="choisirJour('core')"><span class="pe">🧘</span>Abdos</div>
+      <div class="pick" onclick="choisirJour('swim')"><span class="pe">🏊</span>Piscine</div>
       <div class="pick" onclick="choisirJour('cardio')"><span class="pe">🏃</span>Cardio</div>
       <div class="pick" onclick="choisirJour('rest')"><span class="pe">😌</span>Repos</div>
       <div class="pick clear" onclick="choisirJour(null)">Effacer ce jour</div>
@@ -1275,12 +1387,13 @@ section{padding:26px 0 10px}
   <div class="bn" onclick="show('pull',this)"><span class="i">🪝</span><span class="l">Tirage</span></div>
   <div class="bn" onclick="show('legs',this)"><span class="i">🦵</span><span class="l">Jambes</span></div>
   <div class="bn" onclick="show('upper',this)"><span class="i">💪</span><span class="l">Bras</span></div>
+  <div class="bn" onclick="show('core',this)"><span class="i">🧘</span><span class="l">Abdos</span></div>
   <div class="bn" onclick="show('profil',this)"><span class="i">👤</span><span class="l">Profil</span></div>
   <div class="bn" onclick="show('plan',this)"><span class="i">📋</span><span class="l">Plan</span></div>
 </nav>
 
 <script>
-var PAGES=['push','pull','legs','upper','profil','plan'];
+var PAGES=['push','pull','legs','upper','core','profil','plan'];
 function show(id, el){
   var page=document.getElementById(id);
   if(!page) return;
@@ -1946,14 +2059,14 @@ function saveWeeks(o){ try{ localStorage.setItem(WEEKKEY, JSON.stringify(o)); }c
 function buildRecap(monday){
   var days=[]; for(var i=0;i<7;i++){ var d=new Date(monday); d.setDate(monday.getDate()+i); days.push(dkey(d)); }
   var tlog=loadTLog(), sets=loadExSets(), hist=loadHist(), names=exerciseMap(), fats=loadFat();
-  var sessions=0, cardio=0, rest=0, byGroup={push:0,pull:0,legs:0,upper:0};
+  var sessions=0, cardio=0, rest=0, byGroup=zeroGroups();
   days.forEach(function(k){
     var v=tlog[k]; if(!v) return;
-    if(v==='cardio') cardio++;
+    if(v==='cardio' || v==='swim') cardio++;
     else if(v==='rest') rest++;
     else { sessions++; if(byGroup[v]!==undefined) byGroup[v]++; }
   });
-  var tonnage=0, totalSets=0, totalReps=0, setsByGroup={push:0,pull:0,legs:0,upper:0};
+  var tonnage=0, totalSets=0, totalReps=0, setsByGroup=zeroGroups();
   var rirSum=0, rirN=0;
   Object.keys(sets).forEach(function(id){
     var g=groupOf(id);
@@ -2011,18 +2124,18 @@ function generateRecaps(){
 function fmtDayMon(k){ var p=k.split('-'); return parseInt(p[2],10)+' '+MOIS[parseInt(p[1],10)-1].slice(0,4).toLowerCase(); }
 function recapLines(r){
   var L=[];
-  var volTot=r.setsByGroup.push+r.setsByGroup.pull+r.setsByGroup.legs+r.setsByGroup.upper;
+  var volTot=0; MUSCLES.forEach(function(g){ volTot+=r.setsByGroup[g]||0; });
   if(volTot){
     var parts=[];
-    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras']].forEach(function(g){
+    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
       if(r.setsByGroup[g[0]]) parts.push(g[1]+' '+r.setsByGroup[g[0]]);
     });
     L.push({i:'📊', t:'<b>Séries par groupe :</b> '+parts.join(' · ')+'. La zone utile pour grossir, c\'est 10-20 séries par muscle et par semaine.'});
     var faibles=[];
-    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras']].forEach(function(g){
-      if(r.setsByGroup[g[0]]>0 && r.setsByGroup[g[0]]<10) faibles.push(g[1]);
+    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
+      if(r.setsByGroup[g[0]]>0 && r.setsByGroup[g[0]]<volMin(g[0])) faibles.push(g[1]);
     });
-    if(faibles.length) L.push({i:'⚠️', t:'<b>Sous les 10 séries :</b> '+faibles.join(', ')+'. Ajoute une série par exercice ou une séance de plus.'});
+    if(faibles.length) L.push({i:'⚠️', t:'<b>Sous le volume utile :</b> '+faibles.join(', ')+'. Ajoute une série par exercice ou une séance de plus.'});
   }
   if(r.prs && r.prs.length){
     L.push({i:'🏆', t:'<b>'+r.prs.length+' record'+(r.prs.length>1?'s':'')+' :</b> '+r.prs.map(function(p){ return p.n+' '+p.from+'→'+p.to+' kg'; }).join(' · ')+'.'});
@@ -2127,10 +2240,22 @@ var SESS={
   pull:{t:'Tirage', s:'Dos · biceps', e:'🪝'},
   legs:{t:'Jambes', s:'Complètes', e:'🦵'},
   upper:{t:'Bras', s:'Bras + buste', e:'💪'},
+  core:{t:'Abdos', s:'Ceinture abdominale', e:'🧘'},
+  swim:{t:'Piscine', s:'Natation', e:'🏊'},
   cardio:{t:'Cardio', s:'Endurance', e:'🏃'},
   rest:{t:'Repos', s:'Récupération', e:'😌'}
 };
-var MUSCLES=['push','pull','legs','upper'];
+var MUSCLES=['push','pull','legs','upper','core'];
+/* journées qui ne coûtent pas de récupération musculaire */
+var LEGERES=['cardio','swim','rest'];
+/* récupération minimale avant de retravailler un groupe : les abdos
+   encaissent une fréquence plus élevée que les gros groupes */
+function recupMin(g){ return g==='core' ? 1 : 2; }
+/* un compteur par groupe musculaire — une seule source, pour qu'un nouveau
+   groupe n'oublie jamais un compteur au passage */
+function zeroGroups(){ var o={}; MUSCLES.forEach(function(g){ o[g]=0; }); return o; }
+/* volume hebdo utile : les abdos saturent plus bas que les gros groupes */
+function volMin(g){ return g==='core' ? 6 : 10; }
 var DAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 var MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 var calDate=new Date(); calDate.setDate(1);
@@ -2145,7 +2270,7 @@ function loadTLog(){ try{ return JSON.parse(localStorage.getItem(TLOGKEY))||{}; 
 function saveTLog(o){ try{ localStorage.setItem(TLOGKEY, JSON.stringify(o)); }catch(e){} }
 function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function parseKey(k){ var p=k.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
-function isTraining(v){ return v && v!=='rest' && v!=='cardio'; }
+function isTraining(v){ return !!v && LEGERES.indexOf(v)<0; }
 
 /* --- bande de la semaine en cours (Lun → Dim) --- */
 function renderWeekStrip(){
@@ -2335,6 +2460,12 @@ function verdictJour(k, g, ctx, noAlt){
   if(g==='cardio'){
     return {niveau:'ok', txt:'<b>Cardio '+quand+'.</b> Sans impact sur ta récupération muscu — cale-le où tu veux.'};
   }
+  if(g==='swim'){
+    var apres=isTraining(typeOn(ctx,shiftKey(k,-1)));
+    return {niveau:'ok', txt:'<b>Piscine '+quand+'.</b> '+(apres
+      ? 'Le lendemain d\'une séance, c\'est même le meilleur usage : ça fait circuler sans charger les articulations.'
+      : 'Récupération active — elle ne mange aucune récup musculaire, cale-la où tu veux.')};
+  }
 
   var prev=daysSincePrev(ctx,k,g);
   var next=daysUntilNext(ctx,k,g);
@@ -2344,15 +2475,21 @@ function verdictJour(k, g, ctx, noAlt){
   var alt=noAlt?null:alternativeJour(k,g,ctx);
 
   /* 1. récupération : rien ne passe avant */
-  if(prev!==null && prev<2){
+  var mini=recupMin(g);
+  if(prev!==null && prev<mini){
     return {niveau:'stop', alt:alt,
       txt:'<b>Trop tôt.</b> Tu as fait '+S.t.toLowerCase()+' il y a '+(prev===1?'un jour':prev+' jours')+
           '. Un muscle a besoin de 48 h pour se reconstruire — le retravailler avant, c\'est de la fatigue sans croissance.'};
   }
-  if(next!==null && next<2){
+  if(next!==null && next<mini){
     return {niveau:'stop', alt:alt,
       txt:'<b>Trop serré.</b> Tu as déjà '+S.t.toLowerCase()+' '+(next===1?'le lendemain':'dans '+next+' jours')+
           '. Deux séances du même groupe collées ne valent pas mieux qu\'une seule.'};
+  }
+  /* les abdos passent à 24 h, mais deux jours de suite reste peu rentable */
+  if(g==='core' && (prev===1 || next===1)){
+    return {niveau:'warn', alt:alt,
+      txt:'<b>Abdos deux jours de suite.</b> La ceinture récupère vite, donc ce n\'est pas dangereux — simplement peu rentable. Un jour d\'écart rend davantage.'};
   }
 
   /* 2. enchaînement sans repos */
@@ -2517,7 +2654,7 @@ function daysSinceGroup(){
 /* séries réalisées par groupe sur les N derniers jours */
 function weeklyVolume(days){
   days=days||7;
-  var sets=loadExSets(), out={push:0,pull:0,legs:0,upper:0}, tonnage=0, nSets=0;
+  var sets=loadExSets(), out=zeroGroups(), tonnage=0, nSets=0;
   var today=new Date(); today.setHours(0,0,0,0);
   var win=[]; for(var i=0;i<days;i++){ var d=new Date(today); d.setDate(today.getDate()-i); win.push(dkey(d)); }
   Object.keys(sets).forEach(function(id){
@@ -2552,11 +2689,11 @@ function updateCoach(){
   var log=loadTLog();
   var today=new Date(); today.setHours(0,0,0,0);
   var tKey=dkey(today);
-  var labels={push:'la poussée (pecs, épaules, triceps)',pull:'le dos',legs:'les jambes',upper:'les bras'};
+  var labels={push:'la poussée (pecs, épaules, triceps)',pull:'le dos',legs:'les jambes',upper:'les bras',core:'la ceinture abdominale'};
   var msg='', ic='🧠', sig='';
 
   var vol=weeklyVolume(7);
-  var volTot=vol.byGroup.push+vol.byGroup.pull+vol.byGroup.legs+vol.byGroup.upper;
+  var volTot=0; MUSCLES.forEach(function(g){ volTot+=vol.byGroup[g]||0; });
 
   /* --- démarrage --- */
   if(Object.keys(log).length===0 && volTot===0){
@@ -2610,11 +2747,11 @@ function updateCoach(){
     var faibles=[], forts=[];
     MUSCLES.forEach(function(g){
       var n=vol.byGroup[g];
-      if(n>0 && n<10) faibles.push(SESS[g].t+' ('+n+')');
+      if(n>0 && n<volMin(g)) faibles.push(SESS[g].t+' ('+n+')');
       if(n>22) forts.push(SESS[g].t+' ('+n+')');
     });
     if(forts.length){ msg+=' <b>Attention :</b> '+forts.join(', ')+' dépasse 22 séries sur 7 jours — au-delà tu accumules de la fatigue sans muscle en plus.'; }
-    else if(faibles.length && volTot>=8){ msg+=' <b>Sous la barre :</b> '+faibles.join(', ')+'. La zone qui fait grossir commence à 10 séries par muscle et par semaine.'; }
+    else if(faibles.length && volTot>=8){ msg+=' <b>Sous la barre :</b> '+faibles.join(', ')+'. La zone qui fait grossir commence à 10 séries par muscle et par semaine — 6 suffisent pour la ceinture abdominale.'; }
   }
 
   if(fat==='fatigue'){ msg+=' <b>Tu t\'es déclaré fatigué aujourd\'hui :</b> aucune montée de charge, on reproduit et on récupère.'; }
@@ -2668,13 +2805,13 @@ function analyzeTraining(){
     return;
   }
 
-  var train=0, rest=0, cardio=0, freq={push:0,pull:0,legs:0,upper:0}, seq=[];
+  var train=0, rest=0, cardio=0, freq=zeroGroups(), seq=[];
   for(var i=6;i>=0;i--){
     var d=new Date(today); d.setDate(today.getDate()-i);
     var v=log[dkey(d)]||null;
     seq.push(v);
     if(v==='rest') rest++;
-    else if(v==='cardio') cardio++;
+    else if(v==='cardio' || v==='swim') cardio++;
     else if(v){ train++; if(freq[v]!==undefined) freq[v]++; }
   }
 

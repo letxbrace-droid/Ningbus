@@ -1,6 +1,7 @@
 # I&N RUN Masse — PWA
 
-Application de suivi de prise de masse sur machines : séries, RIR, double
+Application de suivi de prise de masse sur machines : cinq séances (poussée,
+tirage, jambes, bras, ceinture abdominale), séries, RIR, double
 progression, calendrier réel, récap hebdomadaire. Tout est local au téléphone
 (localStorage), aucun compte, aucun serveur.
 
@@ -56,7 +57,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v5';   →   'v6'
+var VERSION = 'v6';   →   'v7'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -89,9 +90,18 @@ tranche avant l'enregistrement :
 
 | Verdict | Quand | Ce qui se passe |
 | --- | --- | --- |
-| `stop` | même groupe à moins de 48 h, avant ou après | le coach explique et propose un autre jour |
-| `warn` | 4ᵉ jour d'affilée, groupe au-delà de 22 séries / 7 jours, 3ᵉ séance du même groupe dans la semaine | idem, avec l'option repos |
+| `stop` | même groupe à moins de 48 h, avant ou après (24 h pour les abdos) | le coach explique et propose un autre jour |
+| `warn` | 4ᵉ jour d'affilée, groupe au-delà de 22 séries / 7 jours, 3ᵉ séance du même groupe dans la semaine, abdos deux jours de suite | idem, avec l'option repos |
 | `ok` | tout le reste | enregistré sans friction, confirmation en bas de l'écran |
+
+Les cinq groupes musculaires (`push`, `pull`, `legs`, `upper`, `core`) passent
+par ce contrôle. **Piscine**, **Cardio** et **Repos** n'y sont pas soumis : ils
+ne consomment aucune récupération musculaire, ne comptent pas comme séances
+dans les statistiques, et coupent les séries de jours d'affilée.
+
+Deux réglages par groupe, dans `recupMin()` et `volMin()` : la ceinture
+abdominale récupère en 24 h et sature vers 6 séries par semaine, là où les gros
+groupes demandent 48 h et 10 séries.
 
 Rien n'est jamais imposé : « Garder quand même » respecte toujours ton choix.
 
