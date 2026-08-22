@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v11';   →   'v12'
+var VERSION = 'v12';   →   'v13'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -125,6 +125,26 @@ ferait défiler la page jusqu'à l'élément correspondant.
 Les anciennes ancres restent valides — `#plan` mène à Semaine, `#profil` à
 Progrès, `#push`/`#legs`… ouvrent Aujourd'hui sur la bonne séance. C'est ce qui
 fait marcher les raccourcis d'icône du manifeste et les liens déjà partagés.
+
+## Le coach raisonne par muscle
+
+Chaque station déclare les muscles qu'elle sollicite dans son libellé
+(« Pectoraux · triceps · épaules »). `carteMuscles()` lit ces libellés dans le
+DOM : le programme reste la source de vérité, il n'y a pas de table à tenir à
+jour en double.
+
+`volumeParMuscle(7)` en tire les séries hebdomadaires par muscle — **entière
+pour le muscle moteur, une demie pour les assistants**, la convention du volume
+indirect. Les fourchettes de `MUSCLES_DET` ne sont pas uniformes : un deltoïde
+latéral encaisse 12 à 25 séries là où un brachial sature vers 12.
+
+Le coach s'en sert pour nommer le muscle en dette plutôt que la séance, et
+l'analyse hebdomadaire affiche le détail avec la cible de chacun.
+
+La ligne de signature, elle, est devenue la **prescription du jour** : elle
+change avec la forme déclarée — reps en réserve, temps de repos, autorisation
+ou non de monter la charge — et bascule sur le sommeil un jour creux. En
+stagnation avérée, elle prescrit une semaine de décharge à 60 %.
 
 ## Le passage de minuit
 

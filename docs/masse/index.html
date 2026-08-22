@@ -2964,6 +2964,125 @@ function stagnation(){
   return tracked>=3 && stale/tracked>=0.7;
 }
 
+/* ================================================================
+   ANATOMIE — le coach raisonne par muscle, pas seulement par séance
+   ----------------------------------------------------------------
+   Chaque station déclare déjà les muscles qu'elle sollicite dans son
+   libellé (« Pectoraux · triceps · épaules »). On s'en sert : le premier
+   muscle cité compte pour une série entière, les suivants pour une demie
+   — c'est la convention du volume indirect.
+   Les fourchettes sont des séries hebdomadaires par muscle. Elles ne sont
+   pas uniformes : un deltoïde latéral encaisse deux fois le volume d'un
+   fessier, et des mollets riches en fibres lentes en demandent davantage.
+   ================================================================ */
+var MUSCLES_DET={
+  pecs:      {n:'Pectoraux',           min:10, max:20, mot:'le volume du buste'},
+  deltAnt:   {n:'Deltoïde antérieur',  min:6,  max:14, mot:'déjà servi par tous les développés'},
+  deltLat:   {n:'Deltoïde latéral',    min:12, max:25, mot:'c\'est lui qui donne la largeur d\'épaules, et il encaisse beaucoup'},
+  deltPost:  {n:'Deltoïde postérieur', min:8,  max:18, mot:'le plus négligé de l\'épaule, il tient la posture'},
+  triceps:   {n:'Triceps',             min:10, max:20, mot:'les deux tiers du volume du bras'},
+  dorsaux:   {n:'Grand dorsal',        min:10, max:20, mot:'la largeur en V'},
+  trapezes:  {n:'Trapèzes',            min:8,  max:18, mot:'l\'épaisseur du dos'},
+  biceps:    {n:'Biceps',              min:10, max:20, mot:'le pic du bras'},
+  brachial:  {n:'Brachial',            min:5,  max:12, mot:'sous le biceps, c\'est lui qui le pousse vers le haut'},
+  quadriceps:{n:'Quadriceps',          min:12, max:20, mot:'la plus grosse masse musculaire du corps'},
+  ischios:   {n:'Ischio-jambiers',     min:10, max:16, mot:'les oublier déséquilibre le genou'},
+  fessiers:  {n:'Fessiers',            min:8,  max:16, mot:'le moteur de la presse et du hack squat'},
+  mollets:   {n:'Mollets',             min:12, max:22, mot:'riches en fibres lentes, ils réclament du volume'},
+  abdos:     {n:'Grands droits',       min:8,  max:16, mot:'la face avant de la sangle'},
+  obliques:  {n:'Obliques',            min:5,  max:12, mot:'les côtés de la taille'},
+  lombaires: {n:'Lombaires',           min:6,  max:12, mot:'ils protègent ton dos sur la presse et le rowing'}
+};
+var MUSCLE_ALIAS={
+  'pectoraux':'pecs','pectoraux (isolation)':'pecs','pectoraux bas':'pecs','pecs':'pecs',
+  'epaules':'deltAnt','deltoides':'deltAnt','deltoide anterieur':'deltAnt',
+  'deltoide lateral':'deltLat','deltoide posterieur':'deltPost',
+  'triceps':'triceps','triceps (finition)':'triceps',
+  'grand dorsal':'dorsaux','dos':'dorsaux','dos moyen':'dorsaux','dos haut':'trapezes','dorsaux':'dorsaux',
+  'trapezes':'trapezes',
+  'biceps':'biceps','biceps (pic)':'biceps','brachial':'brachial',
+  'cuisses':'quadriceps','avant des cuisses':'quadriceps','quadriceps':'quadriceps',
+  'arriere des cuisses':'ischios','ischios':'ischios',
+  'fessiers':'fessiers','mollets':'mollets',
+  'grands droits':'abdos','obliques':'obliques','lombaires':'lombaires'
+  /* le transverse est un muscle profond : il n'a pas de volume mesurable ici */
+};
+function normTexte(t){
+  return String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+var _carte=null;
+/* station → muscles, lu une fois dans le DOM : la source de vérité reste
+   le libellé affiché sous chaque machine */
+function carteMuscles(){
+  if(_carte) return _carte;
+  _carte={};
+  document.querySelectorAll('.station').forEach(function(st){
+    var id=st.getAttribute('data-ex');
+    var txt=(st.querySelector('.st-mus')||{}).textContent||'';
+    var liste=[];
+    txt.split('·').forEach(function(part){
+      var k=MUSCLE_ALIAS[normTexte(part)];
+      if(k && liste.indexOf(k)<0) liste.push(k);
+    });
+    _carte[id]=liste;
+  });
+  return _carte;
+}
+/* séries par muscle sur N jours : entière pour le muscle moteur,
+   moitié pour les muscles assistants */
+function volumeParMuscle(jours){
+  jours=jours||7;
+  var carte=carteMuscles(), sets=loadExSets(), out={};
+  Object.keys(MUSCLES_DET).forEach(function(m){ out[m]=0; });
+  var t=new Date(); t.setHours(0,0,0,0);
+  var fenetre=[]; for(var i=0;i<jours;i++){ var d=new Date(t); d.setDate(t.getDate()-i); fenetre.push(dkey(d)); }
+  Object.keys(sets).forEach(function(id){
+    var mus=carte[id]; if(!mus || !mus.length) return;
+    fenetre.forEach(function(k){
+      var arr=sets[id][k]; if(!arr) return;
+      mus.forEach(function(m,i){ if(out[m]!==undefined) out[m]+=arr.length*(i===0?1:0.5); });
+    });
+  });
+  Object.keys(out).forEach(function(m){ out[m]=Math.round(out[m]*10)/10; });
+  return out;
+}
+/* les muscles en dette, du plus en retard au moins : seuls comptent ceux
+   que le programme travaille réellement */
+function musclesEnDette(vol){
+  var travailles={}, carte=carteMuscles();
+  Object.keys(carte).forEach(function(id){ carte[id].forEach(function(m){ travailles[m]=true; }); });
+  return Object.keys(travailles)
+    .filter(function(m){ return MUSCLES_DET[m] && vol[m] < MUSCLES_DET[m].min; })
+    .map(function(m){ return {m:m, v:vol[m], manque:Math.round((MUSCLES_DET[m].min-vol[m])*10)/10}; })
+    .sort(function(a,b){ return b.manque-a.manque; });
+}
+function musclesSatures(vol){
+  return Object.keys(vol)
+    .filter(function(m){ return MUSCLES_DET[m] && vol[m] > MUSCLES_DET[m].max; })
+    .map(function(m){ return {m:m, v:vol[m]}; })
+    .sort(function(a,b){ return b.v-a.v; });
+}
+
+/* ----------------------------------------------------------------
+   LA PRESCRIPTION DU JOUR — ce qui change vraiment d'un jour à l'autre
+   ---------------------------------------------------------------- */
+function prescriptionDuJour(){
+  var fat=todayFat(), stag=stagnation();
+  var vol=weeklyVolume(7), volTot=0;
+  MUSCLES.forEach(function(g){ volTot+=vol.byGroup[g]||0; });
+
+  if(stag && volTot>=20){
+    return 'Semaine de décharge : 60 % des charges habituelles, mêmes séries, mêmes reps, 4 reps en réserve. On ne cherche rien, on récupère.';
+  }
+  if(fat==='fatigue'){
+    return 'Journée creuse : 3 reps en réserve, aucune montée de charge. Reproduis la dernière séance, repos 2 à 3 min, arrête-toi à la première série qui se dégrade.';
+  }
+  if(fat==='forme'){
+    return 'Jour favorable : 1 à 2 reps en réserve sur la dernière série de chaque exercice, 2 sur les précédentes. Repos 2 min en force, 90 s en isolation.';
+  }
+  return 'Réglage du jour : 2 reps en réserve, repos 2 min en force et 90 s en isolation. Monte la charge dès que tu boucles le haut de la fourchette proprement.';
+}
+
 function updateCoach(){
   var msgEl=document.getElementById('coachMsg'), icEl=document.getElementById('coachIc'), sigEl=document.getElementById('coachSig');
   if(!msgEl) return;
@@ -3023,16 +3142,20 @@ function updateCoach(){
     else { ic='rest'; msg='<b>Tout est frais.</b> Tu as tout travaillé dans les 48 h. Repos, ou une séance légère sur ton point faible.'; }
   }
 
-  /* --- couche volume : la vraie métrique de la prise de masse --- */
+  /* --- couche volume : au muscle près, pas à la séance près --- */
   if(volTot>0){
-    var faibles=[], forts=[];
-    MUSCLES.forEach(function(g){
-      var n=vol.byGroup[g];
-      if(n>0 && n<volMin(g)) faibles.push(SESS[g].t+' ('+n+')');
-      if(n>22) forts.push(SESS[g].t+' ('+n+')');
-    });
-    if(forts.length){ msg+=' <b>Attention :</b> '+forts.join(', ')+' dépasse 22 séries sur 7 jours — au-delà tu accumules de la fatigue sans muscle en plus.'; }
-    else if(faibles.length && volTot>=8){ msg+=' <b>Sous la barre :</b> '+faibles.join(', ')+'. La zone qui fait grossir commence à 10 séries par muscle et par semaine — 6 suffisent pour la ceinture abdominale.'; }
+    var volM=volumeParMuscle(7);
+    var sature=musclesSatures(volM), dette=musclesEnDette(volM);
+    if(sature.length){
+      var ds=MUSCLES_DET[sature[0].m];
+      msg+=' <b>'+ds.n+' : '+sature[0].v+' séries sur 7 jours</b>, pour un plafond utile de '+ds.max+
+           '. Au-delà tu accumules de la fatigue sans muscle en plus — coupe une série, pas deux.';
+    } else if(dette.length && volTot>=8){
+      var dd=MUSCLES_DET[dette[0].m];
+      msg+=' <b>'+dd.n+' : '+dette[0].v+' série'+(dette[0].v>1?'s':'')+' sur 7 jours</b> pour une cible de '+
+           dd.min+'-'+dd.max+' — '+dd.mot+'.';
+      if(dette[1]) msg+=' Ensuite : '+MUSCLES_DET[dette[1].m].n+' ('+dette[1].v+').';
+    }
   }
 
   if(fat==='fatigue'){ msg+=' <b>Tu t\'es déclaré fatigué aujourd\'hui :</b> aucune montée de charge, on reproduit et on récupère.'; }
@@ -3060,16 +3183,20 @@ function updateCoach(){
   msgEl.innerHTML=msg;
   poserCoachIc(icEl, ic);
 
-  /* --- signature : les chiffres de la semaine --- */
+  /* --- signature : la prescription du jour, puis les chiffres réels --- */
   if(sigEl){
+    sig=prescriptionDuJour();
     if(volTot>0){
-      sig='7 derniers jours · '+volTot+' séries · '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+' soulevés  —  cible : 10-20 séries par muscle, 2-3 reps en réserve.';
-    } else {
-      sig='Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.';
+      sig+='  ·  7 j : '+volTot+' séries, '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+'.';
     }
     var pf={}; try{ pf=JSON.parse(localStorage.getItem(PROFKEY))||{}; }catch(e){}
     var bw=parseFloat(pf.w||document.getElementById('pf-w').value);
-    if(bw) sig+='  ·  Protéines : '+Math.round(bw*1.8)+' g/jour.';
+    if(bw){
+      /* un jour creux, le levier n'est plus l'assiette mais le sommeil */
+      sig+= (fat==='fatigue')
+        ? '  ·  '+Math.round(bw*1.8)+' g de protéines, et vise 8 h de sommeil : c\'est là que la fatigue se répare.'
+        : '  ·  Protéines : '+Math.round(bw*1.8)+' g/jour.';
+    }
     sigEl.textContent=sig;
   }
 }
@@ -3081,7 +3208,11 @@ function analyzeTraining(){
   var rows=[]; function add(t,i,x){ rows.push({type:t,icon:i,txt:x}); }
   var today=new Date(); today.setHours(0,0,0,0);
 
-  if(Object.keys(log).length===0){
+  /* le volume par muscle se lit dans les séries, pas dans le calendrier :
+     après un import de sauvegarde, on peut avoir l'un sans l'autre */
+  var volM=volumeParMuscle(7);
+  var travailles=Object.keys(volM).filter(function(m){ return volM[m]>0; });
+  if(Object.keys(log).length===0 && !travailles.length){
     box.innerHTML='<div class="arow tip"><span class="ai">🗓️</span><span class="at">Commence à marquer tes séances dans le calendrier. Après quelques jours, j\'analyse ta régularité et je te conseille ici.</span></div>';
     return;
   }
@@ -3127,6 +3258,28 @@ function analyzeTraining(){
   /* 6) repos déclarés */
   if(train>=3 && rest===0){ add('tip','😌','Aucun jour de <b>repos marqué</b> cette semaine. Note-les aussi : ça fait partie du programme, pas une case vide.'); }
   if(cardio>0){ add('good','🏃','<b>'+cardio+' séance'+(cardio>1?'s':'')+' de cardio</b> cette semaine — bon pour la récupération et le cœur sans nuire à la masse.'); }
+
+  /* 7) le détail par muscle : la métrique d'un coach, pas celle d'un agenda */
+  var dette=musclesEnDette(volM), sature=musclesSatures(volM);
+  if(travailles.length){
+    var haut=travailles.map(function(m){ return {m:m,v:volM[m]}; })
+      .sort(function(a2,b2){ return b2.v-a2.v; }).slice(0,4)
+      .map(function(x){ return MUSCLES_DET[x.m].n+' '+x.v; }).join(' · ');
+    add('tip','🫀','<b>Volume par muscle, 7 jours :</b> '+haut+
+        '. Le muscle assistant compte pour une demi-série — c\'est la convention du volume indirect.');
+  }
+  if(sature.length){
+    var s0=MUSCLES_DET[sature[0].m];
+    add('warn','🔺','<b>'+s0.n+' à '+sature[0].v+' séries</b>, plafond utile '+s0.max+
+        '. Retire une série plutôt qu\'une séance : c\'est la fréquence qui fait progresser, pas l\'accumulation.');
+  }
+  if(dette.length){
+    add('tip','🎯','<b>En dette :</b> '+dette.slice(0,3).map(function(x){
+      return MUSCLES_DET[x.m].n+' '+x.v+'/'+MUSCLES_DET[x.m].min; }).join(' · ')+
+      '. '+MUSCLES_DET[dette[0].m].n+' d\'abord — '+MUSCLES_DET[dette[0].m].mot+'.');
+  } else if(travailles.length>=4){
+    add('good','⚖️','<b>Aucun muscle en dette</b> sur les 7 derniers jours. C\'est l\'équilibre qui tient un physique, pas le total.');
+  }
 
   if(!rows.some(function(r){ return r.type==='warn'; }) && train>=3){
     add('good','🎯','<b>Semaine bien équilibrée.</b> Continue comme ça, la régularité bat l\'intensité sur la durée.');
