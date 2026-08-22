@@ -533,6 +533,55 @@ section{padding:26px 0 10px}
 .pick .pe{font-size:19px}
 .pick.clear{grid-column:1/-1;justify-content:center;color:var(--dim);background:none;border-style:dashed;font-size:14.5px}
 
+/* ===== PLANIFICATION : prévu ≠ fait ===== */
+.ws.plan{border-style:dashed;border-color:var(--line2);background:rgba(255,255,255,.02)}
+.ws.plan .wse{opacity:.6}
+.ws.plan .wsn{color:var(--dim)}
+.ws.free{border-style:dashed;border-color:rgba(34,211,238,.26)}
+.ws.free .wsn{color:var(--cyan);opacity:.9}
+.ws.free .wsn:before{content:'→ '}   /* une proposition, pas une décision */
+.ws.free .wse{opacity:.35}
+.cd.plan{border-style:dashed;border-color:var(--line2);background:rgba(255,255,255,.02)}
+.cd.plan .cde{opacity:.5}
+
+/* verdict du coach au moment du choix */
+.verdict{margin-top:15px;border-radius:14px;padding:13px 14px;border:1px solid var(--line2);
+  background:rgba(255,255,255,.04);font-size:13.5px;line-height:1.55;color:#d3dfee;display:none}
+.verdict.show{display:block;animation:pfade .18s ease}
+.verdict b{color:var(--ink);font-weight:600}
+.verdict.ok{border-color:rgba(61,220,151,.34);background:rgba(61,220,151,.07)}
+.verdict.ok b{color:var(--mint)}
+.verdict.warn{border-color:rgba(255,200,87,.36);background:rgba(255,200,87,.07)}
+.verdict.warn b{color:var(--amber)}
+.verdict.stop{border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+.verdict.stop b{color:#f87171}
+.verdict .vlbl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.verdict-act{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap}
+.verdict-act button{flex:1;min-width:132px;border-radius:11px;padding:11px 12px;cursor:pointer;
+  font-family:var(--disp);font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.03em;
+  border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--ink);transition:transform .1s}
+.verdict-act button.primary{background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;color:#04121a}
+.verdict-act button:active{transform:scale(.96)}
+
+/* barre de génération de la semaine */
+.planbar{display:flex;gap:9px;margin:16px 0 0}
+.planbar button{flex:1;min-width:140px;border-radius:12px;padding:12px 13px;cursor:pointer;
+  font-family:var(--disp);font-weight:600;font-size:13.5px;text-transform:uppercase;letter-spacing:.03em;
+  border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:transform .1s}
+.planbar button.primary{background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;color:#04121a}
+.planbar button:active{transform:scale(.97)}
+
+/* message flottant du coach */
+.ctoast{position:fixed;left:12px;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:56;
+  background:rgba(10,21,36,.96);border:1px solid var(--line2);border-radius:14px;padding:13px 15px;
+  font-size:13.5px;line-height:1.5;color:#d3dfee;display:none;cursor:pointer;
+  box-shadow:0 12px 30px rgba(0,0,0,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ctoast.show{display:block;animation:pfade .2s ease}
+.ctoast b{color:var(--mint);font-weight:600}
+.ctoast.warn{border-color:rgba(255,200,87,.36)}
+.ctoast.warn b{color:var(--amber)}
+
 @media (prefers-reduced-motion:reduce){.day{animation:none}*{transition:none!important}}
 </style>
 </head>
@@ -1085,8 +1134,12 @@ section{padding:26px 0 10px}
 <section><div class="wrap">
 
   <div class="phase"><span class="num">📅</span><span class="tag">Cette semaine</span><span class="line"></span></div>
-  <p style="font-size:12px;color:var(--mut);margin:-6px 0 14px">Touche un jour pour marquer ta séance. Le coach analyse ce que tu fais vraiment.</p>
+  <p style="font-size:12px;color:var(--mut);margin:-6px 0 14px">Touche un jour pour marquer ta séance ou en caler une. Le coach vérifie l'espacement avant de valider. Les jours en pointillés sont prévus, pas encore faits.</p>
   <div class="weekstrip" id="weekStrip"></div>
+  <div class="planbar">
+    <button class="primary" onclick="proposerSemaine()">🗓️ Propose-moi la semaine</button>
+    <button onclick="effacerPlan()">Effacer le prévu</button>
+  </div>
 
   <div style="height:18px"></div>
   <div class="streak-row">
@@ -1188,16 +1241,17 @@ section{padding:26px 0 10px}
 <div class="picksheet" id="pickSheet" onclick="if(event.target===this)closePick()">
   <div class="sheet">
     <h4 id="pickDate">—</h4>
-    <div class="psd">Qu'as-tu fait ce jour ?</div>
+    <div class="psd" id="pickSub">Qu'as-tu fait ce jour ?</div>
     <div class="pick-grid">
-      <div class="pick" onclick="markDay('push')"><span class="pe">🔨</span>Poussée</div>
-      <div class="pick" onclick="markDay('pull')"><span class="pe">🪝</span>Tirage</div>
-      <div class="pick" onclick="markDay('legs')"><span class="pe">🦵</span>Jambes</div>
-      <div class="pick" onclick="markDay('upper')"><span class="pe">💪</span>Bras</div>
-      <div class="pick" onclick="markDay('cardio')"><span class="pe">🏃</span>Cardio</div>
-      <div class="pick" onclick="markDay('rest')"><span class="pe">😌</span>Repos</div>
-      <div class="pick clear" onclick="markDay(null)">Effacer ce jour</div>
+      <div class="pick" onclick="choisirJour('push')"><span class="pe">🔨</span>Poussée</div>
+      <div class="pick" onclick="choisirJour('pull')"><span class="pe">🪝</span>Tirage</div>
+      <div class="pick" onclick="choisirJour('legs')"><span class="pe">🦵</span>Jambes</div>
+      <div class="pick" onclick="choisirJour('upper')"><span class="pe">💪</span>Bras</div>
+      <div class="pick" onclick="choisirJour('cardio')"><span class="pe">🏃</span>Cardio</div>
+      <div class="pick" onclick="choisirJour('rest')"><span class="pe">😌</span>Repos</div>
+      <div class="pick clear" onclick="choisirJour(null)">Effacer ce jour</div>
     </div>
+    <div class="verdict" id="pickVerdict"></div>
   </div>
 </div>
 
@@ -1210,6 +1264,8 @@ section{padding:26px 0 10px}
     <button class="rc-close" onclick="closeRecap()">C'est noté</button>
   </div>
 </div>
+
+<div id="coachToast" class="ctoast"></div>
 
 <div id="swToast" class="swtoast"><span>Nouvelle version disponible.</span><button onclick="swReload()">Recharger</button></div>
 
@@ -1493,7 +1549,7 @@ function drawProg(){
 }
 
 /* ===== IMPORT / EXPORT de toutes les données ===== */
-var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue'];
+var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_plan', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue'];
 function exportData(){
   var dump={ app:'inrun-masse', version:1, date:new Date().toISOString(), data:{} };
   ALL_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) dump.data[k]=v; });
@@ -2094,18 +2150,28 @@ function isTraining(v){ return v && v!=='rest' && v!=='cardio'; }
 /* --- bande de la semaine en cours (Lun → Dim) --- */
 function renderWeekStrip(){
   var box=document.getElementById('weekStrip'); if(!box) return;
-  var log=loadTLog();
+  var ctx=planCtx();
   var today=new Date(); today.setHours(0,0,0,0);
+  var tk=dkey(today);
   var monday=new Date(today); monday.setDate(today.getDate()-((today.getDay()+6)%7));
   box.innerHTML='';
   for(var i=0;i<7;i++){
     var d=new Date(monday); d.setDate(monday.getDate()+i);
-    var k=dkey(d), v=log[k];
+    var k=dkey(d), fait=ctx.log[k], prevu=!fait && ctx.plan[k];
+    var cls='ws'+(k===tk?' today':'')+(fait?' done':'')+(prevu?' plan':'');
+    var emo='·', nom='';
+    if(fait){ emo=SESS[fait].e; nom=SESS[fait].t; }
+    else if(prevu){ emo=SESS[prevu].e; nom=SESS[prevu].t; }
+    else if(k>=tk){
+      /* jour libre : le coach dit ce qui irait le mieux ici */
+      var sug=suggestGroup(k,ctx);
+      if(sug){ cls+=' free'; emo=SESS[sug].e; nom=SESS[sug].t; }
+    }
     var ws=document.createElement('div');
-    ws.className='ws'+(k===dkey(today)?' today':'')+(v?' done':'');
+    ws.className=cls;
     ws.innerHTML='<span class="wsd">'+DAYS[i]+'</span>'+
-      '<span class="wse">'+(v?SESS[v].e:'·')+'</span>'+
-      '<span class="wsn">'+(v?SESS[v].t:'')+'</span>';
+      '<span class="wse">'+emo+'</span>'+
+      '<span class="wsn">'+nom+'</span>';
     (function(key){ ws.addEventListener('click', function(){ openPick(key); }); })(k);
     box.appendChild(ws);
   }
@@ -2115,7 +2181,7 @@ function renderWeekStrip(){
 function calMove(dir){ calDate.setMonth(calDate.getMonth()+dir); renderCal(); }
 function renderCal(){
   var grid=document.getElementById('calGrid'); if(!grid) return;
-  var log=loadTLog();
+  var log=loadTLog(), plan=loadPlan();
   var y=calDate.getFullYear(), m=calDate.getMonth();
   document.getElementById('calMonth').textContent=MOIS[m]+' '+y;
   grid.innerHTML='';
@@ -2125,10 +2191,10 @@ function renderCal(){
   for(var b=0;b<start;b++){ var e=document.createElement('div'); e.className='cd blank'; grid.appendChild(e); }
   for(var dd=1;dd<=days;dd++){
     var k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
-    var v=log[k];
+    var v=log[k], pv=!v && plan[k];
     var cell=document.createElement('div');
-    cell.className='cd'+(v?' has s-'+v:'')+(k===tKey?' today':'');
-    cell.innerHTML='<span class="cdn">'+dd+'</span><span class="cde">'+(v?SESS[v].e:'')+'</span>';
+    cell.className='cd'+(v?' has s-'+v:'')+(pv?' plan':'')+(k===tKey?' today':'');
+    cell.innerHTML='<span class="cdn">'+dd+'</span><span class="cde">'+(v?SESS[v].e:(pv?SESS[pv].e:''))+'</span>';
     (function(key){ cell.addEventListener('click', function(){ openPick(key); }); })(k);
     grid.appendChild(cell);
   }
@@ -2158,29 +2224,278 @@ function renderStreaks(){
 
 /* --- sheet de sélection --- */
 function openPick(k){
-  pickKey=k;
+  pickKey=k; pickPending=null;
   var p=k.split('-');
   document.getElementById('pickDate').textContent=parseInt(p[2],10)+' '+MOIS[parseInt(p[1],10)-1];
+  var sub=document.getElementById('pickSub');
+  if(sub) sub.textContent = isFuture(k) ? 'Que veux-tu caler ce jour-là ?' : 'Qu\'as-tu fait ce jour ?';
+  var v=document.getElementById('pickVerdict');
+  if(v){ v.className='verdict'; v.innerHTML=''; }
   document.getElementById('pickSheet').classList.add('show');
 }
-function closePick(){ document.getElementById('pickSheet').classList.remove('show'); pickKey=null; }
-function markDay(type){
-  if(!pickKey) return;
-  var log=loadTLog();
-  if(type===null){ delete log[pickKey]; } else { log[pickKey]=type; }
-  saveTLog(log); closePick();
-  refreshPlan(); buzz(15);
+function closePick(){
+  document.getElementById('pickSheet').classList.remove('show');
+  pickKey=null; pickPending=null;
+  var v=document.getElementById('pickVerdict');
+  if(v){ v.className='verdict'; v.innerHTML=''; }
 }
 /* marquage auto quand une perf est enregistrée depuis une séance */
 function autoMark(type){
   if(!SESS[type]) return;
-  var log=loadTLog();
+  var log=loadTLog(), plan=loadPlan();
   var k=dkey(new Date());
+  /* la séance était peut-être prévue : elle passe du prévu au fait */
+  if(plan[k]){ delete plan[k]; savePlan(plan); }
   if(log[k]===type) return;
   log[k]=type; saveTLog(log);
   refreshPlan();
 }
-function refreshPlan(){ renderWeekStrip(); renderCal(); renderStreaks(); updateCoach(); analyzeTraining(); }
+function refreshPlan(){ cleanPlan(); renderWeekStrip(); renderCal(); renderStreaks(); updateCoach(); analyzeTraining(); }
+
+/* ================================================================
+   PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
+   ----------------------------------------------------------------
+   inrun_trainlog  = les séances réalisées (toutes les stats le lisent)
+   inrun_plan      = les intentions, uniquement dans le futur
+   Confondre les deux faussait tout : un jour futur marqué comptait
+   comme une séance faite, gonflait les compteurs, et le coach croyait
+   le muscle fraîchement travaillé.
+   ================================================================ */
+var PLANKEY='inrun_plan';
+var DAYS_L=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+
+function loadPlan(){ try{ return JSON.parse(localStorage.getItem(PLANKEY))||{}; }catch(e){ return {}; } }
+function savePlan(o){ try{ localStorage.setItem(PLANKEY, JSON.stringify(o)); }catch(e){} }
+
+/* un jour prévu qui est passé n'est plus une intention : on le retire */
+function cleanPlan(){
+  var p=loadPlan(), t=todayKey(), ch=false;
+  Object.keys(p).forEach(function(k){ if(k<t){ delete p[k]; ch=true; } });
+  if(ch) savePlan(p);
+}
+/* les jours futurs marqués avant l'arrivée du planning étaient comptés
+   comme faits : on les bascule une bonne fois en prévus */
+function migrerFuturs(){
+  var log=loadTLog(), plan=loadPlan(), t=todayKey(), ch=false;
+  Object.keys(log).forEach(function(k){ if(k>t){ plan[k]=log[k]; delete log[k]; ch=true; } });
+  if(ch){ saveTLog(log); savePlan(plan); }
+}
+
+/* --- petits outils de dates --- */
+function shiftKey(k,n){ var d=parseKey(k); d.setDate(d.getDate()+n); return dkey(d); }
+function isFuture(k){ return k>todayKey(); }
+function libelleJour(k){
+  var t=todayKey();
+  if(k===t) return "aujourd'hui";
+  if(k===shiftKey(t,1)) return 'demain';
+  if(k===shiftKey(t,-1)) return 'hier';
+  var d=parseKey(k);
+  return DAYS_L[(d.getDay()+6)%7]+' '+d.getDate();
+}
+
+/* --- lecture combinée : on relit une fois, pas à chaque jour testé --- */
+function planCtx(){ return {log:loadTLog(), plan:loadPlan()}; }
+function typeOn(ctx,k){ return ctx.log[k] || ctx.plan[k] || null; }
+
+function daysSincePrev(ctx,k,g){ for(var i=1;i<=14;i++){ if(typeOn(ctx,shiftKey(k,-i))===g) return i; } return null; }
+function daysUntilNext(ctx,k,g){ for(var i=1;i<=14;i++){ if(typeOn(ctx,shiftKey(k,i))===g) return i; } return null; }
+
+/* combien de jours d'entraînement d'affilée si on pose une séance sur k */
+function consecutiveWith(ctx,k){
+  var n=1,i;
+  for(i=1;i<=10 && isTraining(typeOn(ctx,shiftKey(k,-i)));i++) n++;
+  for(i=1;i<=10 && isTraining(typeOn(ctx,shiftKey(k,i)));i++) n++;
+  return n;
+}
+function weekDaysOf(k){
+  var m=mondayOf(parseKey(k)), out=[];
+  for(var i=0;i<7;i++){ var d=new Date(m); d.setDate(m.getDate()+i); out.push(dkey(d)); }
+  return out;
+}
+function countGroupInWeek(ctx,k,g){
+  return weekDaysOf(k).filter(function(x){ return typeOn(ctx,x)===g; }).length;
+}
+
+/* ----------------------------------------------------------------
+   LE VERDICT : ce jour-là, ce groupe, bonne ou mauvaise idée ?
+   niveau : 'ok' (on enregistre sans friction), 'warn' (on demande
+   confirmation), 'stop' (on déconseille fermement).
+   alt = le jour proposé à la place.
+   ---------------------------------------------------------------- */
+function verdictJour(k, g, ctx, noAlt){
+  ctx=ctx||planCtx();
+  var S=SESS[g]||{t:g}, quand=libelleJour(k);
+
+  /* repos et cardio ne se refusent jamais : ils ne coûtent pas de récup */
+  if(g==='rest'){
+    var autour=consecutiveWith(ctx,k)-1;
+    if(autour>=3) return {niveau:'ok', txt:'<b>Bien vu.</b> Tu enchaînais '+autour+' jours d\'entraînement : ce repos coupe la série avant que la fatigue mange tes perfs.'};
+    return {niveau:'ok', txt:'<b>Repos noté.</b> C\'est là que le muscle se construit, pas à la salle.'};
+  }
+  if(g==='cardio'){
+    return {niveau:'ok', txt:'<b>Cardio '+quand+'.</b> Sans impact sur ta récupération muscu — cale-le où tu veux.'};
+  }
+
+  var prev=daysSincePrev(ctx,k,g);
+  var next=daysUntilNext(ctx,k,g);
+  var cons=consecutiveWith(ctx,k);
+  var sem=countGroupInWeek(ctx,k,g);
+  var vol=weeklyVolume(7).byGroup[g]||0;
+  var alt=noAlt?null:alternativeJour(k,g,ctx);
+
+  /* 1. récupération : rien ne passe avant */
+  if(prev!==null && prev<2){
+    return {niveau:'stop', alt:alt,
+      txt:'<b>Trop tôt.</b> Tu as fait '+S.t.toLowerCase()+' il y a '+(prev===1?'un jour':prev+' jours')+
+          '. Un muscle a besoin de 48 h pour se reconstruire — le retravailler avant, c\'est de la fatigue sans croissance.'};
+  }
+  if(next!==null && next<2){
+    return {niveau:'stop', alt:alt,
+      txt:'<b>Trop serré.</b> Tu as déjà '+S.t.toLowerCase()+' '+(next===1?'le lendemain':'dans '+next+' jours')+
+          '. Deux séances du même groupe collées ne valent pas mieux qu\'une seule.'};
+  }
+
+  /* 2. enchaînement sans repos */
+  if(cons>=4){
+    return {niveau:'warn', rest:true, alt:alt,
+      txt:'<b>'+cons+' jours d\'affilée.</b> Au-delà de 3, la fatigue s\'accumule et tes charges baissent. Un repos ici te ferait progresser plus que cette séance.'};
+  }
+
+  /* 3. saturation du groupe */
+  if(vol>22){
+    return {niveau:'warn', alt:alt,
+      txt:'<b>'+S.t+' est déjà à '+vol+' séries sur 7 jours.</b> Au-delà de 22, tu accumules de la fatigue sans muscle en plus. Un autre groupe rendrait davantage.'};
+  }
+  if(sem>=3){
+    return {niveau:'warn', alt:alt,
+      txt:'<b>3ᵉ séance '+S.t.toLowerCase()+' cette semaine.</b> Deux suffisent pour saturer le signal de croissance : la troisième vole du volume aux autres groupes.'};
+  }
+
+  /* 4. les bons créneaux */
+  if(prev===null){
+    return {niveau:'ok',
+      txt:'<b>'+S.t+' '+quand+' : oui.</b> Aucune donnée sur ce groupe — c\'est le trou de ton programme.'};
+  }
+  if(prev>6){
+    return {niveau:'ok',
+      txt:'<b>'+prev+' jours sans '+S.t.toLowerCase()+'.</b> Il était temps : au-delà de 5-6 jours tu perds le bénéfice de la séance précédente.'};
+  }
+  if(prev===2){
+    return {niveau:'ok',
+      txt:'<b>'+S.t+' '+quand+' : ça passe.</b> 48 h de récupération, c\'est le minimum viable — un jour de plus serait plus confortable.'};
+  }
+  if(prev<=5){
+    return {niveau:'ok',
+      txt:'<b>'+S.t+' '+quand+' : bon créneau.</b> '+prev+' jours depuis la dernière — la fenêtre idéale est de 3 à 5 jours.'};
+  }
+  return {niveau:'ok', txt:'<b>'+S.t+' '+quand+'.</b> '+prev+' jours de récup, espacement correct.'};
+}
+
+/* le premier jour libre qui passe le contrôle, dans les 9 jours qui suivent */
+function alternativeJour(k,g,ctx){
+  for(var i=1;i<=9;i++){
+    var kk=shiftKey(k,i);
+    if(typeOn(ctx,kk)) continue;
+    if(verdictJour(kk,g,ctx,true).niveau==='ok') return kk;
+  }
+  return null;
+}
+
+/* --- quel groupe irait le mieux sur un jour libre --- */
+function suggestGroup(k,ctx){
+  ctx=ctx||planCtx();
+  if(typeOn(ctx,k)) return null;
+  if(consecutiveWith(ctx,k)>=4) return 'rest';
+  var best=null, score=-1e9;
+  MUSCLES.forEach(function(g){
+    if(verdictJour(k,g,ctx,true).niveau!=='ok') return;
+    var prev=daysSincePrev(ctx,k,g);
+    var sem=countGroupInWeek(ctx,k,g);
+    /* jamais travaillé passe devant tout, puis le plus longtemps négligé,
+       et on pénalise un groupe déjà servi cette semaine */
+    var s=(prev===null?60:prev)*10 - sem*22;
+    if(s>score){ score=s; best=g; }
+  });
+  return best;
+}
+
+/* ----------------------------------------------------------------
+   LA FEUILLE DE CHOIX : le coach répond au moment où tu décides
+   ---------------------------------------------------------------- */
+var pickPending=null;
+
+function choisirJour(type){
+  if(!pickKey) return;
+  if(type===null){ appliquerJour(null, pickKey); return; }
+  var v=verdictJour(pickKey, type);
+  if(v.niveau==='ok'){ appliquerJour(type, pickKey); coachToast(v.txt, false); return; }
+  /* seulement quand ça coince : on explique et on propose */
+  pickPending={k:pickKey, t:type, v:v};
+  var box=document.getElementById('pickVerdict');
+  box.className='verdict show '+v.niveau;
+  box.innerHTML='<span class="vlbl">Le coach</span>'+v.txt+
+    '<div class="verdict-act">'+
+      (v.alt?'<button class="primary" onclick="accepterAlt()">Caler '+libelleJour(v.alt)+'</button>':'')+
+      (v.rest?'<button class="primary" onclick="poserRepos()">Mettre repos</button>':'')+
+      '<button onclick="forcerJour()">Garder quand même</button>'+
+    '</div>';
+  buzz(18);
+}
+function appliquerJour(type, k){
+  if(!k) return;
+  var log=loadTLog(), plan=loadPlan();
+  if(type===null){ delete log[k]; delete plan[k]; }
+  else if(isFuture(k)){ plan[k]=type; delete log[k]; }   /* futur = intention */
+  else { log[k]=type; delete plan[k]; }                  /* aujourd'hui ou passé = fait */
+  saveTLog(log); savePlan(plan);
+  closePick(); refreshPlan(); buzz(15);
+}
+function forcerJour(){ if(pickPending) appliquerJour(pickPending.t, pickPending.k); }
+function accepterAlt(){
+  if(!pickPending || !pickPending.v.alt) return;
+  var k=pickPending.v.alt, t=pickPending.t;
+  appliquerJour(t, k);
+  coachToast('<b>'+SESS[t].t+' calé '+libelleJour(k)+'.</b>', false);
+}
+function poserRepos(){ if(pickPending) appliquerJour('rest', pickPending.k); }
+
+/* ----------------------------------------------------------------
+   PHASE 4 : la semaine proposée d'un coup
+   ---------------------------------------------------------------- */
+function proposerSemaine(){
+  var ctx=planCtx(), plan=loadPlan(), t=todayKey(), poses=0, liste=[];
+  for(var i=1;i<=7;i++){
+    var k=shiftKey(t,i);
+    if(typeOn(ctx,k)) continue;                 /* on ne touche jamais à un jour déjà décidé */
+    var g=suggestGroup(k,ctx) || 'rest';
+    plan[k]=g; ctx.plan[k]=g;                   /* le jour suivant tient compte de celui-ci */
+    poses++;
+    if(g!=='rest') liste.push(SESS[g].t+' '+libelleJour(k));
+  }
+  savePlan(plan); refreshPlan(); buzz(25);
+  coachToast(poses
+    ? '<b>'+poses+' jour'+(poses>1?'s':'')+' proposé'+(poses>1?'s':'')+'.</b> '+
+      (liste.length?liste.join(' · ')+'. ':'')+'Touche un jour pour le changer.'
+    : '<b>Ta semaine est déjà complète.</b> Rien à proposer.', false);
+}
+function effacerPlan(){
+  var plan=loadPlan(), t=todayKey(), n=0;
+  Object.keys(plan).forEach(function(k){ if(k>t){ delete plan[k]; n++; } });
+  savePlan(plan); refreshPlan(); buzz(15);
+  coachToast(n? '<b>Prévisionnel effacé</b> — '+n+' jour'+(n>1?'s':'')+'. Tes séances faites sont intactes.'
+              : 'Aucun jour prévu à effacer.', false);
+}
+
+/* --- message flottant --- */
+var ctoastT=null;
+function coachToast(html, warn){
+  var el=document.getElementById('coachToast'); if(!el) return;
+  el.className='ctoast show'+(warn?' warn':'');
+  el.innerHTML=html;
+  el.onclick=function(){ el.classList.remove('show'); };
+  clearTimeout(ctoastT);
+  ctoastT=setTimeout(function(){ el.classList.remove('show'); }, 6000);
+}
 
 /* --- jours depuis le dernier travail de chaque groupe (calendrier réel) --- */
 function daysSinceGroup(){
@@ -2251,11 +2566,16 @@ function updateCoach(){
     return;
   }
 
-  var since=daysSinceGroup();
+  var since=daysSinceGroup();   /* ne compte que les séances faites */
+  /* un groupe déjà calé dans les 2 jours n'est pas une cible pour aujourd'hui :
+     sans ça le coach réclamait les jambes le jour où elles étaient prévues */
+  var ctxP0=planCtx(), bientot={};
+  for(var jj=1;jj<=2;jj++){ var kx=shiftKey(tKey,jj); if(ctxP0.plan[kx]) bientot[ctxP0.plan[kx]]=true; }
   var neglect=null, maxd=-1;
-  MUSCLES.forEach(function(g){ if(since[g]!==null && since[g]>maxd){ maxd=since[g]; neglect=g; } });
+  MUSCLES.forEach(function(g){ if(!bientot[g] && since[g]!==null && since[g]>maxd){ maxd=since[g]; neglect=g; } });
+  if(neglect===null){ MUSCLES.forEach(function(g){ if(since[g]!==null && since[g]>maxd){ maxd=since[g]; neglect=g; } }); }
   var never=null;
-  ['legs','pull','push','upper'].forEach(function(g){ if(since[g]===null && !never) never=g; });
+  ['legs','pull','push','upper'].forEach(function(g){ if(since[g]===null && !never && !bientot[g]) never=g; });
   var doneToday=log[tKey];
   var fat=todayFat();
 
@@ -2299,6 +2619,25 @@ function updateCoach(){
 
   if(fat==='fatigue'){ msg+=' <b>Tu t\'es déclaré fatigué aujourd\'hui :</b> aucune montée de charge, on reproduit et on récupère.'; }
   else if(fat==='forme'){ msg+=' <b>Tu es en forme :</b> c\'est le jour pour tenter le haut de tes fourchettes.'; }
+
+  /* --- couche planning : la suite du programme --- */
+  var ctxP=planCtx(), prochain=null, quandP=null;
+  for(var j=1;j<=3;j++){
+    var kk=shiftKey(tKey,j);
+    if(ctxP.plan[kk]){ prochain=ctxP.plan[kk]; quandP=kk; break; }
+  }
+  if(prochain){
+    if(prochain==='rest'){ msg+=' <b>Repos prévu '+libelleJour(quandP)+'</b> — tiens-le, c\'est une partie du programme.'; }
+    else {
+      var vp=verdictJour(quandP, prochain, ctxP, true);
+      msg+=' <b>Prévu '+libelleJour(quandP)+' : '+SESS[prochain].t+'.</b>';
+      if(vp.niveau!=='ok') msg+=' Attention, ce créneau coince — touche ce jour dans le calendrier, je te propose mieux.';
+    }
+  } else {
+    var kd=shiftKey(tKey,1), sugd=suggestGroup(kd, ctxP);
+    if(sugd && sugd!=='rest'){ msg+=' <b>Rien de prévu demain :</b> '+SESS[sugd].t+' serait le bon choix.'; }
+    else if(sugd==='rest'){ msg+=' <b>Rien de prévu demain :</b> vu ton enchaînement, un repos serait le plus rentable.'; }
+  }
 
   msgEl.innerHTML=msg;
   if(icEl) icEl.textContent=ic;
@@ -2380,6 +2719,7 @@ function analyzeTraining(){
   }).join('');
 }
 
+migrerFuturs();
 refreshPlan();
 
 /* ===== Minuteur de repos : anneau circulaire ===== */

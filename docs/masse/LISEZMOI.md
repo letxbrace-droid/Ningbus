@@ -31,11 +31,11 @@ la racine d'un site que dans un sous-dossier — mais il doit rester entier.
 
 ### GitHub Pages — ce dépôt
 
-Le dossier est publié dans `docs/masse/`. Si Pages est servi depuis `/docs` sur
-la branche par défaut, l'app est en ligne à :
+Le dossier est publié dans `docs/masse/`. Pages étant servi depuis `/docs` sur
+`main`, l'app est en ligne à :
 
 ```
-https://letxbrace-droid.github.io/ningbus/masse/
+https://letxbrace-droid.github.io/Ningbus/masse/
 ```
 
 Pages ne permet pas de régler les en-têtes HTTP, donc `_headers` y est ignoré.
@@ -56,7 +56,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v4';   →   'v5'
+var VERSION = 'v5';   →   'v6'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -74,11 +74,37 @@ Puis `http://localhost:8000`. Le service worker ne fonctionne **pas** en
 `file://` — c'est normal, l'app marche quand même, simplement sans cache
 offline.
 
+## Le coach planificateur
+
+Deux notions distinctes, volontairement séparées dans le stockage :
+
+- `inrun_trainlog` — les séances **faites**. Toutes les statistiques (volume,
+  récap, compteurs de régularité, jours depuis chaque groupe) ne lisent que ça.
+- `inrun_plan` — les séances **prévues**, uniquement dans le futur. Purgé
+  automatiquement dès qu'un jour est passé, et effacé pour un jour donné dès
+  qu'une série y est enregistrée : le prévu devient du fait.
+
+Quand tu touches un jour et choisis un groupe, `verdictJour(date, groupe)`
+tranche avant l'enregistrement :
+
+| Verdict | Quand | Ce qui se passe |
+| --- | --- | --- |
+| `stop` | même groupe à moins de 48 h, avant ou après | le coach explique et propose un autre jour |
+| `warn` | 4ᵉ jour d'affilée, groupe au-delà de 22 séries / 7 jours, 3ᵉ séance du même groupe dans la semaine | idem, avec l'option repos |
+| `ok` | tout le reste | enregistré sans friction, confirmation en bas de l'écran |
+
+Rien n'est jamais imposé : « Garder quand même » respecte toujours ton choix.
+
+Le même moteur alimente les suggestions sur les jours libres de la bande
+hebdo (`→ Tirage`) et le bouton **Propose-moi la semaine**, qui remplit les
+7 jours suivants en respectant les 48 h par groupe et en glissant un repos
+avant tout 4ᵉ jour consécutif. Il ne touche jamais un jour déjà décidé.
+
 ## Sauvegarde
 
 Profil → Exporter. Le JSON contient les clés : carnet, historique 1RM, poids,
-profil, réglages, calendrier, séries détaillées avec RIR, prescriptions
-ajustées, fatigue.
+profil, réglages, calendrier, planning prévisionnel, séries détaillées avec
+RIR, prescriptions ajustées, fatigue.
 
 Fais-le une fois par mois. C'est la seule protection contre un cache vidé ou un
 changement de téléphone.
