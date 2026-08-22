@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v10';   →   'v11'
+var VERSION = 'v11';   →   'v12'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -125,6 +125,22 @@ ferait défiler la page jusqu'à l'élément correspondant.
 Les anciennes ancres restent valides — `#plan` mène à Semaine, `#profil` à
 Progrès, `#push`/`#legs`… ouvrent Aujourd'hui sur la bonne séance. C'est ce qui
 fait marcher les raccourcis d'icône du manifeste et les liens déjà partagés.
+
+## Le passage de minuit
+
+Une PWA reste ouverte ou en veille pendant des jours. Tout ce qui dépend
+d'« aujourd'hui » était calculé une fois au chargement : passé minuit, la date
+affichée, la bande de la semaine, le calendrier et la fatigue du jour restaient
+figés sur la veille.
+
+`verifierJour()` compare la date courante à celle affichée et, au moindre écart,
+recalcule tout : date, fatigue, séries du jour, conseils, purge du prévu,
+calendrier, coach, récap. Elle est déclenchée au retour au premier plan
+(`visibilitychange`, `focus`, `pageshow`) et par une minuterie calée sur le
+prochain minuit, réarmée à chaque passage.
+
+La séance affichée, elle, ne bascule jamais toute seule : quelqu'un qui
+s'entraîne à minuit passé n'a pas à voir son écran changer sous ses doigts.
 
 ## Le coach planificateur
 
