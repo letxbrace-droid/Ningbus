@@ -688,6 +688,16 @@ section{padding:26px 0 10px}
 /* 3. Le bandeau du jour : coach et fatigue compacts, 437 px → ~230 */
 .coach{padding:14px 15px;gap:12px;margin:4px 0 12px}
 .coach-ic{width:40px;height:40px;font-size:21px}
+/* Le coach a un visage : le casque reste, c'est l'état qui teinte le cadre.
+   On garde le personnage constant et l'information passe par la couleur. */
+.coach-ic .ic{width:26px;height:26px}
+.coach-ic.t-alerte{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.4)}
+.coach-ic.t-alerte .ic{background:#f87171}
+.coach-ic.t-ok{background:rgba(61,220,151,.14);border-color:rgba(61,220,151,.38)}
+.coach-ic.t-ok .ic{background:var(--mint)}
+.coach-ic.t-calme{background:rgba(139,166,200,.12);border-color:rgba(139,166,200,.32)}
+.coach-ic.t-calme .ic{background:var(--steel)}
+.coach-ic .ic{background:var(--acc)}
 .coach-msg{font-size:14.5px;line-height:1.5}
 .coach:not(.open) .coach-msg{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .coach:not(.open) .coach-sig{display:none}
@@ -744,6 +754,7 @@ section{padding:26px 0 10px}
 .ic-fatigue{-webkit-mask-image:url(img/ic-fatigue.webp);mask-image:url(img/ic-fatigue.webp)}
 .ic-normal{-webkit-mask-image:url(img/ic-normal.webp);mask-image:url(img/ic-normal.webp)}
 .ic-forme{-webkit-mask-image:url(img/ic-forme.webp);mask-image:url(img/ic-forme.webp)}
+.ic-coach{-webkit-mask-image:url(img/ic-coach.webp);mask-image:url(img/ic-coach.webp)}
 
 /* carte musculaire en tête de séance */
 .sh-in{display:flex;gap:13px;align-items:flex-start}
@@ -1551,9 +1562,14 @@ var ALIAS={plan:'semaine', profil:'progres'};
 
 /* une icône = un masque ; le nom de la classe est celui du groupe ou de l'état */
 function ico(n, extra){ return '<i class="ic ic-'+n+(extra?' '+extra:'')+'"></i>'; }
-/* l'icône du coach : notre jeu quand elle désigne une séance, un emoji sinon
-   (cerveau, stop, validation n'existent pas dans le jeu généré) */
-function coachIco(v){ return (SESS[v]||v==='today') ? ico(v) : v; }
+/* Le casque du coach est permanent : sa couleur porte l'état, pas sa forme.
+   La séance conseillée reste nommée en toutes lettres dans le message. */
+function poserCoachIc(el, etat){
+  if(!el) return;
+  var ton = etat==='🛑' ? ' t-alerte' : etat==='✅' ? ' t-ok' : etat==='rest' ? ' t-calme' : '';
+  el.className='coach-ic'+ton;
+  el.innerHTML=ico('coach');
+}
 function setHash(h){
   if(location.hash.slice(1)===h) return;
   try{ history.replaceState(null,'','#'+h); }catch(e){ location.hash=h; }
@@ -2923,7 +2939,7 @@ function updateCoach(){
   /* --- démarrage --- */
   if(Object.keys(log).length===0 && volTot===0){
     msgEl.innerHTML='<b>On commence par la base.</b> Enregistre chaque série (charge × reps) pendant ta séance : c\'est la seule donnée qui me permet de te dire quand monter la charge. Marque aussi tes jours dans le calendrier.';
-    if(icEl) icEl.innerHTML=ico('today');
+    poserCoachIc(icEl,'');
     if(sigEl) sigEl.textContent='Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.';
     return;
   }
@@ -2945,7 +2961,7 @@ function updateCoach(){
   if(stagnation() && volTot>=20){
     ic='🛑';
     msg='<b>Signal de décharge.</b> Tes charges ne montent plus sur la majorité des exercices alors que ton volume est élevé. Fais une semaine à <b>60 % de tes charges habituelles</b>, mêmes séries, mêmes reps. Tu reviendras plus fort — c\'est prévu, pas un échec.';
-    msgEl.innerHTML=msg; if(icEl) icEl.innerHTML=coachIco(ic);
+    msgEl.innerHTML=msg; poserCoachIc(icEl, ic);
     if(sigEl) sigEl.textContent='Volume 7 j : '+volTot+' séries · '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+' soulevés.';
     return;
   }
@@ -3002,7 +3018,7 @@ function updateCoach(){
   }
 
   msgEl.innerHTML=msg;
-  if(icEl) icEl.innerHTML=coachIco(ic);
+  poserCoachIc(icEl, ic);
 
   /* --- signature : les chiffres de la semaine --- */
   if(sigEl){

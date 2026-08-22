@@ -20,12 +20,12 @@ icon-192.png             ← icône Android
 icon-512.png             ← icône haute définition / splash screen
 icon-maskable-512.png    ← icône adaptative Android
 _headers                 ← en-têtes de cache (Netlify et Cloudflare Pages)
-img/                     ← icônes, cartes musculaires et fonds (144 Ko)
+img/                     ← icônes, cartes musculaires et fonds (147 Ko)
 ```
 
 Le dossier `img/` contient 22 fichiers WebP :
 
-- `ic-*.webp` — 15 icônes monochromes, utilisées comme **masques CSS**. Un seul
+- `ic-*.webp` — 16 icônes monochromes, utilisées comme **masques CSS**. Un seul
   fichier sert l'état actif (dégradé bleu-cyan), inactif (gris) et toutes les
   tailles : c'est `background` qui les colore, pas l'image.
 - `mus-*.webp` — 5 cartes musculaires (face et dos) en tête de chaque séance.
@@ -36,6 +36,12 @@ Le dossier `img/` contient 22 fichiers WebP :
 - `fond-texture.webp` — matière sur le fond global, à 50 % d'opacité.
 - `fond-salle.webp` — photo de salle dans l'en-tête d'Aujourd'hui, sous un
   dégradé qui garantit la lisibilité du texte.
+
+`ic-coach.webp` est le casque du coach : il ne change jamais de forme, c'est la
+couleur de son cadre qui porte l'état — orange par défaut, rouge sur un signal
+de décharge, vert quand la séance est faite, acier un jour de repos. Le
+personnage reste constant, l'information passe par la teinte, et la séance
+conseillée reste nommée en toutes lettres dans le message.
 
 Tout est précaché par le service worker : l'app garde ses icônes hors ligne.
 Les emoji restent employés dans les textes du coach — les icônes servent la
@@ -76,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v9';   →   'v10'
+var VERSION = 'v10';   →   'v11'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
