@@ -57,7 +57,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v6';   →   'v7'
+var VERSION = 'v7';   →   'v8'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -74,6 +74,32 @@ python3 -m http.server 8000
 Puis `http://localhost:8000`. Le service worker ne fonctionne **pas** en
 `file://` — c'est normal, l'app marche quand même, simplement sans cache
 offline.
+
+## Structure de l'app
+
+Quatre onglets, un rôle chacun :
+
+| Onglet | Rôle | Contenu |
+| --- | --- | --- |
+| **Aujourd'hui** | faire | message du coach · fatigue du jour · sélecteur de séance · la séance |
+| **Semaine** | piloter | bande hebdo · propose-moi la semaine · régularité · calendrier · analyse |
+| **Progrès** | regarder | mensurations et IMC · suivi du poids · courbes de force · récap hebdo |
+| **Moi** | régler | réglages · sauvegarde · la méthode (repliée) · effacer les perfs |
+
+Les cinq séances ne sont pas des destinations de navigation : elles se
+choisissent dans le sélecteur horizontal en haut d'« Aujourd'hui », qui reste
+collé en haut de l'écran pendant la séance. Les puces portent l'état — point
+orange sur la séance du jour, coche verte sur ce qui est déjà fait cette
+semaine.
+
+À l'ouverture, l'app affiche la séance déjà commencée aujourd'hui, sinon celle
+qui est prévue, sinon celle que le coach conseille, sinon la dernière consultée.
+Aucune ancre n'est écrite tant que l'utilisateur n'a rien touché : le navigateur
+ferait défiler la page jusqu'à l'élément correspondant.
+
+Les anciennes ancres restent valides — `#plan` mène à Semaine, `#profil` à
+Progrès, `#push`/`#legs`… ouvrent Aujourd'hui sur la bonne séance. C'est ce qui
+fait marcher les raccourcis d'icône du manifeste et les liens déjà partagés.
 
 ## Le coach planificateur
 
@@ -112,7 +138,7 @@ avant tout 4ᵉ jour consécutif. Il ne touche jamais un jour déjà décidé.
 
 ## Sauvegarde
 
-Profil → Exporter. Le JSON contient les clés : carnet, historique 1RM, poids,
+Moi → Exporter. Le JSON contient les clés : carnet, historique 1RM, poids,
 profil, réglages, calendrier, planning prévisionnel, séries détaillées avec
 RIR, prescriptions ajustées, fatigue.
 
