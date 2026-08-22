@@ -20,7 +20,7 @@ icon-192.png             ← icône Android
 icon-512.png             ← icône haute définition / splash screen
 icon-maskable-512.png    ← icône adaptative Android
 _headers                 ← en-têtes de cache (Netlify et Cloudflare Pages)
-img/                     ← icônes, cartes musculaires et fonds (151 Ko)
+img/                     ← icônes, cartes musculaires et fonds (144 Ko)
 ```
 
 Le dossier `img/` contient 22 fichiers WebP :
@@ -28,8 +28,11 @@ Le dossier `img/` contient 22 fichiers WebP :
 - `ic-*.webp` — 15 icônes monochromes, utilisées comme **masques CSS**. Un seul
   fichier sert l'état actif (dégradé bleu-cyan), inactif (gris) et toutes les
   tailles : c'est `background` qui les colore, pas l'image.
-- `mus-*.webp` — 5 cartes musculaires (face et dos, muscles travaillés en cyan),
-  affichées en tête de chaque séance.
+- `mus-*.webp` — 5 cartes musculaires (face et dos) en tête de chaque séance.
+  Deux niveaux de lecture : **cyan** pour les muscles moteurs, **bleu** pour
+  ceux sollicités en second. Les planches ont été générées sur fond magenta —
+  demander un fond « transparent » fait peindre un damier dans les pixels, et
+  le détourage par saturation qui en découle laisse des bords crénelés.
 - `fond-texture.webp` — matière sur le fond global, à 50 % d'opacité.
 - `fond-salle.webp` — photo de salle dans l'en-tête d'Aujourd'hui, sous un
   dégradé qui garantit la lisibilité du texte.
@@ -73,7 +76,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v8';   →   'v9'
+var VERSION = 'v9';   →   'v10'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
