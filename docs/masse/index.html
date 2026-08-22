@@ -90,6 +90,65 @@ h1 .o{color:var(--blue-l);display:block;text-shadow:0 2px 26px var(--cyan-glow)}
 
 .day{display:none;animation:fade .35s ease}
 .day.show{display:block}
+.sess{display:none;animation:fade .28s ease}
+.sess.show{display:block}
+
+/* ===== EN-TÊTES COMPACTS =====
+   L'ancien hero prenait 490 px, soit 58 % du premier écran, sur chaque page.
+   Il est réduit à l'essentiel : un titre, une date, une phrase. */
+.pg-hero.compact{padding:24px 18px 20px}
+.pg-hero.compact .brand{margin-bottom:12px;font-size:12.5px}
+.pg-hero.compact h1{font-size:clamp(28px,7.5vw,40px)}
+.pg-hero.compact .lead{margin-top:10px;font-size:14.5px}
+.hero-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hero-date{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--cyan);white-space:nowrap}
+
+/* en-tête d'une séance, dans l'onglet Aujourd'hui */
+.sess-head{padding:4px 0 16px}
+.sess-head h2{font-family:var(--disp);font-weight:700;text-transform:uppercase;line-height:.95;
+  font-size:26px;letter-spacing:.01em}
+.sess-head h2 .o{color:var(--blue-l);font-size:15px;display:block;margin-top:5px;letter-spacing:.05em}
+.sess-head .sh-g{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.sess-head .sh-g span{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--mut);
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+.sess-head .sh-lead{color:var(--mut);font-size:13.5px;line-height:1.55;margin-top:11px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ===== SÉLECTEUR DE SÉANCE =====
+   Les 5 séances ne sont plus des destinations de navigation : elles se
+   choisissent ici, et les puces portent l'état (prévu aujourd'hui, déjà fait). */
+.sessbar-wrap{position:sticky;top:0;z-index:30;padding:8px 0 7px;
+  background:rgba(10,21,36,.93);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.sessbar{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  margin:0 -14px;padding:2px 14px}
+.sessbar::-webkit-scrollbar{display:none}
+.sessbar .sc{flex:0 0 auto;display:flex;align-items:center;gap:6px;min-height:44px;padding:9px 11px;
+  border-radius:13px;border:1px solid var(--line2);background:var(--panel);cursor:pointer;
+  font-family:var(--disp);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.03em;
+  color:var(--mut);white-space:nowrap;transition:transform .1s,border-color .15s,color .15s}
+/* dégradé au bord droit : il reste des séances à faire défiler */
+.sessbar{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+.sessbar .sc:active{transform:scale(.96)}
+.sessbar .sc .e{font-size:16px;line-height:1}
+.sessbar .sc.on{border-color:var(--cyan);color:var(--ink);background:rgba(34,211,238,.12);
+  box-shadow:0 0 14px rgba(34,211,238,.18)}
+.sessbar .sc .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.sessbar .sc .ok{color:var(--mint);font-size:13px}
+
+/* ===== REPLI (la méthode) ===== */
+.fold{margin:0 0 18px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+  backdrop-filter:blur(var(--glass-b));-webkit-backdrop-filter:blur(var(--glass-b))}
+.fold summary{cursor:pointer;list-style:none;padding:15px 16px;min-height:44px;display:flex;align-items:center;
+  gap:9px;font-family:var(--disp);font-weight:600;font-size:14.5px;color:var(--mut)}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary:before{content:'▸';color:var(--cyan);transition:transform .2s;display:inline-block}
+.fold[open] summary:before{transform:rotate(90deg)}
+.fold[open] summary{color:var(--ink);border-bottom:1px solid var(--line)}
+.fold-b{padding:4px 14px 2px}
+.fold-b .info{margin:14px 0}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 section{padding:26px 0 10px}
 
@@ -587,32 +646,115 @@ section{padding:26px 0 10px}
 .ctoast.warn{border-color:rgba(255,200,87,.36)}
 .ctoast.warn b{color:var(--amber)}
 
+/* ================================================================
+   AÉRATION — chiffres mesurés sur un écran de 390 px
+   ================================================================ */
+
+/* 1. Marges imbriquées : 96 px de largeur partaient en padding empilé
+   (wrap 36 + carte 30 + bloc 28), ce qui comprimait le texte à 41 caractères
+   par ligne quand l'optimum de lecture est 45-75. Un texte plus étroit n'est
+   pas plus aéré : il est simplement plus haut. */
+.wrap{padding:0 14px}
+.st-body{padding:0 11px 12px}
+.advice{margin:0;padding:11px 12px;border-radius:0;border-left:0;border-right:0;border-bottom:0}
+.advice.show{display:block}
+.log-prev{padding:10px 11px}
+.log-in{padding:9px 10px;gap:7px}
+.rirrow{padding:0 11px 10px}
+.fold-b .info{margin-left:0;margin-right:0}
+
+/* 2. La carte station : description et démo repliées derrière l'en-tête.
+   Elles se lisent une fois et occupaient 123 px sur chacune des 25 cartes. */
+.station:not(.open) .st-desc,
+.station:not(.open) .demo,
+.station:not(.open) .tipbox{display:none}
+.st-head{cursor:pointer;padding:12px 12px 11px;position:relative}
+.st-head .st-badge{display:none}
+.st-head:after{content:'▾';align-self:flex-start;font-size:15px;line-height:1.2;color:var(--dim);
+  width:26px;text-align:right}
+.station.open .st-head:after{content:'▴';color:var(--cyan)}
+
+/* prescription sur une seule ligne, réglage au bout : 93 px → 46 */
+.presc{margin-top:10px;align-items:center}
+.presc .c{padding:7px 3px;display:flex;align-items:baseline;justify-content:center;gap:5px;white-space:nowrap}
+.presc .cv{font-size:16px}
+.presc .ck{margin-top:0;font-size:10px;letter-spacing:.04em}
+/* le réglage devient une icône : son libellé ne tient pas sur la ligne */
+.presc .presc-edit{flex:0 0 auto;width:auto;min-width:46px;min-height:46px;margin:0;border:none;
+  border-left:1px solid var(--line);border-radius:0;padding:0;font-size:0;color:var(--dim)}
+.presc .presc-edit:before{content:'⚙︎';font-size:17px}
+.presc .presc-edit.custom{border-color:var(--line);color:var(--amber)}
+
+/* 3. Le bandeau du jour : coach et fatigue compacts, 437 px → ~230 */
+.coach{padding:14px 15px;gap:12px;margin:4px 0 12px}
+.coach-ic{width:40px;height:40px;font-size:21px}
+.coach-msg{font-size:14.5px;line-height:1.5}
+.coach:not(.open) .coach-msg{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.coach:not(.open) .coach-sig{display:none}
+.coach:after{content:'▾';position:absolute;right:13px;top:12px;color:var(--dim);font-size:12px}
+.coach.open:after{content:'▴'}
+.coach{position:relative;cursor:pointer}
+.coach-sig{margin-top:8px}
+.fatigue{margin:0 0 14px;padding:12px 13px}
+.fatigue .fh{margin-bottom:9px}
+.fatigue button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 5px;
+  font-size:13px;white-space:nowrap}
+.fatigue button .fe{display:inline;margin:0;font-size:15px}
+.warmnote{padding:11px 13px;font-size:13px;line-height:1.5}
+
+/* 4. Rythme vertical : un seul écart entre blocs de premier niveau, au lieu
+   de six valeurs différentes. C'est la régularité qui fait respirer, pas
+   l'ajout d'espace — la page fait déjà cinq écrans. */
+.block-h{margin:24px 0 12px}
+.station{margin-bottom:12px}
+.info,.settings{margin:16px 0}
+.prof-card{margin-bottom:16px}
+
+/* 5. Zones tactiles : 44 px minimum, en priorité le bouton pressé une
+   vingtaine de fois par séance, avec les mains moites. */
+.log-in button{min-height:48px;padding:0 16px;font-size:14px}
+.log-in input{padding:13px 10px}
+.rirrow .rb{min-height:44px;display:flex;align-items:center;justify-content:center}
+.rest-ctl button{width:48px;height:48px}
+.demo{min-height:44px;padding:0 14px}
+.presc-tools button{min-height:44px}
+
 @media (prefers-reduced-motion:reduce){.day{animation:none}*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<!-- ============ PAGE : POUSSÉE ============ -->
-<div class="day show" id="push">
-<header class="pg-hero"><div class="hero-in">
+<!-- ============ ONGLET : AUJOURD'HUI ============ -->
+<div class="day show" id="today">
+<header class="pg-hero compact"><div class="hero-in">
   <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Station 1 · Poussée</div>
-  <h1>Pecs<span class="o">épaules · triceps</span></h1>
-  <p class="lead">Tout ce qui pousse, 100% sur machines. Le volume du buste et l'avant des bras.</p>
-  <div class="gauges">
-    <div class="gauge"><span class="tick"></span><div class="gv">~50<span class="u">′</span></div><div class="gl">Durée</div></div>
-    <div class="gauge"><div class="gv">5</div><div class="gl">Machines</div></div>
-    <div class="gauge"><div class="gv">16</div><div class="gl">Séries</div></div>
-  </div>
-  <div class="targets">
-    <span class="tgt"><span class="e">🎯</span>Pectoraux</span>
-    <span class="tgt"><span class="e">🎯</span>Épaules</span>
-    <span class="tgt"><span class="e">🎯</span>Triceps</span>
-  </div>
+  <div class="hero-row"><h1>Aujourd'hui</h1><span class="hero-date" id="todayDate">—</span></div>
+  <p class="lead">Ta séance du jour, choisie d'après ton calendrier et ta récupération.</p>
 </div></header>
 <section><div class="wrap">
 
+  <div class="coach" id="coachCard">
+    <div class="coach-ic" id="coachIc">🧠</div>
+    <div class="coach-tx">
+      <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie</div>
+      <div class="coach-msg" id="coachMsg">…</div>
+      <div class="coach-sig" id="coachSig">Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.</div>
+    </div>
+  </div>
+
   <div class="fatigue" data-fatigue></div>
+
+</div></section>
+
+<div class="sessbar-wrap"><div class="wrap"><div class="sessbar" id="sessBar"></div></div></div>
+
+<div class="sess" id="push">
+<div class="sess-head"><div class="wrap">
+  <h2>Pecs<span class="o">épaules · triceps</span></h2>
+  <div class="sh-g"><span>~50′</span><span>5 machines</span><span>16 séries</span></div>
+  <p class="sh-lead">Tout ce qui pousse, 100&nbsp;% sur machines. Le volume du buste et l'avant des bras.</p>
+</div></div>
+<section><div class="wrap">
 
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger + rotations d'épaules, puis 1 série légère à la première machine avant d'attaquer.</div>
 
@@ -705,27 +847,13 @@ section{padding:26px 0 10px}
 </div></section>
 </div>
 
-<!-- ============ PAGE : TIRAGE ============ -->
-<div class="day" id="pull">
-<header class="pg-hero"><div class="hero-in">
-  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Station 2 · Tirage</div>
-  <h1>Dos<span class="o">largeur · biceps</span></h1>
-  <p class="lead">Tout ce qui tire, sur machines. La largeur en V, l'épaisseur du dos et les biceps.</p>
-  <div class="gauges">
-    <div class="gauge"><span class="tick"></span><div class="gv">~50<span class="u">′</span></div><div class="gl">Durée</div></div>
-    <div class="gauge"><div class="gv">5</div><div class="gl">Machines</div></div>
-    <div class="gauge"><div class="gv">16</div><div class="gl">Séries</div></div>
-  </div>
-  <div class="targets">
-    <span class="tgt"><span class="e">🎯</span>Dorsaux</span>
-    <span class="tgt"><span class="e">🎯</span>Trapèzes</span>
-    <span class="tgt"><span class="e">🎯</span>Biceps</span>
-  </div>
-</div></header>
+<div class="sess" id="pull">
+<div class="sess-head"><div class="wrap">
+  <h2>Dos<span class="o">largeur · biceps</span></h2>
+  <div class="sh-g"><span>~50′</span><span>5 machines</span><span>16 séries</span></div>
+  <p class="sh-lead">Tout ce qui tire, sur machines. La largeur en V, l'épaisseur du dos et les biceps.</p>
+</div></div>
 <section><div class="wrap">
-
-  <div class="fatigue" data-fatigue></div>
 
   <div class="warmnote"><b>Échauffement · 8 min.</b> Cardio léger + mobilité épaules, puis 1 série légère de tirage vertical avant d'attaquer.</div>
 
@@ -817,28 +945,13 @@ section{padding:26px 0 10px}
 </div></section>
 </div>
 
-<!-- ============ PAGE : JAMBES ============ -->
-<div class="day" id="legs">
-<header class="pg-hero"><div class="hero-in">
-  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Station 3 · Jambes</div>
-  <h1>Jambes<span class="o">complètes</span></h1>
-  <p class="lead">La moitié de ta masse musculaire, 100% machines. Les travailler booste toute ta progression.</p>
-  <div class="gauges">
-    <div class="gauge"><span class="tick"></span><div class="gv">~50<span class="u">′</span></div><div class="gl">Durée</div></div>
-    <div class="gauge"><div class="gv">5</div><div class="gl">Machines</div></div>
-    <div class="gauge"><div class="gv">17</div><div class="gl">Séries</div></div>
-  </div>
-  <div class="targets">
-    <span class="tgt"><span class="e">🎯</span>Quadriceps</span>
-    <span class="tgt"><span class="e">🎯</span>Ischios</span>
-    <span class="tgt"><span class="e">🎯</span>Fessiers</span>
-    <span class="tgt"><span class="e">🎯</span>Mollets</span>
-  </div>
-</div></header>
+<div class="sess" id="legs">
+<div class="sess-head"><div class="wrap">
+  <h2>Jambes<span class="o">complètes</span></h2>
+  <div class="sh-g"><span>~50′</span><span>5 machines</span><span>17 séries</span></div>
+  <p class="sh-lead">La moitié de ta masse musculaire. Les travailler booste toute ta progression.</p>
+</div></div>
 <section><div class="wrap">
-
-  <div class="fatigue" data-fatigue></div>
 
   <div class="warmnote"><b>Échauffement · 10 min.</b> Vélo + mobilité hanches/genoux, puis 1 série légère à la presse. Ne saute pas, les jambes ont besoin d'être préparées.</div>
 
@@ -930,27 +1043,13 @@ section{padding:26px 0 10px}
 </div></section>
 </div>
 
-<!-- ============ PAGE : BRAS FOCUS ============ -->
-<div class="day" id="upper">
-<header class="pg-hero"><div class="hero-in">
-  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Station 4 · Focus bras</div>
-  <h1>Bras<span class="o">+ buste</span></h1>
-  <p class="lead">Ta priorité : les bras. Un peu de pecs et dos, puis 4 machines dédiées biceps-triceps pour le volume.</p>
-  <div class="gauges">
-    <div class="gauge"><span class="tick"></span><div class="gv">~50<span class="u">′</span></div><div class="gl">Durée</div></div>
-    <div class="gauge"><div class="gv">6</div><div class="gl">Machines</div></div>
-    <div class="gauge"><div class="gv">18</div><div class="gl">Séries</div></div>
-  </div>
-  <div class="targets">
-    <span class="tgt"><span class="e">🎯</span>Pecs</span>
-    <span class="tgt"><span class="e">🎯</span>Dos</span>
-    <span class="tgt focus"><span class="e">🔥</span>Bras · focus</span>
-  </div>
-</div></header>
+<div class="sess" id="upper">
+<div class="sess-head"><div class="wrap">
+  <h2>Bras<span class="o">+ buste</span></h2>
+  <div class="sh-g"><span>~50′</span><span>6 machines</span><span>18 séries</span></div>
+  <p class="sh-lead">Un peu de pecs et de dos, puis 4 machines dédiées biceps-triceps pour le volume.</p>
+</div></div>
 <section><div class="wrap">
-
-  <div class="fatigue" data-fatigue></div>
 
   <div class="warmnote"><b>Échauffement · 8 min.</b> Cardio léger + mobilité épaules et coudes, puis directement les gros exercices.</div>
 
@@ -1058,27 +1157,13 @@ section{padding:26px 0 10px}
 </div></section>
 </div>
 
-<!-- ============ PAGE : ABDOS ============ -->
-<div class="day" id="core">
-<header class="pg-hero"><div class="hero-in">
-  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Station 5 · Ceinture abdominale</div>
-  <h1>Abdos<span class="o">ceinture complète</span></h1>
-  <p class="lead">La sangle qui tient tout le reste : grands droits, obliques et lombaires. Courte, chargée, à caler en fin de séance ou seule.</p>
-  <div class="gauges">
-    <div class="gauge"><span class="tick"></span><div class="gv">~25<span class="u">′</span></div><div class="gl">Durée</div></div>
-    <div class="gauge"><div class="gv">4</div><div class="gl">Machines</div></div>
-    <div class="gauge"><div class="gv">13</div><div class="gl">Séries</div></div>
-  </div>
-  <div class="targets">
-    <span class="tgt"><span class="e">🎯</span>Grands droits</span>
-    <span class="tgt"><span class="e">🎯</span>Obliques</span>
-    <span class="tgt"><span class="e">🎯</span>Lombaires</span>
-  </div>
-</div></header>
+<div class="sess" id="core">
+<div class="sess-head"><div class="wrap">
+  <h2>Abdos<span class="o">ceinture complète</span></h2>
+  <div class="sh-g"><span>~25′</span><span>4 machines</span><span>13 séries</span></div>
+  <p class="sh-lead">Grands droits, obliques et lombaires : la sangle qui tient tout le reste.</p>
+</div></div>
 <section><div class="wrap">
-
-  <div class="fatigue" data-fatigue></div>
 
   <div class="warmnote"><b>Échauffement · 4 min.</b> Rien de lourd : quelques rotations du bassin et 20 respirations en gainage léger. Les abdos se réveillent vite.</div>
 
@@ -1160,84 +1245,14 @@ section{padding:26px 0 10px}
   <div class="total"><div class="big">25<small>min</small></div><div class="t">Ceinture complète : face avant chargée, obliques en rotation, lombaires en équilibre. Deux fois par semaine suffisent.</div></div>
 </div></section>
 </div>
-
-<!-- ============ PAGE : PROFIL ============ -->
-<div class="day" id="profil">
-<header class="pg-hero"><div class="hero-in">
-  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse machines</div>
-  <div class="eyebrow">// Mon profil</div>
-  <h1>Moi<span class="o">en chiffres</span></h1>
-  <p class="lead">Tes mensurations et le suivi de ton poids dans le temps. Ce qui compte, c'est la tendance, pas un chiffre isolé.</p>
-</div></header>
-<section><div class="wrap">
-
-  <div class="coach" id="coachCard">
-    <div class="coach-ic" id="coachIc">🧠</div>
-    <div class="coach-tx">
-      <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie</div>
-      <div class="coach-msg" id="coachMsg">…</div>
-      <div class="coach-sig" id="coachSig">Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.</div>
-    </div>
-  </div>
-
-  <div class="block-h"><span class="num">👤</span><span class="tag">Mensurations</span><span class="line"></span></div>
-  <div class="prof-card">
-    <div class="prof-grid">
-      <div class="pf"><label>Taille</label><div class="field"><input inputmode="decimal" id="pf-h" value="175" oninput="updateProfil()"><span class="u">cm</span></div></div>
-      <div class="pf"><label>Poids</label><div class="field"><input inputmode="decimal" id="pf-w" value="90" oninput="updateProfil()"><span class="u">kg</span></div></div>
-      <div class="pf"><label>Tour de taille</label><div class="field"><input inputmode="decimal" id="pf-t" value="" placeholder="—" oninput="updateProfil()"><span class="u">cm</span></div></div>
-    </div>
-    <div class="imc-box">
-      <div class="imc-val" id="imc-val">—</div>
-      <div class="imc-tx"><div class="cat" id="imc-cat">—</div><div class="note" id="imc-note">Renseigne ta taille et ton poids.</div></div>
-    </div>
-  </div>
-
-  <div class="block-h"><span class="num">📉</span><span class="tag">Suivi du poids</span><span class="line"></span></div>
-  <div class="prof-card">
-    <div class="chart" id="wchart"><div class="empty">Ajoute ton poids pour lancer le suivi.</div></div>
-    <div class="chart-x" id="wchart-x"></div>
-    <div class="wlog">
-      <input inputmode="decimal" id="wlog-in" placeholder="Poids du jour (kg)">
-      <button onclick="addWeight()">Ajouter</button>
-    </div>
-  </div>
-
-  <div class="prof-card" style="border-left:3px solid var(--cyan)">
-    <div style="font-size:12.5px;color:#c4d2e4;line-height:1.55">
-      <b style="color:var(--cyan)">Ton repère le plus fiable :</b> le tour de taille. Au-dessus de ~94 cm on surveille, au-dessus de ~102 cm le risque augmente. En reprise, tu prends du muscle et perds du gras en même temps — la balance bouge peu, c'est normal.
-    </div>
-  </div>
-
-  <div class="block-h"><span class="num">📈</span><span class="tag">Progression force</span><span class="line"></span></div>
-  <div class="prof-card">
-    <select id="prog-ex" class="prog-sel"></select>
-    <div class="chart" id="pchart"><div class="empty">Enregistre des perfs pour voir ta courbe de force.</div></div>
-    <div class="chart-x" id="pchart-x"></div>
-    <div style="font-size:11px;color:var(--dim);margin-top:10px;text-align:center">Courbe de ta 1RM estimée par séance — ta vraie progression de force.</div>
-  </div>
-
-  <div class="block-h"><span class="num">💾</span><span class="tag">Sauvegarde</span><span class="line"></span></div>
-  <div class="prof-card">
-    <div style="font-size:12.5px;color:#c4d2e4;line-height:1.5;margin-bottom:14px">Toutes tes données (perfs, historique, poids, profil, réglages) sont sur ce téléphone. Exporte-les régulièrement : en cas de vidage du cache ou de changement de téléphone, tu réimportes tout.</div>
-    <div class="io-btns">
-      <button class="io-b primary" onclick="exportData()">⬇️ Exporter</button>
-      <button class="io-b" onclick="document.getElementById('io-file').click()">⬆️ Importer</button>
-    </div>
-    <input type="file" id="io-file" accept=".json,application/json" style="display:none" onchange="importData(event)">
-    <div id="io-msg" style="text-align:center;font-family:var(--mono);font-size:11px;margin-top:12px;min-height:16px;color:var(--mint)"></div>
-  </div>
-
-</div></section>
 </div>
 
-<!-- ============ PAGE : PLAN ============ -->
-<div class="day" id="plan">
-<header class="pg-hero"><div class="hero-in">
+<!-- ============ ONGLET : SEMAINE ============ -->
+<div class="day" id="semaine">
+<header class="pg-hero compact"><div class="hero-in">
   <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
-  <div class="eyebrow">// Tableau de bord</div>
-  <h1>Le<span class="o">plan</span></h1>
-  <p class="lead">Comment enchaîner tes 4 séances machines et les principes pour prendre du muscle.</p>
+  <div class="hero-row"><h1>Ma semaine</h1></div>
+  <p class="lead">Ce qui est prévu, ce qui est fait, et ce que le coach en pense.</p>
 </div></header>
 <section><div class="wrap">
 
@@ -1280,25 +1295,70 @@ section{padding:26px 0 10px}
   <div class="block-h"><span class="num">🧠</span><span class="tag">Analyse du coach</span><span class="line"></span></div>
   <div class="analysis" id="planAnalysis"></div>
 
+</div></section>
+</div>
+
+<!-- ============ ONGLET : PROGRÈS ============ -->
+<div class="day" id="progres">
+<header class="pg-hero compact"><div class="hero-in">
+  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
+  <div class="hero-row"><h1>Mes progrès</h1></div>
+  <p class="lead">Le poids, la force et le bilan de tes semaines. Ce qui compte, c'est la tendance.</p>
+</div></header>
+<section><div class="wrap">
+
+  <div class="block-h"><span class="num">👤</span><span class="tag">Mensurations</span><span class="line"></span></div>
+  <div class="prof-card">
+    <div class="prof-grid">
+      <div class="pf"><label>Taille</label><div class="field"><input inputmode="decimal" id="pf-h" value="175" oninput="updateProfil()"><span class="u">cm</span></div></div>
+      <div class="pf"><label>Poids</label><div class="field"><input inputmode="decimal" id="pf-w" value="90" oninput="updateProfil()"><span class="u">kg</span></div></div>
+      <div class="pf"><label>Tour de taille</label><div class="field"><input inputmode="decimal" id="pf-t" value="" placeholder="—" oninput="updateProfil()"><span class="u">cm</span></div></div>
+    </div>
+    <div class="imc-box">
+      <div class="imc-val" id="imc-val">—</div>
+      <div class="imc-tx"><div class="cat" id="imc-cat">—</div><div class="note" id="imc-note">Renseigne ta taille et ton poids.</div></div>
+    </div>
+  </div>
+
+  <div class="block-h"><span class="num">📉</span><span class="tag">Suivi du poids</span><span class="line"></span></div>
+  <div class="prof-card">
+    <div class="chart" id="wchart"><div class="empty">Ajoute ton poids pour lancer le suivi.</div></div>
+    <div class="chart-x" id="wchart-x"></div>
+    <div class="wlog">
+      <input inputmode="decimal" id="wlog-in" placeholder="Poids du jour (kg)">
+      <button onclick="addWeight()">Ajouter</button>
+    </div>
+  </div>
+
+  <div class="prof-card" style="border-left:3px solid var(--cyan)">
+    <div style="font-size:12.5px;color:#c4d2e4;line-height:1.55">
+      <b style="color:var(--cyan)">Ton repère le plus fiable :</b> le tour de taille. Au-dessus de ~94 cm on surveille, au-dessus de ~102 cm le risque augmente. En reprise, tu prends du muscle et perds du gras en même temps — la balance bouge peu, c'est normal.
+    </div>
+  </div>
+
+  <div class="block-h"><span class="num">📈</span><span class="tag">Progression force</span><span class="line"></span></div>
+  <div class="prof-card">
+    <select id="prog-ex" class="prog-sel"></select>
+    <div class="chart" id="pchart"><div class="empty">Enregistre des perfs pour voir ta courbe de force.</div></div>
+    <div class="chart-x" id="pchart-x"></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:10px;text-align:center">Courbe de ta 1RM estimée par séance — ta vraie progression de force.</div>
+  </div>
+
   <div class="block-h"><span class="num">📈</span><span class="tag">Récap hebdo</span><span class="line"></span></div>
   <p style="font-size:13px;color:var(--mut);margin:-6px 0 14px;line-height:1.55">Chaque dimanche à 20h, ta semaine est figée : séances, tonnage, séries par muscle, records et évolution du poids.</p>
   <div class="wk" id="wkList"></div>
 
-  <div class="info">
-    <div class="info-h">🎯 Les 5 principes prise de masse</div>
-    <div class="info-row"><span class="rn">1</span><span><b>Surcharge progressive.</b> Monte la charge dès que tu boucles le haut de ta fourchette de reps proprement. C'est LE moteur du muscle.</span></div>
-    <div class="info-row"><span class="rn">2</span><span><b>Lourd puis léger.</b> Gros exercices en force (8-10 reps), puis isolation en congestion (12-15 reps).</span></div>
-    <div class="info-row"><span class="rn">3</span><span><b>Note chaque séance</b> dans le carnet de bord de l'exercice. Tu vois ta perf précédente et tu bats ton score.</span></div>
-    <div class="info-row"><span class="rn">4</span><span><b>Mange assez.</b> Léger surplus + ~1,8 g protéines/kg (≈160-170 g/jour). Sans ça, pas de muscle.</span></div>
-    <div class="info-row"><span class="rn">5</span><span><b>Dors 7-8h.</b> Le muscle se construit au repos, pas à la salle.</span></div>
-  </div>
+</div></section>
+</div>
 
-  <div class="info">
-    <div class="info-h">📓 Le carnet de bord</div>
-    <div class="info-row"><span class="rn">›</span><span>Sous chaque machine, entre ta <b>charge</b> et tes <b>reps</b>, puis touche OK. C'est sauvegardé sur ton téléphone.</span></div>
-    <div class="info-row"><span class="rn">›</span><span>La fois suivante, tu vois ta dernière perf en vert : <b>« 18 kg × 14 »</b>. Ton objectif : faire au moins pareil, idéalement mieux.</span></div>
-    <div class="info-row"><span class="rn">›</span><span>Quand tu bats tes reps facilement, monte la charge. C'est la boucle qui construit du muscle.</span></div>
-  </div>
+<!-- ============ ONGLET : MOI ============ -->
+<div class="day" id="moi">
+<header class="pg-hero compact"><div class="hero-in">
+  <div class="brand"><span class="bar"></span>I&amp;N RUN · Masse</div>
+  <div class="hero-row"><h1>Réglages</h1></div>
+  <p class="lead">Tes préférences, ta sauvegarde et la méthode derrière les conseils.</p>
+</div></header>
+<section><div class="wrap">
 
   <div class="block-h"><span class="num" style="margin-right:2px">⚙︎</span><span class="tag">Réglages</span><span class="line"></span></div>
   <div class="settings">
@@ -1324,6 +1384,39 @@ section{padding:26px 0 10px}
     </div>
     
   </div>
+
+  <div class="block-h"><span class="num">💾</span><span class="tag">Sauvegarde</span><span class="line"></span></div>
+  <div class="prof-card">
+    <div style="font-size:12.5px;color:#c4d2e4;line-height:1.5;margin-bottom:14px">Toutes tes données (perfs, historique, poids, profil, réglages) sont sur ce téléphone. Exporte-les régulièrement : en cas de vidage du cache ou de changement de téléphone, tu réimportes tout.</div>
+    <div class="io-btns">
+      <button class="io-b primary" onclick="exportData()">⬇️ Exporter</button>
+      <button class="io-b" onclick="document.getElementById('io-file').click()">⬆️ Importer</button>
+    </div>
+    <input type="file" id="io-file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+    <div id="io-msg" style="text-align:center;font-family:var(--mono);font-size:11px;margin-top:12px;min-height:16px;color:var(--mint)"></div>
+  </div>
+
+  <div class="block-h"><span class="num">📖</span><span class="tag">La méthode</span><span class="line"></span></div>
+  <details class="fold">
+    <summary>Les principes et le mode d'emploi du carnet</summary>
+    <div class="fold-b">
+    <div class="info">
+    <div class="info-h">🎯 Les 5 principes prise de masse</div>
+    <div class="info-row"><span class="rn">1</span><span><b>Surcharge progressive.</b> Monte la charge dès que tu boucles le haut de ta fourchette de reps proprement. C'est LE moteur du muscle.</span></div>
+    <div class="info-row"><span class="rn">2</span><span><b>Lourd puis léger.</b> Gros exercices en force (8-10 reps), puis isolation en congestion (12-15 reps).</span></div>
+    <div class="info-row"><span class="rn">3</span><span><b>Note chaque séance</b> dans le carnet de bord de l'exercice. Tu vois ta perf précédente et tu bats ton score.</span></div>
+    <div class="info-row"><span class="rn">4</span><span><b>Mange assez.</b> Léger surplus + ~1,8 g protéines/kg (≈160-170 g/jour). Sans ça, pas de muscle.</span></div>
+    <div class="info-row"><span class="rn">5</span><span><b>Dors 7-8h.</b> Le muscle se construit au repos, pas à la salle.</span></div>
+  </div>
+
+  <div class="info">
+    <div class="info-h">📓 Le carnet de bord</div>
+    <div class="info-row"><span class="rn">›</span><span>Sous chaque machine, entre ta <b>charge</b> et tes <b>reps</b>, puis touche OK. C'est sauvegardé sur ton téléphone.</span></div>
+    <div class="info-row"><span class="rn">›</span><span>La fois suivante, tu vois ta dernière perf en vert : <b>« 18 kg × 14 »</b>. Ton objectif : faire au moins pareil, idéalement mieux.</span></div>
+    <div class="info-row"><span class="rn">›</span><span>Quand tu bats tes reps facilement, monte la charge. C'est la boucle qui construit du muscle.</span></div>
+  </div>
+    </div>
+  </details>
 
   <div class="resetbar"><button onclick="resetLogs()">Effacer tout le carnet de bord</button></div>
 
@@ -1383,18 +1476,28 @@ section{padding:26px 0 10px}
 
 <!-- ====== BOTTOM NAV ====== -->
 <nav class="bottomnav">
-  <div class="bn active" onclick="show('push',this)"><span class="i">🔨</span><span class="l">Poussée</span></div>
-  <div class="bn" onclick="show('pull',this)"><span class="i">🪝</span><span class="l">Tirage</span></div>
-  <div class="bn" onclick="show('legs',this)"><span class="i">🦵</span><span class="l">Jambes</span></div>
-  <div class="bn" onclick="show('upper',this)"><span class="i">💪</span><span class="l">Bras</span></div>
-  <div class="bn" onclick="show('core',this)"><span class="i">🧘</span><span class="l">Abdos</span></div>
-  <div class="bn" onclick="show('profil',this)"><span class="i">👤</span><span class="l">Profil</span></div>
-  <div class="bn" onclick="show('plan',this)"><span class="i">📋</span><span class="l">Plan</span></div>
+  <div class="bn active" onclick="show('today',this)"><span class="i">🏋️</span><span class="l">Aujourd'hui</span></div>
+  <div class="bn" onclick="show('semaine',this)"><span class="i">📅</span><span class="l">Semaine</span></div>
+  <div class="bn" onclick="show('progres',this)"><span class="i">📈</span><span class="l">Progrès</span></div>
+  <div class="bn" onclick="show('moi',this)"><span class="i">⚙️</span><span class="l">Moi</span></div>
 </nav>
 
 <script>
-var PAGES=['push','pull','legs','upper','core','profil','plan'];
-function show(id, el){
+/* ================================================================
+   NAVIGATION — 4 onglets, et 5 séances qui ne sont plus des
+   destinations mais un choix à l'intérieur d'« Aujourd'hui ».
+   ================================================================ */
+var PAGES=['today','semaine','progres','moi'];
+var SESSIONS=['push','pull','legs','upper','core'];
+/* les anciennes ancres restent valides : raccourcis d'icône du manifeste
+   et liens déjà enregistrés continuent de tomber au bon endroit */
+var ALIAS={plan:'semaine', profil:'progres'};
+
+function setHash(h){
+  if(location.hash.slice(1)===h) return;
+  try{ history.replaceState(null,'','#'+h); }catch(e){ location.hash=h; }
+}
+function show(id, el, garderPosition){
   var page=document.getElementById(id);
   if(!page) return;
   document.querySelectorAll('.day').forEach(function(d){d.classList.remove('show');});
@@ -1403,16 +1506,70 @@ function show(id, el){
   if(!el){ var i=PAGES.indexOf(id); el = i>=0 ? nav[i] : null; }
   nav.forEach(function(t){t.classList.remove('active');});
   if(el) el.classList.add('active');
-  /* garde l'ancre à jour : les raccourcis du manifeste et le bouton retour
-     d'Android retombent sur la bonne page. */
-  if(location.hash.slice(1)!==id){
-    try{ history.replaceState(null,'','#'+id); }catch(e){ location.hash=id; }
+  setHash(id);
+  if(!garderPosition) window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* --- la séance affichée dans l'onglet Aujourd'hui --- */
+var SESSKEY='inrun_last_sess';
+function showSess(g, garderPosition, sansAncre){
+  if(SESSIONS.indexOf(g)<0) return;
+  document.querySelectorAll('.sess').forEach(function(d){ d.classList.toggle('show', d.id===g); });
+  try{ localStorage.setItem(SESSKEY,g); }catch(e){}
+  renderSessBar();
+  /* au démarrage on n'écrit pas d'ancre : le navigateur ferait défiler la page
+     jusqu'à l'élément correspondant une fois le chargement terminé */
+  if(!sansAncre) setHash(g);
+  if(!garderPosition){
+    var bar=document.getElementById('sessBar');
+    if(bar) window.scrollTo({top:Math.max(0, bar.getBoundingClientRect().top+window.scrollY-8), behavior:'smooth'});
   }
-  window.scrollTo({top:0,behavior:'smooth'});
+}
+/* Ce que l'app ouvre d'elle-même : ce qui est déjà fait aujourd'hui, sinon
+   ce qui est prévu, sinon ce que le coach conseille, sinon la dernière vue.
+   L'app connaît le jour — inutile de le lui redemander à chaque ouverture. */
+function sessionDuJour(){
+  var ctx=planCtx(), k=todayKey();
+  if(SESSIONS.indexOf(ctx.log[k])>=0) return ctx.log[k];
+  if(SESSIONS.indexOf(ctx.plan[k])>=0) return ctx.plan[k];
+  var s=suggestGroup(k,ctx);
+  if(SESSIONS.indexOf(s)>=0) return s;
+  var last=null; try{ last=localStorage.getItem(SESSKEY); }catch(e){}
+  return SESSIONS.indexOf(last)>=0 ? last : 'push';
+}
+/* Le sélecteur porte l'état : point orange = au programme aujourd'hui,
+   coche verte = déjà fait cette semaine. La navigation devient une lecture. */
+function renderSessBar(){
+  var bar=document.getElementById('sessBar'); if(!bar) return;
+  var ctx=planCtx(), k=todayKey(), sem=weekDaysOf(k);
+  var courant=(document.querySelector('.sess.show')||{}).id;
+  bar.innerHTML=SESSIONS.map(function(g){
+    var prevu=(ctx.plan[k]===g || ctx.log[k]===g);
+    var fait=sem.some(function(d){ return ctx.log[d]===g; });
+    return '<button class="sc'+(g===courant?' on':'')+'" data-g="'+g+'">'+
+      '<span class="e">'+SESS[g].e+'</span>'+SESS[g].t+
+      (prevu?'<span class="dot"></span>':'')+
+      (fait&&!prevu?'<span class="ok">✓</span>':'')+'</button>';
+  }).join('');
+  bar.querySelectorAll('[data-g]').forEach(function(b){
+    b.onclick=function(){ showSess(b.getAttribute('data-g')); buzz(10); };
+  });
+}
+/* le message du coach est tronqué à 4 lignes : une tape le déplie */
+function initCoachFold(){
+  var c=document.getElementById('coachCard'); if(!c) return;
+  c.addEventListener('click', function(){ c.classList.toggle('open'); });
+}
+function renderTodayDate(){
+  var el=document.getElementById('todayDate'); if(!el) return;
+  var d=new Date();
+  el.textContent=DAYS_L[(d.getDay()+6)%7]+' '+d.getDate()+' '+MOIS[d.getMonth()].toLowerCase();
 }
 function showFromHash(){
   var id=location.hash.slice(1);
-  if(PAGES.indexOf(id)>=0) show(id, null);
+  if(ALIAS[id]) id=ALIAS[id];
+  if(SESSIONS.indexOf(id)>=0){ show('today',null,true); showSess(id,true); return; }
+  if(PAGES.indexOf(id)>=0) show(id, null, true);
 }
 window.addEventListener('hashchange', showFromHash);
 
@@ -1518,6 +1675,11 @@ function enhanceStation(st){
   var iw=st.querySelector('[data-w]'), ir=st.querySelector('[data-r]');
   var log=st.querySelector('.log'); if(!log||!iw) return;
   var stepW=wStep(st);
+
+  /* l'en-tête déplie la technique et le lien démo : ils se lisent une fois,
+     ils n'ont pas à occuper 123 px sur chaque carte pendant la séance */
+  var head=st.querySelector('.st-head');
+  if(head) head.addEventListener('click', function(){ st.classList.toggle('open'); buzz(8); });
 
   // 1RM + badge dans le header
   var tx=st.querySelector('.st-tx');
@@ -1766,7 +1928,8 @@ function resetPresc(st){
   renderPresc(st); renderAdvice(st); buzz(12);
 }
 function togglePrescTools(btn){
-  var t=btn.parentNode.querySelector('.presc-tools');
+  var st0=btn.closest('.station');
+  var t=st0?st0.querySelector('.presc-tools'):null;
   if(!t) return;
   var open=t.classList.toggle('show');
   if(open){ btn.dataset.open='1'; btn.textContent='✕ Fermer'; }
@@ -1788,8 +1951,9 @@ function buildPrescTools(st){
     '<button data-p="reps" data-d="-1">− Rep</button>'+
     '<button data-p="reps" data-d="1">+ Rep</button>'+
     '<button class="wide" data-reset>↺ Prescription d\'origine</button>';
-  host.insertBefore(btn, box.nextSibling);
-  host.insertBefore(tools, btn.nextSibling);
+  /* le bouton vit dans la ligne de prescription : une ligne au lieu de deux */
+  box.appendChild(btn);
+  host.insertBefore(tools, box.nextSibling);
   tools.querySelectorAll('[data-p]').forEach(function(b){
     b.onclick=function(){ changePresc(st, b.getAttribute('data-p'), parseInt(b.getAttribute('data-d'),10)); };
   });
@@ -2375,7 +2539,7 @@ function autoMark(type){
   log[k]=type; saveTLog(log);
   refreshPlan();
 }
-function refreshPlan(){ cleanPlan(); renderWeekStrip(); renderCal(); renderStreaks(); updateCoach(); analyzeTraining(); }
+function refreshPlan(){ cleanPlan(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -3032,7 +3196,12 @@ renderFatigue();
 refreshAllStations();
 maybeShowRecapPop();
 scheduleSundayNudge();
-showFromHash();
+renderTodayDate();
+initCoachFold();
+/* l'ancre a le dernier mot, mais l'app prépare d'abord la séance du jour */
+var ancreDepart=location.hash.slice(1);
+showSess(sessionDuJour(), true, true);
+if(ancreDepart){ setHash(ancreDepart); showFromHash(); }
 </script>
 
 </body>
