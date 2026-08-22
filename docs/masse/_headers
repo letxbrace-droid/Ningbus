@@ -1,0 +1,25 @@
+# Netlify / Cloudflare Pages — en-têtes de cache.
+# Sans ça, le navigateur peut garder l'ancien sw.js pendant 24 h et bloquer
+# toutes les mises à jour de l'app. GitHub Pages ignore ce fichier : l'app
+# enregistre le worker avec updateViaCache:'none', ce qui donne le même
+# résultat sur les navigateurs récents.
+
+/sw.js
+  Cache-Control: no-cache, max-age=0, must-revalidate
+  Service-Worker-Allowed: /
+
+/index.html
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/manifest.json
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Cache-Control: public, max-age=604800
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer-when-downgrade

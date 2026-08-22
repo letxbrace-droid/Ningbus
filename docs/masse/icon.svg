@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="I&amp;N RUN Masse">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3d7dff"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="28%" cy="18%" r="70%">
+      <stop offset="0" stop-color="#3d7dff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#3d7dff" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="card"><rect width="512" height="512" rx="112" ry="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="512" height="512" fill="#0a1524"/>
+    <rect width="512" height="512" fill="url(#halo)"/>
+    <circle cx="256" cy="234" r="150" fill="none" stroke="url(#ring)" stroke-width="24"/>
+    <text x="256" y="294" text-anchor="middle"
+          font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="170"
+          fill="#eaf3ff" letter-spacing="4">IN</text>
+    <rect x="201" y="422" width="110" height="15" rx="7.5" fill="#ff6b35"/>
+  </g>
+</svg>
