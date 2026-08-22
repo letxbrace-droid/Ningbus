@@ -110,8 +110,8 @@ h1 .o{color:var(--blue-l);display:block;text-shadow:0 2px 26px var(--cyan-glow)}
   font-size:26px;letter-spacing:.01em}
 .sess-head h2 .o{color:var(--blue-l);font-size:15px;display:block;margin-top:5px;letter-spacing:.05em}
 .sess-head .sh-g{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.sess-head .sh-g span{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--mut);
-  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+.sess-head .sh-g span{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--mut);
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 7px;white-space:nowrap}
 .sess-head .sh-lead{color:var(--mut);font-size:13.5px;line-height:1.55;margin-top:11px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
@@ -719,6 +719,47 @@ section{padding:26px 0 10px}
 .demo{min-height:44px;padding:0 14px}
 .presc-tools button{min-height:44px}
 
+/* ================================================================
+   ICÔNES — masques monochromes teintés par la couleur du texte.
+   Un seul fichier sert l'état actif, inactif et toutes les tailles.
+   ================================================================ */
+.ic{display:inline-block;width:1em;height:1em;flex:0 0 auto;vertical-align:-.14em;
+  background:currentColor;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain}
+.ic.grad{background:linear-gradient(135deg,var(--blue-l),var(--cyan))}
+.ic-push{-webkit-mask-image:url(img/ic-push.webp);mask-image:url(img/ic-push.webp)}
+.ic-pull{-webkit-mask-image:url(img/ic-pull.webp);mask-image:url(img/ic-pull.webp)}
+.ic-legs{-webkit-mask-image:url(img/ic-legs.webp);mask-image:url(img/ic-legs.webp)}
+.ic-upper{-webkit-mask-image:url(img/ic-upper.webp);mask-image:url(img/ic-upper.webp)}
+.ic-core{-webkit-mask-image:url(img/ic-core.webp);mask-image:url(img/ic-core.webp)}
+.ic-today{-webkit-mask-image:url(img/ic-today.webp);mask-image:url(img/ic-today.webp)}
+.ic-semaine{-webkit-mask-image:url(img/ic-semaine.webp);mask-image:url(img/ic-semaine.webp)}
+.ic-progres{-webkit-mask-image:url(img/ic-progres.webp);mask-image:url(img/ic-progres.webp)}
+.ic-moi{-webkit-mask-image:url(img/ic-moi.webp);mask-image:url(img/ic-moi.webp)}
+.ic-swim{-webkit-mask-image:url(img/ic-swim.webp);mask-image:url(img/ic-swim.webp)}
+.ic-cardio{-webkit-mask-image:url(img/ic-cardio.webp);mask-image:url(img/ic-cardio.webp)}
+.ic-rest{-webkit-mask-image:url(img/ic-rest.webp);mask-image:url(img/ic-rest.webp)}
+.ic-fatigue{-webkit-mask-image:url(img/ic-fatigue.webp);mask-image:url(img/ic-fatigue.webp)}
+.ic-normal{-webkit-mask-image:url(img/ic-normal.webp);mask-image:url(img/ic-normal.webp)}
+.ic-forme{-webkit-mask-image:url(img/ic-forme.webp);mask-image:url(img/ic-forme.webp)}
+
+/* carte musculaire en tête de séance */
+.sh-in{display:flex;gap:13px;align-items:flex-start}
+.sh-tx{flex:1;min-width:0}
+.sh-mus{flex:0 0 auto;width:100px;height:auto;opacity:.92;margin-top:2px}
+@media (max-width:359px){.sh-mus{width:96px}}
+
+/* matière de fond et photo de salle dans l'en-tête du jour */
+body:after{background-image:url(img/fond-texture.webp);background-size:cover;
+  background-position:center;background-repeat:no-repeat;opacity:.5}
+#today .pg-hero{background-image:
+  linear-gradient(180deg,rgba(10,21,36,.74) 0%,rgba(10,21,36,.93) 78%,var(--bg) 100%),
+  url(img/fond-salle.webp);
+  background-size:cover;background-position:center 28%}
+#today .pg-hero:before{opacity:.5}
+
 @media (prefers-reduced-motion:reduce){.day{animation:none}*{transition:none!important}}
 </style>
 </head>
@@ -749,10 +790,13 @@ section{padding:26px 0 10px}
 <div class="sessbar-wrap"><div class="wrap"><div class="sessbar" id="sessBar"></div></div></div>
 
 <div class="sess" id="push">
-<div class="sess-head"><div class="wrap">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
   <h2>Pecs<span class="o">épaules · triceps</span></h2>
   <div class="sh-g"><span>~50′</span><span>5 machines</span><span>16 séries</span></div>
   <p class="sh-lead">Tout ce qui pousse, 100&nbsp;% sur machines. Le volume du buste et l'avant des bras.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-push.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -848,10 +892,13 @@ section{padding:26px 0 10px}
 </div>
 
 <div class="sess" id="pull">
-<div class="sess-head"><div class="wrap">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
   <h2>Dos<span class="o">largeur · biceps</span></h2>
   <div class="sh-g"><span>~50′</span><span>5 machines</span><span>16 séries</span></div>
   <p class="sh-lead">Tout ce qui tire, sur machines. La largeur en V, l'épaisseur du dos et les biceps.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-pull.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -946,10 +993,13 @@ section{padding:26px 0 10px}
 </div>
 
 <div class="sess" id="legs">
-<div class="sess-head"><div class="wrap">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
   <h2>Jambes<span class="o">complètes</span></h2>
   <div class="sh-g"><span>~50′</span><span>5 machines</span><span>17 séries</span></div>
   <p class="sh-lead">La moitié de ta masse musculaire. Les travailler booste toute ta progression.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-legs.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -1044,10 +1094,13 @@ section{padding:26px 0 10px}
 </div>
 
 <div class="sess" id="upper">
-<div class="sess-head"><div class="wrap">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
   <h2>Bras<span class="o">+ buste</span></h2>
   <div class="sh-g"><span>~50′</span><span>6 machines</span><span>18 séries</span></div>
   <p class="sh-lead">Un peu de pecs et de dos, puis 4 machines dédiées biceps-triceps pour le volume.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-upper.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -1158,10 +1211,13 @@ section{padding:26px 0 10px}
 </div>
 
 <div class="sess" id="core">
-<div class="sess-head"><div class="wrap">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
   <h2>Abdos<span class="o">ceinture complète</span></h2>
   <div class="sh-g"><span>~25′</span><span>4 machines</span><span>13 séries</span></div>
   <p class="sh-lead">Grands droits, obliques et lombaires : la sangle qui tient tout le reste.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-core.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -1446,14 +1502,14 @@ section{padding:26px 0 10px}
     <h4 id="pickDate">—</h4>
     <div class="psd" id="pickSub">Qu'as-tu fait ce jour ?</div>
     <div class="pick-grid">
-      <div class="pick" onclick="choisirJour('push')"><span class="pe">🔨</span>Poussée</div>
-      <div class="pick" onclick="choisirJour('pull')"><span class="pe">🪝</span>Tirage</div>
-      <div class="pick" onclick="choisirJour('legs')"><span class="pe">🦵</span>Jambes</div>
-      <div class="pick" onclick="choisirJour('upper')"><span class="pe">💪</span>Bras</div>
-      <div class="pick" onclick="choisirJour('core')"><span class="pe">🧘</span>Abdos</div>
-      <div class="pick" onclick="choisirJour('swim')"><span class="pe">🏊</span>Piscine</div>
-      <div class="pick" onclick="choisirJour('cardio')"><span class="pe">🏃</span>Cardio</div>
-      <div class="pick" onclick="choisirJour('rest')"><span class="pe">😌</span>Repos</div>
+      <div class="pick" onclick="choisirJour('push')"><i class="ic ic-push pe"></i>Poussée</div>
+      <div class="pick" onclick="choisirJour('pull')"><i class="ic ic-pull pe"></i>Tirage</div>
+      <div class="pick" onclick="choisirJour('legs')"><i class="ic ic-legs pe"></i>Jambes</div>
+      <div class="pick" onclick="choisirJour('upper')"><i class="ic ic-upper pe"></i>Bras</div>
+      <div class="pick" onclick="choisirJour('core')"><i class="ic ic-core pe"></i>Abdos</div>
+      <div class="pick" onclick="choisirJour('swim')"><i class="ic ic-swim pe"></i>Piscine</div>
+      <div class="pick" onclick="choisirJour('cardio')"><i class="ic ic-cardio pe"></i>Cardio</div>
+      <div class="pick" onclick="choisirJour('rest')"><i class="ic ic-rest pe"></i>Repos</div>
       <div class="pick clear" onclick="choisirJour(null)">Effacer ce jour</div>
     </div>
     <div class="verdict" id="pickVerdict"></div>
@@ -1476,10 +1532,10 @@ section{padding:26px 0 10px}
 
 <!-- ====== BOTTOM NAV ====== -->
 <nav class="bottomnav">
-  <div class="bn active" onclick="show('today',this)"><span class="i">🏋️</span><span class="l">Aujourd'hui</span></div>
-  <div class="bn" onclick="show('semaine',this)"><span class="i">📅</span><span class="l">Semaine</span></div>
-  <div class="bn" onclick="show('progres',this)"><span class="i">📈</span><span class="l">Progrès</span></div>
-  <div class="bn" onclick="show('moi',this)"><span class="i">⚙️</span><span class="l">Moi</span></div>
+  <div class="bn active" onclick="show('today',this)"><i class="ic ic-today i"></i><span class="l">Aujourd'hui</span></div>
+  <div class="bn" onclick="show('semaine',this)"><i class="ic ic-semaine i"></i><span class="l">Semaine</span></div>
+  <div class="bn" onclick="show('progres',this)"><i class="ic ic-progres i"></i><span class="l">Progrès</span></div>
+  <div class="bn" onclick="show('moi',this)"><i class="ic ic-moi i"></i><span class="l">Moi</span></div>
 </nav>
 
 <script>
@@ -1493,6 +1549,11 @@ var SESSIONS=['push','pull','legs','upper','core'];
    et liens déjà enregistrés continuent de tomber au bon endroit */
 var ALIAS={plan:'semaine', profil:'progres'};
 
+/* une icône = un masque ; le nom de la classe est celui du groupe ou de l'état */
+function ico(n, extra){ return '<i class="ic ic-'+n+(extra?' '+extra:'')+'"></i>'; }
+/* l'icône du coach : notre jeu quand elle désigne une séance, un emoji sinon
+   (cerveau, stop, validation n'existent pas dans le jeu généré) */
+function coachIco(v){ return (SESS[v]||v==='today') ? ico(v) : v; }
 function setHash(h){
   if(location.hash.slice(1)===h) return;
   try{ history.replaceState(null,'','#'+h); }catch(e){ location.hash=h; }
@@ -1547,7 +1608,7 @@ function renderSessBar(){
     var prevu=(ctx.plan[k]===g || ctx.log[k]===g);
     var fait=sem.some(function(d){ return ctx.log[d]===g; });
     return '<button class="sc'+(g===courant?' on':'')+'" data-g="'+g+'">'+
-      '<span class="e">'+SESS[g].e+'</span>'+SESS[g].t+
+      ico(g,'e'+(g===courant?' grad':''))+SESS[g].t+
       (prevu?'<span class="dot"></span>':'')+
       (fait&&!prevu?'<span class="ok">✓</span>':'')+'</button>';
   }).join('');
@@ -1982,7 +2043,7 @@ function renderFatigue(){
   document.querySelectorAll('[data-fatigue]').forEach(function(box){
     box.innerHTML='<div class="fh">Comment tu te sens aujourd\'hui ?</div><div class="fg">'+
       Object.keys(FAT).map(function(k){
-        return '<button data-f="'+k+'" class="'+(cur===k?'sel':'')+'"><span class="fe">'+FAT[k].e+'</span>'+FAT[k].t+'</button>';
+        return '<button data-f="'+k+'" class="'+(cur===k?'sel':'')+'">'+ico(k,'fe')+FAT[k].t+'</button>';
       }).join('')+'</div>';
     box.querySelectorAll('[data-f]').forEach(function(b){
       b.onclick=function(){ setFat(b.getAttribute('data-f')); };
@@ -2449,12 +2510,12 @@ function renderWeekStrip(){
     var k=dkey(d), fait=ctx.log[k], prevu=!fait && ctx.plan[k];
     var cls='ws'+(k===tk?' today':'')+(fait?' done':'')+(prevu?' plan':'');
     var emo='·', nom='';
-    if(fait){ emo=SESS[fait].e; nom=SESS[fait].t; }
-    else if(prevu){ emo=SESS[prevu].e; nom=SESS[prevu].t; }
+    if(fait){ emo=ico(fait); nom=SESS[fait].t; }
+    else if(prevu){ emo=ico(prevu); nom=SESS[prevu].t; }
     else if(k>=tk){
       /* jour libre : le coach dit ce qui irait le mieux ici */
       var sug=suggestGroup(k,ctx);
-      if(sug){ cls+=' free'; emo=SESS[sug].e; nom=SESS[sug].t; }
+      if(sug){ cls+=' free'; emo=ico(sug); nom=SESS[sug].t; }
     }
     var ws=document.createElement('div');
     ws.className=cls;
@@ -2483,7 +2544,7 @@ function renderCal(){
     var v=log[k], pv=!v && plan[k];
     var cell=document.createElement('div');
     cell.className='cd'+(v?' has s-'+v:'')+(pv?' plan':'')+(k===tKey?' today':'');
-    cell.innerHTML='<span class="cdn">'+dd+'</span><span class="cde">'+(v?SESS[v].e:(pv?SESS[pv].e:''))+'</span>';
+    cell.innerHTML='<span class="cdn">'+dd+'</span><span class="cde">'+(v?ico(v):(pv?ico(pv):''))+'</span>';
     (function(key){ cell.addEventListener('click', function(){ openPick(key); }); })(k);
     grid.appendChild(cell);
   }
@@ -2862,7 +2923,7 @@ function updateCoach(){
   /* --- démarrage --- */
   if(Object.keys(log).length===0 && volTot===0){
     msgEl.innerHTML='<b>On commence par la base.</b> Enregistre chaque série (charge × reps) pendant ta séance : c\'est la seule donnée qui me permet de te dire quand monter la charge. Marque aussi tes jours dans le calendrier.';
-    if(icEl) icEl.textContent='💪';
+    if(icEl) icEl.innerHTML=ico('today');
     if(sigEl) sigEl.textContent='Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.';
     return;
   }
@@ -2884,15 +2945,15 @@ function updateCoach(){
   if(stagnation() && volTot>=20){
     ic='🛑';
     msg='<b>Signal de décharge.</b> Tes charges ne montent plus sur la majorité des exercices alors que ton volume est élevé. Fais une semaine à <b>60 % de tes charges habituelles</b>, mêmes séries, mêmes reps. Tu reviendras plus fort — c\'est prévu, pas un échec.';
-    msgEl.innerHTML=msg; if(icEl) icEl.textContent=ic;
+    msgEl.innerHTML=msg; if(icEl) icEl.innerHTML=coachIco(ic);
     if(sigEl) sigEl.textContent='Volume 7 j : '+volTot+' séries · '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+' soulevés.';
     return;
   }
 
   /* --- priorité 2 : la séance du jour --- */
   if(doneToday){
-    if(doneToday==='rest'){ ic='😌'; msg='<b>Repos noté.</b> Le muscle ne se construit pas à la salle mais maintenant. '; }
-    else if(doneToday==='cardio'){ ic='🏃'; msg='<b>Cardio noté.</b> Bon pour la récupération sans entamer ta masse. '; }
+    if(doneToday==='rest'){ ic='rest'; msg='<b>Repos noté.</b> Le muscle ne se construit pas à la salle mais maintenant. '; }
+    else if(doneToday==='cardio'){ ic='cardio'; msg='<b>Cardio noté.</b> Bon pour la récupération sans entamer ta masse. '; }
     else { ic='✅'; msg='<b>'+SESS[doneToday].t+' : c\'est fait.</b> '; }
 
     if(never){ msg+='<b>'+SESS[never].t+'</b> reste à faire : tu n\'as aucune donnée dessus.'; }
@@ -2900,10 +2961,10 @@ function updateCoach(){
     else if(neglect && maxd>=2){ msg+='Prochaine séance : <b>'+SESS[neglect].t+'</b>.'; }
     else { msg+='Ta rotation est propre. Mange ton surplus et dors 7-8 h, c\'est là que tout se joue.'; }
   } else {
-    if(never){ ic=SESS[never].e; msg='<b>Aujourd\'hui : '+SESS[never].t+'.</b> Aucune donnée sur ce groupe — c\'est le trou dans ton programme.'; }
-    else if(neglect && maxd>=5){ ic=SESS[neglect].e; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'.</b> '+maxd+' jours sans travailler '+labels[neglect]+'. Un muscle se retravaille tous les 3 à 5 jours, pas une fois par semaine.'; }
-    else if(neglect && maxd>=2){ ic=SESS[neglect].e; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'</b> ('+maxd+' jours de récup, c\'est le bon créneau).'; }
-    else { ic='😌'; msg='<b>Tout est frais.</b> Tu as tout travaillé dans les 48 h. Repos, ou une séance légère sur ton point faible.'; }
+    if(never){ ic=never; msg='<b>Aujourd\'hui : '+SESS[never].t+'.</b> Aucune donnée sur ce groupe — c\'est le trou dans ton programme.'; }
+    else if(neglect && maxd>=5){ ic=neglect; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'.</b> '+maxd+' jours sans travailler '+labels[neglect]+'. Un muscle se retravaille tous les 3 à 5 jours, pas une fois par semaine.'; }
+    else if(neglect && maxd>=2){ ic=neglect; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'</b> ('+maxd+' jours de récup, c\'est le bon créneau).'; }
+    else { ic='rest'; msg='<b>Tout est frais.</b> Tu as tout travaillé dans les 48 h. Repos, ou une séance légère sur ton point faible.'; }
   }
 
   /* --- couche volume : la vraie métrique de la prise de masse --- */
@@ -2941,7 +3002,7 @@ function updateCoach(){
   }
 
   msgEl.innerHTML=msg;
-  if(icEl) icEl.textContent=ic;
+  if(icEl) icEl.innerHTML=coachIco(ic);
 
   /* --- signature : les chiffres de la semaine --- */
   if(sigEl){
