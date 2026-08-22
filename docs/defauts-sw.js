@@ -19,17 +19,29 @@ self.addEventListener('install', e => {
   );
 });
 
+/* Le ménage ne porte que sur les caches de cette app : letxbrace-droid.github.io
+   héberge aussi la PWA I&N RUN Masse (/Ningbus/masse/) et le stockage des caches
+   est commun à tout le domaine. Sans ce filtre, chaque activation de ce worker
+   supprimait les caches de l'autre app et lui faisait perdre son mode hors ligne. */
+const PREFIXE = 'ningbus-defauts-';
+
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys
+        .filter(k => k.startsWith(PREFIXE) && k !== CACHE)
+        .map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  /* caches.match() interroge tous les caches du domaine, y compris ceux de
+     l'autre app : on ne lit que le nôtre. */
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.open(CACHE)
+      .then(c => c.match(e.request))
+      .then(cached => cached || fetch(e.request))
   );
 });
