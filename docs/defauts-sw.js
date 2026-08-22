@@ -1,47 +1,36 @@
-/* Service Worker — Suivi Atelier RATP Cap Saclay
-   Stratégie : cache-first pour les assets statiques.
-   Les données métier sont dans IndexedDB → l'app fonctionne 100 % hors-ligne. */
+/* Pierre tombale — la PWA « Suivi Atelier RATP Cap Saclay » a été retirée.
+   ---------------------------------------------------------------------
+   Supprimer les fichiers du dépôt ne désinstalle rien : les téléphones qui
+   ont déjà installé l'app gardent son service worker enregistré sur tout
+   /Ningbus/, avec une stratégie cache-first qui continuerait à servir
+   l'ancienne app indéfiniment.
 
-const CACHE = 'ningbus-defauts-v3';
-const ASSETS = [
-  '/Ningbus/defauts.html',
-  '/Ningbus/logo-ratpcap.png',
-  '/Ningbus/defauts-manifest.json',
-  '/Ningbus/icons/defauts-192.png',
-  '/Ningbus/icons/defauts-512.png',
-];
+   Ce worker prend la place de l'ancien : il vide ses caches, se désinscrit
+   et laisse la main au réseau. Une fois qu'il ne reste plus d'installation
+   en circulation (quelques semaines), ce fichier peut être supprimé à son
+   tour. */
 
-self.addEventListener('install', e => {
+self.addEventListener('install', function(){ self.skipWaiting(); });
+
+self.addEventListener('activate', function(e){
+  /* Le ménage des caches doit finir avant que l'activation soit considérée
+     comme terminée : il porte uniquement sur les caches de cette app. */
   e.waitUntil(
-    caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+    caches.keys().then(function(keys){
+      return Promise.all(keys
+        .filter(function(k){ return k.indexOf('ningbus-defauts-') === 0; })
+        .map(function(k){ return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
   );
+
+  /* La désinscription reste HORS de waitUntil : unregister() n'aboutit
+     qu'une fois ce worker relâché, donc l'attendre ici bloque l'activation
+     et le worker reste en place — exactement ce qu'on veut éviter. Les
+     onglets ouverts sont rechargés pour repartir sans worker. */
+  self.registration.unregister()
+    .then(function(){ return self.clients.matchAll({ type: 'window' }); })
+    .then(function(cs){ cs.forEach(function(c){ c.navigate(c.url).catch(function(){}); }); })
+    .catch(function(){});
 });
 
-/* Le ménage ne porte que sur les caches de cette app : letxbrace-droid.github.io
-   héberge aussi la PWA I&N RUN Masse (/Ningbus/masse/) et le stockage des caches
-   est commun à tout le domaine. Sans ce filtre, chaque activation de ce worker
-   supprimait les caches de l'autre app et lui faisait perdre son mode hors ligne. */
-const PREFIXE = 'ningbus-defauts-';
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys
-        .filter(k => k.startsWith(PREFIXE) && k !== CACHE)
-        .map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  /* caches.match() interroge tous les caches du domaine, y compris ceux de
-     l'autre app : on ne lit que le nôtre. */
-  e.respondWith(
-    caches.open(CACHE)
-      .then(c => c.match(e.request))
-      .then(cached => cached || fetch(e.request))
-  );
-});
+/* Aucune interception : tout passe au réseau. */
