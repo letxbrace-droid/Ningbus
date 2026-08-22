@@ -3,7 +3,7 @@
    Change la version à chaque modification d'index.html : c'est ce numéro qui
    déclenche l'installation d'un nouveau worker, donc le bandeau « Recharger ».
    ----------------------------------------------------------------------- */
-var VERSION = 'v7';
+var VERSION = 'v8';
 var SHELL   = 'inrun-masse-shell-' + VERSION;   /* l'app elle-même */
 var FONTS   = 'inrun-masse-fonts-' + VERSION;   /* Google Fonts */
 
@@ -17,7 +17,31 @@ var PRECACHE = [
   './icon-180.png',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png'
+  './icon-maskable-512.png',
+  /* icônes, cartes musculaires et fonds : sans eux l'app hors ligne
+     afficherait des emplacements vides */
+  './img/ic-push.webp',
+  './img/ic-pull.webp',
+  './img/ic-legs.webp',
+  './img/ic-upper.webp',
+  './img/ic-core.webp',
+  './img/ic-today.webp',
+  './img/ic-semaine.webp',
+  './img/ic-progres.webp',
+  './img/ic-moi.webp',
+  './img/ic-swim.webp',
+  './img/ic-cardio.webp',
+  './img/ic-rest.webp',
+  './img/ic-fatigue.webp',
+  './img/ic-normal.webp',
+  './img/ic-forme.webp',
+  './img/mus-push.webp',
+  './img/mus-pull.webp',
+  './img/mus-legs.webp',
+  './img/mus-upper.webp',
+  './img/mus-core.webp',
+  './img/fond-texture.webp',
+  './img/fond-salle.webp'
 ];
 
 var FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];

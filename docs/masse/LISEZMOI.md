@@ -20,7 +20,23 @@ icon-192.png             ← icône Android
 icon-512.png             ← icône haute définition / splash screen
 icon-maskable-512.png    ← icône adaptative Android
 _headers                 ← en-têtes de cache (Netlify et Cloudflare Pages)
+img/                     ← icônes, cartes musculaires et fonds (151 Ko)
 ```
+
+Le dossier `img/` contient 22 fichiers WebP :
+
+- `ic-*.webp` — 15 icônes monochromes, utilisées comme **masques CSS**. Un seul
+  fichier sert l'état actif (dégradé bleu-cyan), inactif (gris) et toutes les
+  tailles : c'est `background` qui les colore, pas l'image.
+- `mus-*.webp` — 5 cartes musculaires (face et dos, muscles travaillés en cyan),
+  affichées en tête de chaque séance.
+- `fond-texture.webp` — matière sur le fond global, à 50 % d'opacité.
+- `fond-salle.webp` — photo de salle dans l'en-tête d'Aujourd'hui, sous un
+  dégradé qui garantit la lisibilité du texte.
+
+Tout est précaché par le service worker : l'app garde ses icônes hors ligne.
+Les emoji restent employés dans les textes du coach — les icônes servent la
+structure, les emoji servent la prose.
 
 Un service worker ne peut pas mettre en cache ce qui se trouve au-dessus de son
 propre dossier. Ici tout est relatif (`./`), donc le dossier marche aussi bien à
@@ -57,7 +73,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v7';   →   'v8'
+var VERSION = 'v8';   →   'v9'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
