@@ -1804,7 +1804,7 @@ function resetLogs(){
   /* le niveau est dérivé des perfs : le garder après les avoir effacées
      laisserait un palier sans rien derrière */
   [LOGKEY, SETSKEY, HISTKEY, 'inrun_niveau'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
-  _niv=null;
+  _niv=null; _cal=null;
   document.querySelectorAll('[data-pbadge]').forEach(function(b){ b.style.display='none'; });
   document.querySelectorAll('[data-rm],[data-zone]').forEach(function(b){ b.style.display='none'; });
   refreshAllStations();
@@ -2040,7 +2040,9 @@ var WEEKKEY='inrun_weeks';     /* { '2026-W34': {...} } */
 var WSEENKEY='inrun_week_seen';
 
 function loadExSets(){ try{ return JSON.parse(localStorage.getItem(SETSKEY))||{}; }catch(e){ return {}; } }
-function saveExSets(o){ try{ localStorage.setItem(SETSKEY, JSON.stringify(o)); }catch(e){} }
+/* toute écriture de séries périme la calibration : le conseil affiché
+   juste après doit tenir compte de la série qu'on vient d'enregistrer */
+function saveExSets(o){ _cal=null; try{ localStorage.setItem(SETSKEY, JSON.stringify(o)); }catch(e){} }
 function todayKey(){ return dkey(new Date()); }
 
 /* ================================================================
@@ -2288,8 +2290,11 @@ function renderAdvice(st){
 }
 
 /* --- verdict : double progression pondérée par le RIR et la fatigue du jour --- */
+/* corrigé du biais personnel : si tes reps montrent que tu es plus près
+   de l'échec que tu ne l'annonces, c'est le chiffre corrigé qui décide
+   de la montée de charge, pas celui que tu as tapé */
 function avgRIR(sets){
-  var v=sets.map(function(s){ return (s.rir===null||s.rir===undefined)?null:+s.rir; })
+  var v=sets.map(function(s){ return rirCorrige(s.rir); })
             .filter(function(x){ return x!==null; });
   return v.length ? v.reduce(function(a,b){ return a+b; },0)/v.length : null;
 }
@@ -2712,7 +2717,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ cleanPlan(); majNiveau(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
+function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -3086,19 +3091,109 @@ function carteMuscles(){
   });
   return _carte;
 }
-/* séries par muscle sur N jours : entière pour le muscle moteur,
-   moitié pour les muscles assistants */
+/* ================================================================
+   LA SÉRIE STIMULANTE — toutes les séries ne se valent pas
+   ----------------------------------------------------------------
+   L'hypertrophie augmente à mesure qu'une série se termine près de
+   l'échec, et s'effondre au-delà d'environ 5 reps en réserve. Compter
+   une série menée à RIR 6 comme une série menée à RIR 1 était une
+   erreur de mesure : le volume par muscle est maintenant pondéré.
+
+   Le volume brut, lui, ne bouge pas (weeklyVolume) : c'est le nombre
+   de séries que tu as réellement faites, et c'est ce que le compteur
+   affiche. Les deux chiffres sont différents exprès.
+   ================================================================ */
+function poidsRir(rir){
+  if(rir===null || rir===undefined) return null;   /* inconnu : traité à part */
+  rir=+rir;
+  if(rir<=2) return 1;
+  if(rir<=4) return 0.7;
+  return 0.3;
+}
+
+/* ----------------------------------------------------------------
+   LA CALIBRATION DU RIR — ce que tu annonces vs ce que tes reps montrent
+   ----------------------------------------------------------------
+   Le RIR déclaré est une estimation, pas une mesure : l'erreur type
+   dépasse deux répétitions même chez les pratiquants expérimentés, et
+   tout le monde se juge mieux près de l'échec que loin.
+
+   Un signal objectif existe pourtant dans les données : à charge
+   constante, la chute de reps d'une série à l'autre dit à quel point
+   la première était proche de l'échec. Perdre trois reps ou plus en
+   annonçant qu'il en restait trois est contradictoire.
+   ================================================================ */
+var CAL_MIN=4;          /* en dessous, on ne juge pas */
+var _cal=null;
+function calibration(){
+  if(_cal) return _cal;
+  var sets=loadExSets(), f=joursFenetre(28), opt=0, pess=0, n=0;
+  Object.keys(sets).forEach(function(id){
+    f.forEach(function(k){
+      var a=sets[id][k];
+      if(!a || a.length<3) return;
+      /* même charge d'un bout à l'autre, sinon la chute de reps vient
+         de la charge et non de la fatigue */
+      var w=a[0].w, rirs=[], i;
+      for(i=0;i<a.length;i++){
+        if(a[i].w!==w) return;
+        if(a[i].rir===null || a[i].rir===undefined) return;
+        rirs.push(+a[i].rir);
+      }
+      n++;
+      var chute=a[0].r - a[a.length-1].r, moy=0;
+      rirs.forEach(function(v){ moy+=v; }); moy/=rirs.length;
+      if(chute>=3 && moy>=2.5) opt++;
+      else if(chute<=0 && moy<=1) pess++;
+    });
+  });
+  var biais=0;
+  if(n>=CAL_MIN){
+    if(opt/n>=0.5) biais=-1;        /* plus près de l'échec qu'annoncé */
+    else if(pess/n>=0.5) biais=1;   /* plus de marge qu'annoncé */
+  }
+  /* la valeur d'une série sans RIR : celle que valent les tiennes en
+     moyenne. Sans aucun repère, elle compte plein — on ne punit pas
+     l'absence de donnée. */
+  var som=0, cnt=0;
+  Object.keys(sets).forEach(function(id){
+    f.forEach(function(k){
+      var a=sets[id][k]; if(!a) return;
+      a.forEach(function(x){
+        if(x.rir===null || x.rir===undefined) return;
+        som+=poidsRir(Math.max(0, +x.rir + biais)); cnt++;
+      });
+    });
+  });
+  _cal={biais:biais, n:n, opt:opt, pess:pess, defaut:cnt?som/cnt:1};
+  return _cal;
+}
+function rirCorrige(rir){
+  if(rir===null || rir===undefined) return null;
+  return Math.max(0, +rir + calibration().biais);
+}
+/* la valeur stimulante d'une série, corrigée du biais personnel */
+function poidsSerie(s, def){
+  var p=poidsRir(rirCorrige(s.rir));
+  return p===null ? def : p;
+}
+
+/* séries stimulantes par muscle sur N jours : entière pour le muscle
+   moteur, moitié pour les muscles assistants — la convention du volume
+   indirect — et pondérée par la proximité de l'échec */
 function volumeParMuscle(jours){
   jours=jours||7;
   var carte=carteMuscles(), sets=loadExSets(), out={};
   Object.keys(MUSCLES_DET).forEach(function(m){ out[m]=0; });
-  var t=new Date(); t.setHours(0,0,0,0);
-  var fenetre=[]; for(var i=0;i<jours;i++){ var d=new Date(t); d.setDate(t.getDate()-i); fenetre.push(dkey(d)); }
+  var def=calibration().defaut;
+  var fenetre=joursFenetre(jours);
   Object.keys(sets).forEach(function(id){
     var mus=carte[id]; if(!mus || !mus.length) return;
     fenetre.forEach(function(k){
       var arr=sets[id][k]; if(!arr) return;
-      mus.forEach(function(m,i){ if(out[m]!==undefined) out[m]+=arr.length*(i===0?1:0.5); });
+      var stim=0;
+      arr.forEach(function(s){ stim+=poidsSerie(s, def); });
+      mus.forEach(function(m,i){ if(out[m]!==undefined) out[m]+=stim*(i===0?1:0.5); });
     });
   });
   Object.keys(out).forEach(function(m){ out[m]=Math.round(out[m]*10)/10; });
@@ -3465,11 +3560,11 @@ function updateCoach(){
     var sature=musclesSatures(volM), dette=musclesEnDette(volM);
     if(sature.length){
       var ds=cibleMuscle(sature[0].m);
-      msg+=' <b>'+ds.n+' : '+sature[0].v+' séries sur 7 jours</b>, pour un plafond utile de '+ds.max+
+      msg+=' <b>'+ds.n+' : '+sature[0].v+' séries stimulantes sur 7 jours</b>, pour un plafond utile de '+ds.max+
            '. Au-delà tu accumules de la fatigue sans muscle en plus — coupe une série, pas deux.';
     } else if(dette.length && volTot>=8){
       var dd=cibleMuscle(dette[0].m);
-      msg+=' <b>'+dd.n+' : '+dette[0].v+' série'+(dette[0].v>1?'s':'')+' sur 7 jours</b> pour une cible de '+
+      msg+=' <b>'+dd.n+' : '+dette[0].v+' série'+(dette[0].v>1?'s':'')+' stimulante'+(dette[0].v>1?'s':'')+' sur 7 jours</b> pour une cible de '+
            dd.min+'-'+dd.max+' — '+dd.mot+'.';
       if(dette[1]) msg+=' Ensuite : '+MUSCLES_DET[dette[1].m].n+' ('+dette[1].v+').';
     }
@@ -3582,8 +3677,26 @@ function analyzeTraining(){
     var haut=travailles.map(function(m){ return {m:m,v:volM[m]}; })
       .sort(function(a2,b2){ return b2.v-a2.v; }).slice(0,4)
       .map(function(x){ return MUSCLES_DET[x.m].n+' '+x.v; }).join(' · ');
-    add('tip','🫀','<b>Volume par muscle, 7 jours :</b> '+haut+
-        '. Le muscle assistant compte pour une demi-série — c\'est la convention du volume indirect.');
+    add('tip','🫀','<b>Séries stimulantes par muscle, 7 jours :</b> '+haut+
+        '. Le muscle assistant compte pour une demi-série, et une série arrêtée loin de l\'échec compte moins qu\'une série menée près : c\'est le stimulus qui est mesuré, pas le passage sur la machine.');
+  }
+
+  /* 7 bis) la calibration : ce que tu annonces vs ce que tes reps montrent */
+  var cal=calibration();
+  if(cal.n>=CAL_MIN){
+    /* « sur 23 séances sur 23 » se lit mal : quand tout concorde, on le dit */
+    var part=function(x){
+      return x>=cal.n ? 'les '+cal.n+' séances comparables' : x+' séances sur '+cal.n;
+    };
+    if(cal.biais<0){
+      add('warn','🎚️','<b>Ton RIR est optimiste.</b> Sur '+part(cal.opt)+
+        ' à charge constante, tu perds 3 répétitions ou plus entre la première et la dernière série tout en annonçant 2 à 3 reps en réserve. Tu es plus près de l\'échec que tu ne le crois : je retire une rep en réserve à tout ce que tu déclares.');
+    } else if(cal.biais>0){
+      add('tip','🎚️','<b>Tu te sous-estimes.</b> Sur '+part(cal.pess)+
+        ', tu annonces l\'échec alors que tes reps ne baissent pas d\'une série à l\'autre. Il te reste de la marge : j\'ajoute une rep en réserve à tout ce que tu déclares, et je te chargerai plus vite.');
+    } else {
+      add('good','🎚️','<b>Ton RIR est fiable.</b> Sur '+cal.n+' séances comparables, ce que tu annonces colle à ce que montrent tes reps. C\'est ce qui me permet de décider quand monter la charge.');
+    }
   }
   if(sature.length){
     var s0=cibleMuscle(sature[0].m);
