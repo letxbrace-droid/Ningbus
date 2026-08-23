@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v15';   →   'v16'
+var VERSION = 'v16';   →   'v17'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -137,6 +137,60 @@ jour en double.
 pour le muscle moteur, une demie pour les assistants**, la convention du volume
 indirect. Les fourchettes de `MUSCLES_DET` ne sont pas uniformes : un deltoïde
 latéral encaisse 12 à 25 séries là où un brachial sature vers 12.
+
+## L'équilibre du programme
+
+Le volume par muscle a été mesuré sur les 25 stations, à partir de la même
+source que le coach : les libellés du DOM et les prescriptions par défaut.
+Le premier relevé était déséquilibré.
+
+Les gros muscles étaient servis par trois ou quatre exercices — les biceps
+ramassaient 18 séries, moteurs sur deux curls et assistants sur tous les
+tirages. Les petits n'en avaient qu'un : le **deltoïde latéral, à 3 séries
+pour une cible de 12-25**, soit 25 % — alors que c'est lui qui donne la
+largeur d'épaules, le meilleur rendement visuel qui existe.
+
+Le rééquilibrage ne rajoute pas de volume, il le **redistribue** :
+
+| Station | Avant | Après |
+| --- | --- | --- |
+| Élévations latérales machine | 3 | 5 |
+| Rear delt (oiseau machine) | 3 | 5 |
+| Leg curl | 3 | 5 |
+| Mollets machine | 4 | 7 |
+| Rotation buste · Extension lombaire | 3 | 4 |
+| Curl poulie basse *(doublon)* | 3 séries biceps | **Élévations latérales poulie**, 4 séries |
+| Curl poulie basse (corde) | 3 | **Curl marteau**, 4 — brachial en moteur |
+| Tirage horizontal (2ᵉ passage) | « Dos · biceps » | « Dos moyen · **trapèzes** · biceps » |
+
+Deux corrections méritent d'être expliquées. Le **curl marteau** en prise
+neutre remplace un troisième curl en supination : le brachial passe de
+simple assistant à muscle moteur. Et le tirage horizontal du 2ᵉ passage ne
+déclarait pas les trapèzes alors que le rowing identique de la séance
+Tirage les déclare — le libellé était faux, pas le geste.
+
+Résultat mesuré, à une séance par groupe et par semaine :
+
+| Muscle | Avant | Après | Cible |
+| --- | --- | --- | --- |
+| Deltoïde latéral | 3 | **9** | 12-25 |
+| Mollets | 4 | **7** | 12-22 |
+| Trapèzes | 3,5 | **6,5** | 8-18 |
+| Ischio-jambiers | 4,5 | **7** | 10-16 |
+| Deltoïde postérieur | 3 | **5** | 8-18 |
+| Biceps | 18 | **14** | 10-20 |
+
+Aucun muscle ne descend plus sous 50 % de sa cible, et aucun ne dépasse son
+plafond. Le reste de l'écart se comble par la **fréquence** : à deux séances
+par groupe — ce que le planificateur encourage déjà — 14 muscles sur 16
+atteignent leur fourchette.
+
+La **coiffe des rotateurs** est le seul muscle du programme entraîné pour ne
+pas se blesser plutôt que pour grossir : deux séries de rotations externes
+dans l'échauffement de la poussée, sans compter dans le volume.
+
+`test-equilibre.js` verrouille tout ça — un exercice renommé ou une série
+retirée fait échouer la suite.
 
 ## La série stimulante
 
