@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v14';   →   'v15'
+var VERSION = 'v15';   →   'v16'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -243,6 +243,90 @@ Le niveau n'est pas décoratif, il change trois choses :
 - **les tolérances du planificateur** : à partir du niveau 5, un jour
   d'enchaînement de plus, 26 séries par groupe au lieu de 22, une 3ᵉ séance du
   même groupe dans la semaine. Elles ne se resserrent jamais en dessous.
+
+## Le système de couleurs
+
+Trois étages, dans `:root` :
+
+| Étage | Rôle | Exemple |
+| --- | --- | --- |
+| **primitives** | valeurs brutes, aucun sens | `--n-800`, `--orange-i` |
+| **sémantique** | le sens — le seul étage que le CSS devrait lire | `--surface-1`, `--accent-ink` |
+| **hérité** | anciens noms redirigés, le temps de la migration | `--panel`, `--cyan` |
+
+Toutes les valeurs sont construites en **OKLCH** puis ajustées par un
+solveur jusqu'à atteindre leur cible **APCA**. Aucune n'a été choisie à
+l'œil. OKLCH est perceptuellement uniforme : deux couleurs de même L ont
+le même poids visuel, ce que HSL ne garantit pas.
+
+### Pourquoi APCA et pas WCAG 2
+
+Mesuré sur les pixels réellement rendus, l'ancienne palette échouait sur
+**67 %** de ses textes en APCA tout en passant WCAG 2 AA à 100 %. WCAG 2
+surestime le contraste quand les deux couleurs sont sombres, et donne le
+même score à une étiquette de 11 px et à un titre de 32 px alors que la
+fréquence spatiale pilote la perception. Il est inutilisable pour régler
+un thème sombre.
+
+### Trois jetons par rôle
+
+Un aplat de milieu d'échelle ne porte **ni** l'encre claire **ni**
+l'encre foncée : mesuré, du texte foncé sur `--accent` ne donne que
+Lc 43. D'où :
+
+- `--x` — l'aplat : pastilles, jauges, bordures ;
+- `--x-btn` — l'aplat de bouton, assez sombre pour porter l'encre claire ;
+- `--x-ink` — l'encre, visée à Lc 84, ce qu'il faut pour tenir à 13 px/700.
+
+### Deux palettes qui ne se croisent jamais
+
+La palette **sémantique** porte l'état — action, information, réussite,
+prudence, danger. La palette **catégorielle** (`--s-push`, `--s-pull`…)
+porte l'identité d'une séance et ne dit **jamais** un état. Avant, l'orange
+signifiait « Poussée » *et* « le coach » *et* « compteur du mois » ; l'ambre
+« Abdos » *et* « attention ». Une couleur ne peut pas porter deux sens.
+
+Bras est passé au violet et Piscine au sarcelle : ils étaient
+indiscernables de Tirage et de Jambes.
+
+### La hiérarchie ne vient pas de la couleur
+
+La table APCA demande Lc 90 à 14 px et Lc 100 à 12 px, quelle que soit la
+graisse. Les trois niveaux de texte sont donc **proches** en contraste —
+c'est la **taille** et la **graisse** qui portent la hiérarchie. Assombrir
+davantage rendrait le texte illisible sans le rendre plus « secondaire ».
+
+Conséquences : plancher à 12 px, graisse 500 minimum sous 15 px, `--text-3`
+interdit sous 15 px, et du texte **coloré** seulement à partir de 14 px.
+
+### La netteté
+
+Trois réglages coûtaient du piqué : `-webkit-font-smoothing:antialiased`
+(qui amincit les traits sur fond sombre), la texture de points à 3 px (du
+bruit à haute densité) et le flou de verre à 22 px. Retiré, agrandi,
+ramené à 12 px.
+
+### Le verre
+
+Les panneaux étaient des `rgba(255,255,255,.06)` posés sur un dégradé :
+ils ne se détachaient pas du fond. Ils reposent maintenant sur une échelle
+de surfaces **opaques**, séparées de ΔL ≈ 0,045 en OKLCH. La profondeur se
+fait par la clarté, pas par l'ombre — on ne projette pas d'ombre sur du
+noir. Et on ne descend pas au noir pur : le blanc pur sur noir pur provoque
+du halo.
+
+### Le test qui verrouille tout
+
+`test-contraste.js` capture l'app, redécode les pixels et mesure chaque
+texte contre son fond **réel**. Six budgets de non-régression : aucune
+couleur ne peut redescendre sans faire échouer la suite.
+
+| Mesure | Avant | Après |
+| --- | --- | --- |
+| APCA moyen | 71,4 | 89,5 |
+| textes sous leur seuil | 37 / 56 | 3 / 53 |
+| APCA moyen au soleil | 43,5 | 56,9 |
+| textes perdus au soleil | 38 | 0 |
 
 ## Le passage de minuit
 
