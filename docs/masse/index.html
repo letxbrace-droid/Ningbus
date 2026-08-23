@@ -579,6 +579,45 @@ section{padding:26px 0 10px}
 .streak .v.cool{color:var(--cyan)}
 .streak .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:6px;font-weight:700}
 
+/* ===== niveau ===== */
+.niv-chip{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;font-size:10px;
+  letter-spacing:.06em;color:var(--cyan);background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.32);
+  text-transform:none;vertical-align:1px;white-space:nowrap}
+.niv-chip.sursis{color:var(--amber);background:rgba(255,200,87,.12);border-color:rgba(255,200,87,.34)}
+.niv-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;
+  backdrop-filter:blur(var(--glass-b));-webkit-backdrop-filter:blur(var(--glass-b))}
+.niv-top{display:flex;gap:15px;align-items:flex-start}
+.niv-badge{flex:0 0 auto;width:66px;height:66px;border-radius:18px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.36);
+  background:linear-gradient(150deg,rgba(34,211,238,.20),rgba(61,125,255,.14))}
+.niv-badge .n{font-family:var(--disp);font-weight:700;font-size:34px;line-height:1;color:var(--cyan)}
+.niv-badge .s{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:3px;font-weight:700}
+.niv-id{flex:1;min-width:0}
+.niv-nom{font-family:var(--disp);font-weight:600;font-size:23px;line-height:1.15;letter-spacing:.02em;color:var(--ink)}
+.niv-sub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+.niv-mot{font-size:13.5px;color:#c9d7e8;line-height:1.55;margin-top:8px}
+.niv-alerte{margin-top:14px;padding:12px 14px;border-radius:13px;font-size:13px;line-height:1.55;color:#e4d5b4;
+  border:1px solid rgba(255,200,87,.34);background:rgba(255,200,87,.07)}
+.niv-alerte b{color:var(--amber)}
+.niv-score{margin-top:16px}
+.niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:7px}
+.niv-sh b{font-family:var(--disp);font-size:21px;color:var(--cyan);letter-spacing:0}
+.niv-card .bar{height:7px;border-radius:20px;background:rgba(255,255,255,.08);overflow:hidden}
+.niv-card .bar i{display:block;height:100%;border-radius:20px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.niv-j{display:flex;flex-direction:column;gap:13px;margin-top:18px;
+  padding-top:16px;border-top:1px solid var(--line)}
+.jr .jh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.jr .jl{font-size:12.5px;font-weight:600;color:var(--ink)}
+.jr .jv{font-family:var(--disp);font-weight:700;font-size:16px;color:var(--blue-l)}
+.jr .jt{font-size:11.5px;color:var(--dim);margin-top:5px;line-height:1.45}
+.jr.off{opacity:.5}
+.jr.off .jv{color:var(--dim)}
+.niv-next{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:13px;color:#c9d7e8;line-height:1.6}
+.niv-next b{color:var(--cyan);font-weight:700}
+
 /* ===== sheet de sélection de séance ===== */
 .picksheet{position:fixed;inset:0;background:rgba(5,10,18,.66);backdrop-filter:blur(5px);z-index:60;
   display:none;align-items:flex-end;justify-content:center}
@@ -719,6 +758,12 @@ section{padding:26px 0 10px}
 .station{margin-bottom:12px}
 .info,.settings{margin:16px 0}
 .prof-card{margin-bottom:16px}
+.niv-card{padding:15px;margin-bottom:16px}
+.niv-badge{width:56px;height:56px;border-radius:15px}
+.niv-badge .n{font-size:28px}
+.niv-nom{font-size:20px}
+.niv-top{gap:13px}
+.niv-chip{margin-left:6px;font-size:9.5px;padding:1px 7px}
 
 /* 5. Zones tactiles : 44 px minimum, en priorité le bouton pressé une
    vingtaine de fois par séance, avec les mains moites. */
@@ -788,7 +833,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="coach" id="coachCard">
     <div class="coach-ic" id="coachIc">🧠</div>
     <div class="coach-tx">
-      <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie</div>
+      <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie<span class="niv-chip" id="nivChip"></span></div>
       <div class="coach-msg" id="coachMsg">…</div>
       <div class="coach-sig" id="coachSig">Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.</div>
     </div>
@@ -1374,6 +1419,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
+  <div class="block-h"><span class="num">🏅</span><span class="tag">Ton niveau</span><span class="line"></span></div>
+  <p style="font-size:12px;color:var(--mut);margin:-6px 0 14px;line-height:1.55">Le coach relit tes 4 dernières semaines. Le niveau monte dès que les deux conditions sont réunies, et il ne redescend qu'après 14 jours de sursis — ton meilleur palier, lui, reste acquis.</p>
+  <div class="niv-card" id="nivCard"></div>
+
   <div class="block-h"><span class="num">👤</span><span class="tag">Mensurations</span><span class="line"></span></div>
   <div class="prof-card">
     <div class="prof-grid">
@@ -1668,6 +1717,7 @@ function verifierJour(){
   renderFatigue();          /* la fatigue déclarée hier ne vaut plus */
   refreshAllStations();     /* séries du jour, conseils, dernière fois */
   refreshPlan();            /* purge du prévu, bande, calendrier, coach */
+  annoncerNiveau();         /* la fenêtre de 28 jours a glissé d'un cran */
   maybeShowRecapPop();      /* un dimanche vient peut-être de se terminer */
   /* on ne change pas la séance affichée : quelqu'un qui s'entraîne à
      minuit passé n'a pas à voir son écran basculer sous ses doigts */
@@ -1751,7 +1801,10 @@ function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){}
    rechargement puisque l'affichage les relit dans inrun_sets. */
 function resetLogs(){
   if(!confirm('Effacer toutes tes perfs (séries, dernières perfs, historique 1RM) ?\n\nTon calendrier, ton poids et tes réglages sont conservés. Cette action est définitive.')) return;
-  [LOGKEY, SETSKEY, HISTKEY].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  /* le niveau est dérivé des perfs : le garder après les avoir effacées
+     laisserait un palier sans rien derrière */
+  [LOGKEY, SETSKEY, HISTKEY, 'inrun_niveau'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  _niv=null;
   document.querySelectorAll('[data-pbadge]').forEach(function(b){ b.style.display='none'; });
   document.querySelectorAll('[data-rm],[data-zone]').forEach(function(b){ b.style.display='none'; });
   refreshAllStations();
@@ -1941,7 +1994,7 @@ function drawProg(){
 }
 
 /* ===== IMPORT / EXPORT de toutes les données ===== */
-var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_plan', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue'];
+var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_plan', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue', 'inrun_niveau'];
 function exportData(){
   var dump={ app:'inrun-masse', version:1, date:new Date().toISOString(), data:{} };
   ALL_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) dump.data[k]=v; });
@@ -2151,6 +2204,7 @@ function addSet(st){
   updateProgBadge(st, prevBest, {w:best.w, r:best.r});
   autoMark(groupOf(id));
   refreshPlan();
+  annoncerNiveau();   /* une série de plus peut faire basculer un palier */
   wi.value=''; ri.value=''; wi.blur(); ri.blur();
   st.querySelectorAll('[data-rir] .rb').forEach(function(b){ b.classList.remove('sel'); });
   buzz(30);
@@ -2656,7 +2710,9 @@ function autoMark(type){
   log[k]=type; saveTLog(log);
   refreshPlan();
 }
-function refreshPlan(){ cleanPlan(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); }
+/* majNiveau() passe en premier : les fourchettes de volume et la prescription
+   du jour dépendent du niveau, donc il doit être à jour avant le coach. */
+function refreshPlan(){ cleanPlan(); majNiveau(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -2773,20 +2829,22 @@ function verdictJour(k, g, ctx, noAlt){
       txt:'<b>Abdos deux jours de suite.</b> La ceinture récupère vite, donc ce n\'est pas dangereux — simplement peu rentable. Un jour d\'écart rend davantage.'};
   }
 
-  /* 2. enchaînement sans repos */
-  if(cons>=4){
+  /* 2. enchaînement sans repos — un avancé encaisse un jour de plus */
+  var niv=niveauActuel();
+  var maxCons=niv>=5?5:4, plafond=niv>=5?26:22, maxSem=niv>=5?4:3;
+  if(cons>=maxCons){
     return {niveau:'warn', rest:true, alt:alt,
-      txt:'<b>'+cons+' jours d\'affilée.</b> Au-delà de 3, la fatigue s\'accumule et tes charges baissent. Un repos ici te ferait progresser plus que cette séance.'};
+      txt:'<b>'+cons+' jours d\'affilée.</b> Au-delà de '+(maxCons-1)+', la fatigue s\'accumule et tes charges baissent. Un repos ici te ferait progresser plus que cette séance.'};
   }
 
   /* 3. saturation du groupe */
-  if(vol>22){
+  if(vol>plafond){
     return {niveau:'warn', alt:alt,
-      txt:'<b>'+S.t+' est déjà à '+vol+' séries sur 7 jours.</b> Au-delà de 22, tu accumules de la fatigue sans muscle en plus. Un autre groupe rendrait davantage.'};
+      txt:'<b>'+S.t+' est déjà à '+vol+' séries sur 7 jours.</b> Au-delà de '+plafond+', tu accumules de la fatigue sans muscle en plus. Un autre groupe rendrait davantage.'};
   }
-  if(sem>=3){
+  if(sem>=maxSem){
     return {niveau:'warn', alt:alt,
-      txt:'<b>3ᵉ séance '+S.t.toLowerCase()+' cette semaine.</b> Deux suffisent pour saturer le signal de croissance : la troisième vole du volume aux autres groupes.'};
+      txt:'<b>'+maxSem+'ᵉ séance '+S.t.toLowerCase()+' cette semaine.</b> '+(maxSem-1)+' suffisent pour saturer le signal de croissance : la suivante vole du volume aux autres groupes.'};
   }
 
   /* 4. les bons créneaux */
@@ -3052,15 +3110,280 @@ function musclesEnDette(vol){
   var travailles={}, carte=carteMuscles();
   Object.keys(carte).forEach(function(id){ carte[id].forEach(function(m){ travailles[m]=true; }); });
   return Object.keys(travailles)
-    .filter(function(m){ return MUSCLES_DET[m] && vol[m] < MUSCLES_DET[m].min; })
-    .map(function(m){ return {m:m, v:vol[m], manque:Math.round((MUSCLES_DET[m].min-vol[m])*10)/10}; })
+    .filter(function(m){ var c=cibleMuscle(m); return c && vol[m] < c.min; })
+    .map(function(m){ var c=cibleMuscle(m); return {m:m, v:vol[m], manque:Math.round((c.min-vol[m])*10)/10}; })
     .sort(function(a,b){ return b.manque-a.manque; });
 }
 function musclesSatures(vol){
   return Object.keys(vol)
-    .filter(function(m){ return MUSCLES_DET[m] && vol[m] > MUSCLES_DET[m].max; })
+    .filter(function(m){ var c=cibleMuscle(m); return c && vol[m] > c.max; })
     .map(function(m){ return {m:m, v:vol[m]}; })
     .sort(function(a,b){ return b.v-a.v; });
+}
+
+/* ================================================================
+   LES NIVEAUX — le coach décide, il ne distribue pas des points
+   ----------------------------------------------------------------
+   Un compteur d'expérience qui ne fait que monter serait un mensonge :
+   quelqu'un qui arrête six mois resterait « athlète ». Ici le niveau est
+   un ÉTAT, relu sur une fenêtre glissante de 28 jours. Il peut donc
+   descendre — mais jamais d'un coup : le coach met d'abord en sursis
+   quatorze jours, et le meilleur palier atteint reste acquis.
+
+   Deux verrous pour monter : un score (la qualité de la pratique) ET un
+   nombre de séances (l'ancienneté). L'un sans l'autre ne suffit pas —
+   quatre séances parfaites ne font pas un pratiquant avancé.
+
+   Le niveau n'est pas décoratif : il change les fourchettes de volume
+   que le coach vise et la prescription du jour (reps en réserve, repos,
+   droit de monter la charge).
+   ================================================================ */
+var NIVKEY='inrun_niveau';   /* {n, max, depuis, sursis, vu} */
+var NIVEAUX=[
+  {n:1, t:'Premier contact', seances:0,   score:0,
+   mot:'On installe le geste avant la charge : amplitude complète, tempo contrôlé, et la même charge tant qu\'elle n\'est pas propre.'},
+  {n:2, t:'Assidu',          seances:8,   score:40,
+   mot:'Tu viens régulièrement, c\'est déjà la moitié du travail. Le corps apprend encore plus vite qu\'il ne grossit.'},
+  {n:3, t:'Régulier',        seances:25,  score:55,
+   mot:'Le rythme est installé. On passe à la double progression stricte : le haut de la fourchette, puis le kilo au-dessus.'},
+  {n:4, t:'Structuré',       seances:60,  score:65,
+   mot:'Ton programme couvre le corps entier et tes séries sont documentées. On peut affiner muscle par muscle.'},
+  {n:5, t:'Avancé',          seances:120, score:75,
+   mot:'Tu sais mener une série près de l\'échec sans casser la technique. Le volume peut monter, la récupération devient le facteur limitant.'},
+  {n:6, t:'Athlète',         seances:200, score:85,
+   mot:'Volume élevé tenu dans la durée et des charges qui montent encore. À ce stade, ce sont le sommeil et l\'assiette qui décident.'}
+];
+/* le niveau élargit les fourchettes de volume : un débutant n\'a pas besoin
+   de 12 séries d\'élévations latérales, un avancé ne progresse plus avec 10 */
+var COEF_NIV={1:0.8, 2:0.9, 3:1, 4:1.1, 5:1.2, 6:1.3};
+
+var _niv=null;
+function loadNiv(){
+  if(_niv) return _niv;
+  try{ _niv=JSON.parse(localStorage.getItem(NIVKEY))||{}; }catch(e){ _niv={}; }
+  return _niv;
+}
+function saveNiv(o){ _niv=o; try{ localStorage.setItem(NIVKEY, JSON.stringify(o)); }catch(e){} }
+function niveauActuel(){ var n=loadNiv().n; return (n>=1 && n<=6) ? n : 1; }
+function infoNiveau(n){ return NIVEAUX[Math.max(0, Math.min(NIVEAUX.length-1, (n||1)-1))]; }
+
+/* la fourchette hebdomadaire visée pour un muscle, au niveau courant */
+function cibleMuscle(m, n){
+  var d=MUSCLES_DET[m]; if(!d) return null;
+  var c=COEF_NIV[n||niveauActuel()]||1;
+  return {n:d.n, mot:d.mot, min:Math.round(d.min*c), max:Math.round(d.max*c)};
+}
+
+function joursFenetre(n){
+  var t=new Date(); t.setHours(0,0,0,0);
+  var a=[]; for(var i=0;i<n;i++){ var d=new Date(t); d.setDate(t.getDate()-i); a.push(dkey(d)); }
+  return a;
+}
+/* toutes les séances de muscu jamais faites : le calendrier, complété par
+   les jours où des séries existent (après un import, l'un peut manquer) */
+function seancesTotales(){
+  var log=loadTLog(), sets=loadExSets(), jours={};
+  Object.keys(log).forEach(function(k){ if(isTraining(log[k])) jours[k]=true; });
+  Object.keys(sets).forEach(function(id){ Object.keys(sets[id]).forEach(function(k){ jours[k]=true; }); });
+  return Object.keys(jours).length;
+}
+
+/* --- les quatre jauges, sur 28 jours glissants --- */
+function jaugeAssiduite(){
+  var log=loadTLog(), n=0;
+  joursFenetre(28).forEach(function(k){ if(isTraining(log[k])) n++; });
+  return {v:Math.min(100, Math.round(n/14*100)), dispo:true,
+    txt:n+' séance'+(n>1?'s':'')+' de muscu en 28 jours · cible 14 (3 à 4 par semaine)'};
+}
+/* Référence volontairement ABSOLUE (MUSCLES_DET brut, pas la cible du
+   niveau) : si la barre montait avec le niveau, monter d'un palier ferait
+   aussitôt chuter la jauge et l'app oscillerait entre deux niveaux. */
+function jaugeEquilibre(){
+  var vol=volumeParMuscle(28), tot=0;
+  Object.keys(vol).forEach(function(m){ tot+=vol[m]; });
+  if(tot<10) return {dispo:false, txt:'il faut au moins 10 séries enregistrées sur 4 semaines'};
+  var noms=Object.keys(MUSCLES_DET), somme=0, dedans=0;
+  noms.forEach(function(m){
+    var d=MUSCLES_DET[m], sem=vol[m]/4, s;
+    if(sem>=d.min){
+      if(sem<=d.max){ s=100; dedans++; }
+      else s=Math.max(40, 100-Math.round((sem-d.max)/d.max*100));
+    } else s=Math.round(sem/d.min*100);
+    somme+=s;
+  });
+  return {v:Math.round(somme/noms.length), dispo:true,
+    txt:dedans+' muscle'+(dedans>1?'s':'')+' sur '+noms.length+' dans sa fourchette hebdomadaire'};
+}
+function jaugeForce(){
+  var hist=loadHist(), f=joursFenetre(28), lim=f[f.length-1], n=0, prog=0, pts=0;
+  Object.keys(hist).forEach(function(id){
+    var h=hist[id]||[];
+    var dans=h.filter(function(e){ return e.d>=lim; });
+    var avant=h.filter(function(e){ return e.d<lim; });
+    if(!dans.length || !avant.length) return;
+    n++;
+    var a=Math.max.apply(null, dans.map(function(e){ return e.rm; }));
+    var b=Math.max.apply(null, avant.map(function(e){ return e.rm; }));
+    if(a>b){ prog++; pts+=1; }
+    else if(a>=b*0.98) pts+=0.4;   /* maintenu : ni record, ni recul */
+  });
+  if(n<3) return {dispo:false, txt:'il faut 3 exercices suivis depuis plus de 4 semaines'};
+  return {v:Math.round(pts/n*100), dispo:true,
+    txt:prog+' exercice'+(prog>1?'s':'')+' sur '+n+' au-dessus de leur record précédent'};
+}
+/* la qualité de la donnée : sans RIR ni forme du jour, le coach devine */
+function jaugeRigueur(){
+  var sets=loadExSets(), f=joursFenetre(28), fat=loadFat();
+  var nS=0, nRir=0, jours={};
+  Object.keys(sets).forEach(function(id){
+    f.forEach(function(k){
+      var a=sets[id][k]; if(!a) return;
+      jours[k]=true;
+      a.forEach(function(x){ nS++; if(x.rir!==null && x.rir!==undefined) nRir++; });
+    });
+  });
+  if(nS<10) return {dispo:false, txt:'encore trop peu de séries pour juger'};
+  var jr=Object.keys(jours), nF=0;
+  jr.forEach(function(k){ if(fat[k]) nF++; });
+  var pRir=nRir/nS, pFat=nF/jr.length;
+  return {v:Math.round(pRir*60 + pFat*40), dispo:true,
+    txt:Math.round(pRir*100)+' % des séries avec RIR · forme déclarée '+nF+' jour'+(nF>1?'s':'')+' sur '+jr.length};
+}
+var JAUGES_ORDRE=['assiduite','equilibre','force','rigueur'];
+var JAUGES_NOM={assiduite:'Assiduité', equilibre:'Équilibre', force:'Force', rigueur:'Rigueur'};
+function jauges(){
+  return {assiduite:jaugeAssiduite(), equilibre:jaugeEquilibre(), force:jaugeForce(), rigueur:jaugeRigueur()};
+}
+/* une jauge sans données n'est pas une jauge à zéro : elle sort du calcul,
+   sinon un débutant serait puni de ne pas avoir encore d'historique */
+function scoreDe(j){
+  var s=0, n=0;
+  JAUGES_ORDRE.forEach(function(k){ if(j[k].dispo){ s+=j[k].v; n++; } });
+  return n?Math.round(s/n):0;
+}
+function niveauCalcule(){
+  var j=jauges(), sc=scoreDe(j), tot=seancesTotales(), n=1;
+  NIVEAUX.forEach(function(L){ if(tot>=L.seances && sc>=L.score && L.n>n) n=L.n; });
+  return {n:n, score:sc, jauges:j, total:tot};
+}
+function joursEntre(a,b){ return Math.round((parseKey(b)-parseKey(a))/86400000); }
+
+var SURSIS_JOURS=14;
+var _calcNiv=null;
+/* Le coach arbitre : promotion immédiate, rétrogradation seulement après
+   quatorze jours de sursis, et un seul palier à la fois. */
+function majNiveau(){
+  var c=niveauCalcule(); _calcNiv=c;
+  var s=loadNiv(), k=todayKey(), avant=JSON.stringify(s);
+  if(!s.n){ s={n:c.n, max:c.n, depuis:k, sursis:null, vu:c.n}; }
+  else if(c.n>s.n){ s.n=c.n; s.depuis=k; s.sursis=null; s.max=Math.max(s.max||1, c.n); }
+  else if(c.n<s.n){
+    if(!s.sursis) s.sursis=k;
+    else if(joursEntre(s.sursis, k)>=SURSIS_JOURS){ s.n=Math.max(1, s.n-1); s.depuis=k; s.sursis=null; }
+  }
+  else if(s.sursis) s.sursis=null;          /* rattrapé avant l'échéance */
+  if(JSON.stringify(s)!==avant) saveNiv(s);
+  return c;
+}
+function annoncerNiveau(){
+  var s=loadNiv();
+  if(!s.n || s.vu===s.n) return;
+  var monte=!s.vu || s.n>s.vu, L=infoNiveau(s.n);
+  s.vu=s.n; saveNiv(s);
+  if(!monte){
+    coachToast('<b>Niveau '+s.n+' · '+L.t+'.</b> Ta pratique a baissé sur les 4 dernières semaines. Rien n\'est perdu — le palier '+(s.max||s.n)+' reste ton record.', true);
+  } else if(s.n>1){
+    coachToast('<b>Niveau '+s.n+' · '+L.t+' !</b> '+L.mot, false);
+  }
+}
+
+/* --- le réglage d'intensité dépend du niveau, pas seulement de la forme --- */
+function reglagePrescription(n, fat){
+  if(fat==='fatigue'){
+    return 'Journée creuse : 3 reps en réserve, aucune montée de charge. Reproduis la dernière séance, repos 2 à 3 min, arrête-toi à la première série qui se dégrade.';
+  }
+  if(n<=2){
+    return fat==='forme'
+      ? 'Jour favorable : garde 2 reps en réserve et ajoute une répétition plutôt qu\'un kilo. Repos 2 min : à ce stade c\'est le geste qu\'on entraîne.'
+      : 'Réglage du jour : 3 reps en réserve, amplitude complète, tempo contrôlé. La charge ne monte que si toutes les reps sont propres, de la première à la dernière.';
+  }
+  if(n<=4){
+    return fat==='forme'
+      ? 'Jour favorable : 1 à 2 reps en réserve sur la dernière série de chaque exercice, 2 sur les précédentes. Repos 2 min en force, 90 s en isolation.'
+      : 'Réglage du jour : 2 reps en réserve, repos 2 min en force et 90 s en isolation. Monte la charge dès que tu boucles le haut de la fourchette proprement.';
+  }
+  return fat==='forme'
+    ? 'Jour favorable : une seule série par exercice menée à 0-1 rep en réserve, la dernière. Repos 2 à 3 min en force pour tenir la charge d\'une série à l\'autre.'
+    : 'Réglage du jour : 1 à 2 reps en réserve sur les séries utiles, 3 sur les montées en charge. Repos 2 à 3 min en force, 90 s en isolation.';
+}
+
+/* --- affichage --- */
+function fmtDateLongue(k){
+  var p=k.split('-'), j=parseInt(p[2],10);
+  return (j===1?'1er':j)+' '+MOIS[parseInt(p[1],10)-1].toLowerCase();
+}
+function renderNivChip(){
+  var el=document.getElementById('nivChip'); if(!el) return;
+  var s=loadNiv(), n=s.n||1;
+  el.textContent='Niv. '+n+' · '+infoNiveau(n).t;
+  el.className='niv-chip'+(s.sursis?' sursis':'');
+}
+function renderNiveau(){
+  var box=document.getElementById('nivCard'); if(!box) return;
+  var c=_calcNiv||niveauCalcule(), s=loadNiv(), n=s.n||1, L=infoNiveau(n);
+
+  var sous=[];
+  if(s.depuis) sous.push('atteint le '+fmtDateLongue(s.depuis));
+  if(s.max && s.max>n) sous.push('meilleur palier : '+s.max+' · '+infoNiveau(s.max).t);
+  sous.push(c.total+' séance'+(c.total>1?'s':'')+' au total');
+
+  var h='<div class="niv-top">'+
+    '<div class="niv-badge"><span class="n">'+n+'</span><span class="s">niveau</span></div>'+
+    '<div class="niv-id"><div class="niv-nom">'+L.t+'</div>'+
+    '<div class="niv-sub">'+sous.join(' · ')+'</div>'+
+    '<div class="niv-mot">'+L.mot+'</div></div></div>';
+
+  if(s.sursis){
+    var reste=Math.max(0, SURSIS_JOURS-joursEntre(s.sursis, todayKey()));
+    /* dire LAQUELLE des deux conditions a cédé : « niveau 3 » à côté d'un
+       score de 92 n'a aucun sens tant qu'on ne nomme pas le verrou */
+    var raisons=[];
+    if(c.total<L.seances) raisons.push('il te faut '+L.seances+' séances au compteur, tu en as '+c.total);
+    if(c.score<L.score) raisons.push('il te faut '+L.score+' / 100, tu es à '+c.score);
+    h+='<div class="niv-alerte"><b>Sursis.</b> Sur les 4 dernières semaines, ta pratique correspond au niveau '+c.n+
+       (raisons.length?' : '+raisons.join(' et ')+'.':'.')+
+       ' Tu gardes le niveau '+n+' encore '+reste+' jour'+(reste>1?'s':'')+
+       ' — reprends le rythme et il ne se passe rien. Ton meilleur palier reste acquis dans tous les cas.</div>';
+  }
+
+  h+='<div class="niv-score"><div class="niv-sh"><span>Score global</span><span><b>'+c.score+'</b> / 100</span></div>'+
+     '<div class="bar"><i style="width:'+c.score+'%"></i></div></div>';
+
+  h+='<div class="niv-j">'+JAUGES_ORDRE.map(function(k){
+    var g=c.jauges[k];
+    return '<div class="jr'+(g.dispo?'':' off')+'">'+
+      '<div class="jh"><span class="jl">'+JAUGES_NOM[k]+'</span><span class="jv">'+(g.dispo?g.v:'—')+'</span></div>'+
+      '<div class="bar"><i style="width:'+(g.dispo?g.v:0)+'%"></i></div>'+
+      '<div class="jt">'+g.txt+'</div></div>';
+  }).join('')+'</div>';
+
+  /* ce qu'il manque, chiffré : un palier qu'on ne sait pas atteindre ne motive personne */
+  var suiv=null;
+  NIVEAUX.forEach(function(X){ if(!suiv && X.n===n+1) suiv=X; });
+  if(!suiv){
+    h+='<div class="niv-next"><b>Dernier palier.</b> Il n\'y a plus rien à débloquer : à partir d\'ici, la seule mesure qui compte est la courbe de force.</div>';
+  } else {
+    var manqueS=Math.max(0, suiv.seances-c.total), manqueP=Math.max(0, suiv.score-c.score);
+    var cond=[];
+    cond.push('<b>'+suiv.seances+' séances</b> ('+(manqueS?'il t\'en manque '+manqueS:'c\'est fait, tu en as '+c.total)+')');
+    cond.push('<b>'+suiv.score+' / 100</b> ('+(manqueP?'il te manque '+manqueP+' points':'c\'est fait, tu es à '+c.score)+')');
+    var faible=null;
+    JAUGES_ORDRE.forEach(function(k){ var g=c.jauges[k]; if(g.dispo && (!faible || g.v<c.jauges[faible].v)) faible=k; });
+    h+='<div class="niv-next"><b>Pour passer niveau '+suiv.n+' · '+suiv.t+ ' :</b> '+cond.join(' et ')+'.'+
+       (manqueP && faible ? ' Le levier le plus court, c\'est <b>'+JAUGES_NOM[faible].toLowerCase()+'</b> — '+c.jauges[faible].txt+'.' : '')+
+       '</div>';
+  }
+  box.innerHTML=h;
 }
 
 /* ----------------------------------------------------------------
@@ -3074,13 +3397,7 @@ function prescriptionDuJour(){
   if(stag && volTot>=20){
     return 'Semaine de décharge : 60 % des charges habituelles, mêmes séries, mêmes reps, 4 reps en réserve. On ne cherche rien, on récupère.';
   }
-  if(fat==='fatigue'){
-    return 'Journée creuse : 3 reps en réserve, aucune montée de charge. Reproduis la dernière séance, repos 2 à 3 min, arrête-toi à la première série qui se dégrade.';
-  }
-  if(fat==='forme'){
-    return 'Jour favorable : 1 à 2 reps en réserve sur la dernière série de chaque exercice, 2 sur les précédentes. Repos 2 min en force, 90 s en isolation.';
-  }
-  return 'Réglage du jour : 2 reps en réserve, repos 2 min en force et 90 s en isolation. Monte la charge dès que tu boucles le haut de la fourchette proprement.';
+  return reglagePrescription(niveauActuel(), fat);
 }
 
 function updateCoach(){
@@ -3147,11 +3464,11 @@ function updateCoach(){
     var volM=volumeParMuscle(7);
     var sature=musclesSatures(volM), dette=musclesEnDette(volM);
     if(sature.length){
-      var ds=MUSCLES_DET[sature[0].m];
+      var ds=cibleMuscle(sature[0].m);
       msg+=' <b>'+ds.n+' : '+sature[0].v+' séries sur 7 jours</b>, pour un plafond utile de '+ds.max+
            '. Au-delà tu accumules de la fatigue sans muscle en plus — coupe une série, pas deux.';
     } else if(dette.length && volTot>=8){
-      var dd=MUSCLES_DET[dette[0].m];
+      var dd=cibleMuscle(dette[0].m);
       msg+=' <b>'+dd.n+' : '+dette[0].v+' série'+(dette[0].v>1?'s':'')+' sur 7 jours</b> pour une cible de '+
            dd.min+'-'+dd.max+' — '+dd.mot+'.';
       if(dette[1]) msg+=' Ensuite : '+MUSCLES_DET[dette[1].m].n+' ('+dette[1].v+').';
@@ -3269,13 +3586,13 @@ function analyzeTraining(){
         '. Le muscle assistant compte pour une demi-série — c\'est la convention du volume indirect.');
   }
   if(sature.length){
-    var s0=MUSCLES_DET[sature[0].m];
+    var s0=cibleMuscle(sature[0].m);
     add('warn','🔺','<b>'+s0.n+' à '+sature[0].v+' séries</b>, plafond utile '+s0.max+
         '. Retire une série plutôt qu\'une séance : c\'est la fréquence qui fait progresser, pas l\'accumulation.');
   }
   if(dette.length){
     add('tip','🎯','<b>En dette :</b> '+dette.slice(0,3).map(function(x){
-      return MUSCLES_DET[x.m].n+' '+x.v+'/'+MUSCLES_DET[x.m].min; }).join(' · ')+
+      var c=cibleMuscle(x.m); return c.n+' '+x.v+'/'+c.min; }).join(' · ')+
       '. '+MUSCLES_DET[dette[0].m].n+' d\'abord — '+MUSCLES_DET[dette[0].m].mot+'.');
   } else if(travailles.length>=4){
     add('good','⚖️','<b>Aucun muscle en dette</b> sur les 7 derniers jours. C\'est l\'équilibre qui tient un physique, pas le total.');
@@ -3292,6 +3609,7 @@ function analyzeTraining(){
 
 migrerFuturs();
 refreshPlan();
+annoncerNiveau();
 
 /* ===== Minuteur de repos : anneau circulaire ===== */
 var restTotal=90, restLeft=0, restInt=null;

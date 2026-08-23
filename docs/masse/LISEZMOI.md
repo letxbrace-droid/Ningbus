@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v12';   →   'v13'
+var VERSION = 'v13';   →   'v14'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -108,7 +108,7 @@ Quatre onglets, un rôle chacun :
 | --- | --- | --- |
 | **Aujourd'hui** | faire | message du coach · fatigue du jour · sélecteur de séance · la séance |
 | **Semaine** | piloter | bande hebdo · propose-moi la semaine · régularité · calendrier · analyse |
-| **Progrès** | regarder | mensurations et IMC · suivi du poids · courbes de force · récap hebdo |
+| **Progrès** | regarder | niveau et jauges · mensurations et IMC · suivi du poids · courbes de force · récap hebdo |
 | **Moi** | régler | réglages · sauvegarde · la méthode (repliée) · effacer les perfs |
 
 Les cinq séances ne sont pas des destinations de navigation : elles se
@@ -145,6 +145,57 @@ La ligne de signature, elle, est devenue la **prescription du jour** : elle
 change avec la forme déclarée — reps en réserve, temps de repos, autorisation
 ou non de monter la charge — et bascule sur le sommeil un jour creux. En
 stagnation avérée, elle prescrit une semaine de décharge à 60 %.
+
+## Les niveaux
+
+Un compteur d'expérience qui ne fait que monter serait un mensonge : quelqu'un
+qui arrête six mois resterait « athlète ». Ici le niveau est un **état**, relu
+sur une fenêtre glissante de 28 jours à partir de quatre jauges :
+
+| Jauge | Ce qu'elle mesure | Disponible à partir de |
+| --- | --- | --- |
+| **Assiduité** | séances de muscu sur 28 jours, cible 14 | toujours |
+| **Équilibre** | part des 16 muscles dans leur fourchette hebdo | 10 séries sur 4 semaines |
+| **Force** | 1RM au-dessus du record précédent, par exercice | 3 exercices suivis depuis plus de 4 semaines |
+| **Rigueur** | RIR renseigné (60 %) et forme du jour déclarée (40 %) | 10 séries sur 4 semaines |
+
+Une jauge sans données **sort du calcul** au lieu de compter zéro : un débutant
+n'a pas à être puni de ne pas encore avoir d'historique. Le score global est la
+moyenne des jauges disponibles.
+
+Monter demande **deux verrous** simultanés — un score et un nombre de séances au
+compteur. L'un sans l'autre ne suffit pas : quatre séances parfaites ne font pas
+un pratiquant avancé.
+
+| Niveau | Séances | Score |
+| --- | --- | --- |
+| 1 · Premier contact | 0 | 0 |
+| 2 · Assidu | 8 | 40 |
+| 3 · Régulier | 25 | 55 |
+| 4 · Structuré | 60 | 65 |
+| 5 · Avancé | 120 | 75 |
+| 6 · Athlète | 200 | 85 |
+
+La promotion est immédiate. La rétrogradation ne l'est jamais : le coach met
+d'abord en **sursis** pendant 14 jours, en nommant le verrou qui a cédé, puis
+descend d'**un seul** palier. Le meilleur palier atteint reste acquis.
+
+La jauge d'équilibre se juge sur les fourchettes **brutes** de `MUSCLES_DET`,
+jamais sur celles du niveau courant : si la barre montait avec le niveau,
+franchir un palier ferait aussitôt chuter la jauge et l'app oscillerait entre
+deux niveaux.
+
+Le niveau n'est pas décoratif, il change trois choses :
+
+- **les fourchettes de volume** visées par le coach (`cibleMuscle()`), de 0,8×
+  au premier palier à 1,3× au dernier — un débutant n'a pas besoin de 12 séries
+  d'élévations latérales, un avancé ne progresse plus avec 10 ;
+- **la prescription du jour** (`reglagePrescription()`) : 3 reps en réserve et
+  l'amplitude avant la charge au niveau 1, double progression stricte au
+  niveau 3, séries menées à 0-1 rep en réserve à partir du niveau 5 ;
+- **les tolérances du planificateur** : à partir du niveau 5, un jour
+  d'enchaînement de plus, 26 séries par groupe au lieu de 22, une 3ᵉ séance du
+  même groupe dans la semaine. Elles ne se resserrent jamais en dessous.
 
 ## Le passage de minuit
 
@@ -201,7 +252,7 @@ avant tout 4ᵉ jour consécutif. Il ne touche jamais un jour déjà décidé.
 
 Moi → Exporter. Le JSON contient les clés : carnet, historique 1RM, poids,
 profil, réglages, calendrier, planning prévisionnel, séries détaillées avec
-RIR, prescriptions ajustées, fatigue.
+RIR, prescriptions ajustées, fatigue, niveau.
 
 Fais-le une fois par mois. C'est la seule protection contre un cache vidé ou un
 changement de téléphone.
