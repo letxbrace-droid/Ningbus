@@ -82,7 +82,7 @@ capricieux, suspensions arbitraires).
 Après chaque modification d'`index.html`, incrémente la version dans `sw.js` :
 
 ```js
-var VERSION = 'v13';   →   'v14'
+var VERSION = 'v14';   →   'v15'
 ```
 
 Sans ça, le téléphone continue de servir l'ancienne version depuis son cache.
@@ -137,6 +137,53 @@ jour en double.
 pour le muscle moteur, une demie pour les assistants**, la convention du volume
 indirect. Les fourchettes de `MUSCLES_DET` ne sont pas uniformes : un deltoïde
 latéral encaisse 12 à 25 séries là où un brachial sature vers 12.
+
+## La série stimulante
+
+Toutes les séries ne se valent pas. L'hypertrophie augmente à mesure qu'une
+série se termine près de l'échec et s'effondre au-delà d'environ cinq
+répétitions en réserve : compter une série menée à RIR 6 comme une série menée
+à RIR 1 était une erreur de mesure.
+
+`poidsRir()` pondère donc chaque série — **RIR ≤ 2 → 1 · RIR 3-4 → 0,7 ·
+RIR ≥ 5 → 0,3** — et `volumeParMuscle()` additionne des *séries stimulantes*.
+
+Le volume **brut** (`weeklyVolume()`) ne bouge pas : c'est le nombre de séries
+réellement faites, et c'est lui qu'affiche le compteur « 7 j : N séries ». Les
+deux chiffres sont différents exprès — l'un mesure ce que tu as fait, l'autre ce
+que ça a stimulé.
+
+Une série sans RIR ne vaut ni zéro ni un : elle prend la valeur moyenne des
+tiennes. Sans aucun repère, elle compte plein — on ne punit pas l'absence de
+donnée, ici comme dans les jauges de niveau.
+
+## La calibration du RIR
+
+Le RIR déclaré est une estimation, pas une mesure : l'erreur type dépasse deux
+répétitions même chez les pratiquants expérimentés, et tout le monde se juge
+mieux près de l'échec que loin.
+
+Un signal objectif existe pourtant dans les données déjà stockées : **à charge
+constante, la chute de reps d'une série à l'autre dit à quel point la première
+était proche de l'échec.** `calibration()` ne retient que les séances d'au moins
+trois séries, à charge strictement identique, avec le RIR renseigné partout —
+sinon la chute viendrait de la charge et non de la fatigue.
+
+| Observation | Verdict | Correction |
+| --- | --- | --- |
+| 3 reps perdues ou plus en annonçant ≥ 2,5 de réserve | optimiste | −1 rep en réserve |
+| aucune rep perdue en annonçant ≤ 1 | pessimiste | +1 rep en réserve |
+| le reste | calibré | aucune |
+
+Il faut **au moins 4 séances comparables** pour qu'un verdict soit rendu : en
+dessous, le biais vaut zéro et rien ne change.
+
+Le biais n'est pas décoratif — `rirCorrige()` s'applique partout où le RIR
+décide : la pondération des séries stimulantes, et `avgRIR()` donc le verdict de
+double progression. Un pratiquant optimiste au plafond de reps ne se verra plus
+proposer d'ajouter une série : la marge que le chiffre déclarait n'existe pas.
+
+Le coach l'annonce en clair dans l'analyse de la semaine, chiffres à l'appui.
 
 Le coach s'en sert pour nommer le muscle en dette plutôt que la séance, et
 l'analyse hebdomadaire affiche le détail avec la cible de chacun.
