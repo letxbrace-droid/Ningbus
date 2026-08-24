@@ -394,6 +394,9 @@ section{padding:26px 0 10px}
 .advice.hold b{color:var(--amber)}
 .advice .lbl{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--dim);margin-bottom:6px;font-weight:700}
+/* incise secondaire du coach (compteur de séries, charge jugée) : un ton
+   plus bas mais un jeton mesuré, jamais une opacité qui écrase le contraste */
+.advice .v-note{color:var(--text-3)}
 
 /* ===== RÉCAP HEBDO ===== */
 .wk{display:flex;flex-direction:column;gap:10px}
@@ -2376,14 +2379,22 @@ function renderAdvice(st){
     if(today.length < p.sets){
       var n=today.length+1;
       var fatNow=todayFat();
-      if(fatNow==='fatigue' && last.r>=p.hi){
-        cls='hold'; out='<b>Série '+n+' : garde '+fmtKg(last.w)+' kg.</b> Tu as bouclé le haut de la fourchette, mais tu t\'es déclaré fatigué : on ne charge pas un jour creux.';
+      /* règle de base : on ne change pas de charge entre deux séries.
+         La double progression compare des séries faites à la même
+         charge ; monter d'une série à l'autre casse la comparaison et
+         rend le verdict de fin de séance illisible. Seule exception :
+         une charge si lourde que les séries suivantes n'auraient plus
+         de valeur. */
+      if(last.r>=p.hi){
+        cls='hold'; out='<b>Série '+n+' : reste à '+fmtKg(last.w)+' kg.</b> Tu as bouclé le haut de la fourchette — c\'est noté'+
+          (fatNow==='fatigue'?', mais tu t\'es déclaré fatigué : on ne charge pas un jour creux':', la charge montera à la prochaine séance')+
+          '. Termine les '+p.sets+' séries à cette charge.';
       }
-      else if(last.r>=p.hi){ cls='up'; out='<b>Série '+n+' : monte à '+fmtKg(last.w+step)+' kg.</b> Tu as bouclé le haut de la fourchette, la charge est trop légère.'; }
-      else if(last.r<p.lo){ cls='hold'; out='<b>Série '+n+' : redescends à '+fmtKg(Math.max(step,last.w-step))+' kg.</b> Tu es sous les '+p.lo+' reps — mieux vaut le volume propre que l\'ego.'; }
+      else if(last.r < p.lo-2){ cls='hold'; out='<b>Série '+n+' : redescends à '+fmtKg(Math.max(step,last.w-step))+' kg.</b> '+last.r+' reps pour '+p.lo+' visées : trop lourd pour finir la séance proprement. Les séries suivantes se feront à la nouvelle charge.'; }
+      else if(last.r<p.lo){ cls='hold'; out='<b>Série '+n+' : garde '+fmtKg(last.w)+' kg</b> et vise '+p.lo+' reps. Un peu court ('+last.r+'), mais on ne change pas de charge en pleine séance : si tu es encore court à la dernière série, on allègera la prochaine fois.'; }
       else if(fatNow==='fatigue'){ cls='hold'; out='<b>Série '+n+' : reste à '+fmtKg(last.w)+' kg</b> et vise seulement à reproduire — journée fatigue déclarée.'; }
       else { out='<b>Série '+n+' : reste à '+fmtKg(last.w)+' kg</b>, vise '+p.hi+' reps. Garde 2 reps en réserve, jamais l\'échec total.'; }
-      out+=' <span style="opacity:.7">('+today.length+'/'+p.sets+' séries)</span>';
+      out+=' <span class="v-note">('+today.length+'/'+p.sets+' séries)</span>';
     } else {
       var v=verdict(today, p, id, stepFor(st, today[today.length-1].w));
       cls=v.cls; out='<b>Séance bouclée ('+today.length+'/'+p.sets+').</b> '+v.txt;
@@ -2415,62 +2426,113 @@ function avgRIR(sets){
             .filter(function(x){ return x!==null; });
   return v.length ? v.reduce(function(a,b){ return a+b; },0)/v.length : null;
 }
+/* --- charge de référence d'une séance ---------------------------------
+   La double progression suppose une charge fixe sur toutes les séries.
+   Quand la charge a bougé en cours de séance, celle qui compte n'est ni
+   la plus lourde ni la plus légère : c'est celle sur laquelle il y a le
+   plus de séries — à égalité, la plus récente, parce que c'est la
+   dernière décision prise. Juger sur la plus lourde revient à conseiller
+   une charge qui n'a jamais été réellement travaillée. */
+function chargeRef(sets){
+  var cnt={}, dernier={}, best=null;
+  sets.forEach(function(s,i){ cnt[s.w]=(cnt[s.w]||0)+1; dernier[s.w]=i; });
+  Object.keys(cnt).forEach(function(k){
+    if(best===null || cnt[k]>cnt[best] || (cnt[k]===cnt[best] && dernier[k]>dernier[best])) best=k;
+  });
+  return best===null ? 0 : +best;
+}
+/* les charges de la séance, dans l'ordre, sans doublon : « 36 → 41 » */
+function suiteCharges(sets){
+  var vus=[];
+  sets.forEach(function(s){ if(vus.indexOf(s.w)<0) vus.push(s.w); });
+  return vus.map(function(w){ return fmtKg(w); }).join(' → ');
+}
+/* une séance est « au plafond » si la prescription a été bouclée en
+   entier à une même charge, avec le haut de fourchette partout */
+function auPlafond(sets, p){
+  if(!sets.length) return false;
+  var w=chargeRef(sets), r=sets.filter(function(x){ return x.w===w; });
+  return r.length>=p.sets && Math.min.apply(null, r.map(function(x){ return x.r; }))>=p.hi;
+}
 function verdict(sets, p, id, step){
   if(!sets.length) return {cls:'', txt:'Aucune donnée.'};
-  var reps=sets.map(function(s){ return s.r; });
-  var wMax=Math.max.apply(null, sets.map(function(s){ return s.w; }));
-  var minR=Math.min.apply(null,reps);
-  var rir=avgRIR(sets);
   var fat=todayFat();
   step=step||2.5;
+
+  /* tout le verdict se juge sur la charge de référence et sur les seules
+     séries faites à cette charge : une série d'essai plus lourde ou un
+     repli plus léger ne doit pas contaminer le jugement. */
+  var wRef=chargeRef(sets);
+  var wMax=Math.max.apply(null, sets.map(function(s){ return s.w; }));
+  var serRef=sets.filter(function(s){ return s.w===wRef; });
+  var reps=serRef.map(function(s){ return s.r; });
+  var minR=Math.min.apply(null,reps);
+  var rir=avgRIR(serRef);
+  var varie=serRef.length!==sets.length;
+  var note=varie ? ' <span class="v-note">(jugé sur tes '+serRef.length+' série'+(serRef.length>1?'s':'')+' à '+fmtKg(wRef)+' kg)</span>' : '';
 
   /* 1. séries manquantes : rien d'autre ne compte */
   if(sets.length < p.sets){
     var m=p.sets-sets.length;
-    return {cls:'hold', txt:'Il te manquait '+m+' série'+(m>1?'s':'')+'. Boucle les '+p.sets+' séries à <b>'+fmtKg(wMax)+' kg</b> avant de toucher à la charge.'};
+    return {cls:'hold', txt:'Il te manquait '+m+' série'+(m>1?'s':'')+'. Boucle les '+p.sets+' séries à <b>'+fmtKg(wRef)+' kg</b> avant de toucher à la charge.'};
   }
 
   /* 2. jour de fatigue déclaré : on ne surcharge jamais */
   if(fat==='fatigue'){
     if(rir!==null && rir<=0.5){
-      return {cls:'hold', txt:'Journée fatigue et séries proches de l\'échec. Prochaine fois, <b>allège à '+fmtKg(Math.max(step, wMax-step))+' kg</b> : mieux vaut une séance propre qu\'une séance héroïque.'};
+      return {cls:'hold', txt:'Journée fatigue et séries proches de l\'échec. Prochaine fois, <b>allège à '+fmtKg(Math.max(step, wRef-step))+' kg</b> : mieux vaut une séance propre qu\'une séance héroïque.'};
     }
-    return {cls:'hold', txt:'Tu t\'es déclaré fatigué. <b>Garde '+fmtKg(wMax)+' kg</b> et contente-toi de reproduire la séance — la surcharge attendra un jour frais.'};
+    return {cls:'hold', txt:'Tu t\'es déclaré fatigué. <b>Garde '+fmtKg(wRef)+' kg</b> et contente-toi de reproduire la séance — la surcharge attendra un jour frais.'};
   }
 
-  /* 3. RIR à 0 sans atteindre le haut de fourchette : signal de trop lourd */
+  /* 3. la charge a bougé et aucune charge n'a porté la prescription
+     entière : il n'y a rien à juger, il y a une charge à fixer. */
+  if(varie && serRef.length < p.sets){
+    if(wRef < sets[0].w){
+      return {cls:'hold', txt:'Tu as commencé à '+fmtKg(sets[0].w)+' kg puis allégé à '+fmtKg(wRef)+
+        ' kg : bon réflexe, la première charge était trop lourde. Mais la progression ne se juge qu\'à charge fixe — la prochaine fois, <b>pars directement à '+
+        fmtKg(wRef)+' kg</b> et fais les '+p.sets+' séries dessus.'};
+    }
+    return {cls:'hold', txt:'Tu as changé de charge en cours de séance ('+suiteCharges(sets)+
+      ' kg). En double progression la charge change d\'une séance à l\'autre, jamais d\'une série à l\'autre : sinon tes séries ne sont plus comparables. La prochaine fois, <b>fais les '+
+      p.sets+' séries à '+fmtKg(wRef)+' kg</b>'+
+      (wMax>wRef ? ' — si tu tiens '+p.hi+' reps partout, la marche suivante sera '+fmtKg(wMax)+' kg.' : '.')};
+  }
+
+  /* 4. RIR à 0 sans atteindre le haut de fourchette : signal de trop lourd */
   if(rir!==null && rir<=0 && minR<p.hi){
-    return {cls:'hold', txt:'Tu es allé à l\'échec sans atteindre '+p.hi+' reps : la charge est trop lourde. <b>Reste à '+fmtKg(wMax)+' kg</b> jusqu\'à finir avec 1-2 reps en réserve.'};
+    return {cls:'hold', txt:'Tu es allé à l\'échec sans atteindre '+p.hi+' reps : la charge est trop lourde. <b>Reste à '+fmtKg(wRef)+' kg</b> jusqu\'à finir avec 1-2 reps en réserve.'+note};
   }
 
-  /* 4. plafond atteint sur toutes les séries */
+  /* 5. plafond atteint sur toutes les séries */
   if(minR>=p.hi){
     var ds=sessionsOf(id), streakTop=0;
     for(var i=ds.length-1;i>=0 && streakTop<2;i--){
-      var s2=setsOn(id,ds[i]);
-      if(s2.length>=p.sets && Math.min.apply(null,s2.map(function(x){ return x.r; }))>=p.hi) streakTop++;
+      if(auPlafond(setsOn(id,ds[i]), p)) streakTop++;
       else break;
     }
     var frais=(fat==='forme');
-    if(streakTop>=2 && rir!==null && rir>=2 && p.sets<8){
-      return {cls:'up', txt:'Deux séances au plafond avec <b>'+rir.toFixed(1).replace('.',',')+' reps en réserve</b> : tu as de la marge. Ajoute une <b>'+(p.sets+1)+'ᵉ série</b> à '+fmtKg(wMax)+' kg, ou monte à '+fmtKg(wMax+step)+' kg.'};
+    var nPlus=Math.max(p.sets, serRef.length)+1;
+    if(streakTop>=2 && rir!==null && rir>=2 && nPlus<=8){
+      return {cls:'up', txt:'Deux séances au plafond avec <b>'+rir.toFixed(1).replace('.',',')+' reps en réserve</b> : tu as de la marge. Ajoute une <b>'+nPlus+'ᵉ série</b> à '+fmtKg(wRef)+' kg, ou monte à '+fmtKg(wRef+step)+' kg.'+note};
     }
     if(streakTop>=2){
-      return {cls:'up', txt:'Deux séances au plafond → <b>monte à '+fmtKg(wMax+step)+' kg</b>'+(frais?' et profite de ta forme du jour':'')+', puis repars en bas de fourchette.'};
+      return {cls:'up', txt:'Deux séances au plafond → <b>monte à '+fmtKg(wRef+step)+' kg</b>'+(frais?' et profite de ta forme du jour':'')+', puis repars en bas de fourchette.'+note};
     }
-    return {cls:'up', txt:'Tu as tenu '+p.hi+' reps partout → <b>monte à '+fmtKg(wMax+step)+' kg</b> et redescends en bas de fourchette.'};
+    return {cls:'up', txt:'Tu as tenu '+p.hi+' reps partout → <b>monte à '+fmtKg(wRef+step)+' kg</b> et redescends en bas de fourchette.'+note};
   }
 
-  /* 5. sous la fourchette */
+  /* 6. sous la fourchette */
   if(minR<p.lo){
-    return {cls:'hold', txt:'Ta série la plus faible est à '+minR+' reps. Reste à <b>'+fmtKg(wMax)+' kg</b> jusqu\'à tenir '+p.lo+' reps sur les '+p.sets+' séries.'};
+    return {cls:'hold', txt:'Ta série la plus faible est à '+minR+' reps. Reste à <b>'+fmtKg(wRef)+
+      ' kg</b> jusqu\'à tenir '+p.lo+' reps sur les '+p.sets+' séries.'+note};
   }
 
-  /* 6. dans la fourchette */
+  /* 7. dans la fourchette */
   var sup='';
   if(rir!==null && rir>=3) sup=' Avec '+rir.toFixed(1).replace('.',',')+' reps en réserve, tu peux même viser directement '+p.hi+' reps.';
   else if(rir!==null && rir<=1) sup=' Tu finis près de l\'échec : consolide avant de charger.';
-  return {cls:'', txt:'Tu es dans la fourchette ('+minR+'-'+Math.max.apply(null,reps)+'). Garde <b>'+fmtKg(wMax)+' kg</b> et gratte <b>1 rep par série</b>.'+sup};
+  return {cls:'', txt:'Tu es dans la fourchette ('+minR+'-'+Math.max.apply(null,reps)+'). Garde <b>'+fmtKg(wRef)+' kg</b> et gratte <b>1 rep par série</b>.'+sup+note};
 }
 
 /* --- rafraîchit une station complète --- */
@@ -2482,7 +2544,13 @@ function refreshStation(st){
   if(ld){
     var prevSets=setsOn(id, ld);
     var p2=ld.split('-');
-    var lbl=prevSets.length+' × '+fmtKg(Math.max.apply(null,prevSets.map(function(s){return s.w;})))+' kg  ·  '+p2[2]+'/'+p2[1];
+    /* charge affichée : la référence, pas la plus lourde. Si elle a bougé
+       dans la séance, on montre l'amplitude — sinon le rappel prétend que
+       toute la séance s'est faite à une charge jamais tenue. */
+    var ws=prevSets.map(function(s){ return s.w; });
+    var wMin=Math.min.apply(null,ws), wHi=Math.max.apply(null,ws);
+    var wTxt=(wMin===wHi) ? fmtKg(wMin) : fmtKg(chargeRef(prevSets))+' ('+fmtKg(wMin)+'-'+fmtKg(wHi)+')';
+    var lbl=prevSets.length+' × '+wTxt+' kg  ·  '+p2[2]+'/'+p2[1];
     prev.textContent=lbl; prev.classList.remove('empty');
   } else if(rec && rec.w){
     prev.textContent=fmtKg(rec.w)+' kg × '+rec.r+(rec.date?'  ·  '+rec.date:'');

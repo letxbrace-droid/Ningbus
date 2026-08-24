@@ -211,6 +211,56 @@ Une série sans RIR ne vaut ni zéro ni un : elle prend la valeur moyenne des
 tiennes. Sans aucun repère, elle compte plein — on ne punit pas l'absence de
 donnée, ici comme dans les jauges de niveau.
 
+## La charge de référence
+
+La double progression compare des séries faites **à la même charge** : on grimpe
+en répétitions à charge fixe, puis on ajoute du poids et on redescend en bas de
+fourchette. Le verdict s'ancrait pourtant sur la charge la **plus lourde** de la
+séance, `Math.max` des séries. Tant que la charge ne bougeait pas, ça revenait au
+même ; dès qu'elle bougeait, le coach conseillait une charge jamais travaillée.
+
+Signalé depuis la salle sur deux exercices réels :
+
+| Séance | Ce que disait le coach | Ce qu'il aurait dû dire |
+|---|---|---|
+| `36×10` `36×12` `41×12` | « Reste à **41 kg** » | la séance s'est faite à 36 |
+| `18×6` `14×12` `14×11` | « Reste à **18 kg** » | 18 avait justement été abandonné |
+
+`chargeRef()` remplace ce maximum : la charge de référence est celle qui porte le
+plus de séries — à égalité la plus récente, parce que c'est la dernière décision
+prise. Tout le verdict se juge sur elle et sur les **seules séries faites à cette
+charge** : une série d'essai plus lourde ou un repli plus léger ne contaminent
+plus le jugement. Quand la référence ne porte pas la séance entière, le coach le
+dit (`jugé sur tes 3 séries à 40 kg`).
+
+Et quand aucune charge n'a porté la prescription complète, il n'y a rien à
+juger : il y a une charge à fixer. Le coach nomme alors le vrai problème —
+`36 → 41 kg` — et distingue les deux cas, parce qu'ils ne se valent pas :
+
+- **repli** (`18 → 14`) : bon réflexe, la première charge était trop lourde ;
+  la prochaine fois, partir directement à 14 ;
+- **montée** (`36 → 41`) : les séries ne sont plus comparables ; refaire les
+  trois séries à 36, et 41 devient la marche d'après.
+
+### Corollaire : plus de montée de charge en cours de séance
+
+Le conseil affiché *pendant* la séance était la cause première. Au haut de
+fourchette dès la première série, il disait « Série 2 : monte à 41 kg » — puis le
+verdict de fin de séance reprochait ce changement. Il annonce désormais la montée
+pour la **séance suivante** et fait terminer les séries à la charge en cours.
+
+Seule exception conservée : une charge franchement trop lourde (plus de deux
+répétitions sous le bas de fourchette), où continuer ne produirait plus rien
+d'exploitable. Deux répétitions de trop peu ne justifient plus de toucher à la
+charge.
+
+Le rappel « dernière fois » suivait le même biais : il affichait `3 × 41 kg` pour
+une séance faite à 36. Il montre maintenant la référence et l'amplitude réelle,
+`3 × 36 (36-41) kg`.
+
+`test-charge.js` verrouille les 26 vérifications correspondantes, dont les deux
+séances réelles ci-dessus.
+
 ## La calibration du RIR
 
 Le RIR déclaré est une estimation, pas une mesure : l'erreur type dépasse deux
