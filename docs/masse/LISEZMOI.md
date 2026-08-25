@@ -348,6 +348,75 @@ Le niveau n'est pas décoratif, il change trois choses :
   d'enchaînement de plus, 26 séries par groupe au lieu de 22, une 3ᵉ séance du
   même groupe dans la semaine. Elles ne se resserrent jamais en dessous.
 
+## Phase A : l'hygiène visuelle
+
+Cinq règles, cinq corrections. Elles sont verrouillées par `test-design.js`
+(18 vérifications) parce que ce sont des règles, pas des goûts.
+
+### Les emoji n'étaient pas des icônes
+
+`🏅 TON NIVEAU`, `📅 CETTE SEMAINE`, `📉 SUIVI DU POIDS` : des glyphes système,
+rendus différemment sur chaque appareil, multicolores, hors palette — et posés
+juste à côté des icônes maison de la barre du bas. C'était le défaut le plus
+visible de l'app.
+
+Un sprite SVG de 36 symboles les remplace, en-têtes, réglages, encadrés de
+conseil, lignes du récap et lignes du coach compris. Un seul tracé, une seule
+graisse, et `stroke:currentColor` : **l'icône ne peut plus sortir de la
+palette**, elle prend la couleur de son contexte. Une icône dans une ligne
+`warn` est ambre, dans une ligne `good` elle est verte, sans une ligne de code
+de plus.
+
+Effet de bord utile : l'état du coach transitait par l'emoji lui-même
+(`etat==='🛑'`). Il passe désormais par un **nom** (`'alerte'`, `'ok'`,
+`'rest'`) — le découplage qu'il aurait fallu faire dès le début.
+
+### La bordure n'est pas une séparation
+
+Chaque carte, chaque tuile, chaque bouton portait un trait de 1 px à
+`--n-500`. Le résultat n'était pas une hiérarchie, c'était une grille de
+boîtes. Or les marches de surface (ΔL ≈ 0,045) existaient déjà pour séparer :
+la bordure faisait double emploi.
+
+`--bord` descend donc à `--n-700` — un liseré qui pose l'arête (ratio 1,14
+contre la carte), plus un contour. Avec une exception **mesurée** : un champ de
+saisie vide n'a que son cadre pour dire qu'on peut y écrire. WCAG 1.4.11 demande
+3:1 contre les couleurs adjacentes, des deux côtés. `--n-500` n'en donnait que
+1,55 et `--n-400` que 2,35 ; d'où `--n-450 #62728a`, qui tient **3,43 contre la
+carte et 3,00 contre le fond du champ**.
+
+### Trois comptes ne sont pas trois natures
+
+Ce mois en cyan, la série en orange, le total en vert : trois couleurs pour
+trois chiffres qui sont tous des comptes. La couleur promettait une différence
+de sens qui n'existait pas.
+
+Les valeurs deviennent neutres et tabulaires, la taille porte la hiérarchie.
+Une seule garde l'accent — la **série en cours**, la seule des trois sur
+laquelle on puisse encore agir aujourd'hui. Même grammaire pour les unités :
+`90` en 26 px, `kg` en 12 px sur `--text-3`, au lieu de deux tailles voisines
+qui se disputaient le regard.
+
+### Une jauge porte son état
+
+Assiduité 100, Équilibre 43, Rigueur 60 s'affichaient dans le même cyan :
+impossible de voir laquelle allait mal. `etatJauge()` applique le seuil que le
+coach utilise déjà pour désigner le levier le plus court — **sous 40 c'est un
+problème (rouge), sous 70 c'est en chemin (ambre), au-delà c'est acquis
+(vert)** — à la barre et à sa valeur.
+
+### Un stockage abîmé ne vide plus un onglet
+
+Trouvé par accident en préparant les captures : en écrivant l'historique de
+poids dans le mauvais format, l'onglet Aujourd'hui devenait **entièrement
+blanc**. Les chargeurs se protégeaient d'un JSON illisible, pas d'un JSON
+valide du mauvais **type** — un objet là où le code attend un tableau, et le
+premier `.map` fait tomber tout le rendu.
+
+Ce n'est pas théorique : `importData()` écrit le contenu d'une sauvegarde sans
+vérifier sa forme, donc un fichier tronqué suffisait. `litObjet()` et
+`litTableau()` vérifient le type ; les neuf chargeurs passent par elles.
+
 ## Le système de couleurs
 
 Trois étages, dans `:root` :
