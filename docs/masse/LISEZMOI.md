@@ -511,6 +511,55 @@ En mode calme, l'anneau et les jauges affichent quand même leur valeur : on
 supprime le parcours, jamais l'information. Six vérifications le contrôlent dans
 un contexte navigateur réellement configuré en `reducedMotion: reduce`.
 
+## Le plafond calorique
+
+### Pourquoi le calcul est fait par jour
+
+Les facteurs d'activité des tables — 1,2 sédentaire, 1,55 modérément actif,
+1,725 très actif — sont des **moyennes hebdomadaires**. Les appliquer à une
+journée précise est un abus : ils supposent déjà un certain nombre de séances
+étalées sur la semaine.
+
+Le module part donc d'une base assise et **ajoute ce qui a réellement été
+fait**. C'est plus juste, et surtout ça se lit : `2 280 base · +300 séance ·
+−400 déficit`.
+
+| Terme | Valeur | D'où ça vient |
+|---|---|---|
+| Métabolisme de base | Mifflin-St Jeor (homme) | `10w + 6,25h − 5a + 5` |
+| Journée assise | × 1,25 | un bureau, pas un lit — le 1,2 des tables suppose vraiment aucun mouvement |
+| Marche 10k | +250 kcal | ~7 000 pas de plus qu'une journée assise, à ~0,035 kcal/pas à 90 kg, net de ce que la base compte déjà |
+| Séance | +300 kcal | 50 min de machines avec 60-90 s de repos, EPOC comprise — bien moins qu'on ne l'imagine |
+| Déficit | −400 kcal | au-delà de 500-600, le corps tape dans le muscle et les charges stagnent |
+| Plancher | 2 000 kcal | en dessous, la récupération ne suit plus |
+
+### Deux choix qui s'excluent, un qui s'ajoute
+
+La journée est **assise ou marchée** — ça s'exclut. La séance, elle, **s'ajoute**
+par-dessus : un jour de marche avec séance existe, et trois boutons exclusifs
+l'auraient rendu impossible à saisir.
+
+La séance n'est pas redemandée : le journal d'entraînement la connaît déjà, elle
+est proposée cochée et reste décochable. Le choix vaut pour **un jour**, pas pour
+toujours, et il survit au rechargement.
+
+### Le plancher mord, et le dit
+
+Une journée entièrement assise donne 2 280 − 400 = 1 880 kcal, soit sous le
+plancher. Le module affiche alors 2 000 et **nomme la raison** plutôt que de
+laisser croire à un calcul. C'est aussi pourquoi le vrai contrôle est le budget
+de la **semaine**, affiché dans Progrès : le déficit se joue sur sept jours, pas
+sur un.
+
+### Ce que le module ne fait pas
+
+Il n'invente rien. Sans taille, poids ou âge, il ne calcule pas : il dit quoi
+renseigner. Et il rappelle que toute formule est à ±10 % près — ce qui fait
+±250 kcal, autant que le déficit lui-même. C'est la balance sur trois semaines
+qui tranche, pas ce chiffre.
+
+`test-calories.js` verrouille les 21 vérifications correspondantes.
+
 ## La palette FIT GREEN
 
 ### Les codes imprimés sur l'image de référence sont faux
