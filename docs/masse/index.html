@@ -373,6 +373,44 @@ section{padding:26px 0 10px}
 .fatigue .fh{font-family:var(--mono);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);
   font-size:12.5px;font-weight:600;color:var(--text-2);margin-bottom:11px}
 .fatigue .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+/* ===== CALORIES ===== */
+/* Deux choix qui s'excluent (la journée) plus un qui s'ajoute (la
+   séance) : un jour de marche AVEC séance existe, les traiter comme
+   trois options exclusives aurait été faux. */
+.kcal .kc-btn{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+.kcal .kc-btn button{background:var(--surface-2);border:1px solid var(--bord);color:var(--text-2);
+  border-radius:11px;padding:10px 8px;font-family:var(--disp);font-weight:600;font-size:13.5px;
+  text-transform:uppercase;letter-spacing:.03em;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:6px;transition:transform .1s,border-color .15s,color .15s}
+.kcal .kc-btn button .gi{width:15px;height:15px}
+.kcal .kc-btn button:active{transform:scale(.96)}
+.kcal .kc-btn button.sel{border-color:var(--accent);color:var(--text);background:rgba(175,250,1,.10)}
+/* la séance s'ajoute : elle porte l'aplat plein quand elle est active */
+.kcal .kc-btn button.tog.sel{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
+.kcal .kc-out{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:14px;
+  padding-top:13px;border-top:1px solid var(--bord)}
+.kcal .kc-l,.kc-sem .kc-l{font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text-2);font-weight:700}
+.kcal .kc-v,.kc-sem .kc-v{font-family:var(--disp);font-weight:700;font-size:30px;line-height:1;
+  color:var(--text);font-variant-numeric:tabular-nums}
+.kcal .kc-v .u,.kc-sem .kc-v .u{font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--text-3);margin-left:4px}
+.kcal .kc-d,.kc-d{font-size:12.5px;font-weight:500;color:var(--text-2);line-height:1.5;margin-top:8px}
+.kc-d b{color:var(--warn-ink);font-weight:700}
+.kc-vide{font-size:13.5px;font-weight:500;color:var(--text-2);line-height:1.55}
+.kc-vide b{color:var(--text)}
+/* le tableau de référence : quatre scénarios, deux colonnes de chiffres */
+.kc-t{width:100%;border-collapse:collapse;font-size:13.5px}
+.kc-t th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);
+  font-weight:700;text-align:right;padding:0 0 8px}
+.kc-t th:first-child{text-align:left}
+.kc-t td{padding:8px 0;border-top:1px solid var(--bord);color:var(--text-2);text-align:right;
+  font-family:var(--mono);font-variant-numeric:tabular-nums}
+.kc-t td:first-child{text-align:left;font-family:var(--body);font-weight:600;color:var(--text)}
+.kc-t td b{color:var(--accent-ink);font-weight:700}
+.kc-sem{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:16px;
+  padding-top:14px;border-top:1px solid var(--bord)}
 .fatigue button{background:var(--surface-2);border:1px solid var(--line2);color:var(--mut);
   border-radius:12px;padding:11px 4px;cursor:pointer;font-family:var(--disp);font-weight:600;
   font-size:13.5px;text-transform:uppercase;letter-spacing:.03em;transition:transform .1s}
@@ -606,7 +644,7 @@ section{padding:26px 0 10px}
 .prof-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;
   backdrop-filter:blur(var(--glass-b));-webkit-backdrop-filter:blur(var(--glass-b));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 10px 28px rgba(0,0,0,.28)}
-.prof-grid{display:flex;gap:10px;margin-bottom:14px}
+.prof-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .pf{flex:1;background:var(--surface-0);border:1px solid var(--line);border-radius:13px;padding:12px 10px;text-align:center}
 .pf label{display:block;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:7px}
 .pf .field{display:flex;align-items:baseline;justify-content:center;gap:3px}
@@ -617,7 +655,7 @@ section{padding:26px 0 10px}
 .pf .u{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-3)}
 .imc-box{display:flex;align-items:center;gap:14px;background:var(--surface-0);border:1px solid var(--line);
   border-radius:14px;padding:14px 16px;margin-bottom:6px}
-.imc-val{font-family:var(--mono);font-weight:700;font-size:32px;line-height:1;color:var(--blue-l);text-shadow:0 0 18px var(--cyan-glow)}
+.imc-val{font-family:var(--mono);font-weight:700;font-size:32px;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
 .imc-tx{flex:1}
 .imc-tx .cat{font-family:var(--disp);font-weight:600;font-size:15px;text-transform:uppercase}
 .imc-tx .note{font-size:13px;color:var(--mut);margin-top:2px;line-height:1.4}
@@ -1119,6 +1157,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="glance" id="glance" onclick="show('semaine', document.querySelectorAll('.bottomnav .bn')[1])"></div>
 
   <div class="fatigue" data-fatigue></div>
+
+  <div class="fatigue kcal" data-kcal></div>
 
 </div></section>
 
@@ -1708,12 +1748,17 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="pf"><label>Taille</label><div class="field"><input inputmode="decimal" id="pf-h" value="175" oninput="updateProfil()"><span class="u">cm</span></div></div>
       <div class="pf"><label>Poids</label><div class="field"><input inputmode="decimal" id="pf-w" value="90" oninput="updateProfil()"><span class="u">kg</span></div></div>
       <div class="pf"><label>Tour de taille</label><div class="field"><input inputmode="decimal" id="pf-t" value="" placeholder="—" oninput="updateProfil()"><span class="u">cm</span></div></div>
+      <div class="pf"><label>Âge</label><div class="field"><input inputmode="numeric" id="pf-a" value="" placeholder="—" oninput="updateProfil()"><span class="u">ans</span></div></div>
     </div>
     <div class="imc-box">
       <div class="imc-val" id="imc-val">—</div>
       <div class="imc-tx"><div class="cat" id="imc-cat">—</div><div class="note" id="imc-note">Renseigne ta taille et ton poids.</div></div>
     </div>
   </div>
+
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-scale"/></svg></span><span class="tag">Calories</span><span class="line"></span><button class="aide" aria-expanded="false" aria-controls="aideKcal" onclick="basculeAide(this)">?</button></div>
+  <p class="note" id="aideKcal" hidden>Le plafond est calculé <b>par jour</b>, d'après ce que tu as fait — pas avec un facteur d'activité moyen, qui est une moyenne hebdomadaire et n'a pas de sens sur une journée précise. On part d'une base assise et on ajoute la marche et la séance.</p>
+  <div class="prof-card" id="kcalDetail"></div>
 
   <div class="block-h"><span class="num"><svg class="gi"><use href="#i-trend-down"/></svg></span><span class="tag">Suivi du poids</span><span class="line"></span></div>
   <div class="prof-card">
@@ -2019,6 +2064,7 @@ function verifierJour(){
   }
   renderTodayDate();
   renderFatigue();          /* la fatigue déclarée hier ne vaut plus */
+  renderKcal();             /* ni le plafond calculé pour hier */
   refreshAllStations();     /* séries du jour, conseils, dernière fois */
   refreshPlan();            /* purge du prévu, bande, calendrier, coach */
   annoncerNiveau();         /* la fenêtre de 28 jours a glissé d'un cran */
@@ -2187,13 +2233,16 @@ function initProfil(){
   if(p.h) document.getElementById('pf-h').value=p.h;
   if(p.w) document.getElementById('pf-w').value=p.w;
   if(p.t) document.getElementById('pf-t').value=p.t;
+  if(p.a) document.getElementById('pf-a').value=p.a;
   updateProfil(); drawWeights();
 }
 function updateProfil(){
   var h=parseFloat(document.getElementById('pf-h').value);
   var w=parseFloat(document.getElementById('pf-w').value);
   var t=document.getElementById('pf-t').value;
-  try{ localStorage.setItem(PROFKEY, JSON.stringify({h:h||'',w:w||'',t:t||''})); }catch(e){}
+  var a=parseFloat(document.getElementById('pf-a').value);
+  try{ localStorage.setItem(PROFKEY, JSON.stringify({h:h||'',w:w||'',t:t||'',a:a||''})); }catch(e){}
+  if(window.renderKcal) renderKcal();
   var iv=document.getElementById('imc-val'), ic=document.getElementById('imc-cat'), inn=document.getElementById('imc-note');
   if(h&&w){
     var m=h/100; var imc=w/(m*m);
@@ -2310,7 +2359,7 @@ function drawProg(){
 }
 
 /* ===== IMPORT / EXPORT de toutes les données ===== */
-var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_plan', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue', 'inrun_niveau'];
+var ALL_KEYS=[LOGKEY, HISTKEY, WKEY, PROFKEY, SETKEY, 'inrun_trainlog', 'inrun_plan', 'inrun_sets', 'inrun_weeks', 'inrun_prescriptions', 'inrun_fatigue', 'inrun_niveau', 'inrun_activite'];
 function exportData(){
   var dump={ app:'inrun-masse', version:1, date:new Date().toISOString(), data:{} };
   ALL_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) dump.data[k]=v; });
@@ -2476,6 +2525,133 @@ function renderFatigue(){
       b.onclick=function(){ setFat(b.getAttribute('data-f')); };
     });
   });
+}
+
+/* ================================================================
+   CALORIES — le plafond du jour, d'après ce qui a été fait
+   ----------------------------------------------------------------
+   Le calcul est fait PAR JOUR, pas avec un facteur d'activité moyen :
+   les facteurs classiques (1,2 · 1,55 · 1,725) sont des moyennes
+   HEBDOMADAIRES, les appliquer à une journée précise est un abus. On
+   part donc d'une base assise et on AJOUTE ce qui a réellement été
+   fait — c'est plus juste et ça se lit.
+   ================================================================ */
+var ACTKEY='inrun_activite';    /* { 'YYYY-MM-DD': {b:'assis'|'marche', s:0|1} } */
+
+/* Mifflin-St Jeor, formule homme. C'est l'estimation du métabolisme de
+   base la mieux validée, à ±10 % près — d'où la règle de vérification :
+   c'est la balance sur trois semaines qui tranche, pas ce chiffre. */
+function metabolismeBase(p){
+  var h=parseFloat(p.h), w=parseFloat(p.w), a=parseFloat(p.a);
+  if(!h || !w || !a) return null;
+  return Math.round(10*w + 6.25*h - 5*a + 5);
+}
+/* Une journée de bureau, pas une journée alitée : ×1,25 plutôt que le
+   1,2 des tables, qui suppose vraiment aucun mouvement. */
+var COEF_ASSIS=1.25;
+/* ~7 000 pas de plus qu'une journée assise, à ~0,035 kcal par pas et
+   par 90 kg, net du métabolisme déjà compté dans la base. */
+var KCAL_MARCHE=250;
+/* 50 min de machines avec 60-90 s de repos : le coût net tourne autour
+   de 300 kcal, EPOC comprise. Bien moins que ce qu'on imagine. */
+var KCAL_SEANCE=300;
+/* Déficit modéré : au-delà de 500-600, le corps tape dans le muscle et
+   les charges stagnent. Et un plancher, parce qu'un jour assis
+   descendrait sinon sous le seuil de récupération. */
+var DEFICIT=400, PLANCHER=2000;
+
+function loadAct(){ return litObjet(ACTKEY); }
+function saveAct(o){ try{ localStorage.setItem(ACTKEY, JSON.stringify(o)); }catch(e){} }
+/* la séance est déjà connue du journal : on ne la redemande pas, on la
+   propose cochée et il peut la décocher. */
+function actJour(k){
+  k=k||todayKey();
+  var a=loadAct()[k];
+  if(a && typeof a==='object') return {b:(a.b==='marche'?'marche':'assis'), s:a.s?1:0};
+  return {b:'assis', s:isTraining(loadTLog()[k])?1:0, defaut:true};
+}
+function setAct(champ, val){
+  var all=loadAct(), k=todayKey(), a=actJour(k);
+  if(champ==='b') a.b=val; else a.s=a.s?0:1;
+  delete a.defaut;
+  all[k]={b:a.b, s:a.s};
+  var ks=Object.keys(all).sort();
+  while(ks.length>120){ delete all[ks.shift()]; }
+  saveAct(all); renderKcal(); buzz(15);
+}
+/* la dépense d'un jour, et son plafond */
+function bilanKcal(k){
+  var mb=metabolismeBase(loadProfil());
+  if(!mb) return null;
+  var a=actJour(k), base=Math.round(mb*COEF_ASSIS);
+  var marche=a.b==='marche'?KCAL_MARCHE:0, seance=a.s?KCAL_SEANCE:0;
+  var depense=base+marche+seance;
+  var brut=depense-DEFICIT;
+  return {mb:mb, base:base, marche:marche, seance:seance, depense:depense,
+          plafond:Math.max(PLANCHER, brut), sousPlancher:brut<PLANCHER, act:a};
+}
+function fmtKcal(v){ return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+function renderKcal(){
+  var b=bilanKcal();
+  document.querySelectorAll('[data-kcal]').forEach(function(box){
+    if(!b){
+      box.innerHTML='<div class="fh">Calories</div><div class="kc-vide">Renseigne ta <b>taille</b>, ton <b>poids</b> et ton <b>âge</b> dans Progrès pour que le coach calcule ton plafond.</div>';
+      return;
+    }
+    var a=b.act;
+    var det=[fmtKcal(b.base)+' base'];
+    if(b.marche) det.push('+'+b.marche+' marche');
+    if(b.seance) det.push('+'+b.seance+' séance');
+    det.push('−'+DEFICIT+' déficit');
+    box.innerHTML='<div class="fh">Ta journée</div>'+
+      '<div class="kc-btn">'+
+        '<button data-b="assis" class="'+(a.b==='assis'?'sel':'')+'">'+gi('note')+'Assis</button>'+
+        '<button data-b="marche" class="'+(a.b==='marche'?'sel':'')+'">'+gi('pulse')+'Marche 10k</button>'+
+        '<button data-s="1" class="tog '+(a.s?'sel':'')+'">'+gi('dumbbell')+'Séance</button>'+
+      '</div>'+
+      '<div class="kc-out"><span class="kc-l">Plafond aujourd\'hui</span>'+
+        '<span class="kc-v">'+fmtKcal(b.plafond)+'<span class="u">kcal</span></span></div>'+
+      '<div class="kc-d">'+det.join(' · ')+
+        (b.sousPlancher?' — <b>plancher à '+fmtKcal(PLANCHER)+'</b>, en dessous tu ne récupères plus':'')+'</div>';
+    box.querySelectorAll('[data-b]').forEach(function(x){
+      x.onclick=function(){ setAct('b', x.getAttribute('data-b')); };
+    });
+    box.querySelectorAll('[data-s]').forEach(function(x){
+      x.onclick=function(){ setAct('s'); };
+    });
+  });
+  renderKcalDetail();
+}
+
+/* le tableau de référence et le budget de la semaine, dans Progrès */
+function renderKcalDetail(){
+  var box=document.getElementById('kcalDetail'); if(!box) return;
+  var mb=metabolismeBase(loadProfil());
+  if(!mb){ box.innerHTML='<div class="kc-vide">Il manque ton âge : renseigne-le ci-dessus.</div>'; return; }
+  var base=Math.round(mb*COEF_ASSIS);
+  var cas=[['Assis',0,0], ['Assis + séance',0,KCAL_SEANCE],
+           ['Marche 10k',KCAL_MARCHE,0], ['Marche + séance',KCAL_MARCHE,KCAL_SEANCE]];
+  var lignes=cas.map(function(c){
+    var d=base+c[1]+c[2], p=Math.max(PLANCHER, d-DEFICIT);
+    return '<tr><td>'+c[0]+'</td><td>'+fmtKcal(d)+'</td><td><b>'+fmtKcal(p)+'</b></td></tr>';
+  }).join('');
+  /* le budget de la semaine : c'est LUI le vrai contrôle, pas le jour */
+  var sem=weekDaysOf(todayKey()), tot=0, connus=0, tk=todayKey();
+  sem.forEach(function(k){
+    if(k>tk) return;                      /* on ne budgète pas l'avenir */
+    var b=bilanKcal(k); if(!b) return;
+    tot+=b.plafond; connus++;
+    if(!loadAct()[k]) return;             /* jour non renseigné : compté assis */
+  });
+  var nonRens=sem.filter(function(k){ return k<=tk && !loadAct()[k]; }).length;
+  box.innerHTML='<table class="kc-t"><thead><tr><th>Ta journée</th><th>Dépense</th><th>Plafond</th></tr></thead><tbody>'+lignes+'</tbody></table>'+
+    '<div class="kc-sem"><span class="kc-l">Budget écoulé cette semaine</span>'+
+      '<span class="kc-v">'+fmtKcal(tot)+'<span class="u">kcal</span></span></div>'+
+    '<div class="kc-d">Sur '+connus+' jour'+(connus>1?'s':'')+
+      (nonRens?' — '+nonRens+' non renseigné'+(nonRens>1?'s':'')+', compté'+(nonRens>1?'s':'')+' comme assis':'')+
+      '. Métabolisme de base '+fmtKcal(mb)+' kcal (Mifflin-St Jeor, homme). '+
+      'Toute formule est à ±10 % près : c\'est ta balance sur trois semaines qui tranche, pas ce chiffre.</div>';
 }
 
 /* pas de charge adapté au matériel : petites charges = petits pas */
@@ -3127,7 +3303,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); initAides(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
+function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -4340,6 +4516,7 @@ function swReload(){
 
 /* ===== DÉMARRAGE ===== */
 renderFatigue();
+renderKcal();
 refreshAllStations();
 maybeShowRecapPop();
 scheduleSundayNudge();
