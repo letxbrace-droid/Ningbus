@@ -511,6 +511,80 @@ En mode calme, l'anneau et les jauges affichent quand même leur valeur : on
 supprime le parcours, jamais l'information. Six vérifications le contrôlent dans
 un contexte navigateur réellement configuré en `reducedMotion: reduce`.
 
+## La palette FIT GREEN
+
+### Les codes imprimés sur l'image de référence sont faux
+
+Première chose faite : échantillonner les pastilles au pixel. Quatre étiquettes
+sur cinq annonçaient une palette de beiges et de bruns pour des pastilles citron
+vert et noires — le gabarit portait les codes d'une autre palette.
+
+| Bande | Étiquette imprimée | Pastille réelle | Écart |
+|---|---|---|---|
+| WHITE | `#FEF9F5` | `#ffffff` | 12 |
+| FIT GREEN | `#F1DFCF` beige | **`#affa01`** | 218 |
+| FIT GREEN 40% | `#7B7457` kaki | **`#cfed89`** | 156 |
+| BLACK 88% | `#CF8E54` ocre | **`#1c1c1c`** | 219 |
+| BLACK | `#854627` brun | **`#000000`** | 155 |
+
+C'est sur les valeurs mesurées que tout est construit.
+
+### Ce que la palette impose
+
+Monochrome plus **un** accent. Les deux ancres — `#000000` pour le fond,
+`#1c1c1c` pour la carte — sont posées telles quelles ; les marches au-dessus
+gardent l'écart de clarté ΔL ≈ 0,048 qui rend une carte lisible sans bordure.
+Les gris bleutés d'avant deviennent des gris neutres.
+
+Les encres sont résolues pour atteindre 95 / 88 / 75 APCA sur la carte, avec une
+pointe de chaleur : du blanc pur sur du noir crée du halo, et l'étiquette
+« white » de l'image allait déjà dans ce sens — c'est la seule exploitable.
+
+### Le piège du citron : il est CLAIR
+
+`#affa01` est à L 0,90. C'est l'inverse exact de l'orange qu'il remplace. Il
+écrit très bien sur le noir (APCA 89) et **porte une encre noire** quand il sert
+d'aplat (APCA 90). Il n'a donc pas besoin d'un aplat de bouton assombri — il
+*est* le bouton, avec `--accent-on` par-dessus.
+
+Le piège s'est refermé une fois pendant le travail : le bouton « Propose-moi la
+semaine » gardait son encre claire, ce qui donnait **APCA 0**, strictement
+illisible. C'est l'audit qui l'a vu. Un test le verrouille désormais : aucun
+aplat opaque clair ne peut porter une encre sous Lc 60.
+
+### Une fusion assumée : le citron porte tout le positif
+
+La règle « une couleur, une fonction » posée en v15 est relâchée sur un point,
+délibérément. Cette palette est monochrome plus un accent : poser un **second**
+vert à côté du citron pour dire « réussi » serait l'erreur classique des deux
+verts. Le citron porte donc l'action à faire *et* l'état atteint. Le rouge et
+l'ambre gardent le reste, et le cyan ne garde que son rôle d'état — « ceci est
+une information » dans les conseils du coach.
+
+Tout le cyan **décoratif** disparaît : il teintait la moitié des intitulés et
+faisait concurrence à l'accent. Les titres redeviennent neutres, les cartes du
+coach et de la fatigue redeviennent des surfaces au lieu de dégradés teintés.
+
+### Une seule teinte catégorielle déplacée
+
+Cardio (`#68a553`) était à 10° du citron devenu couleur de marque. Le replacer en
+rose (`#d66892`) fait passer la séparation minimale de tout le jeu de ΔE 7 à
+**ΔE 12**, et l'écarte du citron de ΔE 42.
+
+J'ai tenté une re-répartition complète des huit teintes : elle ne bat pas le jeu
+existant. Huit catégories saturent le cercle des teintes. Jambes et Piscine
+restent à ΔE 8 — c'est ce que ce jeu permet, le calendrier porte une légende
+nommée, et le test verrouille cette valeur contre une dégradation plutôt que de
+prétendre à mieux.
+
+### La palette mesure mieux que la précédente
+
+| | avant (v20) | après |
+|---|---|---|
+| textes sous seuil | 4 | **2** |
+| APCA moyen | 89,8 | **91,3** |
+| perdus en plein soleil | 0 | **0** |
+
 ## Le système de couleurs
 
 Trois étages, dans `:root` :
