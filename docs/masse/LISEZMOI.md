@@ -474,6 +474,43 @@ en arrière sur les cinq concernés. Le bilan de l'audit s'améliore nettement :
 
 Les budgets de `test-contraste.js` sont resserrés d'autant.
 
+## Phase C : l'anneau et le mouvement
+
+### Un élément au lieu de deux
+
+Le badge du niveau était un carré qui ne disait que le palier, et une barre
+linéaire répétait le score global quinze lignes plus bas : deux éléments pour une
+seule information. L'**anneau** les réunit — l'arc porte le score, le centre
+porte le palier. La barre a disparu.
+
+L'arc suit les seuils de `etatJauge()`, les mêmes que les jauges, et la valeur
+« Score global » sous la carte porte la **même couleur d'état** : c'est ce qui
+relie l'arc à son chiffre sans avoir à l'écrire.
+
+Le mot « niveau » a quitté le centre de l'anneau : mesuré, le bloc de texte
+débordait du cercle utile de 3,7 px. L'élargir aurait mangé la colonne de texte,
+et le mot répétait déjà l'en-tête de section (« Ton niveau ») et le nom du palier
+juste à droite.
+
+### Le mouvement dit quelque chose, ou il ne sert à rien
+
+L'anneau et les jauges sont rendus **vides** puis remplis à la frame suivante :
+écrire directement la valeur finale dans le HTML fait naître l'élément déjà
+rempli et la transition ne se déclenche jamais. Le mouvement dit « voilà où tu en
+es », il ne décore pas.
+
+### Qui refuse le mouvement est écouté partout
+
+L'ancienne règle `prefers-reduced-motion` ne coupait qu'une animation nommée et
+les transitions. Les feuilles qui montent, les voiles qui apparaissent et les
+**confettis** continuaient de bouger — ces derniers sont du canvas, aucune règle
+CSS ne peut les arrêter. `mouvementRefuse()` les court-circuite, et la règle CSS
+couvre désormais toutes les animations et transitions.
+
+En mode calme, l'anneau et les jauges affichent quand même leur valeur : on
+supprime le parcours, jamais l'information. Six vérifications le contrôlent dans
+un contexte navigateur réellement configuré en `reducedMotion: reduce`.
+
 ## Le système de couleurs
 
 Trois étages, dans `:root` :
