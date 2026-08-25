@@ -67,8 +67,20 @@
   --surface-1:var(--n-800);   /* carte, panneau */
   --surface-2:var(--n-700);   /* barre collante, feuille */
   --surface-3:var(--n-600);   /* modale, toast */
-  --bord:var(--n-500);
-  --bord-fort:var(--n-400);
+  /* Les bordures encadraient TOUT : chaque carte, chaque tuile, chaque
+     bouton. Résultat, une grille de boîtes au lieu d'une hiérarchie. On
+     a déjà des marches de surface pour séparer — la bordure redevient ce
+     qu'elle doit être, un liseré qui pose l'arête, pas un contour.
+     --bord-fort reste franc là où le trait EST l'affordance : un champ
+     de saisie vide n'a que son cadre pour dire qu'on peut y écrire. */
+  --bord:var(--n-700);
+  --bord-fort:var(--n-600);
+  /* mesuré : un champ de saisie n'a que son cadre pour dire qu'on peut
+     y écrire, donc ce cadre doit tenir 3:1 des DEUX côtés — contre la
+     carte derrière (3,43) et contre son propre fond (3,00). --n-500 n'en
+     donnait que 1,55, --n-400 que 2,35. */
+  --n-450:#62728a;
+  --bord-champ:var(--n-450);
   /* À 12-14 px, la hiérarchie ne peut PAS venir de la couleur : la table
      APCA demande Lc 90 à 14 px et Lc 100 à 12 px, quelle que soit la
      graisse. Les trois niveaux sont donc proches en contraste — c'est la
@@ -253,6 +265,12 @@ h1 .o{color:var(--blue-l);display:block;text-shadow:0 2px 26px var(--cyan-glow)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 section{padding:26px 0 10px}
 
+/* ===== icônes de tracé =====
+   Une seule classe, une seule graisse de trait, la couleur héritée du
+   texte : l'icône ne peut plus sortir de la palette. */
+.gi{width:1em;height:1em;flex:0 0 auto;display:inline-block;vertical-align:-.125em;
+  fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.gi.f{fill:currentColor;stroke:none}
 .phase{display:flex;align-items:center;gap:12px;margin:22px 0 14px}
 .phase .num{font-family:var(--mono);font-weight:700;font-size:13.5px;color:var(--cyan);
   border:1px solid var(--line2);border-radius:6px;padding:3px 8px;background:var(--panel)}
@@ -260,7 +278,14 @@ section{padding:26px 0 10px}
 .phase .line{flex:1;height:1px;background:var(--line)}
 /* en-têtes secondaires : même grammaire que .phase */
 .block-h{display:flex;align-items:center;gap:12px;margin:28px 0 14px}
-.block-h .num{font-size:15px;line-height:1;flex:0 0 auto}
+/* l'icône d'en-tête : même taille que le titre, teinte de l'accent
+   d'information — elle situe la section, elle ne crie pas */
+.block-h .num{font-size:15px;line-height:1;flex:0 0 auto;display:flex;align-items:center;color:var(--info-ink)}
+.block-h .num .gi{width:19px;height:19px}
+/* le cadre du .num a été dessiné pour un numéro de phase (« 02 ») ; sur
+   une icône il fait doublon avec l'en-tête nu de .block-h juste à côté */
+.phase .num:has(.gi){border:none;background:none;padding:0;display:flex;align-items:center;color:var(--info-ink)}
+.phase .num .gi{width:19px;height:19px}
 .block-h .tag{font-family:var(--disp);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:var(--ink)}
 .block-h .line{flex:1;height:1px;background:var(--line)}
 
@@ -303,7 +328,7 @@ section{padding:26px 0 10px}
 .log-prev .val{font-family:var(--mono);font-weight:700;color:var(--mint);font-size:14.5px;text-shadow:0 0 12px rgba(74,169,105,.4)}
 .log-prev .val.empty{color:var(--dim);text-shadow:none}
 .log-in{display:flex;align-items:center;gap:8px;padding:10px 12px}
-.log-in input{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--line2);border-radius:10px;
+.log-in input{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--bord-champ);border-radius:10px;
   color:var(--ink);font-family:var(--mono);font-weight:700;font-size:17px;padding:12px 10px;text-align:center;width:100%}
 .log-in input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(127,227,232,.15)}
 .log-in input::placeholder{color:var(--dim);font-weight:600}
@@ -561,11 +586,13 @@ section{padding:26px 0 10px}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 10px 28px rgba(0,0,0,.28)}
 .prof-grid{display:flex;gap:10px;margin-bottom:14px}
 .pf{flex:1;background:var(--surface-0);border:1px solid var(--line);border-radius:13px;padding:12px 10px;text-align:center}
-.pf label{display:block;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:7px}
+.pf label{display:block;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:7px}
 .pf .field{display:flex;align-items:baseline;justify-content:center;gap:3px}
-.pf input{width:56px;background:none;border:none;color:var(--ink);font-family:var(--mono);font-weight:700;font-size:22px;text-align:center;outline:none}
+.pf input{width:56px;background:none;border:none;color:var(--text);font-family:var(--mono);font-weight:700;font-size:26px;
+  text-align:center;outline:none;font-variant-numeric:tabular-nums}
 .pf input:focus{color:var(--cyan)}
-.pf .u{font-family:var(--mono);font-size:13px;color:var(--mut)}
+/* l'unité accompagne le nombre, elle ne le concurrence pas */
+.pf .u{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-3)}
 .imc-box{display:flex;align-items:center;gap:14px;background:var(--surface-0);border:1px solid var(--line);
   border-radius:14px;padding:14px 16px;margin-bottom:6px}
 .imc-val{font-family:var(--mono);font-weight:700;font-size:32px;line-height:1;color:var(--blue-l);text-shadow:0 0 18px var(--cyan-glow)}
@@ -573,7 +600,7 @@ section{padding:26px 0 10px}
 .imc-tx .cat{font-family:var(--disp);font-weight:600;font-size:15px;text-transform:uppercase}
 .imc-tx .note{font-size:13px;color:var(--mut);margin-top:2px;line-height:1.4}
 .wlog{display:flex;gap:8px;margin-top:12px}
-.wlog input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line2);border-radius:10px;color:var(--ink);
+.wlog input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bord-champ);border-radius:10px;color:var(--ink);
   font-family:var(--mono);font-weight:700;font-size:15px;padding:10px;text-align:center;outline:none}
 .wlog input:focus{border-color:var(--cyan)}
 .wlog button{flex:0 0 auto;background:linear-gradient(135deg,var(--blue),var(--cyan));color:var(--surface-0);border:none;
@@ -684,12 +711,15 @@ section{padding:26px 0 10px}
 .streak-row{display:flex;gap:9px;margin:0 0 16px}
 .streak{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 12px;text-align:center;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.streak .v{font-family:var(--disp);font-weight:700;font-size:28px;line-height:1;color:var(--info-ink)}
+.streak .v{font-family:var(--disp);font-weight:700;font-size:30px;line-height:1;color:var(--text);
+  font-variant-numeric:tabular-nums}
 /* trois compteurs, trois sens : ce mois est une donnée, la série est ce
    qu'on ne veut pas casser, le total est de l'acquis */
+/* une seule exception : la série en cours est la seule des trois sur
+   laquelle on peut encore agir aujourd'hui. */
 .streak .v.warm{color:var(--accent-ink)}
-.streak .v.cool{color:var(--success-ink)}
-.streak .l{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-2);margin-top:6px;font-weight:700}
+.streak .v.cool{color:var(--text)}
+.streak .l{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);margin-top:6px;font-weight:700}
 
 /* ===== niveau ===== */
 .niv-chip{display:inline-block;margin-left:0;padding:1px 8px;border-radius:20px;font-size:12.5px;font-weight:700;
@@ -712,17 +742,27 @@ section{padding:26px 0 10px}
   border:1px solid rgba(184,138,6,.34);background:rgba(184,138,6,.07)}
 .niv-alerte b{color:var(--amber)}
 .niv-score{margin-top:16px}
-.niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:7px}
-.niv-sh b{font-family:var(--disp);font-size:21px;color:var(--cyan);letter-spacing:0}
+.niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:8px}
+.niv-sh b{font-family:var(--disp);font-size:24px;color:var(--text);letter-spacing:0;font-variant-numeric:tabular-nums}
 .niv-card .bar{height:7px;border-radius:20px;background:rgba(255,255,255,.08);overflow:hidden}
-.niv-card .bar i{display:block;height:100%;border-radius:20px;
-  background:linear-gradient(90deg,var(--blue),var(--cyan))}
+/* Une jauge de la même couleur qu'elle soit à 100 ou à 12 ne dit rien.
+   Elle porte maintenant son état : sous 40 c'est un problème, sous 70
+   c'est en chemin, au-delà c'est acquis. Le seuil est le même que celui
+   que le coach utilise pour désigner le levier le plus court. */
+.niv-card .bar i{display:block;height:100%;border-radius:20px;background:var(--info);
+  transition:width .5s cubic-bezier(.3,0,.2,1)}
+.niv-card .bar i.b-bas{background:var(--danger)}
+.niv-card .bar i.b-moy{background:var(--warn)}
+.niv-card .bar i.b-haut{background:var(--success)}
+.jr .jv.b-bas{color:var(--danger-ink)}
+.jr .jv.b-moy{color:var(--warn-ink)}
+.jr .jv.b-haut{color:var(--success-ink)}
 .niv-j{display:flex;flex-direction:column;gap:13px;margin-top:18px;
   padding-top:16px;border-top:1px solid var(--line)}
 .jr .jh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
 .jr .jl{font-size:13.5px;font-weight:600;color:var(--ink)}
-.jr .jv{font-family:var(--disp);font-weight:700;font-size:16px;color:var(--blue-l)}
+.jr .jv{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
 .jr .jt{font-size:13.5px;font-weight:500;color:var(--text-2);margin-top:5px;line-height:1.45}
 .jr.off{opacity:.5}
 .jr.off .jv{color:var(--dim)}
@@ -941,6 +981,52 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </head>
 <body>
 
+<!-- ============ JEU D'ICÔNES ============================================
+     Les emoji système étaient le plus gros défaut visuel : rendus
+     différemment sur chaque appareil, multicolores, hors palette, et
+     posés à côté des icônes maison de la barre du bas. Ici, un seul
+     tracé monochrome qui prend la couleur du texte : l'icône suit le
+     jeton, jamais l'inverse.
+     ==================================================================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+<symbol id="i-cal-check" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></symbol>
+<symbol id="i-coach" viewBox="0 0 24 24"><path d="M20 14.5A2.5 2.5 0 0 1 17.5 17H9l-5 4V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5z"/><path d="M9 9h6M9 12.5h4"/></symbol>
+<symbol id="i-medal" viewBox="0 0 24 24"><path d="M8 3l2.5 5M16 3l-2.5 5"/><circle cx="12" cy="14.5" r="6"/><path d="M12 11.8l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.1 3.4-7 7.5-7s7.5 2.9 7.5 7"/></symbol>
+<symbol id="i-trend-down" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 12v5h-5"/></symbol>
+<symbol id="i-trend-up" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M16 7h5v5"/></symbol>
+<symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20v-8M12 20V4M19 20v-5"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5l1.4 2.6 2.9-.6.6 2.9 2.6 1.4-1.6 2.5 1.6 2.5-2.6 1.4-.6 2.9-2.9-.6L12 21.5l-1.4-2.6-2.9.6-.6-2.9-2.6-1.4L6.1 12 4.5 9.5l2.6-1.4.6-2.9 2.9.6z"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.2"/><path d="M9 3v18M12.5 8.5h4M12.5 12.5h4"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-5-4-6-4-10 0 0-3 1.5-3 5 0 0-2-1-2-3-2 2-5 4-5 8a7 7 0 0 0 7 7z"/></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2h5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-12 0c0 6.5-3 8.5-3 8.5h18s-3-2-3-8.5z"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M11 3l1.7 4.6L17 9.5l-4.3 1.9L11 16l-1.7-4.6L5 9.5l4.3-1.9z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5M12 3v12"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M12 2.5a6.2 6.2 0 0 0-3.6 11.3V16h7.2v-2.2A6.2 6.2 0 0 0 12 2.5z"/><path d="M9.6 19h4.8M10.4 22h3.2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.2L2.6 20.3h18.8z"/><path d="M12 9.5v4.8"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 3.5h8v6.2a4 4 0 0 1-8 0z"/><path d="M8 5.5H5.2a2.2 2.2 0 0 0 0 4.4H8M16 5.5h2.8a2.2 2.2 0 0 1 0 4.4H16M9.8 20.5h4.4M12 13.7v6.8"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5s7-6.4 7-11.2a7 7 0 1 0-14 0c0 4.8 7 11.2 7 11.2z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M8.5 20.5h7M4.5 7.5h15"/><path d="M4.5 7.5L2 14.5a3.4 3.4 0 0 0 5 0zM19.5 7.5L17 14.5a3.4 3.4 0 0 0 5 0z"/></symbol>
+<symbol id="i-slider" viewBox="0 0 24 24"><path d="M3 8h9M17.5 8H21M3 16h5M13 16h8"/><circle cx="14.5" cy="8" r="2.5"/><circle cx="10.5" cy="16" r="2.5"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.4l2.8 2.8 5-5.4"/></symbol>
+<symbol id="i-neutral" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5h7"/><circle cx="9.3" cy="9.8" r=".9" fill="currentColor" stroke="none"/><circle cx="14.7" cy="9.8" r=".9" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h3.5L9.5 4l4.5 16 2.5-8H21"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5S4.5 15.8 4.5 10.5a4.5 4.5 0 0 1 7.5-3.35A4.5 4.5 0 0 1 19.5 10.5c0 5.3-7.5 10-7.5 10z"/></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24"><rect x="2.5" y="7.5" width="16" height="9" rx="2.2"/><path d="M21.5 11v2M6 11v2"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5"/><path d="M10.5 6.5L12 5a4.3 4.3 0 0 1 6 6l-1.5 1.5M7.5 11.5L6 13a4.3 4.3 0 0 0 6 6l1.5-1.5"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M4 9.5v5M7 7v10M17 7v10M20 9.5v5M7 12h10"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20.5 3.5V9h-5.5"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+</defs></svg>
+
 <!-- ============ ONGLET : AUJOURD'HUI ============ -->
 <div class="day show" id="today">
 <header class="pg-hero compact"><div class="hero-in">
@@ -951,7 +1037,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 <section><div class="wrap">
 
   <div class="coach" id="coachCard">
-    <div class="coach-ic" id="coachIc">🧠</div>
+    <div class="coach-ic" id="coachIc"><svg class="gi"><use href="#i-coach"/></svg></div>
     <div class="coach-tx">
       <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie<span class="niv-chip" id="nivChip"></span></div>
       <div class="coach-msg" id="coachMsg">…</div>
@@ -1042,7 +1128,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <div class="tipbox"><span class="e">💡</span><span><b>Clé des épaules larges.</b> Va léger, fais des reps propres. Si pas de machine dédiée, la poulie basse fait le job.</span></div>
+      <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-bulb"/></svg></span><span><b>Clé des épaules larges.</b> Va léger, fais des reps propres. Si pas de machine dédiée, la poulie basse fait le job.</span></div>
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lateral+raise+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
@@ -1316,7 +1402,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
-  <div class="phase"><span class="num">02</span><span class="tag">🔥 Focus bras</span><span class="line"></span></div>
+  <div class="phase"><span class="num">02</span><span class="tag">Focus bras</span><span class="line"></span></div>
 
   <div class="station" data-ex="up3">
     <div class="st-head"><div class="st-no">3</div>
@@ -1399,7 +1485,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="warmnote"><b>Échauffement · 4 min.</b> Rien de lourd : quelques rotations du bassin et 20 respirations en gainage léger. Les abdos se réveillent vite.</div>
 
-  <div class="tipbox"><span class="e">💡</span><span><b>Une ceinture, pas une tablette.</b> Les lombaires font partie de la sangle : les oublier, c'est se construire un déséquilibre et un mal de dos. Le relief, lui, vient de l'alimentation — pas du nombre de crunchs.</span></div>
+  <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-bulb"/></svg></span><span><b>Une ceinture, pas une tablette.</b> Les lombaires font partie de la sangle : les oublier, c'est se construire un déséquilibre et un mal de dos. Le relief, lui, vient de l'alimentation — pas du nombre de crunchs.</span></div>
 
   <div class="phase"><span class="num">01</span><span class="tag">Chargé · face avant</span><span class="line"></span></div>
 
@@ -1449,7 +1535,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <div class="tipbox"><span class="e">⚠️</span><span><b>Reps par côté.</b> Note le total d'un côté, pas des deux : c'est la seule façon de comparer d'une séance à l'autre.</span></div>
+      <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-alert"/></svg></span><span><b>Reps par côté.</b> Note le total d'un côté, pas des deux : c'est la seule façon de comparer d'une séance à l'autre.</span></div>
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rotary+torso+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
@@ -1472,7 +1558,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
-  <div class="tipbox"><span class="e">⏱️</span><span><b>Le gainage en bonus.</b> Deux planches de 30 à 45 secondes pour finir, si tu as le temps. Elles ne se notent pas ici — le carnet suit des charges, pas des chronos — mais elles complètent bien la séance.</span></div>
+  <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-timer"/></svg></span><span><b>Le gainage en bonus.</b> Deux planches de 30 à 45 secondes pour finir, si tu as le temps. Elles ne se notent pas ici — le carnet suit des charges, pas des chronos — mais elles complètent bien la séance.</span></div>
 
   <div class="total"><div class="big">25<small>min</small></div><div class="t">Ceinture complète : face avant chargée, obliques en rotation, lombaires en équilibre. Deux fois par semaine suffisent.</div></div>
 </div></section>
@@ -1488,11 +1574,11 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
-  <div class="phase"><span class="num">📅</span><span class="tag">Cette semaine</span><span class="line"></span></div>
+  <div class="phase"><span class="num"><svg class="gi"><use href="#i-cal"/></svg></span><span class="tag">Cette semaine</span><span class="line"></span></div>
   <p style="font-size:13.5px;font-weight:500;color:var(--text-2);margin:-6px 0 14px;line-height:1.55">Touche un jour pour marquer ta séance ou en caler une. Le coach vérifie l'espacement avant de valider. Les jours en pointillés sont prévus, pas encore faits.</p>
   <div class="weekstrip" id="weekStrip"></div>
   <div class="planbar">
-    <button class="primary" onclick="proposerSemaine()">🗓️ Propose-moi la semaine</button>
+    <button class="primary" onclick="proposerSemaine()"><svg class="gi"><use href="#i-cal-check"/></svg> Propose-moi la semaine</button>
     <button onclick="effacerPlan()">Effacer le prévu</button>
   </div>
 
@@ -1503,7 +1589,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     <div class="streak"><div class="v cool" id="stTotal">0</div><div class="l">Total</div></div>
   </div>
 
-  <div class="block-h"><span class="num">🗓️</span><span class="tag">Calendrier</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-cal-check"/></svg></span><span class="tag">Calendrier</span><span class="line"></span></div>
   <div class="cal">
     <div class="cal-nav">
       <button onclick="calMove(-1)" aria-label="Mois précédent">‹</button>
@@ -1524,7 +1610,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
-  <div class="block-h"><span class="num">🧠</span><span class="tag">Analyse du coach</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-coach"/></svg></span><span class="tag">Analyse du coach</span><span class="line"></span></div>
   <div class="analysis" id="planAnalysis"></div>
 
 </div></section>
@@ -1539,11 +1625,11 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
-  <div class="block-h"><span class="num">🏅</span><span class="tag">Ton niveau</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-medal"/></svg></span><span class="tag">Ton niveau</span><span class="line"></span></div>
   <p style="font-size:13.5px;font-weight:500;color:var(--text-2);margin:-6px 0 14px;line-height:1.55">Le coach relit tes 4 dernières semaines. Le niveau monte dès que les deux conditions sont réunies, et il ne redescend qu'après 14 jours de sursis — ton meilleur palier, lui, reste acquis.</p>
   <div class="niv-card" id="nivCard"></div>
 
-  <div class="block-h"><span class="num">👤</span><span class="tag">Mensurations</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-user"/></svg></span><span class="tag">Mensurations</span><span class="line"></span></div>
   <div class="prof-card">
     <div class="prof-grid">
       <div class="pf"><label>Taille</label><div class="field"><input inputmode="decimal" id="pf-h" value="175" oninput="updateProfil()"><span class="u">cm</span></div></div>
@@ -1556,7 +1642,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
-  <div class="block-h"><span class="num">📉</span><span class="tag">Suivi du poids</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-trend-down"/></svg></span><span class="tag">Suivi du poids</span><span class="line"></span></div>
   <div class="prof-card">
     <div class="chart" id="wchart"><div class="empty">Ajoute ton poids pour lancer le suivi.</div></div>
     <div class="chart-x" id="wchart-x"></div>
@@ -1572,7 +1658,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
-  <div class="block-h"><span class="num">📈</span><span class="tag">Progression force</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-trend-up"/></svg></span><span class="tag">Progression force</span><span class="line"></span></div>
   <div class="prof-card">
     <select id="prog-ex" class="prog-sel"></select>
     <div class="chart" id="pchart"><div class="empty">Enregistre des perfs pour voir ta courbe de force.</div></div>
@@ -1580,7 +1666,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     <div style="font-size:11px;color:var(--dim);margin-top:10px;text-align:center">Courbe de ta 1RM estimée par séance — ta vraie progression de force.</div>
   </div>
 
-  <div class="block-h"><span class="num">📈</span><span class="tag">Récap hebdo</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-bars"/></svg></span><span class="tag">Récap hebdo</span><span class="line"></span></div>
   <p style="font-size:13px;color:var(--mut);margin:-6px 0 14px;line-height:1.55">Chaque dimanche à 20h, ta semaine est figée : séances, tonnage, séries par muscle, records et évolution du poids.</p>
   <div class="wk" id="wkList"></div>
 
@@ -1596,48 +1682,48 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
-  <div class="block-h"><span class="num" style="margin-right:2px">⚙︎</span><span class="tag">Réglages</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-gear"/></svg></span><span class="tag">Réglages</span><span class="line"></span></div>
   <div class="settings">
     <div class="set-row">
-      <div class="set-ic">⏱️</div>
+      <div class="set-ic"><svg class="gi"><use href="#i-timer"/></svg></div>
       <div class="set-tx"><div class="t">Minuteur de repos auto</div><div class="s">Lance le compte à rebours après chaque perf</div></div>
       <div class="toggle on" data-set="timer" onclick="toggleSet(this)"><span class="knob"></span></div>
     </div>
     <div class="set-row">
-      <div class="set-ic">🔔</div>
+      <div class="set-ic"><svg class="gi"><use href="#i-bell"/></svg></div>
       <div class="set-tx"><div class="t">Bip de fin de repos</div><div class="s">Un signal sonore quand le repos est terminé</div></div>
       <div class="toggle" data-set="beep" onclick="toggleSet(this)"><span class="knob"></span></div>
     </div>
     <div class="set-row">
-      <div class="set-ic">🎉</div>
+      <div class="set-ic"><svg class="gi"><use href="#i-sparkle"/></svg></div>
       <div class="set-tx"><div class="t">Confettis sur record</div><div class="s">Petite animation quand tu bats ta 1RM estimée</div></div>
       <div class="toggle" data-set="confetti" onclick="toggleSet(this)"><span class="knob"></span></div>
     </div>
     <div class="set-row">
-      <div class="set-ic">📅</div>
+      <div class="set-ic"><svg class="gi"><use href="#i-cal"/></svg></div>
       <div class="set-tx"><div class="t">Rappel du dimanche 20h</div><div class="s">Notification quand ton récap de semaine est prêt</div></div>
       <div class="toggle" data-set="dimanche" onclick="toggleSet(this);askNudge()"><span class="knob"></span></div>
     </div>
     
   </div>
 
-  <div class="block-h"><span class="num">💾</span><span class="tag">Sauvegarde</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-save"/></svg></span><span class="tag">Sauvegarde</span><span class="line"></span></div>
   <div class="prof-card">
     <div style="font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:14px">Toutes tes données (perfs, historique, poids, profil, réglages) sont sur ce téléphone. Exporte-les régulièrement : en cas de vidage du cache ou de changement de téléphone, tu réimportes tout.</div>
     <div class="io-btns">
-      <button class="io-b primary" onclick="exportData()">⬇️ Exporter</button>
-      <button class="io-b" onclick="document.getElementById('io-file').click()">⬆️ Importer</button>
+      <button class="io-b primary" onclick="exportData()"><svg class="gi"><use href="#i-download"/></svg> Exporter</button>
+      <button class="io-b" onclick="document.getElementById('io-file').click()"><svg class="gi"><use href="#i-upload"/></svg> Importer</button>
     </div>
     <input type="file" id="io-file" accept=".json,application/json" style="display:none" onchange="importData(event)">
     <div id="io-msg" style="text-align:center;font-family:var(--mono);font-size:11px;margin-top:12px;min-height:16px;color:var(--mint)"></div>
   </div>
 
-  <div class="block-h"><span class="num">📖</span><span class="tag">La méthode</span><span class="line"></span></div>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-book"/></svg></span><span class="tag">La méthode</span><span class="line"></span></div>
   <details class="fold">
     <summary>Les principes et le mode d'emploi du carnet</summary>
     <div class="fold-b">
     <div class="info">
-    <div class="info-h">🎯 Les 5 principes prise de masse</div>
+    <div class="info-h"><svg class="gi"><use href="#i-target"/></svg> Les 5 principes prise de masse</div>
     <div class="info-row"><span class="rn">1</span><span><b>Surcharge progressive.</b> Monte la charge dès que tu boucles le haut de ta fourchette de reps proprement. C'est LE moteur du muscle.</span></div>
     <div class="info-row"><span class="rn">2</span><span><b>Lourd puis léger.</b> Gros exercices en force (8-10 reps), puis isolation en congestion (12-15 reps).</span></div>
     <div class="info-row"><span class="rn">3</span><span><b>Note chaque séance</b> dans le carnet de bord de l'exercice. Tu vois ta perf précédente et tu bats ton score.</span></div>
@@ -1646,7 +1732,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 
   <div class="info">
-    <div class="info-h">📓 Le carnet de bord</div>
+    <div class="info-h"><svg class="gi"><use href="#i-note"/></svg> Le carnet de bord</div>
     <div class="info-row"><span class="rn">›</span><span>Sous chaque machine, entre ta <b>charge</b> et tes <b>reps</b>, puis touche OK. C'est sauvegardé sur ton téléphone.</span></div>
     <div class="info-row"><span class="rn">›</span><span>La fois suivante, tu vois ta dernière perf en vert : <b>« 18 kg × 14 »</b>. Ton objectif : faire au moins pareil, idéalement mieux.</span></div>
     <div class="info-row"><span class="rn">›</span><span>Quand tu bats tes reps facilement, monte la charge. C'est la boucle qui construit du muscle.</span></div>
@@ -1723,6 +1809,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
    NAVIGATION — 4 onglets, et 5 séances qui ne sont plus des
    destinations mais un choix à l'intérieur d'« Aujourd'hui ».
    ================================================================ */
+/* une icône du sprite, en chaîne : les listes du coach et du récap sont
+   construites en HTML, elles ont besoin du tracé et pas d'un caractère. */
+function gi(nom, cls){ return '<svg class="gi'+(cls?' '+cls:'')+'"><use href="#i-'+nom+'"/></svg>'; }
+
 var PAGES=['today','semaine','progres','moi'];
 var SESSIONS=['push','pull','legs','upper','core'];
 /* les anciennes ancres restent valides : raccourcis d'icône du manifeste
@@ -1735,7 +1825,7 @@ function ico(n, extra){ return '<i class="ic ic-'+n+(extra?' '+extra:'')+'"></i>
    La séance conseillée reste nommée en toutes lettres dans le message. */
 function poserCoachIc(el, etat){
   if(!el) return;
-  var ton = etat==='🛑' ? ' t-alerte' : etat==='✅' ? ' t-ok' : etat==='rest' ? ' t-calme' : '';
+  var ton = etat==='alerte' ? ' t-alerte' : etat==='ok' ? ' t-ok' : etat==='rest' ? ' t-calme' : '';
   el.className='coach-ic'+ton;
   el.innerHTML=ico('coach');
 }
@@ -1984,8 +2074,20 @@ document.querySelectorAll('.station').forEach(enhanceStation);
 
 /* ===== PROFIL : IMC + suivi du poids ===== */
 var PROFKEY='inrun_profil', WKEY='inrun_poids';
-function loadProfil(){ try{ return JSON.parse(localStorage.getItem(PROFKEY))||{}; }catch(e){ return {}; } }
-function loadWeights(){ try{ return JSON.parse(localStorage.getItem(WKEY))||[]; }catch(e){ return []; } }
+/* --- lecture défensive du stockage ------------------------------------
+   La restauration d'une sauvegarde écrit ce qu'on lui donne sans vérifier
+   la forme. Un fichier tronqué ou bricolé suffisait donc à faire planter
+   le premier .map venu — et un plantage pendant le rendu laisse l'onglet
+   VIDE, à la salle, sans rien pour comprendre. On vérifie le type. */
+function litObjet(cle){
+  try{ var v=JSON.parse(localStorage.getItem(cle));
+    return (v && typeof v==='object' && !Array.isArray(v)) ? v : {}; }catch(e){ return {}; }
+}
+function litTableau(cle){
+  try{ var v=JSON.parse(localStorage.getItem(cle)); return Array.isArray(v) ? v : []; }catch(e){ return []; }
+}
+function loadProfil(){ return litObjet(PROFKEY); }
+function loadWeights(){ return litTableau(WKEY); }
 function initProfil(){
   var p=loadProfil();
   if(p.h) document.getElementById('pf-h').value=p.h;
@@ -2050,7 +2152,7 @@ initProfil();
 
 /* ===== HISTORIQUE des perfs (toutes les data) ===== */
 var HISTKEY='inrun_hist';
-function loadHist(){ try{ return JSON.parse(localStorage.getItem(HISTKEY))||{}; }catch(e){ return {}; } }
+function loadHist(){ return litObjet(HISTKEY); }
 function archivePerf(id, w, r){
   var h=loadHist();
   if(!h[id]) h[id]=[];
@@ -2159,7 +2261,7 @@ var SETSKEY='inrun_sets';      /* { exId: { 'YYYY-MM-DD': [ {w,r}, ... ] } } */
 var WEEKKEY='inrun_weeks';     /* { '2026-W34': {...} } */
 var WSEENKEY='inrun_week_seen';
 
-function loadExSets(){ try{ return JSON.parse(localStorage.getItem(SETSKEY))||{}; }catch(e){ return {}; } }
+function loadExSets(){ return litObjet(SETSKEY); }
 /* toute écriture de séries périme la calibration : le conseil affiché
    juste après doit tenir compte de la série qu'on vient d'enregistrer */
 function saveExSets(o){ _cal=null; try{ localStorage.setItem(SETSKEY, JSON.stringify(o)); }catch(e){} }
@@ -2205,7 +2307,7 @@ function renderPresc(st){
   var btn=st.querySelector('.presc-edit');
   if(btn && !btn.dataset.open){
     btn.classList.toggle('custom', modif);
-    btn.textContent = modif ? '⚙︎ Ajustée · '+p.sets+' × '+fmtRange(p.lo,p.hi) : '⚙︎ Ajuster séries et reps';
+    btn.innerHTML = '<svg class="gi"><use href="#i-gear"/></svg> ' + (modif ? 'Ajustée · '+p.sets+' × '+fmtRange(p.lo,p.hi) : 'Ajuster séries et reps');
   }
 }
 function changePresc(st, kind, delta){
@@ -2224,7 +2326,7 @@ function togglePrescTools(btn){
   var t=st0?st0.querySelector('.presc-tools'):null;
   if(!t) return;
   var open=t.classList.toggle('show');
-  if(open){ btn.dataset.open='1'; btn.textContent='✕ Fermer'; }
+  if(open){ btn.dataset.open='1'; btn.innerHTML='<svg class="gi"><use href="#i-close"/></svg> Fermer'; }
   else { delete btn.dataset.open; }
   var st=btn.closest('.station'); if(st) renderPresc(st);
 }
@@ -2234,7 +2336,7 @@ function buildPrescTools(st){
   box._built=1;
   var host=box.parentNode;
   var btn=document.createElement('button');
-  btn.className='presc-edit'; btn.textContent='⚙︎ Ajuster séries et reps';
+  btn.className='presc-edit'; btn.innerHTML='<svg class="gi"><use href="#i-gear"/></svg> Ajuster séries et reps';
   btn.onclick=function(){ togglePrescTools(btn); };
   var tools=document.createElement('div'); tools.className='presc-tools';
   tools.innerHTML=
@@ -2242,7 +2344,7 @@ function buildPrescTools(st){
     '<button data-p="sets" data-d="1">+ Série</button>'+
     '<button data-p="reps" data-d="-1">− Rep</button>'+
     '<button data-p="reps" data-d="1">+ Rep</button>'+
-    '<button class="wide" data-reset>↺ Prescription d\'origine</button>';
+    '<button class="wide" data-reset><svg class="gi"><use href="#i-refresh"/></svg> Prescription d\'origine</button>';
   /* le bouton vit dans la ligne de prescription : une ligne au lieu de deux */
   box.appendChild(btn);
   host.insertBefore(tools, box.nextSibling);
@@ -2258,7 +2360,7 @@ function buildPrescTools(st){
    ================================================================ */
 var FATKEY='inrun_fatigue';
 var FAT={fatigue:{e:'😴', t:'Fatigué'}, normal:{e:'🙂', t:'Normal'}, forme:{e:'🔥', t:'En forme'}};
-function loadFat(){ try{ return JSON.parse(localStorage.getItem(FATKEY))||{}; }catch(e){ return {}; } }
+function loadFat(){ return litObjet(FATKEY); }
 function todayFat(){ return loadFat()[dkey(new Date())]||null; }
 function setFat(v){
   var all=loadFat(), k=dkey(new Date());
@@ -2359,7 +2461,7 @@ function renderSets(st){
     return '<span class="set-chip'+(pr?' pr':'')+'"><span class="sn">S'+(i+1)+'</span>'+
       fmtKg(s.w)+'&nbsp;×&nbsp;'+s.r+
       (s.rir!==null&&s.rir!==undefined?'<span class="rr">RIR '+s.rir+(s.rir>=4?'+':'')+'</span>':'')+
-      '<span class="del" onclick="delSet(\''+id+'\','+i+')">✕</span></span>';
+      '<span class="del" onclick="delSet(\''+id+'\','+i+')">'+gi('close')+'</span></span>';
   }).join('');
 }
 
@@ -2578,7 +2680,7 @@ function isoWeekKey(d){
   return t.getFullYear()+'-S'+String(wk).padStart(2,'0');
 }
 function mondayOf(d){ var m=new Date(d.getFullYear(),d.getMonth(),d.getDate()); m.setDate(m.getDate()-((m.getDay()+6)%7)); return m; }
-function loadWeeks(){ try{ return JSON.parse(localStorage.getItem(WEEKKEY))||{}; }catch(e){ return {}; } }
+function loadWeeks(){ return litObjet(WEEKKEY); }
 function saveWeeks(o){ try{ localStorage.setItem(WEEKKEY, JSON.stringify(o)); }catch(e){} }
 
 function buildRecap(monday){
@@ -2655,32 +2757,32 @@ function recapLines(r){
     [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
       if(r.setsByGroup[g[0]]) parts.push(g[1]+' '+r.setsByGroup[g[0]]);
     });
-    L.push({i:'📊', t:'<b>Séries par groupe :</b> '+parts.join(' · ')+'. La zone utile pour grossir, c\'est 10-20 séries par muscle et par semaine.'});
+    L.push({i:gi('bars'), t:'<b>Séries par groupe :</b> '+parts.join(' · ')+'. La zone utile pour grossir, c\'est 10-20 séries par muscle et par semaine.'});
     var faibles=[];
     [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
       if(r.setsByGroup[g[0]]>0 && r.setsByGroup[g[0]]<volMin(g[0])) faibles.push(g[1]);
     });
-    if(faibles.length) L.push({i:'⚠️', t:'<b>Sous le volume utile :</b> '+faibles.join(', ')+'. Ajoute une série par exercice ou une séance de plus.'});
+    if(faibles.length) L.push({i:gi('alert'), t:'<b>Sous le volume utile :</b> '+faibles.join(', ')+'. Ajoute une série par exercice ou une séance de plus.'});
   }
   if(r.prs && r.prs.length){
-    L.push({i:'🏆', t:'<b>'+r.prs.length+' record'+(r.prs.length>1?'s':'')+' :</b> '+r.prs.map(function(p){ return p.n+' '+p.from+'→'+p.to+' kg'; }).join(' · ')+'.'});
+    L.push({i:gi('trophy'), t:'<b>'+r.prs.length+' record'+(r.prs.length>1?'s':'')+' :</b> '+r.prs.map(function(p){ return p.n+' '+p.from+'→'+p.to+' kg'; }).join(' · ')+'.'});
   } else if(r.sets>0){
-    L.push({i:'📌', t:'Aucun record cette semaine. Normal : la progression n\'est pas linéaire. Si ça dure 3 semaines, c\'est le signal d\'un deload.'});
+    L.push({i:gi('pin'), t:'Aucun record cette semaine. Normal : la progression n\'est pas linéaire. Si ça dure 3 semaines, c\'est le signal d\'un deload.'});
   }
   if(r.wStart!==null && r.wEnd!==null && r.wStart!==r.wEnd){
     var d=Math.round((r.wEnd-r.wStart)*10)/10;
-    L.push({i:d>0?'⚖️':'⚖️', t:'<b>Poids :</b> '+fmtKg(r.wStart)+' → '+fmtKg(r.wEnd)+' kg ('+(d>0?'+':'')+fmtKg(d)+'). En prise de masse, 0,2 à 0,4 kg par semaine, pas plus : au-delà c\'est du gras.'});
+    L.push({i:gi('scale'), t:'<b>Poids :</b> '+fmtKg(r.wStart)+' → '+fmtKg(r.wEnd)+' kg ('+(d>0?'+':'')+fmtKg(d)+'). En prise de masse, 0,2 à 0,4 kg par semaine, pas plus : au-delà c\'est du gras.'});
   }
   if(r.rir!==null){
     var rtxt=r.rir<=1 ? 'Tu finis tes séries très près de l\'échec. Efficace, mais coûteux en récupération : vise plutôt 2.'
            : r.rir>=3 ? 'Tu gardes beaucoup de marge. Tu peux charger plus ou pousser les reps.'
            : 'Intensité bien calibrée.';
-    L.push({i:'🎚️', t:'<b>RIR moyen : '+String(r.rir).replace('.',',')+'.</b> '+rtxt});
+    L.push({i:gi('slider'), t:'<b>RIR moyen : '+String(r.rir).replace('.',',')+'.</b> '+rtxt});
   }
-  if(r.fatDays>=3) L.push({i:'😴', t:'<b>'+r.fatDays+' jours déclarés fatigués.</b> Regarde du côté du sommeil et des calories avant de blâmer le programme.'});
-  if(r.sessions>=4) L.push({i:'✅', t:'<b>'+r.sessions+' séances :</b> volume solide. Vérifie que le sommeil et les protéines suivent, sinon tu t\'entraînes pour rien.'});
-  else if(r.sessions===3) L.push({i:'👍', t:'<b>3 séances :</b> le minimum qui marche. Une 4ᵉ te ferait passer un cap.'});
-  else if(r.sessions>0) L.push({i:'📉', t:'<b>'+r.sessions+' séance'+(r.sessions>1?'s':'')+' :</b> trop peu pour progresser. Vise 3 minimum, même courtes.'});
+  if(r.fatDays>=3) L.push({i:gi('moon'), t:'<b>'+r.fatDays+' jours déclarés fatigués.</b> Regarde du côté du sommeil et des calories avant de blâmer le programme.'});
+  if(r.sessions>=4) L.push({i:gi('check'), t:'<b>'+r.sessions+' séances :</b> volume solide. Vérifie que le sommeil et les protéines suivent, sinon tu t\'entraînes pour rien.'});
+  else if(r.sessions===3) L.push({i:gi('check'), t:'<b>3 séances :</b> le minimum qui marche. Une 4ᵉ te ferait passer un cap.'});
+  else if(r.sessions>0) L.push({i:gi('trend-down'), t:'<b>'+r.sessions+' séance'+(r.sessions>1?'s':'')+' :</b> trop peu pour progresser. Vise 3 minimum, même courtes.'});
   return L;
 }
 
@@ -2791,7 +2893,7 @@ var pickKey=null;
    normalisation, tout le travail des bras disparaissait des compteurs et le
    jour n'était jamais marqué automatiquement dans le calendrier. */
 function groupOf(id){ var g=String(id).replace(/[0-9]+$/,''); return g==='up'?'upper':g; }
-function loadTLog(){ try{ return JSON.parse(localStorage.getItem(TLOGKEY))||{}; }catch(e){ return {}; } }
+function loadTLog(){ return litObjet(TLOGKEY); }
 function saveTLog(o){ try{ localStorage.setItem(TLOGKEY, JSON.stringify(o)); }catch(e){} }
 function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function parseKey(k){ var p=k.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
@@ -2916,7 +3018,7 @@ function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); renderWeekStrip(); 
 var PLANKEY='inrun_plan';
 var DAYS_L=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 
-function loadPlan(){ try{ return JSON.parse(localStorage.getItem(PLANKEY))||{}; }catch(e){ return {}; } }
+function loadPlan(){ return litObjet(PLANKEY); }
 function savePlan(o){ try{ localStorage.setItem(PLANKEY, JSON.stringify(o)); }catch(e){} }
 
 /* un jour prévu qui est passé n'est plus une intention : on le retire */
@@ -3440,7 +3542,7 @@ var COEF_NIV={1:0.8, 2:0.9, 3:1, 4:1.1, 5:1.2, 6:1.3};
 var _niv=null;
 function loadNiv(){
   if(_niv) return _niv;
-  try{ _niv=JSON.parse(localStorage.getItem(NIVKEY))||{}; }catch(e){ _niv={}; }
+  _niv=litObjet(NIVKEY);
   return _niv;
 }
 function saveNiv(o){ _niv=o; try{ localStorage.setItem(NIVKEY, JSON.stringify(o)); }catch(e){} }
@@ -3531,6 +3633,8 @@ function jaugeRigueur(){
 }
 var JAUGES_ORDRE=['assiduite','equilibre','force','rigueur'];
 var JAUGES_NOM={assiduite:'Assiduité', equilibre:'Équilibre', force:'Force', rigueur:'Rigueur'};
+/* la couleur d'une jauge est son état, jamais une décoration */
+function etatJauge(v){ return v<40 ? 'b-bas' : v<70 ? 'b-moy' : 'b-haut'; }
 function jauges(){
   return {assiduite:jaugeAssiduite(), equilibre:jaugeEquilibre(), force:jaugeForce(), rigueur:jaugeRigueur()};
 }
@@ -3637,13 +3741,14 @@ function renderNiveau(){
   }
 
   h+='<div class="niv-score"><div class="niv-sh"><span>Score global</span><span><b>'+c.score+'</b> / 100</span></div>'+
-     '<div class="bar"><i style="width:'+c.score+'%"></i></div></div>';
+     '<div class="bar"><i class="'+etatJauge(c.score)+'" style="width:'+c.score+'%"></i></div></div>';
 
   h+='<div class="niv-j">'+JAUGES_ORDRE.map(function(k){
     var g=c.jauges[k];
+    var e=g.dispo?etatJauge(g.v):'';
     return '<div class="jr'+(g.dispo?'':' off')+'">'+
-      '<div class="jh"><span class="jl">'+JAUGES_NOM[k]+'</span><span class="jv">'+(g.dispo?g.v:'—')+'</span></div>'+
-      '<div class="bar"><i style="width:'+(g.dispo?g.v:0)+'%"></i></div>'+
+      '<div class="jh"><span class="jl">'+JAUGES_NOM[k]+'</span><span class="jv '+e+'">'+(g.dispo?g.v:'—')+'</span></div>'+
+      '<div class="bar"><i class="'+e+'" style="width:'+(g.dispo?g.v:0)+'%"></i></div>'+
       '<div class="jt">'+g.txt+'</div></div>';
   }).join('')+'</div>';
 
@@ -3687,7 +3792,7 @@ function updateCoach(){
   var today=new Date(); today.setHours(0,0,0,0);
   var tKey=dkey(today);
   var labels={push:'la poussée (pecs, épaules, triceps)',pull:'le dos',legs:'les jambes',upper:'les bras',core:'la ceinture abdominale'};
-  var msg='', ic='🧠', sig='';
+  var msg='', ic='', sig='';
 
   var vol=weeklyVolume(7);
   var volTot=0; MUSCLES.forEach(function(g){ volTot+=vol.byGroup[g]||0; });
@@ -3715,7 +3820,7 @@ function updateCoach(){
 
   /* --- priorité 1 : signal de deload --- */
   if(stagnation() && volTot>=20){
-    ic='🛑';
+    ic='alerte';
     msg='<b>Signal de décharge.</b> Tes charges ne montent plus sur la majorité des exercices alors que ton volume est élevé. Fais une semaine à <b>60 % de tes charges habituelles</b>, mêmes séries, mêmes reps. Tu reviendras plus fort — c\'est prévu, pas un échec.';
     msgEl.innerHTML=msg; poserCoachIc(icEl, ic);
     if(sigEl) sigEl.textContent='Volume 7 j : '+volTot+' séries · '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+' soulevés.';
@@ -3726,7 +3831,7 @@ function updateCoach(){
   if(doneToday){
     if(doneToday==='rest'){ ic='rest'; msg='<b>Repos noté.</b> Le muscle ne se construit pas à la salle mais maintenant. '; }
     else if(doneToday==='cardio'){ ic='cardio'; msg='<b>Cardio noté.</b> Bon pour la récupération sans entamer ta masse. '; }
-    else { ic='✅'; msg='<b>'+SESS[doneToday].t+' : c\'est fait.</b> '; }
+    else { ic='ok'; msg='<b>'+SESS[doneToday].t+' : c\'est fait.</b> '; }
 
     if(never){ msg+='<b>'+SESS[never].t+'</b> reste à faire : tu n\'as aucune donnée dessus.'; }
     else if(neglect && maxd>=5){ msg+='Prochaine cible : <b>'+SESS[neglect].t+'</b>, '+maxd+' jours sans stimulus. Au-delà de 5-6 jours, tu perds le bénéfice de la séance précédente.'; }
@@ -3810,7 +3915,7 @@ function analyzeTraining(){
   var volM=volumeParMuscle(7);
   var travailles=Object.keys(volM).filter(function(m){ return volM[m]>0; });
   if(Object.keys(log).length===0 && !travailles.length){
-    box.innerHTML='<div class="arow tip"><span class="ai">🗓️</span><span class="at">Commence à marquer tes séances dans le calendrier. Après quelques jours, j\'analyse ta régularité et je te conseille ici.</span></div>';
+    box.innerHTML='<div class="arow tip">'+gi('cal-check')+'<span class="at">Commence à marquer tes séances dans le calendrier. Après quelques jours, j\'analyse ta régularité et je te conseille ici.</span></div>';
     return;
   }
 
@@ -3825,16 +3930,16 @@ function analyzeTraining(){
   }
 
   /* 1) volume de la semaine */
-  if(train===0){ add('warn','😴','<b>Aucune séance de muscu ces 7 derniers jours.</b> Il est temps de s\'y remettre — même une séance courte relance la machine.'); }
-  else if(train<3){ add('tip','📊','<b>'+train+' séance'+(train>1?'s':'')+' cette semaine.</b> Vise 3-4 pour bien progresser en prise de masse.'); }
-  else if(train<=5){ add('good','✅','<b>'+train+' séances sur 7 jours :</b> excellent rythme pour la prise de masse.'); }
-  else { add('warn','🔋','<b>'+train+' séances en 7 jours, c\'est intense.</b> Assure-toi de bien dormir et manger, ou intercale un jour off.'); }
+  if(train===0){ add('warn',gi('moon'),'<b>Aucune séance de muscu ces 7 derniers jours.</b> Il est temps de s\'y remettre — même une séance courte relance la machine.'); }
+  else if(train<3){ add('tip',gi('bars'),'<b>'+train+' séance'+(train>1?'s':'')+' cette semaine.</b> Vise 3-4 pour bien progresser en prise de masse.'); }
+  else if(train<=5){ add('good',gi('check'),'<b>'+train+' séances sur 7 jours :</b> excellent rythme pour la prise de masse.'); }
+  else { add('warn',gi('battery'),'<b>'+train+' séances en 7 jours, c\'est intense.</b> Assure-toi de bien dormir et manger, ou intercale un jour off.'); }
 
   /* 2) jours d'affilée sans vrai repos */
   var cur=0, mx=0;
   seq.forEach(function(v){ if(isTraining(v)){ cur++; mx=Math.max(mx,cur); } else if(v==='rest'){ cur=0; } });
-  if(mx>=4){ add('warn','🔗','<b>'+mx+' jours d\'affilée sans repos.</b> Intercale un jour off : la fatigue s\'accumule et fait chuter tes perfs.'); }
-  else if(mx===3 && train>=4){ add('tip','💡','3 jours d\'entraînement d\'affilée. Ça passe, mais un repos au milieu aiderait la récupération.'); }
+  if(mx>=4){ add('warn',gi('link'),'<b>'+mx+' jours d\'affilée sans repos.</b> Intercale un jour off : la fatigue s\'accumule et fait chuter tes perfs.'); }
+  else if(mx===3 && train>=4){ add('tip',gi('bulb'),'3 jours d\'entraînement d\'affilée. Ça passe, mais un repos au milieu aiderait la récupération.'); }
 
   /* 3) groupe négligé */
   var since=daysSinceGroup();
@@ -3843,18 +3948,18 @@ function analyzeTraining(){
   var jamais=MUSCLES.filter(function(g){ return since[g]===null; }).map(function(g){ return SESS[g].t; });
   if(jamais.length){ add('tip','🆕','<b>Jamais marqué :</b> '+jamais.join(', ')+'. Programme-les pour équilibrer ton développement.'); }
   else if(wd>=6){ add('warn','⏳','<b>'+SESS[worst].t+' : rien depuis '+wd+' jours.</b> Reprogramme cette séance vite pour rester équilibré.'); }
-  else if(wd>=4){ add('tip','👀','Ça fait '+wd+' jours sans <b>'+SESS[worst].t+'</b>. À prévoir bientôt.'); }
+  else if(wd>=4){ add('tip',gi('eye'),'Ça fait '+wd+' jours sans <b>'+SESS[worst].t+'</b>. À prévoir bientôt.'); }
 
   /* 4) jambes négligées */
-  if(train>=3 && freq.legs===0){ add('warn','🦵','<b>Pas de jambes cette semaine.</b> Ne les néglige pas : c\'est la moitié de ta masse musculaire et ça tire toute la progression vers le haut.'); }
+  if(train>=3 && freq.legs===0){ add('warn',gi('dumbbell'),'<b>Pas de jambes cette semaine.</b> Ne les néglige pas : c\'est la moitié de ta masse musculaire et ça tire toute la progression vers le haut.'); }
 
   /* 5) fréquence 2× = idéal hypertrophie */
   var twice=[]; MUSCLES.forEach(function(g){ if(freq[g]>=2) twice.push(SESS[g].t); });
-  if(twice.length>=2){ add('good','📈','<b>2× cette semaine :</b> '+twice.join(', ')+' — c\'est la fréquence idéale pour la croissance musculaire.'); }
+  if(twice.length>=2){ add('good',gi('trend-up'),'<b>2× cette semaine :</b> '+twice.join(', ')+' — c\'est la fréquence idéale pour la croissance musculaire.'); }
 
   /* 6) repos déclarés */
-  if(train>=3 && rest===0){ add('tip','😌','Aucun jour de <b>repos marqué</b> cette semaine. Note-les aussi : ça fait partie du programme, pas une case vide.'); }
-  if(cardio>0){ add('good','🏃','<b>'+cardio+' séance'+(cardio>1?'s':'')+' de cardio</b> cette semaine — bon pour la récupération et le cœur sans nuire à la masse.'); }
+  if(train>=3 && rest===0){ add('tip',gi('moon'),'Aucun jour de <b>repos marqué</b> cette semaine. Note-les aussi : ça fait partie du programme, pas une case vide.'); }
+  if(cardio>0){ add('good',gi('pulse'),'<b>'+cardio+' séance'+(cardio>1?'s':'')+' de cardio</b> cette semaine — bon pour la récupération et le cœur sans nuire à la masse.'); }
 
   /* 7) le détail par muscle : la métrique d'un coach, pas celle d'un agenda */
   var dette=musclesEnDette(volM), sature=musclesSatures(volM);
@@ -3862,7 +3967,7 @@ function analyzeTraining(){
     var haut=travailles.map(function(m){ return {m:m,v:volM[m]}; })
       .sort(function(a2,b2){ return b2.v-a2.v; }).slice(0,4)
       .map(function(x){ return MUSCLES_DET[x.m].n+' '+x.v; }).join(' · ');
-    add('tip','🫀','<b>Séries stimulantes par muscle, 7 jours :</b> '+haut+
+    add('tip',gi('heart'),'<b>Séries stimulantes par muscle, 7 jours :</b> '+haut+
         '. Le muscle assistant compte pour une demi-série, et une série arrêtée loin de l\'échec compte moins qu\'une série menée près : c\'est le stimulus qui est mesuré, pas le passage sur la machine.');
   }
 
@@ -3874,30 +3979,30 @@ function analyzeTraining(){
       return x>=cal.n ? 'les '+cal.n+' séances comparables' : x+' séances sur '+cal.n;
     };
     if(cal.biais<0){
-      add('warn','🎚️','<b>Ton RIR est optimiste.</b> Sur '+part(cal.opt)+
+      add('warn',gi('slider'),'<b>Ton RIR est optimiste.</b> Sur '+part(cal.opt)+
         ' à charge constante, tu perds 3 répétitions ou plus entre la première et la dernière série tout en annonçant 2 à 3 reps en réserve. Tu es plus près de l\'échec que tu ne le crois : je retire une rep en réserve à tout ce que tu déclares.');
     } else if(cal.biais>0){
-      add('tip','🎚️','<b>Tu te sous-estimes.</b> Sur '+part(cal.pess)+
+      add('tip',gi('slider'),'<b>Tu te sous-estimes.</b> Sur '+part(cal.pess)+
         ', tu annonces l\'échec alors que tes reps ne baissent pas d\'une série à l\'autre. Il te reste de la marge : j\'ajoute une rep en réserve à tout ce que tu déclares, et je te chargerai plus vite.');
     } else {
-      add('good','🎚️','<b>Ton RIR est fiable.</b> Sur '+cal.n+' séances comparables, ce que tu annonces colle à ce que montrent tes reps. C\'est ce qui me permet de décider quand monter la charge.');
+      add('good',gi('slider'),'<b>Ton RIR est fiable.</b> Sur '+cal.n+' séances comparables, ce que tu annonces colle à ce que montrent tes reps. C\'est ce qui me permet de décider quand monter la charge.');
     }
   }
   if(sature.length){
     var s0=cibleMuscle(sature[0].m);
-    add('warn','🔺','<b>'+s0.n+' à '+sature[0].v+' séries</b>, plafond utile '+s0.max+
+    add('warn',gi('alert'),'<b>'+s0.n+' à '+sature[0].v+' séries</b>, plafond utile '+s0.max+
         '. Retire une série plutôt qu\'une séance : c\'est la fréquence qui fait progresser, pas l\'accumulation.');
   }
   if(dette.length){
-    add('tip','🎯','<b>En dette :</b> '+dette.slice(0,3).map(function(x){
+    add('tip',gi('target'),'<b>En dette :</b> '+dette.slice(0,3).map(function(x){
       var c=cibleMuscle(x.m); return c.n+' '+x.v+'/'+c.min; }).join(' · ')+
       '. '+MUSCLES_DET[dette[0].m].n+' d\'abord — '+MUSCLES_DET[dette[0].m].mot+'.');
   } else if(travailles.length>=4){
-    add('good','⚖️','<b>Aucun muscle en dette</b> sur les 7 derniers jours. C\'est l\'équilibre qui tient un physique, pas le total.');
+    add('good',gi('scale'),'<b>Aucun muscle en dette</b> sur les 7 derniers jours. C\'est l\'équilibre qui tient un physique, pas le total.');
   }
 
   if(!rows.some(function(r){ return r.type==='warn'; }) && train>=3){
-    add('good','🎯','<b>Semaine bien équilibrée.</b> Continue comme ça, la régularité bat l\'intensité sur la durée.');
+    add('good',gi('target'),'<b>Semaine bien équilibrée.</b> Continue comme ça, la régularité bat l\'intensité sur la durée.');
   }
 
   box.innerHTML=rows.map(function(r){
