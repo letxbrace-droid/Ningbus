@@ -140,7 +140,7 @@ latéral encaisse 12 à 25 séries là où un brachial sature vers 12.
 
 ## L'équilibre du programme
 
-Le volume par muscle a été mesuré sur les 25 stations, à partir de la même
+Le volume par muscle a été mesuré sur les stations, à partir de la même
 source que le coach : les libellés du DOM et les prescriptions par défaut.
 Le premier relevé était déséquilibré.
 
@@ -191,6 +191,67 @@ dans l'échauffement de la poussée, sans compter dans le volume.
 
 `test-equilibre.js` verrouille tout ça — un exercice renommé ou une série
 retirée fait échouer la suite.
+
+## Le programme tient ses propres promesses
+
+Le contrôle de cohérence qui a suivi le coach exigeant a trouvé pire qu'un
+message mal tourné : **le coach fixait des cibles que son propre programme
+ne pouvait pas atteindre.** La rotation entière, faite exactement comme
+prescrite, laissait six muscles sur seize sous leur minimum — les mollets à
+7 séries pour une cible de 10, soit 58 %. L'app reprochait donc à
+l'utilisateur une dette qu'aucun effort de sa part ne pouvait combler.
+C'est la faute de coaching la plus détestable qui soit : accuser quelqu'un
+de ce qu'on lui a rendu impossible.
+
+Deux réponses, mesurées puis vérifiées.
+
+**1. Le programme délivre ce qu'il demande.** Quatre prescriptions montent
+d'une série, et une station apparaît :
+
+| Station | Avant | Après | Ce que ça débloque |
+| --- | --- | --- | --- |
+| Rear delt (oiseau machine) | 5 | **6** | deltoïde postérieur 5 → 6 |
+| Élévations latérales poulie | 4 | **5** | deltoïde latéral 9 → 10 |
+| Leg curl | 5 | **6** | ischios 7 → 8,5 |
+| Extension lombaire au banc | 4 | **5** | lombaires 4 → 5, fessiers 5,5 → 6 |
+| **Mollets debout (2ᵉ passage)** — séance Ceinture | — | **4** | mollets 7 → 11 |
+
+Les mollets réclament plus de séries que n'importe quel autre petit muscle,
+et un seul passage ne peut pas les servir : les empiler le jour des jambes
+fatigue sans stimuler davantage. Un second passage dans la séance Ceinture
+— la plus courte — coûte cinq minutes. Résultat : **zéro muscle en dette**
+sur la rotation complète, et aucun au-dessus de son plafond.
+
+**2. Ce que le programme ne peut pas donner, le coach l'assume.** Les cibles
+montent avec le niveau (`COEF_NIV`), pas les prescriptions — délibérément :
+on ne fait pas seize séries d'élévations latérales dans une séance. Au-delà
+du palier de départ, la rotation à un passage par groupe ne suffit donc plus
+pour certains muscles. `volumeNominal()` mesure ce que le programme délivre,
+`detteStructurelle(m)` compare cette mesure à la cible du niveau courant, et
+`fuites()` sépare deux choses que l'app confondait :
+
+| | Message | Priorité |
+| --- | --- | --- |
+| `dette` | « Deltoïde latéral : 6 séries pour une cible de 10-20. **Ce muscle passe en premier à ta prochaine séance.** » | 60 |
+| `structurel` | « **Ce n'est pas toi, c'est le programme.** […] Une séance de plus dans la semaine — un second passage sur la séance concernée — règle ça d'un coup. » | 55 |
+
+Le titre du bloc suit : « Ce qui te coûte le plus » quand c'est de toi qu'il
+s'agit, « **La limite de ton programme** » quand ça ne l'est pas. L'analyse
+hebdo fait le même partage — « En dette » d'un côté, « Hors de portée de la
+rotation » de l'autre.
+
+J'ai aussi essayé de faire monter les prescriptions avec le niveau, pour que
+les deux côtés bougent ensemble. Mesuré aux six niveaux : au niveau 1 ça
+prescrivait **moins** que la feuille imprimée (79 séries au lieu de 105) et
+ça ne réglait rien plus haut. Annulé, le commentaire dans `defaultPresc()`
+en garde la trace.
+
+`audit-cibles.js` et `audit-niveaux.js` produisent les tableaux ci-dessus.
+`test-equilibre.js` exige désormais que la rotation atteigne **toutes** les
+cibles du niveau de départ, et que toute cible hors de portée à un niveau
+supérieur soit reconnue comme structurelle — sans quoi le coach mentirait.
+`test-coherence.js` vérifie les deux surfaces (priorité et analyse) à un
+niveau où la barre a monté.
 
 ## La série stimulante
 

@@ -3,7 +3,7 @@
    Change la version à chaque modification d'index.html : c'est ce numéro qui
    déclenche l'installation d'un nouveau worker, donc le bandeau « Recharger ».
    ----------------------------------------------------------------------- */
-var VERSION = 'v23';
+var VERSION = 'v24';
 var SHELL   = 'inrun-masse-shell-' + VERSION;   /* l'app elle-même */
 var FONTS   = 'inrun-masse-fonts-' + VERSION;   /* Google Fonts */
 
