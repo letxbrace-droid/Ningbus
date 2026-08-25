@@ -768,11 +768,26 @@ section{padding:26px 0 10px}
 .niv-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;
   backdrop-filter:blur(var(--glass-b));-webkit-backdrop-filter:blur(var(--glass-b))}
 .niv-top{display:flex;gap:15px;align-items:flex-start}
-.niv-badge{flex:0 0 auto;width:66px;height:66px;border-radius:18px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;border:1px solid rgba(127,227,232,.36);
-  background:linear-gradient(150deg,rgba(127,227,232,.20),rgba(2,166,173,.14))}
-.niv-badge .n{font-family:var(--disp);font-weight:700;font-size:34px;line-height:1;color:var(--cyan)}
-.niv-badge .s{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text);margin-top:3px;font-weight:700}
+/* L'anneau porte le score, le centre porte le niveau. Avant, le carré
+   ne disait que le palier et une barre répétait le score plus bas :
+   deux éléments pour une seule information. Un seul, désormais, et
+   l'arc suit les mêmes seuils de couleur que les jauges. */
+.niv-badge{flex:0 0 auto;width:78px;height:78px;position:relative;display:flex;
+  align-items:center;justify-content:center}
+.niv-badge svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.niv-badge .piste{fill:none;stroke:var(--surface-3);stroke-width:6}
+.niv-badge .arc{fill:none;stroke:var(--info);stroke-width:6;stroke-linecap:round;
+  transition:stroke-dashoffset .9s cubic-bezier(.3,0,.2,1)}
+.niv-badge .arc.b-bas{stroke:var(--danger)}
+.niv-badge .arc.b-moy{stroke:var(--warn)}
+.niv-badge .arc.b-haut{stroke:var(--success)}
+.niv-badge .mid{position:relative;text-align:center;line-height:1}
+/* le centre ne porte que le palier : « niveau » est déjà dans l'en-tête
+   de section et le nom du palier est juste à droite. Le lien entre l'arc
+   et le score se fait par la couleur, partagée avec la ligne « Score
+   global » en dessous. */
+.niv-badge .n{display:block;font-family:var(--disp);font-weight:700;font-size:34px;line-height:1;
+  color:var(--text);font-variant-numeric:tabular-nums}
 .niv-id{flex:1;min-width:0}
 .niv-nom{font-family:var(--disp);font-weight:600;font-size:23px;line-height:1.15;letter-spacing:.02em;color:var(--ink)}
 .niv-sub{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text-2);margin-top:4px;line-height:1.5}
@@ -784,6 +799,9 @@ section{padding:26px 0 10px}
 .niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.09em;
   text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:8px}
 .niv-sh b{font-family:var(--disp);font-size:24px;color:var(--text);letter-spacing:0;font-variant-numeric:tabular-nums}
+.niv-sh b.b-bas{color:var(--danger-ink)}
+.niv-sh b.b-moy{color:var(--warn-ink)}
+.niv-sh b.b-haut{color:var(--success-ink)}
 .niv-card .bar{height:7px;border-radius:20px;background:rgba(255,255,255,.08);overflow:hidden}
 /* Une jauge de la même couleur qu'elle soit à 100 ou à 12 ne dit rien.
    Elle porte maintenant son état : sous 40 c'est un problème, sous 70
@@ -950,8 +968,8 @@ section{padding:26px 0 10px}
 .info,.settings{margin:16px 0}
 .prof-card{margin-bottom:16px}
 .niv-card{padding:15px;margin-bottom:16px}
-.niv-badge{width:56px;height:56px;border-radius:15px}
-.niv-badge .n{font-size:28px}
+.niv-badge{width:70px;height:70px}
+.niv-badge .n{font-size:31px}
 .niv-nom{font-size:20px}
 .niv-top{gap:13px}
 .niv-chip{margin-left:6px;font-size:11px;padding:1px 7px}
@@ -1015,7 +1033,13 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   background-size:cover;background-position:center 28%}
 #today .pg-hero:before{opacity:.5}
 
-@media (prefers-reduced-motion:reduce){.day{animation:none}*{transition:none!important}}
+/* Refuser le mouvement doit tout couvrir : l'ancienne règle ne coupait
+   qu'une animation nommée et les transitions. Les feuilles qui montent,
+   les voiles qui apparaissent et les confettis continuaient de bouger. */
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -3806,6 +3830,35 @@ function renderNivChip(){
   el.textContent='Niv. '+n+' · '+infoNiveau(n).t;
   el.className='niv-chip'+(s.sursis?' sursis':'');
 }
+/* L'anneau du niveau. Le rayon et la circonférence sont calculés une
+   fois : un arc dessiné « à peu près » se voit tout de suite. */
+function anneauNiveau(n, score){
+  var R=34, C=2*Math.PI*R;
+  var reste=C*(1-Math.max(0,Math.min(100,score))/100);
+  return '<div class="niv-badge">'+
+    '<svg viewBox="0 0 78 78" aria-hidden="true">'+
+      '<circle class="piste" cx="39" cy="39" r="'+R+'"/>'+
+      '<circle class="arc '+etatJauge(score)+'" cx="39" cy="39" r="'+R+'" '+
+        'stroke-dasharray="'+C.toFixed(2)+'" stroke-dashoffset="'+C.toFixed(2)+'" data-arc="'+reste.toFixed(2)+'"/>'+
+    '</svg>'+
+    '<span class="mid"><span class="n">'+n+'</span></span></div>';
+}
+/* l'arc part de zéro puis se remplit : le mouvement dit « voilà où tu en
+   es », pas « regarde comme c'est joli ». Sans mouvement demandé, on
+   pose directement la valeur finale. */
+function mouvementRefuse(){
+  return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function animerAnneau(){
+  var a=document.querySelector('.niv-badge .arc');
+  var barres=[].slice.call(document.querySelectorAll('.niv-card .bar i[data-w]'));
+  var poser=function(){
+    if(a) a.style.strokeDashoffset=a.getAttribute('data-arc');
+    barres.forEach(function(b){ b.style.width=b.getAttribute('data-w')+'%'; });
+  };
+  if(mouvementRefuse()){ poser(); return; }
+  requestAnimationFrame(function(){ requestAnimationFrame(poser); });
+}
 function renderNiveau(){
   var box=document.getElementById('nivCard'); if(!box) return;
   var c=_calcNiv||niveauCalcule(), s=loadNiv(), n=s.n||1, L=infoNiveau(n);
@@ -3816,7 +3869,7 @@ function renderNiveau(){
   sous.push(c.total+' séance'+(c.total>1?'s':'')+' au total');
 
   var h='<div class="niv-top">'+
-    '<div class="niv-badge"><span class="n">'+n+'</span><span class="s">niveau</span></div>'+
+    anneauNiveau(n, c.score)+
     '<div class="niv-id"><div class="niv-nom">'+L.t+'</div>'+
     '<div class="niv-sub">'+sous.join(' · ')+'</div>'+
     '<div class="niv-mot">'+L.mot+'</div></div></div>';
@@ -3834,15 +3887,15 @@ function renderNiveau(){
        ' — reprends le rythme et il ne se passe rien. Ton meilleur palier reste acquis dans tous les cas.</div>';
   }
 
-  h+='<div class="niv-score"><div class="niv-sh"><span>Score global</span><span><b>'+c.score+'</b> / 100</span></div>'+
-     '<div class="bar"><i class="'+etatJauge(c.score)+'" style="width:'+c.score+'%"></i></div></div>';
+  h+='<div class="niv-score"><div class="niv-sh"><span>Score global</span>'+
+     '<span><b class="'+etatJauge(c.score)+'">'+c.score+'</b> / 100</span></div></div>';
 
   h+='<div class="niv-j">'+JAUGES_ORDRE.map(function(k){
     var g=c.jauges[k];
     var e=g.dispo?etatJauge(g.v):'';
     return '<div class="jr'+(g.dispo?'':' off')+'">'+
       '<div class="jh"><span class="jl">'+JAUGES_NOM[k]+'</span><span class="jv '+e+'">'+(g.dispo?g.v:'—')+'</span></div>'+
-      '<div class="bar"><i class="'+e+'" style="width:'+(g.dispo?g.v:0)+'%"></i></div>'+
+      '<div class="bar"><i class="'+e+'" data-w="'+(g.dispo?g.v:0)+'"></i></div>'+
       '<div class="jt">'+g.txt+'</div></div>';
   }).join('')+'</div>';
 
@@ -3863,6 +3916,7 @@ function renderNiveau(){
        '</div>';
   }
   box.innerHTML=h;
+  animerAnneau();
 }
 
 /* ----------------------------------------------------------------
@@ -4186,6 +4240,9 @@ function beep(){
 
 /* ===== CONFETTIS (équivalent minimal de canvas-confetti, ~1,5 Ko) ===== */
 function confetti(n){
+  /* les confettis sont du canvas : aucune règle CSS ne les arrête. Qui
+     refuse le mouvement refuse aussi celui-là. */
+  if(mouvementRefuse()) return;
   if(document.getElementById('confCv')) return;
   var cv=document.createElement('canvas'); cv.id='confCv';
   cv.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:70;pointer-events:none';
