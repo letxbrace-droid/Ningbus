@@ -417,6 +417,63 @@ Ce n'est pas théorique : `importData()` écrit le contenu d'une sauvegarde sans
 vérifier sa forme, donc un fichier tronqué suffisait. `litObjet()` et
 `litTableau()` vérifient le type ; les neuf chargeurs passent par elles.
 
+## Phase B : la lecture d'un coup d'œil
+
+### La semaine en sept pastilles
+
+`renderGlance()` pose en haut d'**Aujourd'hui** une bande de sept pastilles qui
+ne répond qu'à une question : où j'en suis cette semaine. Aucun nom, aucun
+bouton — la planification garde son onglet. Ce qui est **fait** porte l'aplat
+catégoriel de sa séance et une coche ; ce qui est **prévu** porte la même teinte
+en creux, parce qu'une intention n'est pas un fait ; **aujourd'hui** porte un
+anneau, jamais une couleur de plus. Toucher la bande mène à Semaine.
+
+### La bande détaillée débordait
+
+Sur 390 px, le septième jour sortait de l'écran : `.ws` était en `flex:1` sans
+`min-width:0`, donc le contenu en `nowrap` imposait sa largeur. Corrigé.
+
+Restait à faire tenir les noms. Les rapetisser était le mauvais réflexe — **plus
+un texte est petit, plus APCA exige de contraste** : à 9,5 px, « Poussée »
+tombait à Lc 75 pour un seuil de 98. Les noms sont donc **abrégés** (`SESS[].c`,
+six caractères au plus) et rendus à 11 px en `--text`. Même raisonnement pour
+l'ancienne flèche `→` des jours proposés : elle mangeait la place du mot. Prévu
+et proposé se lisent maintenant à leur cadre en pointillés et à leur icône en
+retrait — le contraste d'un mot ne se négocie pas contre une nuance de sens.
+
+Un test mesure le pire cas : sept jours portant le nom le plus long, aucun
+débordement, aucun `text-overflow` déclenché.
+
+### L'explication passe après la donnée
+
+Trois lignes de prose ouvraient « Cette semaine » et « Ton niveau » : utiles la
+première fois, du bruit la quarantième. Elles se replient derrière un « ? » qui
+porte `aria-expanded`, **sauf au tout premier lancement** — quand il n'y a aucun
+historique, l'explication est ce qu'il y a de plus utile à l'écran.
+
+`initAides()` doit tourner une fois l'app en place : appelée trop tôt, elle lit
+un stockage encore inaccessible, croit l'app neuve et ouvre tout.
+
+### Les tuiles de statistique
+
+Icône et intitulé d'abord, en petit et en retrait, puis la valeur seule en gros
+et tabulaire — l'inverse de l'ancien, où la valeur colorée et l'intitulé se
+disputaient le regard. Les deux copies du bloc sont réunies dans `statsRecap()`.
+
+### Ce que la phase A avait assombri de trop
+
+En passant les intitulés en capitales de 12 px/`--text-2` à 11,5 px/`--text-3`,
+la phase A les avait fait tomber sous leur seuil (Lc 75 pour 88 exigé). Retour
+en arrière sur les cinq concernés. Le bilan de l'audit s'améliore nettement :
+
+| | avant | après |
+|---|---|---|
+| textes sous seuil | 6 | **4** |
+| APCA moyen | 85 | **89,8** |
+| perdus en plein soleil | 3 | **0** |
+
+Les budgets de `test-contraste.js` sont resserrés d'autant.
+
 ## Le système de couleurs
 
 Trois étages, dans `:root` :

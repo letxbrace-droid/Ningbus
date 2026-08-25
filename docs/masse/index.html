@@ -288,6 +288,16 @@ section{padding:26px 0 10px}
 .phase .num .gi{width:19px;height:19px}
 .block-h .tag{font-family:var(--disp);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:var(--ink)}
 .block-h .line{flex:1;height:1px;background:var(--line)}
+/* L'explication passait AVANT la donnée : trois lignes de texte à lire
+   la première fois, à sauter les quarante suivantes. Elle se replie
+   derrière un « ? », ouvert d'office tant qu'il n'y a aucun historique. */
+.aide{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--bord-fort);
+  background:var(--surface-2);color:var(--text-3);font-family:var(--disp);font-weight:700;font-size:14px;
+  line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  transition:color .15s,border-color .15s}
+.aide[aria-expanded="true"]{color:var(--info-ink);border-color:var(--info)}
+.note{font-size:13.5px;font-weight:500;color:var(--text-2);margin:-4px 0 14px;line-height:1.55}
+.note[hidden]{display:none}
 
 /* ===== STATION (exercice) — verre dépoli ===== */
 .station{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:13px;
@@ -435,10 +445,17 @@ section{padding:26px 0 10px}
 .wk-card.open .wk-h .chev{transform:rotate(90deg)}
 .wk-b{display:none;padding:0 15px 16px;border-top:1px solid var(--line)}
 .wk-card.open .wk-b{display:block}
+/* Tuile de statistique : icône et intitulé d'abord, en petit et en
+   retrait, puis la valeur seule en gros. L'inverse de ce qu'on avait,
+   où la valeur colorée et l'intitulé se disputaient le regard. */
 .wk-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0 4px}
-.wk-s{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:12px}
-.wk-s .v{font-family:var(--disp);font-weight:700;font-size:23px;line-height:1;color:var(--blue-l)}
-.wk-s .k{font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;font-weight:700}
+.wk-s{background:var(--surface-2);border:1px solid var(--bord);border-radius:13px;padding:12px 13px}
+.wk-s .k{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);text-transform:uppercase;
+  letter-spacing:.08em;font-weight:700}
+.wk-s .k .gi{width:14px;height:14px}
+.wk-s .v{font-family:var(--disp);font-weight:700;font-size:26px;line-height:1;color:var(--text);
+  margin-top:8px;font-variant-numeric:tabular-nums}
+.wk-s .v .u{font-size:14px;color:var(--text-3);margin-left:1px}
 .wk-line{font-size:13.5px;color:var(--text-2);line-height:1.55;margin-top:11px;display:flex;gap:10px}
 .wk-line .i{flex:0 0 auto;font-size:15px}
 .wk-line b{color:var(--ink);font-weight:600}
@@ -586,7 +603,7 @@ section{padding:26px 0 10px}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 10px 28px rgba(0,0,0,.28)}
 .prof-grid{display:flex;gap:10px;margin-bottom:14px}
 .pf{flex:1;background:var(--surface-0);border:1px solid var(--line);border-radius:13px;padding:12px 10px;text-align:center}
-.pf label{display:block;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:7px}
+.pf label{display:block;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:7px}
 .pf .field{display:flex;align-items:baseline;justify-content:center;gap:3px}
 .pf input{width:56px;background:none;border:none;color:var(--text);font-family:var(--mono);font-weight:700;font-size:26px;
   text-align:center;outline:none;font-variant-numeric:tabular-nums}
@@ -655,9 +672,31 @@ section{padding:26px 0 10px}
 .arow.tip{border-color:rgba(92,200,255,.3);background:rgba(92,200,255,.06)}
 .arow.tip .at b{color:var(--cyan)}
 
+/* ===== LA SEMAINE D'UN COUP D'ŒIL =====
+   Une pastille par jour, l'état dans le remplissage. C'est une lecture,
+   pas une commande : on touche n'importe où et on part vers Semaine. */
+.glance{display:flex;align-items:center;gap:4px;margin:0 0 14px;padding:13px 12px;border-radius:16px;
+  background:var(--surface-1);border:1px solid var(--bord);cursor:pointer;transition:transform .1s}
+.glance:active{transform:scale(.985)}
+.glance .gd{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px}
+.glance .gp{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--surface-3);position:relative}
+.glance .gp .gi{width:15px;height:15px;stroke-width:2.4;color:var(--surface-0)}
+/* fait : l'aplat de la séance, la couleur catégorielle et rien d'autre */
+.glance .gd.fait .gp{background:var(--gc,var(--success))}
+/* prévu : la même teinte, mais creuse — une intention n'est pas un fait */
+.glance .gd.prevu .gp{background:none;border:1.5px dashed var(--gc,var(--bord-fort))}
+.glance .gd.repos .gp{background:var(--surface-2)}
+.glance .gd .gl{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.02em;
+  text-transform:uppercase;color:var(--text-2)}
+.glance .gd.auj .gl{color:var(--text)}
+/* aujourd'hui : un anneau, jamais une couleur de plus */
+.glance .gd.auj .gp:after{content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:1.5px solid var(--info-ink)}
+
 /* ===== SEMAINE EN COURS ===== */
 .weekstrip{display:flex;gap:6px}
-.ws{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 3px;border-radius:13px;
+.ws{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 2px;border-radius:13px;
   background:var(--panel);border:1px solid var(--line);cursor:pointer;position:relative;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .1s,border-color .15s}
 .ws:active{transform:scale(.94)}
@@ -665,8 +704,8 @@ section{padding:26px 0 10px}
 .ws .wsd{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--text);text-transform:uppercase}
 .ws.today .wsd{color:var(--info-ink)}
 .ws .wse{font-size:18px;line-height:1;height:21px;display:flex;align-items:center}
-.ws .wsn{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);text-align:center;line-height:1.1;height:13px;
-  white-space:nowrap;overflow:hidden}
+.ws .wsn{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);text-align:center;line-height:1.1;height:13px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .ws.done{background:rgba(127,227,232,.08)}
 
 /* ===== CALENDRIER MENSUEL ===== */
@@ -719,7 +758,7 @@ section{padding:26px 0 10px}
    laquelle on peut encore agir aujourd'hui. */
 .streak .v.warm{color:var(--accent-ink)}
 .streak .v.cool{color:var(--text)}
-.streak .l{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);margin-top:6px;font-weight:700}
+.streak .l{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-2);margin-top:6px;font-weight:700}
 
 /* ===== niveau ===== */
 .niv-chip{display:inline-block;margin-left:0;padding:1px 8px;border-radius:20px;font-size:12.5px;font-weight:700;
@@ -742,8 +781,8 @@ section{padding:26px 0 10px}
   border:1px solid rgba(184,138,6,.34);background:rgba(184,138,6,.07)}
 .niv-alerte b{color:var(--amber)}
 .niv-score{margin-top:16px}
-.niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:8px}
+.niv-sh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--text-2);font-weight:700;margin-bottom:8px}
 .niv-sh b{font-family:var(--disp);font-size:24px;color:var(--text);letter-spacing:0;font-variant-numeric:tabular-nums}
 .niv-card .bar{height:7px;border-radius:20px;background:rgba(255,255,255,.08);overflow:hidden}
 /* Une jauge de la même couleur qu'elle soit à 100 ou à 12 ne dit rien.
@@ -790,11 +829,11 @@ section{padding:26px 0 10px}
 
 /* ===== PLANIFICATION : prévu ≠ fait ===== */
 .ws.plan{border-style:dashed;border-color:var(--line2);background:rgba(255,255,255,.02)}
-.ws.plan .wse{opacity:.6}
-.ws.plan .wsn{color:var(--dim)}
 .ws.free{border-style:dashed;border-color:rgba(127,227,232,.26)}
-.ws.free .wsn{color:var(--text-2);opacity:1}
-.ws.free .wsn:before{content:'→ '}   /* une proposition, pas une décision */
+/* prévu comme proposé se lisent à leur cadre en pointillés et à leur
+   icône en retrait — jamais à un texte plus pâle : le contraste d'un mot
+   ne se négocie pas contre une nuance de sens. */
+.ws.plan .wse, .ws.free .wse{opacity:.55}
 .ws.free .wse{opacity:.35}
 .cd.plan{border-style:dashed;border-color:var(--line2);background:rgba(255,255,255,.02)}
 .cd.plan .cde{opacity:.5}
@@ -1044,6 +1083,11 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="coach-sig" id="coachSig">Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.</div>
     </div>
   </div>
+
+  <!-- La semaine d'un coup d'œil : sept pastilles, aucune décision à
+       prendre. La planification reste dans l'onglet Semaine ; ici on
+       répond à une seule question, « où j'en suis ». -->
+  <div class="glance" id="glance" onclick="show('semaine', document.querySelectorAll('.bottomnav .bn')[1])"></div>
 
   <div class="fatigue" data-fatigue></div>
 
@@ -1574,8 +1618,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
-  <div class="phase"><span class="num"><svg class="gi"><use href="#i-cal"/></svg></span><span class="tag">Cette semaine</span><span class="line"></span></div>
-  <p style="font-size:13.5px;font-weight:500;color:var(--text-2);margin:-6px 0 14px;line-height:1.55">Touche un jour pour marquer ta séance ou en caler une. Le coach vérifie l'espacement avant de valider. Les jours en pointillés sont prévus, pas encore faits.</p>
+  <div class="phase"><span class="num"><svg class="gi"><use href="#i-cal"/></svg></span><span class="tag">Cette semaine</span><span class="line"></span><button class="aide" aria-expanded="false" aria-controls="aideSemaine" onclick="basculeAide(this)">?</button></div>
+  <p class="note" id="aideSemaine" hidden>Touche un jour pour marquer ta séance ou en caler une. Le coach vérifie l'espacement avant de valider. Les jours en pointillés sont prévus, pas encore faits.</p>
   <div class="weekstrip" id="weekStrip"></div>
   <div class="planbar">
     <button class="primary" onclick="proposerSemaine()"><svg class="gi"><use href="#i-cal-check"/></svg> Propose-moi la semaine</button>
@@ -1625,8 +1669,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></header>
 <section><div class="wrap">
 
-  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-medal"/></svg></span><span class="tag">Ton niveau</span><span class="line"></span></div>
-  <p style="font-size:13.5px;font-weight:500;color:var(--text-2);margin:-6px 0 14px;line-height:1.55">Le coach relit tes 4 dernières semaines. Le niveau monte dès que les deux conditions sont réunies, et il ne redescend qu'après 14 jours de sursis — ton meilleur palier, lui, reste acquis.</p>
+  <div class="block-h"><span class="num"><svg class="gi"><use href="#i-medal"/></svg></span><span class="tag">Ton niveau</span><span class="line"></span><button class="aide" aria-expanded="false" aria-controls="aideNiveau" onclick="basculeAide(this)">?</button></div>
+  <p class="note" id="aideNiveau" hidden>Le coach relit tes 4 dernières semaines. Le niveau monte dès que les deux conditions sont réunies, et il ne redescend qu'après 14 jours de sursis — ton meilleur palier, lui, reste acquis.</p>
   <div class="niv-card" id="nivCard"></div>
 
   <div class="block-h"><span class="num"><svg class="gi"><use href="#i-user"/></svg></span><span class="tag">Mensurations</span><span class="line"></span></div>
@@ -1812,6 +1856,27 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 /* une icône du sprite, en chaîne : les listes du coach et du récap sont
    construites en HTML, elles ont besoin du tracé et pas d'un caractère. */
 function gi(nom, cls){ return '<svg class="gi'+(cls?' '+cls:'')+'"><use href="#i-'+nom+'"/></svg>'; }
+
+/* Une explication de section : repliée par défaut, parce qu'elle sert
+   une fois et encombre ensuite. Sauf au tout premier lancement, où il
+   n'y a encore aucune donnée à regarder — là, elle est ce qu'il y a de
+   plus utile à l'écran. */
+function basculeAide(btn){
+  var p=document.getElementById(btn.getAttribute('aria-controls')); if(!p) return;
+  var ouvert=p.hidden;
+  p.hidden=!ouvert;
+  btn.setAttribute('aria-expanded', ouvert?'true':'false');
+  if(window.buzz) buzz(8);
+}
+function initAides(){
+  var vierge=true;
+  try{ vierge=Object.keys(loadTLog()).length===0 && Object.keys(loadExSets()).length===0; }catch(e){}
+  if(!vierge) return;
+  document.querySelectorAll('.aide').forEach(function(b){
+    var p=document.getElementById(b.getAttribute('aria-controls'));
+    if(p){ p.hidden=false; b.setAttribute('aria-expanded','true'); }
+  });
+}
 
 var PAGES=['today','semaine','progres','moi'];
 var SESSIONS=['push','pull','legs','upper','core'];
@@ -2805,12 +2870,7 @@ function renderRecaps(){
         (r.prs&&r.prs.length?'<span class="wk-badge">'+r.prs.length+' PR</span>':'')+
       '</div>'+
       '<div class="wk-b">'+
-        '<div class="wk-stats">'+
-          '<div class="wk-s"><div class="v">'+r.sessions+'</div><div class="k">Séances</div></div>'+
-          '<div class="wk-s"><div class="v">'+r.sets+'</div><div class="k">Séries</div></div>'+
-          '<div class="wk-s"><div class="v">'+(r.tonnage>=1000?(Math.round(r.tonnage/100)/10)+'t':r.tonnage+'kg')+'</div><div class="k">Tonnage</div></div>'+
-          '<div class="wk-s"><div class="v">'+r.reps+'</div><div class="k">Reps</div></div>'+
-        '</div>'+
+        statsRecap(r)+
         lines.map(function(l){ return '<div class="wk-line"><span class="i">'+l.i+'</span><span>'+l.t+'</span></div>'; }).join('')+
       '</div></div>';
   }).join('');
@@ -2826,16 +2886,21 @@ function maybeShowRecapPop(){
   var r=loadWeeks()[newest];
   if(!r){ return; }
   var body=document.getElementById('recapBody');
-  body.innerHTML='<div class="wk-stats">'+
-      '<div class="wk-s"><div class="v">'+r.sessions+'</div><div class="k">Séances</div></div>'+
-      '<div class="wk-s"><div class="v">'+r.sets+'</div><div class="k">Séries</div></div>'+
-      '<div class="wk-s"><div class="v">'+(r.tonnage>=1000?(Math.round(r.tonnage/100)/10)+'t':r.tonnage+'kg')+'</div><div class="k">Tonnage</div></div>'+
-      '<div class="wk-s"><div class="v">'+r.reps+'</div><div class="k">Reps</div></div>'+
-    '</div>'+
+  body.innerHTML=statsRecap(r)+
     recapLines(r).map(function(l){ return '<div class="wk-line"><span class="i">'+l.i+'</span><span>'+l.t+'</span></div>'; }).join('');
   document.getElementById('recapTitle').textContent=newest.replace('-S',' · Semaine ');
   document.getElementById('recapPop').classList.add('show');
   try{ localStorage.setItem(WSEENKEY,newest); }catch(e){}
+}
+/* les quatre chiffres d'une semaine, construits une seule fois */
+function statsRecap(r){
+  var t = r.tonnage>=1000 ? (Math.round(r.tonnage/100)/10)+'<span class="u">t</span>'
+                          : r.tonnage+'<span class="u">kg</span>';
+  var T=[['dumbbell','Séances',r.sessions], ['bars','Séries',r.sets],
+         ['scale','Tonnage',t], ['refresh','Reps',r.reps]];
+  return '<div class="wk-stats">'+T.map(function(x){
+    return '<div class="wk-s"><div class="k">'+gi(x[0])+x[1]+'</div><div class="v">'+x[2]+'</div></div>';
+  }).join('')+'</div>';
 }
 function closeRecap(){ document.getElementById('recapPop').classList.remove('show'); }
 
@@ -2862,15 +2927,18 @@ function askNudge(){
 
 /* ===== CALENDRIER DE SUIVI RÉEL + COACH ===== */
 var TLOGKEY='inrun_trainlog';   /* { 'YYYY-MM-DD': 'push'|'pull'|'legs'|'upper'|'cardio'|'rest' } */
+/* `c` : le nom court de la bande hebdo. Six caractères au plus, parce
+   qu'au-delà il faudrait rapetisser la lettre — et un texte plus petit
+   demande plus de contraste, pas moins. */
 var SESS={
-  push:{t:'Poussée', s:'Pecs · épaules · triceps', e:'🔨'},
-  pull:{t:'Tirage', s:'Dos · biceps', e:'🪝'},
-  legs:{t:'Jambes', s:'Complètes', e:'🦵'},
-  upper:{t:'Bras', s:'Bras + buste', e:'💪'},
-  core:{t:'Abdos', s:'Ceinture abdominale', e:'🧘'},
-  swim:{t:'Piscine', s:'Natation', e:'🏊'},
-  cardio:{t:'Cardio', s:'Endurance', e:'🏃'},
-  rest:{t:'Repos', s:'Récupération', e:'😌'}
+  push:{t:'Poussée', c:'Pouss.', s:'Pecs · épaules · triceps'},
+  pull:{t:'Tirage', c:'Tirage', s:'Dos · biceps'},
+  legs:{t:'Jambes', c:'Jambes', s:'Complètes'},
+  upper:{t:'Bras', c:'Bras', s:'Bras + buste'},
+  core:{t:'Abdos', c:'Abdos', s:'Ceinture abdominale'},
+  swim:{t:'Piscine', c:'Nage', s:'Natation'},
+  cardio:{t:'Cardio', c:'Cardio', s:'Endurance'},
+  rest:{t:'Repos', c:'Repos', s:'Récupération'}
 };
 var MUSCLES=['push','pull','legs','upper','core'];
 /* journées qui ne coûtent pas de récupération musculaire */
@@ -2900,6 +2968,32 @@ function parseKey(k){ var p=k.split('-'); return new Date(+p[0], +p[1]-1, +p[2])
 function isTraining(v){ return !!v && LEGERES.indexOf(v)<0; }
 
 /* --- bande de la semaine en cours (Lun → Dim) --- */
+/* --- la semaine d'un coup d'œil, sur Aujourd'hui ---------------------
+   Sept pastilles, et une seule question : où j'en suis cette semaine.
+   Aucun nom de séance, aucun bouton — la planification a son onglet.
+   Ce qui est fait porte l'aplat de sa séance, ce qui est prévu porte la
+   même teinte en creux, aujourd'hui porte un anneau. */
+function renderGlance(){
+  var box=document.getElementById('glance'); if(!box) return;
+  var ctx=planCtx(), t=new Date(); t.setHours(0,0,0,0);
+  var tk=dkey(t), L=['L','M','M','J','V','S','D'];
+  var monday=new Date(t); monday.setDate(t.getDate()-((t.getDay()+6)%7));
+  var h='';
+  for(var i=0;i<7;i++){
+    var d=new Date(monday); d.setDate(monday.getDate()+i);
+    var k=dkey(d), fait=ctx.log[k], prevu=!fait && ctx.plan[k];
+    var v=fait||prevu, cls='gd';
+    if(fait) cls+=(v==='rest' ? ' repos' : ' fait');
+    else if(prevu) cls+=' prevu';
+    if(k===tk) cls+=' auj';
+    /* la couleur vient de la palette catégorielle : elle dit QUELLE
+       séance, jamais si c'est bien ou mal */
+    var st=(v && v!=='rest') ? ' style="--gc:var(--s-'+v+')"' : '';
+    var dedans=(fait && v!=='rest') ? gi('check') : '';
+    h+='<div class="'+cls+'"'+st+'><div class="gp">'+dedans+'</div><div class="gl">'+L[i]+'</div></div>';
+  }
+  box.innerHTML=h;
+}
 function renderWeekStrip(){
   var box=document.getElementById('weekStrip'); if(!box) return;
   var ctx=planCtx();
@@ -2912,12 +3006,12 @@ function renderWeekStrip(){
     var k=dkey(d), fait=ctx.log[k], prevu=!fait && ctx.plan[k];
     var cls='ws'+(k===tk?' today':'')+(fait?' done':'')+(prevu?' plan':'');
     var emo='·', nom='';
-    if(fait){ emo=ico(fait); nom=SESS[fait].t; }
-    else if(prevu){ emo=ico(prevu); nom=SESS[prevu].t; }
+    if(fait){ emo=ico(fait); nom=SESS[fait].c; }
+    else if(prevu){ emo=ico(prevu); nom=SESS[prevu].c; }
     else if(k>=tk){
       /* jour libre : le coach dit ce qui irait le mieux ici */
       var sug=suggestGroup(k,ctx);
-      if(sug){ cls+=' free'; emo=ico(sug); nom=SESS[sug].t; }
+      if(sug){ cls+=' free'; emo=ico(sug); nom=SESS[sug].c; }
     }
     var ws=document.createElement('div');
     ws.className=cls;
@@ -3004,7 +3098,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
+function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); initAides(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
