@@ -371,7 +371,7 @@ section{padding:26px 0 10px}
   background:var(--surface-1);
   backdrop-filter:blur(var(--glass-b));-webkit-backdrop-filter:blur(var(--glass-b))}
 .fatigue .fh{font-family:var(--mono);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);
-  font-size:12.5px;font-weight:600;color:var(--text-2);margin-bottom:11px}
+  font-size:12.5px;font-weight:700;color:var(--text-2);margin-bottom:11px}
 .fatigue .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 
 /* ===== CALORIES ===== */
@@ -697,6 +697,19 @@ section{padding:26px 0 10px}
   font-size:13px;color:var(--text-2);margin-bottom:6px}
 .coach-msg{font-size:15.5px;color:var(--ink);line-height:1.52;font-weight:500}
 .coach-msg b{color:var(--text);font-weight:700}
+
+/* ===== LA PRIORITÉ ===== */
+/* Une seule fuite à la fois, celle qui coûte le plus. Le liseré citron
+   à gauche dit « ceci n'est pas un commentaire, c'est une consigne ». */
+.prio{display:none;margin:12px 0 0;padding:12px 14px;border-radius:12px;
+  background:var(--surface-2);border-left:3px solid var(--accent)}
+.prio.show{display:block}
+.prio .ph{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:9px}
+.prio .ph .gi{width:15px;height:15px}
+.prio .pt{font-size:15px;line-height:1.55;color:var(--text-2);font-weight:500}
+.prio .pt b{color:var(--text);font-weight:700}
+.prio .pn{margin-top:10px;font-size:12.5px;color:var(--text-2);font-weight:700}
 .wd{cursor:pointer}
 .wd:active{transform:scale(.99)}
 
@@ -1147,6 +1160,9 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     <div class="coach-tx">
       <div class="coach-h">Coach I&amp;N · Force &amp; hypertrophie<span class="niv-chip" id="nivChip"></span></div>
       <div class="coach-msg" id="coachMsg">…</div>
+      <!-- Une priorité, pas une liste : c'est la différence entre un
+           coach et une application qui commente. -->
+      <div class="prio" id="coachPrio"></div>
       <div class="coach-sig" id="coachSig">Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.</div>
     </div>
   </div>
@@ -4114,6 +4130,29 @@ function prescriptionDuJour(){
   return reglagePrescription(niveauActuel(), fat);
 }
 
+/* La priorité du jour : une fuite, la plus coûteuse, et ce qu'on en
+   fait. Quand il n'y en a aucune, on le dit — c'est une information,
+   pas un silence. */
+function renderPrio(){
+  var box=document.getElementById('coachPrio'); if(!box) return;
+  var f=[];
+  try{ f=fuites(); }catch(e){ f=[]; }
+  if(!f.length){
+    var vol=weeklyVolume(7), tot=0;
+    MUSCLES.forEach(function(g){ tot+=vol.byGroup[g]||0; });
+    if(tot<4){ box.className='prio'; box.innerHTML=''; return; }
+    box.className='prio show';
+    box.innerHTML='<div class="ph">'+gi('check')+'Rien à te reprocher</div>'+
+      '<div class="pt">Assiduité, intensité, équilibre : tout est en place cette semaine. '+
+      '<b>Ne change rien et recommence.</b> C\'est la répétition qui construit, pas la nouveauté.</div>';
+    return;
+  }
+  box.className='prio show';
+  box.innerHTML='<div class="ph">'+gi('target')+'Ce qui te coûte le plus</div>'+
+    '<div class="pt">'+f[0].t+'</div>'+
+    (f.length>1 ? '<div class="pn">'+(f.length-1)+' autre'+(f.length>2?'s':'')+' point'+(f.length>2?'s':'')+' à régler ensuite — un à la fois.</div>' : '');
+}
+
 function updateCoach(){
   var msgEl=document.getElementById('coachMsg'), icEl=document.getElementById('coachIc'), sigEl=document.getElementById('coachSig');
   if(!msgEl) return;
@@ -4128,8 +4167,8 @@ function updateCoach(){
 
   /* --- démarrage --- */
   if(Object.keys(log).length===0 && volTot===0){
-    msgEl.innerHTML='<b>On commence par la base.</b> Enregistre chaque série (charge × reps) pendant ta séance : c\'est la seule donnée qui me permet de te dire quand monter la charge. Marque aussi tes jours dans le calendrier.';
-    poserCoachIc(icEl,'');
+    msgEl.innerHTML='<b>Règle numéro un : tout se note.</b> Charge × reps × RIR, à chaque série, pendant la séance — pas de mémoire, pas d\'approximation. Sans ces trois chiffres je ne peux rien te dire, et tu t\'entraînes au hasard. Marque aussi tes jours dans le calendrier.';
+    poserCoachIc(icEl,''); renderPrio();
     if(sigEl) sigEl.textContent='Méthode : double progression · 2-3 reps en réserve · 10-20 séries par muscle et par semaine.';
     return;
   }
@@ -4150,27 +4189,27 @@ function updateCoach(){
   /* --- priorité 1 : signal de deload --- */
   if(stagnation() && volTot>=20){
     ic='alerte';
-    msg='<b>Signal de décharge.</b> Tes charges ne montent plus sur la majorité des exercices alors que ton volume est élevé. Fais une semaine à <b>60 % de tes charges habituelles</b>, mêmes séries, mêmes reps. Tu reviendras plus fort — c\'est prévu, pas un échec.';
-    msgEl.innerHTML=msg; poserCoachIc(icEl, ic);
+    msg='<b>Décharge. Cette semaine, 60 % de tes charges.</b> Mêmes séries, mêmes reps, et tu ne discutes pas. Tes charges ne montent plus sur la majorité de tes exercices alors que ton volume est élevé : continuer à pousser maintenant ne te fera pas progresser plus vite, ça te fera stagner plus longtemps. C\'est planifié, pas un échec.';
+    msgEl.innerHTML=msg; poserCoachIc(icEl, ic); renderPrio();
     if(sigEl) sigEl.textContent='Volume 7 j : '+volTot+' séries · '+(vol.tonnage>=1000?(Math.round(vol.tonnage/100)/10)+' t':vol.tonnage+' kg')+' soulevés.';
     return;
   }
 
   /* --- priorité 2 : la séance du jour --- */
   if(doneToday){
-    if(doneToday==='rest'){ ic='rest'; msg='<b>Repos noté.</b> Le muscle ne se construit pas à la salle mais maintenant. '; }
+    if(doneToday==='rest'){ ic='rest'; msg='<b>Repos.</b> C\'est maintenant que le muscle se construit, pas à la salle — alors dors et mange. '; }
     else if(doneToday==='cardio'){ ic='cardio'; msg='<b>Cardio noté.</b> Bon pour la récupération sans entamer ta masse. '; }
     else { ic='ok'; msg='<b>'+SESS[doneToday].t+' : c\'est fait.</b> '; }
 
     if(never){ msg+='<b>'+SESS[never].t+'</b> reste à faire : tu n\'as aucune donnée dessus.'; }
     else if(neglect && maxd>=5){ msg+='Prochaine cible : <b>'+SESS[neglect].t+'</b>, '+maxd+' jours sans stimulus. Au-delà de 5-6 jours, tu perds le bénéfice de la séance précédente.'; }
     else if(neglect && maxd>=2){ msg+='Prochaine séance : <b>'+SESS[neglect].t+'</b>.'; }
-    else { msg+='Ta rotation est propre. Mange ton surplus et dors 7-8 h, c\'est là que tout se joue.'; }
+    else { msg+='Rotation propre. Maintenant le travail se fait dans l\'assiette et dans le lit : tes protéines en entier, 7-8 h de sommeil. Non négociable.'; }
   } else {
-    if(never){ ic=never; msg='<b>Aujourd\'hui : '+SESS[never].t+'.</b> Aucune donnée sur ce groupe — c\'est le trou dans ton programme.'; }
-    else if(neglect && maxd>=5){ ic=neglect; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'.</b> '+maxd+' jours sans travailler '+labels[neglect]+'. Un muscle se retravaille tous les 3 à 5 jours, pas une fois par semaine.'; }
+    if(never){ ic=never; msg='<b>Aujourd\'hui : '+SESS[never].t+'.</b> Zéro donnée sur ce groupe. C\'est le trou de ton programme, et il ne se bouchera pas tout seul.'; }
+    else if(neglect && maxd>=5){ ic=neglect; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'. '+maxd+' jours sans stimulus.</b> Un muscle se retravaille tous les 3 à 5 jours. Au-delà tu ne construis plus, tu entretiens — et on n\'est pas là pour entretenir.'; }
     else if(neglect && maxd>=2){ ic=neglect; msg='<b>Aujourd\'hui : '+SESS[neglect].t+'</b> ('+maxd+' jours de récup, c\'est le bon créneau).'; }
-    else { ic='rest'; msg='<b>Tout est frais.</b> Tu as tout travaillé dans les 48 h. Repos, ou une séance légère sur ton point faible.'; }
+    else { ic='rest'; msg='<b>Tout a été touché en 48 h.</b> Repos complet, ou une séance courte sur ton point faible. Pas de séance « pour faire quelque chose » : elle coûterait de la récupération sans rien rapporter.'; }
   }
 
   /* --- couche volume : au muscle près, pas à la séance près --- */
@@ -4189,8 +4228,8 @@ function updateCoach(){
     }
   }
 
-  if(fat==='fatigue'){ msg+=' <b>Tu t\'es déclaré fatigué aujourd\'hui :</b> aucune montée de charge, on reproduit et on récupère.'; }
-  else if(fat==='forme'){ msg+=' <b>Tu es en forme :</b> c\'est le jour pour tenter le haut de tes fourchettes.'; }
+  if(fat==='fatigue'){ msg+=' <b>Fatigué aujourd\'hui : zéro montée de charge.</b> Tu reproduis la dernière séance, tu ne cherches pas l\'exploit. Le courage ici, c\'est de ne pas forcer.'; }
+  else if(fat==='forme'){ msg+=' <b>En forme : c\'est aujourd\'hui qu\'on prend.</b> Haut de fourchette sur chaque exercice, et tu finis tes deux dernières séries à 1 rep de l\'échec.'; }
 
   /* --- couche planning : la suite du programme --- */
   var ctxP=planCtx(), prochain=null, quandP=null;
@@ -4199,7 +4238,7 @@ function updateCoach(){
     if(ctxP.plan[kk]){ prochain=ctxP.plan[kk]; quandP=kk; break; }
   }
   if(prochain){
-    if(prochain==='rest'){ msg+=' <b>Repos prévu '+libelleJour(quandP)+'</b> — tiens-le, c\'est une partie du programme.'; }
+    if(prochain==='rest'){ msg+=' <b>Repos prévu '+libelleJour(quandP)+'.</b> Tu le tiens. C\'est une séance comme une autre.'; }
     else {
       var vp=verdictJour(quandP, prochain, ctxP, true);
       msg+=' <b>Prévu '+libelleJour(quandP)+' : '+SESS[prochain].t+'.</b>';
@@ -4207,12 +4246,13 @@ function updateCoach(){
     }
   } else {
     var kd=shiftKey(tKey,1), sugd=suggestGroup(kd, ctxP);
-    if(sugd && sugd!=='rest'){ msg+=' <b>Rien de prévu demain :</b> '+SESS[sugd].t+' serait le bon choix.'; }
-    else if(sugd==='rest'){ msg+=' <b>Rien de prévu demain :</b> vu ton enchaînement, un repos serait le plus rentable.'; }
+    if(sugd && sugd!=='rest'){ msg+=' <b>Rien de prévu demain. Ce sera '+SESS[sugd].t+'.</b> Cale-le maintenant, pas demain matin.'; }
+    else if(sugd==='rest'){ msg+=' <b>Rien de prévu demain, et c\'est très bien : repos.</b> Vu ton enchaînement, c\'est ce qui te rapportera le plus.'; }
   }
 
   msgEl.innerHTML=msg;
   poserCoachIc(icEl, ic);
+  renderPrio();
 
   /* --- signature : la prescription du jour, puis les chiffres réels --- */
   if(sigEl){
@@ -4230,6 +4270,138 @@ function updateCoach(){
     }
     sigEl.textContent=sig;
   }
+}
+
+/* ================================================================
+   CE QUI TE COÛTE LE PLUS — le coach exigeant
+   ----------------------------------------------------------------
+   Un coach cher ne donne pas une liste de dix remarques : il regarde
+   tes données, il classe les fuites par ce qu'elles COÛTENT, et il t'en
+   donne UNE. Le reste attend son tour.
+   Il est dur sur le travail, jamais sur la personne : c'est la seule
+   forme d'exigence qui produise des résultats plutôt que de l'évitement.
+   ================================================================ */
+
+/* Le stimulus réellement produit, en fraction de ce qu'il aurait pu
+   être. Une série à RIR 4 ne vaut que 0,7 série ; à RIR 6, 0,3. C'est
+   le chiffre qu'un coach regarde en premier — et personne ne se le dit
+   à soi-même. */
+function majuscule(t){
+  t=String(t||'').replace(/[.\s]*$/,'');
+  return t ? t.charAt(0).toUpperCase()+t.slice(1) : t;
+}
+function rendementSeries(j){
+  var sets=loadExSets(), t=new Date(); t.setHours(0,0,0,0);
+  var n=0, som=0, sansRir=0;
+  Object.keys(sets).forEach(function(id){
+    Object.keys(sets[id]).forEach(function(k){
+      if(joursEntre(k, todayKey())>(j||7)) return;
+      (sets[id][k]||[]).forEach(function(x){
+        n++;
+        var p=poidsRir(rirCorrige(x.rir));
+        if(p===null) sansRir++; else som+=p;
+      });
+    });
+  });
+  var mesurees=n-sansRir;
+  return {n:n, sansRir:sansRir, rendement:mesurees ? som/mesurees : null};
+}
+
+/* Une séance ouverte puis abandonnée : le journal dit « Poussée », les
+   séries disent deux exercices sur cinq. */
+function seancesAbandonnees(j){
+  var log=loadTLog(), sets=loadExSets(), out=[];
+  Object.keys(log).forEach(function(k){
+    if(joursEntre(k, todayKey())>(j||14) || k>todayKey()) return;
+    var g=log[k]; if(!isTraining(g) || MUSCLES.indexOf(g)<0) return;
+    var total=document.querySelectorAll('#'+g+' .station').length;
+    if(!total) return;
+    var faits=0;
+    document.querySelectorAll('#'+g+' .station').forEach(function(st){
+      var id=st.getAttribute('data-ex');
+      if(sets[id] && sets[id][k] && sets[id][k].length) faits++;
+    });
+    if(faits>0 && faits*2<total) out.push({k:k, g:g, faits:faits, total:total});
+  });
+  return out;
+}
+
+/* La vitesse de perte, lue sur la balance. C'est ici que le coach dit
+   non : au-delà d'un kilo par semaine, ce n'est plus du gras qui part. */
+function vitessePoids(){
+  var w=loadWeights(); if(w.length<3) return null;
+  var recent=w.filter(function(e){ return joursEntre(e.d, todayKey())<=21; });
+  if(recent.length<3) return null;
+  var a=recent[0], b=recent[recent.length-1];
+  var jours=joursEntre(a.d, b.d); if(jours<10) return null;
+  return {kgSem:((a.w-b.w)/jours)*7, jours:jours, de:a.w, a:b.w};
+}
+
+/* Les fuites, classées par ce qu'elles coûtent. La première est la
+   seule que le coach énonce. */
+function fuites(){
+  var out=[], sem=weekDaysOf(todayKey()), tk=todayKey(), log=loadTLog();
+  var faitesSem=sem.filter(function(k){ return k<=tk && isTraining(log[k]); }).length;
+  var joursEcoules=sem.filter(function(k){ return k<=tk; }).length;
+
+  /* 1. la vitesse de perte : le coach refuse d'accélérer, chiffres à l'appui */
+  var v=vitessePoids();
+  if(v && v.kgSem>1){
+    out.push({code:'tropVite', p:100,
+      t:'<b>Tu vas trop vite, et ça te coûte du muscle.</b> '+fmtKg(v.kgSem)+
+        ' kg par semaine sur les '+v.jours+' derniers jours. Au-delà d\'un kilo, ce n\'est plus seulement du gras qui part — et tes charges vont le dire avant ta balance. '+
+        '<b>Remonte de 200 kcal dès aujourd\'hui.</b> Aller moins vite est la façon la plus rapide d\'arriver où tu veux.'});
+  }
+
+  /* 2. le rendement des séries : la fuite la plus silencieuse */
+  var r=rendementSeries(7);
+  if(r.n>=10 && r.rendement!==null && r.rendement<0.85){
+    var perdu=Math.round((1-r.rendement)*100);
+    out.push({code:'menage', p:90,
+      t:'<b>Tu te ménages.</b> Sur tes '+(r.n-r.sansRir)+' séries mesurées cette semaine, tu produis <b>'+
+        Math.round(r.rendement*100)+' % du stimulus possible</b> — tu laisses '+perdu+
+        ' % sur la table. Une série arrêtée à 4 reps de l\'échec ne vaut pas une série arrêtée à 1. '+
+        '<b>Les deux dernières séries de chaque exercice se finissent à 1-2 reps de l\'échec.</b> Pas plus, pas moins.'});
+  }
+
+  /* 3. rien de mesurable : un coach ne travaille pas à l'aveugle */
+  if(r.n>=8 && r.sansRir/r.n>0.4){
+    out.push({code:'aveugle', p:85,
+      t:'<b>Je ne peux pas te coacher à l\'aveugle.</b> '+r.sansRir+' de tes '+r.n+
+        ' séries n\'ont pas de RIR. Sans ça je ne sais pas si tu forces ou si tu fais du volume, et je te conseille au hasard. '+
+        '<b>Un appui sur le chiffre après chaque série.</b> Deux secondes.'});
+  }
+
+  /* 4. les séances abandonnées */
+  var ab=seancesAbandonnees(14);
+  if(ab.length){
+    var d=ab[ab.length-1];
+    out.push({code:'abandon', p:80,
+      t:'<b>Tu as lâché une séance en route.</b> '+SESS[d.g].t+' le '+fmtDateLongue(d.k)+' : '+
+        d.faits+' exercice'+(d.faits>1?'s':'')+' sur '+d.total+'. Les exercices qu\'on saute sont toujours les mêmes, et ce sont toujours les petits muscles qui paient. '+
+        '<b>Une séance se finit, ou elle ne compte pas.</b>'});
+  }
+
+  /* 5. le compte de séances de la semaine */
+  if(joursEcoules>=5 && faitesSem<3){
+    out.push({code:'manque', p:70,
+      t:'<b>'+faitesSem+' séance'+(faitesSem>1?'s':'')+' sur '+joursEcoules+' jours écoulés.</b> '+
+        'En dessous de trois par semaine, tu entretiens, tu ne construis pas. Il te reste '+
+        (7-joursEcoules)+' jour'+(7-joursEcoules>1?'s':'')+' — <b>'+Math.max(0,3-faitesSem)+
+        ' séance'+(3-faitesSem>1?'s':'')+' à caler</b>, pas à envisager.'});
+  }
+
+  /* 6. le muscle le plus en dette */
+  var volM=volumeParMuscle(7), dette=musclesEnDette(volM);
+  if(dette.length && dette[0].v*2<cibleMuscle(dette[0].m).min){
+    var dm=cibleMuscle(dette[0].m);
+    out.push({code:'dette', p:60,
+      t:'<b>'+dm.n+' : '+dette[0].v+' série'+(dette[0].v>1?'s':'')+' pour une cible de '+dm.min+'-'+dm.max+'.</b> '+
+        majuscule(dm.mot)+'. <b>Ce muscle passe en premier à ta prochaine séance</b>, pas en dernier quand tu es cuit.'});
+  }
+
+  out.sort(function(a,b){ return b.p-a.p; });
+  return out;
 }
 
 /* --- ANALYSE de la pratique réelle sur 7 jours glissants --- */

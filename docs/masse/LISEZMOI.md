@@ -511,6 +511,69 @@ En mode calme, l'anneau et les jauges affichent quand même leur valeur : on
 supprime le parcours, jamais l'information. Six vérifications le contrôlent dans
 un contexte navigateur réellement configuré en `reducedMotion: reduce`.
 
+## Le coach exigeant
+
+### Une priorité, pas une liste
+
+Un coach à 100 € de l'heure ne te sort pas dix remarques. Il regarde tes
+données, il classe les fuites par **ce qu'elles coûtent**, et il t'en donne
+**une**. Le reste attend son tour.
+
+`fuites()` retourne les fuites détectées, triées par gravité ; la carte du coach
+n'en affiche que la première, et se contente d'annoncer combien il en reste.
+Quand il n'y en a aucune, il le dit — c'est une information, pas un silence.
+
+### Ce qu'il détecte, et que l'app ne voyait pas
+
+| Fuite | Déclencheur | Pourquoi c'est cher |
+|---|---|---|
+| **Tu vas trop vite** | > 1 kg/semaine sur 3 semaines | ce n'est plus du gras qui part |
+| **Tu te ménages** | rendement < 85 % du stimulus possible | une série à RIR 4 ne vaut que 0,7 série |
+| **Coaching à l'aveugle** | > 40 % des séries sans RIR | le coach conseille au hasard |
+| **Séance abandonnée** | moins de la moitié des stations faites | ce sont toujours les petits muscles qui sautent |
+| **Compte de séances** | < 3 sur la semaine | en dessous on entretient, on ne construit pas |
+| **Muscle en dette** | moins de la moitié de sa cible | le muscle passe en premier, pas en dernier |
+
+Le **rendement** est la mesure la plus utile, et personne ne se la dit à
+soi-même : `rendementSeries()` moyenne le poids stimulant de chaque série
+(`poidsRir`) et le rend en pourcentage. Des séries systématiquement à RIR 5
+donnent **30 % du stimulus possible** — le coach l'affiche tel quel.
+
+### Il dit non, chiffres à l'appui
+
+« Le plus rapidement possible » est exactement la phrase sur laquelle un bon
+coach reprend. `vitessePoids()` lit la balance sur trois semaines ; au-delà d'un
+kilo par semaine, la fuite `tropVite` passe **en tête de toutes les autres** et
+la consigne est de **remonter de 200 kcal**. Aller moins vite est la façon la
+plus rapide d'arriver au résultat, et c'est le coach qui le dit, pas une note en
+bas de page.
+
+### Dur sur le travail, jamais sur la personne
+
+C'est la seule forme d'exigence qui produise des résultats plutôt que de
+l'évitement. Toutes les formulations portent sur **ce qui a été fait ou pas** —
+séries, charges, RIR, assiduité, vitesse de perte. Aucune ne porte sur le corps
+ni sur la personne.
+
+Le registre a suivi partout ailleurs : impératif, chiffré, sans coussin.
+« Décharge. Cette semaine, 60 % de tes charges. » plutôt que « Fais une semaine
+à 60 %, tu reviendras plus fort ».
+
+### Un piège de mise en page trouvé au passage
+
+Le bloc de priorité, posé d'abord comme une carte séparée sous celle du coach,
+repoussait le **sélecteur de séance** si bas qu'il n'atteignait plus le haut de
+l'écran en défilant — or c'est précisément l'élément qu'on utilise en pleine
+séance. Il est donc **dans** la carte du coach : une seule voix, une seule carte,
+et le sélecteur retrouve sa place.
+
+Le test qui l'a signalé mesurait par ailleurs une image en cours d'animation :
+`html{scroll-behavior:smooth}` et un délai fixe de 400 ms ne s'entendent pas. Il
+attend maintenant que le défilement se stabilise.
+
+`test-exigeant.js` verrouille les 21 vérifications correspondantes, dont le fait
+qu'une seule fuite soit énoncée quand il y en a trois.
+
 ## Le plafond calorique
 
 ### Pourquoi le calcul est fait par jour
