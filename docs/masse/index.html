@@ -4071,8 +4071,38 @@ function migrerPlanProgramme(){
     if(!m || SESSIONS.indexOf(m)<0){ delete plan[k]; ch++; return; }
     plan[k]=m; ch++; vus[SESS[g].t]=1;
   });
-  if(!ch) return;
+  /* Convertir jour par jour préserve la moitié du corps, mais peut coller
+     deux séances identiques dos à dos : Poussée mercredi et Tirage jeudi
+     étaient deux séances DIFFÉRENTES ; devenues Haut et Haut, elles se
+     retrouvent à 24 h l'une de l'autre quand le programme en exige 48.
+     L'app rejetait donc son propre planning — verdictJour renvoyait
+     « stop » sur les deux jours.
+
+     On repasse chaque jour converti devant CE verdict plutôt que de
+     réécrire la règle ici. On avance dans l'ordre du calendrier et on ne
+     juge que contre les jours déjà arbitrés : le premier garde ce qui
+     était prévu, c'est le suivant qui cède. */
+  var espace=0, regles={};
+  Object.keys(plan).forEach(function(k){ if(k<t) regles[k]=plan[k]; });
+  Object.keys(plan).filter(function(k){ return k>=t; }).sort().forEach(function(k){
+    var g=plan[k];
+    if(SESSIONS.indexOf(g)<0){ regles[k]=g; return; }   /* repos, piscine, cardio */
+    var ctx={log:loadTLog(), plan:regles};
+    if(verdictJour(k,g,ctx,true).niveau!=='stop'){ regles[k]=g; return; }
+    var autre=SESSIONS.filter(function(x){ return x!==g; })[0];
+    if(autre && verdictJour(k,autre,ctx,true).niveau!=='stop'){
+      plan[k]=autre; regles[k]=autre; espace++;
+    }else{
+      delete plan[k]; espace++;                          /* au planificateur de reproposer */
+    }
+  });
+
+  if(!ch && !espace) return;
   savePlan(plan);
+  if(espace) journalCoach('Planning réespacé : '+espace+' jour'+(espace>1?'s':'')+
+    ' tombai'+(espace>1?'ent':'t')+' à moins de 48 h de la même séance. '+
+    'Deux passages du même groupe collés ne valent pas mieux qu\'un seul.');
+  if(!ch) return;
   var noms=Object.keys(vus);
   if(noms.length) journalCoach('Planning converti : '+ch+' jour'+(ch>1?'s':'')+
     ' posé'+(ch>1?'s':'')+' sous l\'ancien découpage ('+noms.join(', ')+
