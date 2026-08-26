@@ -129,6 +129,14 @@
   --s-swim:#37a88a;   --s-swim-i:#7ec6af;
   --s-cardio:#d66892; --s-cardio-i:#ffafca;
   --s-rest:#8b939f;   --s-rest-i:#b2b9c1;
+  /* Haut et Bas n'avaient aucune teinte : les journées du programme par
+     défaut s'affichaient sans aplat. Cherchées par mesure, avec deux
+     contraintes — une dominante froide pour le haut, chaude pour le bas,
+     et le vert écarté par principe, qui dit « accent » dans cette app.
+     Séparation minimale 10,5 ΔE des huit autres (le pire couple déjà en
+     place, legs/swim, est à 8,4) et 20,0 entre elles deux. */
+  --s-haut:#7366d9;   --s-haut-i:#9a96eb;
+  --s-bas:#a96463;    --s-bas-i:#c79190;
 
   --glass-b:12px;
 
@@ -845,6 +853,8 @@ section{padding:26px 0 10px}
 .cd.s-core  {background:color-mix(in oklab,var(--s-core)   34%,var(--surface-1))}
 .cd.s-swim  {background:color-mix(in oklab,var(--s-swim)   34%,var(--surface-1))}
 .cd.s-cardio{background:color-mix(in oklab,var(--s-cardio) 34%,var(--surface-1))}
+.cd.s-haut  {background:color-mix(in oklab,var(--s-haut)   34%,var(--surface-1))}
+.cd.s-bas   {background:color-mix(in oklab,var(--s-bas)    34%,var(--surface-1))}
 .cd.s-rest  {background:color-mix(in oklab,var(--s-rest)   22%,var(--surface-1))}
 .cal-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px;justify-content:center;font-size:12.5px;font-weight:500;color:var(--text-2)}
 .cal-legend span{display:inline-flex;align-items:center;gap:5px}
@@ -2203,16 +2213,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
     <div class="cal-dow"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
     <div class="cal-grid" id="calGrid"></div>
-    <div class="cal-legend">
-      <span><i style="background:var(--s-push)"></i>Poussée</span>
-      <span><i style="background:var(--s-pull)"></i>Tirage</span>
-      <span><i style="background:var(--s-legs)"></i>Jambes</span>
-      <span><i style="background:var(--s-upper)"></i>Bras</span>
-      <span><i style="background:var(--s-core)"></i>Abdos</span>
-      <span><i style="background:var(--s-swim)"></i>Piscine</span>
-      <span><i style="background:var(--s-cardio)"></i>Cardio</span>
-      <span><i style="background:var(--s-rest)"></i>Repos</span>
-    </div>
+    <!-- remplie depuis le programme actif : les cinq séances de la rotation
+         y étaient écrites en dur, donc la légende nommait des séances que
+         le programme ne propose plus -->
+    <div class="cal-legend" id="calLegend"></div>
   </div>
 
   <div class="block-h"><span class="num"><svg class="gi"><use href="#i-coach"/></svg></span><span class="tag">Analyse du coach</span><span class="line"></span></div>
@@ -3664,13 +3668,15 @@ function recapLines(r){
   var volTot=0; MUSCLES.forEach(function(g){ volTot+=r.setsByGroup[g]||0; });
   if(volTot){
     var parts=[];
-    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
-      if(r.setsByGroup[g[0]]) parts.push(g[1]+' '+r.setsByGroup[g[0]]);
+    /* la ventilation suivait cinq noms écrits en dur : en Haut/Bas le récap
+       ne montrait donc aucune série, alors que MUSCLES venait d'en compter */
+    MUSCLES.forEach(function(g){
+      if(r.setsByGroup[g]) parts.push(SESS[g].t+' '+r.setsByGroup[g]);
     });
     L.push({i:gi('bars'), t:'<b>Séries par groupe :</b> '+parts.join(' · ')+'. La zone utile est de 10 à 20 séries par MUSCLE et par semaine — un groupe en cumule plusieurs, c\'est le détail par muscle qui tranche.'});
     var faibles=[];
-    [['push','Poussée'],['pull','Tirage'],['legs','Jambes'],['upper','Bras'],['core','Abdos']].forEach(function(g){
-      if(r.setsByGroup[g[0]]>0 && r.setsByGroup[g[0]]<volMin(g[0])) faibles.push(g[1]);
+    MUSCLES.forEach(function(g){
+      if(r.setsByGroup[g]>0 && r.setsByGroup[g]<volMin(g)) faibles.push(SESS[g].t);
     });
     if(faibles.length) L.push({i:gi('alert'), t:'<b>Sous le volume utile :</b> '+faibles.join(', ')+'. Ajoute une série par exercice ou une séance de plus.'});
   }
@@ -3972,6 +3978,15 @@ function renderStreaks(){
    HTML. Passé en Haut/Bas, il proposait donc de consigner des séances qui
    n'existent plus dans le programme. Il se construit désormais depuis
    SESSIONS, et les activités hors programme le suivent. */
+/* La légende nommait cinq séances écrites dans le HTML : elle annonçait
+   donc des couleurs pour des séances absentes du programme, et taisait
+   celles du programme en cours. */
+function renderLegende(){
+  var el=document.getElementById('calLegend'); if(!el) return;
+  el.innerHTML=SESSIONS.concat(['swim','cardio','rest']).map(function(g){
+    return '<span><i style="background:var(--s-'+g+')"></i>'+SESS[g].t+'</span>';
+  }).join('');
+}
 function renderPickGrid(){
   var g=document.getElementById('pickGrid'); if(!g) return;
   var cases=SESSIONS.concat(['swim','cardio','rest']).map(function(k){
@@ -4035,6 +4050,36 @@ function cleanPlan(){
 }
 /* les jours futurs marqués avant l'arrivée du planning étaient comptés
    comme faits : on les bascule une bonne fois en prévus */
+/* Changer de programme ne nettoyait pas le planning. Les jours posés sous
+   l'ancien découpage y restaient, et proposerSemaine() refuse par principe
+   de toucher un jour déjà décidé : le planning continuait donc d'annoncer
+   « Poussée » et « Tirage » à quelqu'un passé en Haut/Bas, pendant que le
+   coach lui reprochait de n'avoir jamais fait Haut du corps.
+
+   On convertit, on n'efface pas : un jour prévu pour du haut du corps
+   reste du haut du corps. C'est moitieDe() qui tranche, la même mesure que
+   les icônes. Le JOURNAL, lui, ne bouge pas — ce qui a été fait a été fait
+   sous le nom qu'il portait ce jour-là. */
+function migrerPlanProgramme(){
+  var plan=loadPlan(), t=todayKey(), ch=0, vus={};
+  Object.keys(plan).forEach(function(k){
+    if(k<t) return;                              /* le passé garde son nom */
+    var g=plan[k];
+    if(!g || SESSIONS.indexOf(g)>=0) return;     /* déjà du programme actif */
+    if(SEANCES_CONNUES.indexOf(g)<0) return;     /* piscine, cardio, repos */
+    var m=moitieDe(g);
+    if(!m || SESSIONS.indexOf(m)<0){ delete plan[k]; ch++; return; }
+    plan[k]=m; ch++; vus[SESS[g].t]=1;
+  });
+  if(!ch) return;
+  savePlan(plan);
+  var noms=Object.keys(vus);
+  if(noms.length) journalCoach('Planning converti : '+ch+' jour'+(ch>1?'s':'')+
+    ' posé'+(ch>1?'s':'')+' sous l\'ancien découpage ('+noms.join(', ')+
+    ') repris en <b>'+SESSIONS.map(function(g){ return SESS[g].t; }).join(' / ')+
+    '</b>. La moitié du corps travaillée ne change pas.');
+}
+
 function migrerFuturs(){
   var log=loadTLog(), plan=loadPlan(), t=todayKey(), ch=false;
   Object.keys(log).forEach(function(k){ if(k>t){ plan[k]=log[k]; delete log[k]; ch=true; } });
@@ -5385,7 +5430,10 @@ function updateCoach(){
   MUSCLES.forEach(function(g){ if(!bientot[g] && since[g]!==null && since[g]>maxd){ maxd=since[g]; neglect=g; } });
   if(neglect===null){ MUSCLES.forEach(function(g){ if(since[g]!==null && since[g]>maxd){ maxd=since[g]; neglect=g; } }); }
   var never=null;
-  ['legs','pull','push','upper'].forEach(function(g){ if(since[g]===null && !never && !bientot[g]) never=g; });
+  /* la liste des séances jamais faites était celle de la rotation, écrite
+     en dur : en Haut/Bas elle ne pouvait rien trouver, et le coach ne
+     signalait jamais une séance du programme jamais abordée */
+  MUSCLES.forEach(function(g){ if(since[g]===null && !never && !bientot[g]) never=g; });
   var doneToday=log[tKey];
   var fat=todayFat();
 
@@ -5770,7 +5818,12 @@ function analyzeTraining(){
   else if(wd>=4){ add('tip',gi('eye'),'Ça fait '+wd+' jours sans <b>'+SESS[worst].t+'</b>. À prévoir bientôt.'); }
 
   /* 4) jambes négligées */
-  if(train>=3 && freq.legs===0){ add('warn',gi('dumbbell'),'<b>Pas de jambes cette semaine.</b> Ne les néglige pas : c\'est la moitié de ta masse musculaire et ça tire toute la progression vers le haut.'); }
+  /* « freq.legs » ne voulait plus rien dire en Haut/Bas : le reproche ne
+     partait jamais, quand bien même aucune jambe n'avait travaillé. On
+     demande au programme quelles séances servent le bas du corps. */
+  var gBas=MUSCLES.filter(function(g){ return moitieDe(g)==='bas'; });
+  if(train>=3 && gBas.length && !gBas.some(function(g){ return freq[g]>0; })){
+    add('warn',gi('dumbbell'),'<b>Rien pour le bas du corps cette semaine.</b> Ne le néglige pas : c\'est la moitié de ta masse musculaire et ça tire toute la progression vers le haut.'); }
 
   /* 5) fréquence 2× = idéal hypertrophie */
   var twice=[]; MUSCLES.forEach(function(g){ if(freq[g]>=2) twice.push(SESS[g].t); });
@@ -5866,6 +5919,8 @@ migrerFuturs();
 annoncerProgramme();
 peindreCartes();
 renderPickGrid();
+renderLegende();
+migrerPlanProgramme();
 refreshPlan();
 annoncerNiveau();
 
