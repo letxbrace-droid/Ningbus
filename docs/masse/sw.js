@@ -3,7 +3,7 @@
    Change la version à chaque modification d'index.html : c'est ce numéro qui
    déclenche l'installation d'un nouveau worker, donc le bandeau « Recharger ».
    ----------------------------------------------------------------------- */
-var VERSION = 'v29';
+var VERSION = 'v30';
 var SHELL   = 'inrun-masse-shell-' + VERSION;   /* l'app elle-même */
 var FONTS   = 'inrun-masse-fonts-' + VERSION;   /* Google Fonts */
 
@@ -36,13 +36,9 @@ var PRECACHE = [
   './img/ic-normal.webp',
   './img/ic-forme.webp',
   './img/ic-coach.webp',
-  './img/mus-push.webp',
-  './img/mus-pull.webp',
-  './img/mus-legs.webp',
-  './img/mus-upper.webp',
-  './img/mus-core.webp',
-  './img/mus-haut.webp',
-  './img/mus-bas.webp',
+  /* Les sept planches musculaires ont disparu en v30 : la carte est un
+     <symbol> SVG inline dans index.html, donc déjà couverte par le
+     précache de l'app. Rien à télécharger, rien à versionner. */
   './img/fond-texture.webp',
   './img/fond-salle.webp'
 ];

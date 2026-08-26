@@ -495,7 +495,81 @@ quelqu'un qui venait d'y passer six semaines. Le journal ne suffit pas à
 dire ce qu'on a vécu, les séances faites si — `renderProgramme()` lit
 maintenant les deux.
 
-### Les cartes de séance
+## La carte musculaire cesse d'être une image
+
+Sept fichiers `.webp` disaient ce que la séance **vise**. Aucun ne pouvait
+dire ce que le corps a **reçu** — et l'app le sait, muscle par muscle,
+depuis `volumeParMuscle()` et `cibleMuscle()`. Une image gèle une seule
+réponse et jette le reste.
+
+Les quatre douleurs de la v29 étaient le même symptôme :
+
+1. Haut/Bas a réclamé **deux fichiers de plus**, plus une composition en
+   `lighten` pour les fabriquer. Le prochain découpage en aurait réclamé
+   d'autres.
+2. Changer la palette voulait dire régénérer **cinq fichiers** pour une
+   variable CSS.
+3. L'alignement au pixel comptait — uniquement parce qu'on superposait des
+   pixels. La planche `legs` dessinait un corps de 129 px là où `core` en
+   faisait 141 : trois essais pour composer `mus-haut`.
+4. Un générateur d'images ne sait pas où est le deltoïde postérieur.
+
+### D'où viennent les tracés
+
+Le dessin de base a été généré, puis **mesuré** avant d'être retenu :
+quatre figures de 337 × 749 px, écart de hauteur de 1 px, fond noir franc.
+Les traits de séparation étaient continus — c'est le point qui décidait de
+tout, et il n'était pas acquis.
+
+De là, une chaîne déterministe : composantes connexes (106 de face, 83 de
+dos, couvrant 96 et 98 % de la chair), étiquetage explicite composante par
+composante, puis tracé des contours en suivant les **arêtes** entre pixels
+plutôt que les pixels eux-mêmes — chaque frontière devient une boucle
+fermée exacte, trous compris.
+
+La simplification (Douglas-Peucker) se fait dans les unités **d'affichage**,
+pas de la source : la carte fait 100 px à l'écran pour 749 px d'origine,
+donc une tolérance de 0,6 sur une hauteur de 300 laisse un tracé lisse là
+où il est vu et divise le poids par vingt. Total : **19 Ko pour les seize
+muscles**, contre 123 Ko pour les sept planches — et le dossier `img/`
+passe de 234 à 92 Ko.
+
+### Comment l'app la pilote
+
+Un seul `<symbol>` porte les tracés. Chaque séance n'est qu'un `<use>` qui
+déclare ce qu'elle allume, en propriétés personnalisées :
+
+```js
+svg.setAttribute('style', Object.keys(role).map(function(m){
+  return '--m-'+m+':var(--mus-'+role[m]+')';
+}).join(';'));
+```
+
+et chaque muscle lit la sienne, le repos en repli :
+
+```
+fill: var(--m-pecs, var(--mus-repos))
+```
+
+Les propriétés personnalisées traversent la frontière de `<use>` : les
+tracés ne sont stockés **qu'une fois** pour les sept séances, et
+`peindreCartes()` les remplit depuis `carteMuscles()` — la même source que
+le volume, avec la même convention (moteur en plein, assistant en
+demi-teinte). Une machine ajoutée ou renommée déplace la carte toute
+seule.
+
+La silhouette entière est posée **sous** les muscles, dans le ton des
+traits. Ce qu'elle laisse voir dans leurs interstices *est* le trait de
+séparation : il n'est ni tracé ni stocké.
+
+### Un piège du remplacement
+
+Un `<svg>` sans hauteur explicite retombe sur les **150 px** par défaut des
+éléments remplacés, là où un `<img>` déduisait la sienne du fichier. La
+carte sortait en 100 × 150 au lieu de 100 × 105. Le rapport se pose donc à
+la main, `aspect-ratio:285/300` — celui du `viewBox`.
+
+### Les cartes de séance de la v29
 
 `img/mus-haut.webp` et `img/mus-bas.webp` sont composées des planches
 existantes (`lighten`, figure par figure, chacune ramenée à une boîte
