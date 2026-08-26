@@ -405,6 +405,56 @@ Le repli `SESSIONS.indexOf(last)>=0 ? last : 'push'` a aussi dû sauter :
 après la bascule, `push` n'existe plus dans le sélecteur et l'onglet
 s'ouvrait sur rien.
 
+## Un programme qu'on ne peut pas atteindre n'existe pas
+
+La v26 a livré Haut/Bas : mesuré, construit, testé, documenté. Et
+personne ne pouvait y arriver. Deux chemins étaient censés y mener, les
+deux étaient bouchés :
+
+- **le coach** ne proposait la bascule que sous la condition `depasse` —
+  atteinte seulement à un palier élevé avec une rotation complète notée.
+  Aux paliers réels de l'utilisateur, le bouton n'apparaissait jamais ;
+- **le réglage** dans *Moi* portait le libellé « **Revenir à** Haut /
+  Bas » — un verbe absurde pour un endroit où l'on n'a jamais mis les
+  pieds, sur un bouton que personne ne va chercher.
+
+Mesuré sur deux états réels avant correction :
+
+| État | Bouton du coach | Réglage dans Moi |
+| --- | --- | --- |
+| installation neuve | *aucun* | « Revenir à Haut / Bas » |
+| trois semaines de rotation | « Cale ce second passage » | « Revenir à Haut / Bas » |
+
+### Le vrai défaut : rustiner par défaut
+
+En creusant, pire que l'ergonomie. `fuites()` proposait **toujours** le
+rattrapage — « refais Jambes une fois de plus » — sans jamais comparer
+avec l'autre découpage. Au palier 2, ce rattrapage répare **trois**
+muscles sur six, quand Haut/Bas les répare **tous les six avec une
+séance de moins**. Préférer la rustine à une structure strictement
+meilleure n'est pas un choix de coaching, c'est un angle mort.
+
+`progMieux()` compare désormais les structures, sur une règle mesurée et
+non esthétique : on ne propose un changement que si l'autre programme
+comble **tout** ce que l'actuel laisse ouvert, **sans coûter plus de
+séances**. Quand c'est le cas, la fuite `structureMieux` (p:62) passe
+devant le rattrapage (p:55) :
+
+> **Ta structure a fait son temps.** Deltoïde latéral, Deltoïde
+> postérieur, Brachial et 3 autres restent sous la cible, et ce
+> découpage ne peut plus les servir. **On passe en Haut / Bas** —
+> 4 séances au lieu de 5, et les 6 muscles reviennent à leur cible.
+
+Le rattrapage **reste dans la liste**, en second : qui décide de garder
+sa structure doit continuer d'avoir le meilleur conseil disponible. Ma
+première version faisait un `return` anticipé qui le supprimait — le
+coach n'aurait plus rien eu à dire à quelqu'un qui décline.
+
+`test-hautbas.js` verrouille l'atteignabilité elle-même : le réglage
+propose *Passer en* dès l'installation, le verbe n'est jamais « revenir »
+pour un programme jamais utilisé, et le coach propose la structure
+lui-même dès qu'elle est mesurablement meilleure.
+
 ## Le RIR n'est pas le même partout
 
 Prescrire « 1 à 2 reps en réserve » sur tout le programme mélangeait deux

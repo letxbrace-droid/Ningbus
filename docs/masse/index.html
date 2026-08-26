@@ -741,8 +741,10 @@ section{padding:26px 0 10px}
 /* le journal du coach : une date, une phrase, rien de cliquable */
 .pg-now{font-size:14.5px;line-height:1.55;color:var(--text-2);margin-bottom:12px}
 .pg-now b{color:var(--text);font-weight:700}
-.pg-alt{min-height:44px;padding:0 16px;border-radius:11px;font-size:13.5px;font-weight:700;
-  background:var(--surface-3);color:var(--text);border:1px solid var(--bord);margin-bottom:14px}
+.pg-alt{display:block;width:100%;text-align:left;min-height:44px;padding:11px 16px;border-radius:11px;
+  font-size:14px;font-weight:700;background:var(--surface-3);color:var(--text);
+  border:1px solid var(--bord);margin-bottom:14px}
+.pg-mot{display:block;font-weight:400;font-size:12.5px;color:var(--text-3);margin-top:3px}
 .jnote{margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--text-2)}
 .jvide{font-size:13.5px;line-height:1.55;color:var(--text-3)}
 .jrow{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--bord)}
@@ -4423,27 +4425,70 @@ function volumeParMuscle(jours){
    Sans ça, le coach reproche une dette que son propre programme rend
    inatteignable : la faute de coaching la plus détestable qui soit. */
 var _nominal=null, _nominalNiv=null;
-function volumeNominal(){
-  /* les prescriptions montent avec le niveau : le cache doit donc suivre
-     le niveau, sinon un passage de palier laisse un chiffre périmé. */
-  var niv=niveauActuel();
-  if(_nominal && _nominalNiv===niv) return _nominal;
-  var carte=carteMuscles(), out={};
+/* Ce qu'un programme délivre par muscle SUR LA SEMAINE, passages
+   compris. Prend le code en argument pour qu'on puisse comparer une
+   structure à l'autre sans avoir à basculer dessus. */
+function volumeNominalDe(code){
+  var P=PROGRAMMES[code]; if(!P) return {};
+  var carte=carteMuscles(), out={}, passages=P.passages||{};
   Object.keys(MUSCLES_DET).forEach(function(m){ out[m]=0; });
-  /* Le nominal d'un programme est ce qu'il délivre SUR LA SEMAINE, donc
-     multiplié par le nombre de passages qu'il prévoit. Compter un seul
-     passage sous-estimait Haut/Bas de moitié — et le coach y voyait une
-     dette structurelle dans le programme qu'il venait de prescrire. */
-  var passages=PROGRAMMES[progActif()].passages||{};
-  document.querySelectorAll(selActif()+' .station').forEach(function(st){
-    var id=st.getAttribute('data-ex'), mus=carte[id];
+  document.querySelectorAll('.sess[data-prog="'+code+'"] .station').forEach(function(st){
+    var mus=carte[st.getAttribute('data-ex')];
     if(!mus || !mus.length) return;
     var sess=st.closest('.sess');
     var nb=getPresc(st).sets * ((sess && passages[sess.id]) || 1);
     mus.forEach(function(m,i){ if(out[m]!==undefined) out[m]+=nb*(i===0?1:0.5); });
   });
   Object.keys(out).forEach(function(m){ out[m]=Math.round(out[m]*10)/10; });
-  _nominal=out; _nominalNiv=niv; return out;
+  return out;
+}
+function seancesDe(code){
+  var P=PROGRAMMES[code], n=0;
+  P.seances.forEach(function(g){ n+=(P.passages||{})[g]||1; });
+  return n;
+}
+function volumeNominal(){
+  /* les prescriptions montent avec le niveau : le cache doit donc suivre
+     le niveau, sinon un passage de palier laisse un chiffre périmé. */
+  var niv=niveauActuel();
+  if(_nominal && _nominalNiv===niv) return _nominal;
+  _nominal=volumeNominalDe(progActif()); _nominalNiv=niv; return _nominal;
+}
+
+/* ================================================================
+   UNE AUTRE STRUCTURE FERAIT-ELLE MIEUX ?
+   ----------------------------------------------------------------
+   Le coach proposait systématiquement de RUSTINER — « refais Jambes
+   une fois de plus » — sans jamais comparer avec l'autre découpage.
+   Au palier 2, ce rattrapage répare trois muscles sur six, quand
+   Haut/Bas les répare tous les six AVEC UNE SÉANCE DE MOINS. Préférer
+   la rustine à une structure strictement meilleure n'est pas du
+   coaching, c'est un angle mort.
+
+   La règle est mesurée, pas esthétique : on ne propose un changement
+   que si l'autre programme comble TOUT ce que l'actuel laisse ouvert,
+   sans coûter plus de séances par semaine.
+   ================================================================ */
+function progMieux(){
+  var actif=progActif(), manque=[];
+  try{
+    manque=musclesEnDette(volumeParMuscle(7))
+      .filter(function(x){ return detteStructurelle(x.m); })
+      .map(function(x){ return x.m; });
+  }catch(e){ return null; }
+  if(!manque.length) return null;
+  var niv=niveauActuel(), coutA=seancesDe(actif), best=null;
+  Object.keys(PROGRAMMES).forEach(function(code){
+    if(code===actif || best) return;
+    var nom=volumeNominalDe(code), cout=seancesDe(code);
+    var reste=manque.filter(function(m){ return nom[m] < cibleMuscle(m,niv).min; });
+    if(!reste.length && cout<=coutA){
+      best={code:code, t:PROGRAMMES[code].t, mot:PROGRAMMES[code].mot,
+        comble:manque.length, cout:cout, coutA:coutA,
+        noms:manque.slice(0,3).map(function(m){ return MUSCLES_DET[m].n; })};
+    }
+  });
+  return best;
 }
 /* une dette est STRUCTURELLE quand même une rotation parfaite ne suffit
    pas : c'est alors la fréquence qu'il faut changer, pas l'effort. */
@@ -4750,7 +4795,10 @@ function basculerProgramme(code, raison){
   location.reload();
 }
 function passerHautBas(){
-  basculerProgramme('hb', 'la rotation à un passage par groupe n\'atteignait plus tes cibles');
+  var m=progMieux();
+  basculerProgramme(m ? m.code : 'hb',
+    m ? 'ce découpage ne servait plus '+m.comble+' muscle'+(m.comble>1?'s':'')+' sous leur cible'
+      : 'la rotation à un passage par groupe n\'atteignait plus tes cibles');
 }
 function revenirRotation(){
   basculerProgramme('rot5', 'retour demandé depuis les réglages');
@@ -4758,10 +4806,18 @@ function revenirRotation(){
 function renderProgramme(){
   var el=document.getElementById('progActuel'); if(!el) return;
   var a=progActif(), P=PROGRAMMES[a];
+  /* « Revenir à » était le libellé pour TOUTE autre structure, y compris
+     celle où l'on n'a jamais mis les pieds. Personne ne devine qu'un
+     bouton nommé « revenir » est le chemin pour découvrir un programme.
+     Le verbe suit maintenant l'histoire réelle. */
+  var vus=loadJournal().map(function(e){ return e.t; }).join(' ');
   el.innerHTML='<div class="pg-now"><b>'+P.t+'</b> — '+P.mot+'</div>'+
     Object.keys(PROGRAMMES).filter(function(k){ return k!==a; }).map(function(k){
+      var Q=PROGRAMMES[k];
+      var dejaVu=vus.indexOf('→ <b>'+Q.t+'</b>')>=0;
       return '<button class="pg-alt" onclick="basculerProgramme(\''+k+'\',\'choix manuel depuis les réglages\')">'+
-        'Revenir à '+PROGRAMMES[k].t+'</button>';
+        (dejaVu ? 'Revenir à ' : 'Passer en ')+Q.t+
+        ' <span class="pg-mot">'+Q.mot+'</span></button>';
     }).join('');
 }
 
@@ -5145,7 +5201,7 @@ function renderPrio(){
      seule limite vient du programme, le titre doit le dire aussi :
      accuser quelqu'un de ce que le plan rend impossible, c'est le
      démotiver pour rien. */
-  var struct=['structurel','depasse','plafondProg'].indexOf(f[0].code)>=0;
+  var struct=['structurel','depasse','plafondProg','structureMieux'].indexOf(f[0].code)>=0;
   /* quand la correction est chiffrable, le coach la POSE : un bouton, pas
      une consigne à aller exécuter soi-même dans les réglages. */
   var acte = f[0].action==='rattrapage'
@@ -5439,6 +5495,26 @@ function fuites(){
         majuscule(dm.mot)+'. <b>Ce muscle passe en premier à ta prochaine séance</b>, pas en dernier quand tu es cuit.'+autres});
   }
   if(struct.length){
+    /* AVANT de rustiner : est-ce qu'une autre structure ferait mieux ?
+       Proposer un second passage qui répare la moitié quand un autre
+       découpage répare tout pour moins de séances, c'est préférer le
+       bricolage à la solution — l'angle mort corrigé en v28. */
+    var mieux=progMieux();
+    if(mieux){
+      out.push({code:'structureMieux', p:62, action:'programme',
+        t:'<b>Ta structure a fait son temps.</b> '+mieux.noms.join(', ')+
+          (struct.length>3 ? ' et '+(struct.length-3)+' autres' : '')+
+          ' rest'+(struct.length>1?'ent':'e')+' sous la cible, et ce découpage ne peut plus les servir. '+
+          '<b>On passe en '+mieux.t+'</b> — '+mieux.mot+' : '+
+          (mieux.cout<mieux.coutA
+            ? '<b>'+mieux.cout+' séances au lieu de '+mieux.coutA+'</b>, et les '+mieux.comble+' muscles reviennent à leur cible.'
+            : 'les '+mieux.comble+' muscles reviennent à leur cible, à nombre de séances égal.')+
+          ' Tes charges et tes records sont conservés : les machines sont les mêmes. C\'est ma décision, pas une option.'});
+      /* On ne s'arrête PAS là : si tu choisis de rester sur cette
+         structure, le rattrapage reste le meilleur conseil disponible.
+         Un return anticipé l'aurait supprimé de la liste — le coach
+         n'aurait plus rien eu à dire à quelqu'un qui décline. */
+    }
     /* Le message NOMME les muscles que la séance prescrite répare, pas les
        plus en retard dans l'absolu : citer les deltoïdes puis ordonner une
        séance d'abdos, c'est se contredire dans le même paragraphe. */
