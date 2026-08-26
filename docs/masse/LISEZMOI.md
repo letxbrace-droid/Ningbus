@@ -610,6 +610,62 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Le calendrier finit d'apprendre Haut/Bas (v32)
+
+Les icônes étaient corrigées, mais **cinq surfaces supposaient encore la
+rotation**. Sur une capture réelle : le planning annonçait *Bras, Poussée,
+Tirage, Jambes, Abdos* pendant que le coach, juste en dessous, reprochait
+« Jamais marqué : Haut du corps, Bas du corps ». L'app se contredisait
+d'un bloc à l'autre.
+
+**1 · Aucune couleur.** `--s-haut` et `--s-bas` n'existaient pas : une
+journée du programme par défaut s'affichait sans aplat dans le
+calendrier. Cherchées par mesure, avec deux contraintes — dominante
+froide pour le haut, chaude pour le bas, et le vert écarté par principe
+puisqu'il dit « accent » dans cette app :
+
+```
+--s-haut:#7366d9    --s-bas:#a96463
+séparation minimale des huit autres : 10,5 ΔE
+   (le pire couple déjà en place, legs/swim, est à 8,4)
+entre elles deux : 20,0 ΔE
+```
+
+Les variantes claires `-i` ne sont pas inventées : elles reprennent
+l'écart moyen mesuré sur les huit paires existantes (L +0,129, chroma
+×0,73).
+
+**2 · La légende** listait les cinq séances de la rotation, écrites dans
+le HTML. Elle nommait donc des couleurs pour des séances absentes du
+programme, et taisait celles du programme en cours.
+
+**3 · Le récap hebdomadaire** ventilait le volume sur ces mêmes cinq
+noms : en Haut/Bas il n'affichait aucune série, alors que `MUSCLES`
+venait d'en compter.
+
+**4 · Deux reproches du coach** étaient figés — la liste des séances
+jamais faites, et `freq.legs===0`. Ce dernier ne partait jamais en
+Haut/Bas, quand bien même aucune jambe n'avait travaillé.
+
+### 5 · Le planning gardait l'ancien découpage
+
+Le plus gênant, et la cause de ce qu'on voyait à l'écran. Changer de
+programme ne nettoyait pas le planning : les jours posés sous la rotation
+y restaient, et `proposerSemaine()` refuse **par principe** de toucher un
+jour déjà décidé —
+
+```js
+if(typeOn(ctx,k)) continue;   /* on ne touche jamais à un jour déjà décidé */
+```
+
+Le planning continuait donc d'annoncer « Poussée » à quelqu'un passé en
+Haut/Bas. `migrerPlanProgramme()` **convertit** au lieu d'effacer : un
+jour prévu pour du haut du corps reste du haut du corps, et c'est
+`moitieDe()` qui tranche — la même mesure que les icônes. Le journal de ce
+qui a été **fait**, lui, ne bouge pas : une séance porte le nom qu'elle
+avait ce jour-là. La conversion laisse une ligne datée dans le journal du
+coach.
+
 ### Toute séance parle la langue du programme (v31)
 
 Restaient les cinq icônes de la rotation — des dessins de machines, en
