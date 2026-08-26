@@ -455,6 +455,56 @@ propose *Passer en* dès l'installation, le verbe n'est jamais « revenir »
 pour un programme jamais utilisé, et le coach propose la structure
 lui-même dès qu'elle est mesurablement meilleure.
 
+## Haut / Bas devient le programme, pas l'alternative
+
+Tant que Haut/Bas restait la seconde option, la mesure de la v28 était
+une note en bas de page : la rotation à cinq séances est la structure
+livrée par défaut, et c'est elle qui échoue à partir du niveau 2 (6 puis
+10 puis 12 muscles sous leur cible). Un coach qui a mesuré ça ne laisse
+pas son client sur la structure perdante en attendant qu'il clique.
+`progActif()` retourne donc `'hb'` par défaut depuis la v29, et la
+rotation reste entière, atteignable en un appui depuis **Moi**.
+
+**Un choix déjà enregistré prime toujours.** Le défaut ne s'applique
+qu'à qui n'a jamais tranché.
+
+### Le changement de défaut devait s'annoncer comme les autres
+
+`basculerProgramme()` écrit une ligne datée dans le journal du coach à
+chaque changement. Un changement de *défaut* n'en écrivait aucune : on
+ouvrait l'app un matin, la semaine avait changé de forme, et le journal
+— dont c'est la seule raison d'être — restait muet. `annoncerProgramme()`
+comble ça au démarrage :
+
+```js
+if(PROGRAMMES[choisi]) return;          // un choix explicite prime
+localStorage.setItem(PROGKEY, 'hb');
+if(!vecu) return;                       // rien à annoncer à qui débute
+journalCoach('Programme : <b>Rotation 5</b> → <b>Haut / Bas</b> — …');
+```
+
+La condition `vecu` compte : arriver sur Haut/Bas au premier jour n'est
+pas un changement, c'est le programme. Seul quelqu'un qui a un
+historique à déplacer reçoit l'explication — et la promesse que ses
+charges survivent, qui est vraie parce que les identifiants d'exercice
+sont partagés entre les deux structures (`push1` est le chest press dans
+les deux).
+
+Corollaire : le réglage proposait « **Passer en** Rotation 5 » à
+quelqu'un qui venait d'y passer six semaines. Le journal ne suffit pas à
+dire ce qu'on a vécu, les séances faites si — `renderProgramme()` lit
+maintenant les deux.
+
+### Les cartes de séance
+
+`img/mus-haut.webp` et `img/mus-bas.webp` sont composées des planches
+existantes (`lighten`, figure par figure, chacune ramenée à une boîte
+commune — la planche `legs` dessine un corps de 129 px là où `core` en
+fait 141, un centrage naïf donnait deux silhouettes décalées). Les
+icônes `.ic-haut` / `.ic-bas` réutilisent les masques `ic-upper` et
+`ic-legs` ; sans leurs règles CSS le sélecteur affichait deux carrés
+vides.
+
 ## Le RIR n'est pas le même partout
 
 Prescrire « 1 à 2 reps en réserve » sur tout le programme mélangeait deux
