@@ -405,6 +405,77 @@ Le repli `SESSIONS.indexOf(last)>=0 ? last : 'push'` a aussi dû sauter :
 après la bascule, `push` n'existe plus dans le sélecteur et l'onglet
 s'ouvrait sur rien.
 
+## Le RIR n'est pas le même partout
+
+Prescrire « 1 à 2 reps en réserve » sur tout le programme mélangeait deux
+gestes qui ne coûtent pas la même chose. Une presse à cuisses menée à
+l'échec coûte des jours de récupération et met le dos en jeu ; une
+élévation latérale menée à l'échec ne coûte presque rien, et c'est
+justement près de l'échec qu'elle produit son effet.
+
+| | Cible | Pourquoi |
+| --- | --- | --- |
+| Gros mouvements (presse, chest press, rowing, tirage) | **RIR 2-3** | le coût systémique d'aller à l'échec dépasse le gain |
+| Isolation (curl, élévations, leg extension, mollets) | **RIR 0-1** | la proximité de l'échec est ce qui fait l'effet, et elle se paie peu |
+
+Le type se lit **dans la prescription elle-même**, pas dans une table à
+tenir à jour : le programme code déjà « gros exercice = fourchette
+basse » (8-10) et « isolation = fourchette haute » (12-20). Un seuil à
+10 classe correctement les 26 stations — rear delt et curl marteau
+compris, que le comptage de muscles ratait.
+
+Deux données ont dû être corrigées pour que la règle tienne : le crunch
+machine était la seule station de la ceinture prescrite en 10-15 quand
+les trois autres sont en 12-15 (aligné), et **les deux exemplaires d'une
+même machine dans les deux programmes prescrivaient des reps
+différentes** — un exercice changeait donc de catégorie selon le
+programme actif. `test-bilan.js` verrouille les deux.
+
+`verdict()` compare désormais le RIR mesuré à la cible du geste, pas à un
+chiffre unique : sur une isolation, 3 reps en réserve devient un reproche
+(« c'est près de l'échec que ça travaille ») ; sur un gros mouvement,
+finir à 0 en devient un.
+
+## Le bilan de fin de séance
+
+Chaque exercice avait son verdict. Ce qui manquait, c'est la phrase qui
+les rassemble : à la fin d'une séance on veut savoir si elle a été bonne,
+pas relire douze avis.
+
+La comparaison se fait contre la **moyenne des trois séances
+précédentes**, jamais contre la dernière — une seule séance faible
+suffirait à annoncer un recul qui n'existe pas. La mesure est le
+**tonnage** (charge × reps), parce qu'il capte les deux à la fois :
+monter de 2,5 kg en perdant trois reps n'est pas un progrès.
+
+Une seule consigne est affichée, choisie dans cet ordre :
+
+| Priorité | Situation | Ce que le coach dit |
+| --- | --- | --- |
+| 1 | un exercice recule de plus de 8 % | « X recule de N % […] c'est la récupération qu'il faut regarder, pas la charge » |
+| 2 | la moitié des machines passent à la charge suivante | « C'est une bonne séance » |
+| 3 | le RIR est trop loin de la cible | « Tu laisses du stimulus sur la table » |
+| 4 | la séance est incomplète | « N exercices sur M » |
+
+L'ordre compte : **reprocher un manque d'intensité pendant que la moitié
+des machines passent à la charge suivante serait se contredire.** On ne
+laisse pas de stimulus sur la table et on ne progresse pas partout en
+même temps ; la première version faisait exactement ça, une assertion
+l'interdit désormais.
+
+Sans historique, aucun jugement : une première séance ne produit ni
+progression ni recul, elle est marquée « sans repère ».
+
+### Une collision de classes qui déplaçait l'état actif
+
+La carte utilisait `.bn` pour son pied. Or `.bn` est la classe des
+onglets de navigation, et `show()` faisait `querySelectorAll('.bn')` sans
+la restreindre à la barre : mon élément se faisait ramasser dans la
+logique de navigation et recevait l'état actif — d'où un tiret citron
+apparu au milieu d'une carte, et le pied centré au lieu d'être aligné.
+Corrigé des deux côtés : mes classes sont préfixées, et la navigation
+n'interroge plus que `.bottomnav .bn`.
+
 ## La série stimulante
 
 Toutes les séries ne se valent pas. L'hypertrophie augmente à mesure qu'une
