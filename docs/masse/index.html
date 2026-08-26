@@ -722,6 +722,10 @@ section{padding:26px 0 10px}
   background:var(--accent);color:var(--accent-on)}
 .prio .pact .gi{width:16px;height:16px}
 /* le journal du coach : une date, une phrase, rien de cliquable */
+.pg-now{font-size:14.5px;line-height:1.55;color:var(--text-2);margin-bottom:12px}
+.pg-now b{color:var(--text);font-weight:700}
+.pg-alt{min-height:44px;padding:0 16px;border-radius:11px;font-size:13.5px;font-weight:700;
+  background:var(--surface-3);color:var(--text);border:1px solid var(--bord);margin-bottom:14px}
 .jnote{margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--text-2)}
 .jvide{font-size:13.5px;line-height:1.55;color:var(--text-3)}
 .jrow{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--bord)}
@@ -1200,7 +1204,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
 <div class="sessbar-wrap"><div class="wrap"><div class="sessbar" id="sessBar"></div></div></div>
 
-<div class="sess" id="push">
+<div class="sess" data-prog="rot5" id="push">
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Pecs<span class="o">épaules · triceps</span></h2>
@@ -1302,7 +1306,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></section>
 </div>
 
-<div class="sess" id="pull">
+<div class="sess" data-prog="rot5" id="pull">
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Dos<span class="o">largeur · biceps</span></h2>
@@ -1403,7 +1407,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></section>
 </div>
 
-<div class="sess" id="legs">
+<div class="sess" data-prog="rot5" id="legs">
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Jambes<span class="o">complètes</span></h2>
@@ -1504,7 +1508,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></section>
 </div>
 
-<div class="sess" id="upper">
+<div class="sess" data-prog="rot5" id="upper">
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Bras<span class="o">+ buste</span></h2>
@@ -1621,7 +1625,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></section>
 </div>
 
-<div class="sess" id="core">
+<div class="sess" data-prog="rot5" id="core">
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Abdos<span class="o">ceinture complète</span></h2>
@@ -1729,6 +1733,353 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="total"><div class="big">30<small>min</small></div><div class="t">Ceinture complète : face avant chargée, obliques en rotation, lombaires en équilibre — plus le second passage mollets, que le jour des jambes ne peut pas absorber seul.</div></div>
 </div></section>
+</div>
+<div class="sess" data-prog="hb" id="haut">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
+  <h2>Haut du corps<span class="o">pecs · dos · épaules · bras</span></h2>
+  <div class="sh-g"><span>~62′</span><span>11 machines</span><span>32 séries</span></div>
+  <p class="sh-lead">Tout le buste en une séance, deux fois par semaine. C’est la fréquence qui construit, pas la longueur : chaque muscle reçoit deux stimulus au lieu d’un.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-push.webp" alt="Muscles travaillés" loading="lazy">
+</div></div>
+<section><div class="wrap">
+
+  <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger, puis <b>2 × 15 rotations externes</b> à la poulie basse, coude au corps, très léger. La coiffe des rotateurs ne fait pas de volume mais elle tient l’épaule sur trois développés. Finis par 1 série légère à la première machine.</div>
+
+  <div class="phase"><span class="num">01</span><span class="tag">Poussée · les gros d'abord</span><span class="line"></span></div>
+  <div class="station" data-ex="push1">
+    <div class="st-head"><div class="st-no">1</div>
+      <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Chest press</div><div class="st-mus">Pectoraux · triceps · épaules</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Ton gros exercice pecs. Règle le siège pour que les poignées soient au niveau de la poitrine. Pousse puissant, contrôle le retour sans relâcher.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=chest+press+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="push3">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Pec deck (écarté)</div><div class="st-mus">Pectoraux (isolation)</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Isole les pecs sans les triceps. Serre les coudes vers l'avant, contracte fort la poitrine, contrôle l'ouverture. Étire bien en fin de course.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pec+deck+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">02</span><span class="tag">Tirage · dos et épaisseur</span><span class="line"></span></div>
+  <div class="station" data-ex="pull1">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Dos · largeur</div><div class="st-name">Tirage vertical</div><div class="st-mus">Grand dorsal · biceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">L'exercice de la largeur en V. Tire la barre au haut de la poitrine, coudes vers le bas et l'arrière, poitrine sortie. Prise large. Jamais derrière la nuque.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lat+pulldown+tirage+vertical+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="pull2">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Dos · épaisseur</div><div class="st-name">Rowing machine assis</div><div class="st-mus">Dos moyen · trapèzes · biceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Le tirage horizontal donne l'épaisseur. Tire vers le ventre en serrant les omoplates, dos droit, sans balancer. Contrôle le retour complet.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rowing+machine+assis+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">03</span><span class="tag">Épaules · les trois faisceaux</span><span class="line"></span></div>
+  <div class="station" data-ex="push2">
+    <div class="st-head"><div class="st-no">5</div>
+      <div class="st-tx"><div class="st-cat">Épaules</div><div class="st-name">Développé épaules machine</div><div class="st-mus">Deltoïdes · triceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Shoulder press guidé. Pousse droit au-dessus de la tête, redescends contrôlé jusqu'aux épaules. Construit des épaules larges sans risque d'équilibre.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=shoulder+press+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="push4">
+    <div class="st-head"><div class="st-no">6</div>
+      <div class="st-tx"><div class="st-cat">Épaules · largeur</div><div class="st-name">Élévations latérales machine</div><div class="st-mus">Deltoïde latéral</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">La machine à élévations donne des épaules larges sans haltères. Monte les bras sur les côtés, contrôle la descente. Léger et strict — c'est le muscle qui encaisse le plus de volume du corps, ne le charge pas comme un développé.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-bulb"/></svg></span><span><b>Clé des épaules larges.</b> Va léger, fais des reps propres. Si pas de machine dédiée, la poulie basse fait le job.</span></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lateral+raise+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="up5">
+    <div class="st-head"><div class="st-no">7</div>
+      <div class="st-tx"><div class="st-cat">Épaules · largeur</div><div class="st-name">Élévations latérales poulie</div><div class="st-mus">Deltoïde latéral</div></div>
+      <span class="st-badge">Poulie</span></div>
+    <div class="st-body">
+      <div class="st-desc">Deuxième angle pour la largeur d'épaules. Un bras à la fois, poulie basse derrière le dos : la tension reste forte <b>en bas</b> du mouvement, là où la machine en donne le moins. Buste droit, pas de balancement.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=cable+lateral+raise+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="pull3">
+    <div class="st-head"><div class="st-no">8</div>
+      <div class="st-tx"><div class="st-cat">Arrière épaules · dos</div><div class="st-name">Rear delt (oiseau machine)</div><div class="st-mus">Deltoïde postérieur · dos haut</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Souvent oublié, essentiel pour un dos complet et une bonne posture (utile quand on conduit assis toute la journée). Écarte les bras vers l'arrière, serre les omoplates.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rear+delt+machine+oiseau+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">04</span><span class="tag">Bras · finition</span><span class="line"></span></div>
+  <div class="station" data-ex="push5">
+    <div class="st-head"><div class="st-no">9</div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Poulie haute, corde ou barre. Coudes fixes collés au corps, tends les bras vers le bas, contrôle la remontée. Les triceps font les 2/3 du volume du bras.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="pull4">
+    <div class="st-head"><div class="st-no">10</div>
+      <div class="st-tx"><div class="st-cat">Biceps</div><div class="st-name">Curl machine</div><div class="st-mus">Biceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Curl guidé, bras calés. Isole le biceps sans triche possible. Monte en contractant, contrôle la descente complète pour bien étirer.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=curl+biceps+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="pull5">
+    <div class="st-head"><div class="st-no">11</div>
+      <div class="st-tx"><div class="st-cat">Brachial · biceps</div><div class="st-name">Curl marteau à la corde</div><div class="st-mus">Brachial · biceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc"><b>Prise neutre</b>, paumes face à face, corde à la poulie basse. Cette prise cible le <b>brachial</b>, le muscle situé sous le biceps : invisible, mais c'est lui qui pousse le biceps vers le haut et donne l'épaisseur du bras. Coudes fixes, contrôle la descente.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=curl+poulie+basse+corde+biceps"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="total"><div class="big">62<small>min</small></div><div class="t">Buste complet · pecs, dos, les trois faisceaux d’épaule et les bras. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
+</div></section>
+</div>
+
+<div class="sess" data-prog="hb" id="bas">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
+  <h2>Bas du corps<span class="o">jambes · fessiers · ceinture</span></h2>
+  <div class="sh-g"><span>~57′</span><span>9 machines</span><span>29 séries</span></div>
+  <p class="sh-lead">Jambes et ceinture ensemble, deux fois par semaine. La plus grosse masse musculaire du corps ne peut pas se contenter d’un passage.</p>
+  </div>
+  <img class="sh-mus" src="img/mus-legs.webp" alt="Muscles travaillés" loading="lazy">
+</div></div>
+<section><div class="wrap">
+
+  <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo léger, puis <b>1 série à vide</b> à la presse et <b>15 montées de mollets</b> au poids du corps. Les genoux et les hanches se préviennent, ils ne s’improvisent pas.</div>
+
+  <div class="phase"><span class="num">01</span><span class="tag">Quadriceps · les gros d'abord</span><span class="line"></span></div>
+  <div class="station" data-ex="legs1">
+    <div class="st-head"><div class="st-no">1</div>
+      <div class="st-tx"><div class="st-cat">Quadriceps · fessiers</div><div class="st-name">Presse à cuisses</div><div class="st-mus">Cuisses · fessiers</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Ton gros exercice jambes, sûr pour le dos. Pieds largeur épaules, descends jusqu'à ~90° aux genoux, pousse sans verrouiller. Ne décolle pas les fesses.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′30</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=presse+%C3%A0+cuisses+leg+press+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="legs2">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Ischios · fessiers</div><div class="st-name">Hack squat ou presse inclinée</div><div class="st-mus">Cuisses · fessiers</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Deuxième angle pour les cuisses. Le hack squat cible bien les quadriceps avec le dos calé. Descends contrôlé, pousse dans les talons.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=hack+squat+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="legs3">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Quadriceps</div><div class="st-name">Leg extension</div><div class="st-mus">Avant des cuisses</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Isole l'avant de la cuisse. Tends les jambes, pause en haut, redescends lentement. Cherche la brûlure sur les dernières reps.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+extension+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">02</span><span class="tag">Chaîne postérieure</span><span class="line"></span></div>
+  <div class="station" data-ex="legs4">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+curl+machine+ischio+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="core4">
+    <div class="st-head"><div class="st-no">5</div>
+      <div class="st-tx"><div class="st-cat">Lombaires</div><div class="st-name">Extension lombaire au banc</div><div class="st-mus">Lombaires · fessiers · ischios</div></div>
+      <span class="st-badge">Banc</span></div>
+    <div class="st-body">
+      <div class="st-desc">Banc à lombaires réglé aux hanches, disque tenu contre la poitrine quand ça devient facile. Descends jusqu'à sentir l'étirement, remonte jusqu'à l'alignement — jamais en cambrant au-delà. C'est ce qui protège ton dos sur la presse et le rowing.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+lombaire+banc+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">03</span><span class="tag">Mollets</span><span class="line"></span></div>
+  <div class="station" data-ex="legs5">
+    <div class="st-head"><div class="st-no">6</div>
+      <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Monte sur la pointe le plus haut possible, pause en haut, descends jusqu'à <b>l'étirement complet</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
+      <div class="presc"><div class="c"><div class="cv acc">6</div><div class="ck">séries</div></div><div class="c"><div class="cv">15-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=mollets+machine+calf+raise+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="phase"><span class="num">04</span><span class="tag">Ceinture</span><span class="line"></span></div>
+  <div class="station" data-ex="core1">
+    <div class="st-head"><div class="st-no">7</div>
+      <div class="st-tx"><div class="st-cat">Grands droits</div><div class="st-name">Crunch machine</div><div class="st-mus">Grands droits · transverse</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">La machine à abdos, dossier réglé pour que ton nombril soit à hauteur de l'axe. Enroule le buste vers le bassin, souffle en fin de course, remonte lentement. Ce sont des muscles comme les autres : ils grossissent avec de la charge, pas avec 100 répétitions.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=ab+crunch+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="core2">
+    <div class="st-head"><div class="st-no">8</div>
+      <div class="st-tx"><div class="st-cat">Bas des abdos</div><div class="st-name">Crunch à la poulie haute</div><div class="st-mus">Grands droits · obliques</div></div>
+      <span class="st-badge">Poulie</span></div>
+    <div class="st-body">
+      <div class="st-desc">À genoux devant la poulie haute, corde derrière la nuque. Descends le buste en enroulant la colonne vertèbre par vertèbre — ce sont les abdos qui tirent, pas les bras ni les hanches. Remonte en contrôle.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=crunch+poulie+haute+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+  <div class="station" data-ex="core3">
+    <div class="st-head"><div class="st-no">9</div>
+      <div class="st-tx"><div class="st-cat">Obliques</div><div class="st-name">Rotation buste machine</div><div class="st-mus">Obliques · transverse</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Rotary torso. Bassin bloqué, seul le buste tourne. Va léger et lent : c'est une machine où l'ego coûte cher au bas du dos. Même nombre de reps des deux côtés.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-alert"/></svg></span><span><b>Reps par côté.</b> Note le total d'un côté, pas des deux : c'est la seule façon de comparer d'une séance à l'autre.</span></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rotary+torso+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="total"><div class="big">57<small>min</small></div><div class="t">Bas complet · quadriceps, chaîne postérieure, mollets et ceinture. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
+</div></section>
+</div>
+
 </div>
 </div>
 
@@ -1892,8 +2243,9 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="block-h"><span class="num"><svg class="gi"><use href="#i-book"/></svg></span><span class="tag">La méthode</span><span class="line"></span></div>
   <details class="fold">
-    <summary>Ce que le coach a changé de lui-même</summary>
+    <summary>Ton programme, et ce que le coach a changé</summary>
     <div class="fold-b">
+      <div id="progActuel"></div>
       <p class="jnote">Le coach peut caler une séance dans ton planning quand ton programme n'atteint plus ses cibles. Chaque décision qu'il prend à ta place est écrite ici, datée et motivée — et rien n'est verrouillé : un jour proposé se change d'un appui dans le calendrier.</p>
       <div id="journalCoach"></div>
     </div>
@@ -2022,7 +2374,34 @@ function initAides(){
 }
 
 var PAGES=['today','semaine','progres','moi'];
-var SESSIONS=['push','pull','legs','upper','core'];
+/* ================================================================
+   LE PROGRAMME ACTIF — c'est le coach qui en décide, pas toi
+   ----------------------------------------------------------------
+   Deux structures cohabitent dans la page. Une seule est active : les
+   séances de l'autre restent dans le DOM (pour ne rien perdre) mais
+   sont exclues de tous les comptages par selActif().
+
+   Les identifiants d'exercice sont VOLONTAIREMENT partagés entre les
+   deux : le chest press est push1 dans les deux programmes, donc ton
+   historique de charges, tes records et tes prescriptions ajustées
+   suivent le changement de structure sans une ligne de migration.
+   ================================================================ */
+var PROGKEY='inrun_programme';
+var PROGRAMMES={
+  rot5: {t:'Rotation 5', seances:['push','pull','legs','upper','core'],
+         passages:{push:1, pull:1, legs:1, upper:1, core:1},
+         mot:'cinq séances, chaque groupe une fois par semaine'},
+  hb:   {t:'Haut / Bas', seances:['haut','bas'],
+         passages:{haut:2, bas:2},
+         mot:'quatre séances, chaque muscle deux fois par semaine'}
+};
+function progActif(){
+  var v=null;
+  try{ v=localStorage.getItem(PROGKEY); }catch(e){}
+  return PROGRAMMES[v] ? v : 'rot5';
+}
+function selActif(){ return '.sess[data-prog="'+progActif()+'"]'; }
+var SESSIONS=PROGRAMMES[progActif()].seances;
 /* les anciennes ancres restent valides : raccourcis d'icône du manifeste
    et liens déjà enregistrés continuent de tomber au bon endroit */
 var ALIAS={plan:'semaine', profil:'progres'};
@@ -2079,7 +2458,10 @@ function sessionDuJour(){
   var s=suggestGroup(k,ctx);
   if(SESSIONS.indexOf(s)>=0) return s;
   var last=null; try{ last=localStorage.getItem(SESSKEY); }catch(e){}
-  return SESSIONS.indexOf(last)>=0 ? last : 'push';
+  /* le repli ne peut pas être une séance écrite en dur : après un
+     changement de structure, 'push' n'est plus proposé et l'onglet
+     s'ouvrait sur rien du tout. */
+  return SESSIONS.indexOf(last)>=0 ? last : SESSIONS[0];
 }
 /* Le sélecteur porte l'état : point orange = au programme aujourd'hui,
    coche verte = déjà fait cette semaine. La navigation devient une lecture. */
@@ -3035,7 +3417,7 @@ function refreshStation(st){
   renderAdvice(st);
 }
 function refreshAllStations(){
-  document.querySelectorAll('.station').forEach(function(st){ buildPrescTools(st); refreshStation(st); });
+  document.querySelectorAll('.station').forEach(function(st){ renderPresc(st); buildPrescTools(st); refreshStation(st); });
 }
 
 /* ================================================================
@@ -3252,15 +3634,23 @@ var SESS={
   legs:{t:'Jambes', c:'Jambes', s:'Complètes'},
   upper:{t:'Bras', c:'Bras', s:'Bras + buste'},
   core:{t:'Abdos', c:'Abdos', s:'Ceinture abdominale'},
+  haut:{t:'Haut du corps', c:'Haut', s:'Pecs · dos · épaules · bras'},
+  bas:{t:'Bas du corps', c:'Bas', s:'Jambes · fessiers · ceinture'},
   swim:{t:'Piscine', c:'Nage', s:'Natation'},
   cardio:{t:'Cardio', c:'Cardio', s:'Endurance'},
   rest:{t:'Repos', c:'Repos', s:'Récupération'}
 };
-var MUSCLES=['push','pull','legs','upper','core'];
+/* les séances que le coach peut proposer : celles du programme actif */
+var MUSCLES=PROGRAMMES[progActif()].seances;
+/* … mais TOUTES celles qui ont pu être enregistrées un jour, pour que
+   l'historique d'un ancien programme reste lisible dans le calendrier */
+var SEANCES_CONNUES=['push','pull','legs','upper','core','haut','bas'];
 /* journées qui ne coûtent pas de récupération musculaire */
 var LEGERES=['cardio','swim','rest'];
 /* récupération minimale avant de retravailler un groupe : les abdos
    encaissent une fréquence plus élevée que les gros groupes */
+/* HAUT et BAS couvrent tout le corps : 48 h, comme les autres séances
+   lourdes. Seule la ceinture seule récupère en 24 h. */
 function recupMin(g){ return g==='core' ? 1 : 2; }
 /* combien de séries un passage complet de cette séance délivre, lu dans
    les prescriptions : toute règle qui compare du volume à un seuil doit
@@ -3274,9 +3664,13 @@ function volumeSeance(g){
 }
 /* un compteur par groupe musculaire — une seule source, pour qu'un nouveau
    groupe n'oublie jamais un compteur au passage */
-function zeroGroups(){ var o={}; MUSCLES.forEach(function(g){ o[g]=0; }); return o; }
+/* Le compteur couvre toutes les séances connues, pas seulement celles du
+   programme actif : après un changement de structure, les séries déjà
+   enregistrées sous l'ancienne doivent continuer d'être comptées. Les
+   affichages n'énumèrent que MUSCLES, donc rien de vide n'apparaît. */
+function zeroGroups(){ var o={}; SEANCES_CONNUES.forEach(function(g){ o[g]=0; }); return o; }
 /* volume hebdo utile : les abdos saturent plus bas que les gros groupes */
-function volMin(g){ return g==='core' ? 6 : 10; }
+function volMin(g){ return g==='core' ? 6 : (g==='haut'||g==='bas') ? 20 : 10; }
 var DAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 var MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 var calDate=new Date(); calDate.setDate(1);
@@ -3286,7 +3680,28 @@ var pickKey=null;
    s'appelle « upper » partout ailleurs (calendrier, volume, récap). Sans cette
    normalisation, tout le travail des bras disparaissait des compteurs et le
    jour n'était jamais marqué automatiquement dans le calendrier. */
-function groupOf(id){ var g=String(id).replace(/[0-9]+$/,''); return g==='up'?'upper':g; }
+/* À quelle séance du programme ACTIF appartient cet exercice. Lu dans le
+   DOM, comme la carte des muscles : les identifiants (push1, legs4…)
+   nomment la machine, pas la séance — c'est ce qui permet à un même
+   exercice de vivre dans deux programmes différents sans que ton
+   historique de charges soit orphelin. Le repli sur le préfixe sert aux
+   séries enregistrées sous un exercice qui ne fait plus partie du
+   programme courant : elles restent comptées, elles ne disparaissent pas. */
+var _seanceDe=null;
+function seanceDe(){
+  if(_seanceDe) return _seanceDe;
+  _seanceDe={};
+  document.querySelectorAll(selActif()+' .station').forEach(function(st){
+    var sess=st.closest('.sess'); if(!sess) return;
+    _seanceDe[st.getAttribute('data-ex')]=sess.id;
+  });
+  return _seanceDe;
+}
+function groupOf(id){
+  var m=seanceDe()[id];
+  if(m) return m;
+  var g=String(id).replace(/[0-9]+$/,''); return g==='up'?'upper':g;
+}
 function loadTLog(){ return litObjet(TLOGKEY); }
 function saveTLog(o){ try{ localStorage.setItem(TLOGKEY, JSON.stringify(o)); }catch(e){} }
 function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -3424,7 +3839,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ _cal=null; _ratFait=false; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); renderJournal(); }
+function refreshPlan(){ _cal=null; _ratFait=false; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); renderJournal(); renderProgramme(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -3815,6 +4230,9 @@ var _carte=null;
 function carteMuscles(){
   if(_carte) return _carte;
   _carte={};
+  /* toutes les stations, y compris celles du programme inactif : une
+     série enregistrée hier sous l'ancienne structure doit garder ses
+     muscles, sinon elle sortirait des compteurs du jour au lendemain */
   document.querySelectorAll('.station').forEach(function(st){
     var id=st.getAttribute('data-ex');
     var txt=(st.querySelector('.st-mus')||{}).textContent||'';
@@ -3948,10 +4366,16 @@ function volumeNominal(){
   if(_nominal && _nominalNiv===niv) return _nominal;
   var carte=carteMuscles(), out={};
   Object.keys(MUSCLES_DET).forEach(function(m){ out[m]=0; });
-  document.querySelectorAll('.station').forEach(function(st){
+  /* Le nominal d'un programme est ce qu'il délivre SUR LA SEMAINE, donc
+     multiplié par le nombre de passages qu'il prévoit. Compter un seul
+     passage sous-estimait Haut/Bas de moitié — et le coach y voyait une
+     dette structurelle dans le programme qu'il venait de prescrire. */
+  var passages=PROGRAMMES[progActif()].passages||{};
+  document.querySelectorAll(selActif()+' .station').forEach(function(st){
     var id=st.getAttribute('data-ex'), mus=carte[id];
     if(!mus || !mus.length) return;
-    var nb=getPresc(st).sets;
+    var sess=st.closest('.sess');
+    var nb=getPresc(st).sets * ((sess && passages[sess.id]) || 1);
     mus.forEach(function(m,i){ if(out[m]!==undefined) out[m]+=nb*(i===0?1:0.5); });
   });
   Object.keys(out).forEach(function(m){ out[m]=Math.round(out[m]*10)/10; });
@@ -4000,7 +4424,7 @@ function seanceARattraper(){
   struct.forEach(function(x){ manque[x.m]=x.manque; });
   var carte=carteMuscles(), score={}, repare={};
   SESSIONS.forEach(function(g){ score[g]=0; repare[g]={}; });
-  document.querySelectorAll('.station').forEach(function(st){
+  document.querySelectorAll(selActif()+' .station').forEach(function(st){
     var sess=st.closest('.sess'); if(!sess) return;
     var g=sess.id; if(score[g]===undefined) return;
     var mus=carte[st.getAttribute('data-ex')]||[], nb=getPresc(st).sets;
@@ -4027,9 +4451,75 @@ function seanceARattraper(){
   /* aucune séance ne ramène un seul muscle à la cible : le découpage est
      dépassé, pas incomplet. On le dit ailleurs, on ne bricole pas ici. */
   if(best===null || !comble[best].length) return null;
+  /* Sur un programme qui fait déjà passer cette séance deux fois, ajouter
+     un troisième passage n'est pas un levier : c'est violer la récupération
+     qu'on prêche par ailleurs. La fréquence est épuisée, on le dira. */
+  var passages=PROGRAMMES[progActif()].passages||{};
+  if((passages[best]||1)>=2) return null;
   var vises=comble[best].slice().sort(function(a,b){ return manque[b]-manque[a]; });
   return {g:best, gain:Math.round(gain[best]*10)/10, vises:vises,
           reste:struct.length-vises.length, tous:struct.map(function(x){ return x.m; })};
+}
+
+/* Quand la fréquence est épuisée, le seul levier restant est la série —
+   posée sur les machines qui portent le muscle en MOTEUR, jamais en
+   assistant : une série de plus au rowing ne répare pas des trapèzes.
+   Plafonnée à 6 séries par station : au-delà on empile sans stimuler. */
+function seriesAAjouter(){
+  var struct=[];
+  try{
+    struct=musclesEnDette(volumeParMuscle(7)).filter(function(x){ return detteStructurelle(x.m); });
+  }catch(e){ return null; }
+  if(!struct.length) return null;
+  var carte=carteMuscles(), passages=PROGRAMMES[progActif()].passages||{}, choix=[];
+  struct.forEach(function(x){
+    var best=null;
+    document.querySelectorAll(selActif()+' .station').forEach(function(st){
+      var mus=carte[st.getAttribute('data-ex')]||[];
+      if(mus[0]!==x.m) return;
+      var p=getPresc(st);
+      if(p.sets>=6) return;
+      if(best===null || p.sets<getPresc(best).sets) best=st;
+    });
+    if(best){
+      var sess=best.closest('.sess');
+      choix.push({m:x.m, ex:best.getAttribute('data-ex'),
+        nom:(best.querySelector('.st-name')||{}).textContent||'',
+        seance:sess?sess.id:'', de:getPresc(best).sets,
+        gain:((sess && passages[sess.id])||1)});
+    }
+  });
+  return choix.length ? choix : null;
+}
+function ajouterSeries(){
+  var c=seriesAAjouter();
+  if(!c){ coachToast('Rien à charger : aucune machine ne peut prendre une série de plus.', false); return; }
+  /* UNE modification à la fois : deux changements simultanés et on ne sait
+     plus lequel a produit l'effet. On prend le muscle le plus en retard. */
+  var x=c[0], pr=loadPrescs();
+  var d=defaultPresc(document.querySelector(selActif()+' [data-ex="'+x.ex+'"]'));
+  pr[x.ex]={sets:x.de+1, lo:d.lo, hi:d.hi, d:todayKey()};
+  savePrescs(pr);
+  journalCoach('<b>'+x.nom+'</b> : '+x.de+' → '+(x.de+1)+' séries — '+MUSCLES_DET[x.m].n+
+    ' restait sous la cible et la fréquence ne pouvait plus rien. Une seule machine changée, pour savoir ce qui agit.');
+  refreshAllStations(); refreshPlan(); buzz(25);
+  coachToast('<b>'+x.nom+' passe à '+(x.de+1)+' séries.</b> C\'est '+MUSCLES_DET[x.m].n+
+    ' qui en avait besoin. Modification tracée dans Moi, annulable.', false);
+}
+
+/* Un muscle est EN TRANSITION quand le coach a modifié, il y a moins de
+   sept jours, une machine qui le porte : la semaine écoulée a été faite
+   sous l'ancienne prescription, on ne juge pas dessus. */
+function enTransition(m){
+  var pr=loadPrescs(), carte=carteMuscles(), lim=shiftKey(todayKey(),-7), vu=false;
+  document.querySelectorAll(selActif()+' .station').forEach(function(st){
+    if(vu) return;
+    var id=st.getAttribute('data-ex');
+    if((carte[id]||[])[0]!==m) return;
+    var e=pr[id];
+    if(e && e.d && e.d>lim) vu=true;
+  });
+  return vu;
 }
 
 /* le premier jour libre où cette séance ne casse rien : on ne propose
@@ -4059,6 +4549,45 @@ function calerRattrapage(){
     ' — '+noms+' reste'+(r.vises.length>1?'nt':'')+' sous la cible même en faisant la rotation entière.');
   refreshPlan(); buzz(25);
   coachToast('<b>'+SESS[r.g].t+' calé '+libelleJour(k)+'.</b> Ce second passage remet '+noms+' à la cible. Touche le jour si tu veux le déplacer.', false);
+}
+
+/* ----------------------------------------------------------------
+   LE CHANGEMENT DE STRUCTURE — décidé par le coach, appliqué par toi
+   ----------------------------------------------------------------
+   Le choix du découpage n'est pas une préférence, c'est une décision
+   technique : le message qui l'annonce est à l'indicatif, pas une
+   question. Mais on ne remplace pas un programme sous les pieds de
+   quelqu'un qui est peut-être debout devant une machine — l'appui ne
+   dit pas « j'accepte », il dit « je suis prêt, applique ».
+
+   SESSIONS et MUSCLES sont figés au chargement : on recharge la page
+   plutôt que de reconstruire dix états dérivés à chaud, parce qu'un
+   changement de structure arrive une fois tous les six mois et qu'une
+   reconstruction partielle est exactement le genre de raccourci qui
+   laisse un compteur périmé quelque part.
+   ---------------------------------------------------------------- */
+function basculerProgramme(code, raison){
+  if(!PROGRAMMES[code] || code===progActif()) return;
+  var avant=PROGRAMMES[progActif()].t;
+  try{ localStorage.setItem(PROGKEY, code); }catch(e){}
+  journalCoach('Programme : <b>'+avant+'</b> → <b>'+PROGRAMMES[code].t+'</b>'+
+    (raison ? ' — '+raison : '')+'. Tes charges et tes records sont conservés : les machines sont les mêmes.');
+  location.reload();
+}
+function passerHautBas(){
+  basculerProgramme('hb', 'la rotation à un passage par groupe n\'atteignait plus tes cibles');
+}
+function revenirRotation(){
+  basculerProgramme('rot5', 'retour demandé depuis les réglages');
+}
+function renderProgramme(){
+  var el=document.getElementById('progActuel'); if(!el) return;
+  var a=progActif(), P=PROGRAMMES[a];
+  el.innerHTML='<div class="pg-now"><b>'+P.t+'</b> — '+P.mot+'</div>'+
+    Object.keys(PROGRAMMES).filter(function(k){ return k!==a; }).map(function(k){
+      return '<button class="pg-alt" onclick="basculerProgramme(\''+k+'\',\'choix manuel depuis les réglages\')">'+
+        'Revenir à '+PROGRAMMES[k].t+'</button>';
+    }).join('');
 }
 
 /* ----------------------------------------------------------------
@@ -4441,12 +4970,18 @@ function renderPrio(){
      seule limite vient du programme, le titre doit le dire aussi :
      accuser quelqu'un de ce que le plan rend impossible, c'est le
      démotiver pour rien. */
-  var struct=(f[0].code==='structurel' || f[0].code==='depasse');
+  var struct=['structurel','depasse','plafondProg'].indexOf(f[0].code)>=0;
   /* quand la correction est chiffrable, le coach la POSE : un bouton, pas
      une consigne à aller exécuter soi-même dans les réglages. */
   var acte = f[0].action==='rattrapage'
     ? '<div class="pact"><button class="primary" onclick="calerRattrapage()">'+
-      gi('cal-check')+'Cale ce second passage</button></div>' : '';
+      gi('cal-check')+'Cale ce second passage</button></div>'
+    : f[0].action==='programme'
+    ? '<div class="pact"><button class="primary" onclick="passerHautBas()">'+
+      gi('bars')+'Applique le nouveau programme</button></div>'
+    : f[0].action==='series'
+    ? '<div class="pact"><button class="primary" onclick="ajouterSeries()">'+
+      gi('bars')+'Ajoute la série qui manque</button></div>' : '';
   box.innerHTML='<div class="ph">'+gi(struct?'bulb':'target')+
       (struct?'La limite de ton programme':'Ce qui te coûte le plus')+'</div>'+
     '<div class="pt">'+f[0].t+'</div>'+ acte +
@@ -4715,8 +5250,11 @@ function fuites(){
      priorité affiche « rien à te reprocher » au-dessus d'une analyse
      qui liste trois muscles en dette. */
   var volM=volumeParMuscle(7), dette=musclesEnDette(volM);
-  /* On sépare ce qui vient de toi de ce qui vient du programme. */
-  var tienne=dette.filter(function(x){ return !detteStructurelle(x.m); });
+  /* On sépare ce qui vient de toi de ce qui vient du programme — et on
+     écarte ce que le coach vient lui-même de changer : ajouter une série
+     puis reprocher de ne pas l'avoir faite est la contradiction la plus
+     bête qu'un coach puisse produire. */
+  var tienne=dette.filter(function(x){ return !detteStructurelle(x.m) && !enTransition(x.m); });
   var struct=dette.filter(function(x){ return detteStructurelle(x.m); });
   if(tienne.length){
     var dm=cibleMuscle(tienne[0].m);
@@ -4740,30 +5278,50 @@ function fuites(){
       var noms=rat.vises.slice(0,3).map(function(m){ return MUSCLES_DET[m].n; }).join(', ');
       var m0=rat.vises[0], c0=cibleMuscle(m0);
       var quand=jourPourRattrapage(rat);
+      var passe0=(PROGRAMMES[progActif()].passages||{})[rat.g]||1;
       out.push({code:'structurel', p:55, action:'rattrapage',
         t:'<b>Ce n\'est pas toi, c\'est le programme.</b> '+noms+
           ' reste'+(rat.vises.length>1?'nt':'')+' sous la cible même en faisant la rotation entière : '+
           MUSCLES_DET[m0].n+' plafonne à '+volumeNominal()[m0]+' séries pour un minimum de '+c0.min+
-          '. La rotation ne fait passer chaque groupe qu\'une fois. '+
+          '. '+(passe0>1 ? 'Même avec '+passe0+' passages par semaine, ta cible est plus haute. '
+                          : 'La rotation ne fait passer chaque groupe qu\'une fois. ')+
           '<b>Refais '+SESS[rat.g].t+' une seconde fois cette semaine'+(quand?', '+libelleJour(quand):'')+'.</b> '+
           'C\'est cette séance qui les remet à la cible'+
           (rat.reste>0 ? ' — il restera '+rat.reste+' muscle'+(rat.reste>1?'s':'')+' en dessous, on les prendra ensuite.' : '.')+
           ' Pas plus de séries le même jour : au-delà d\'un certain point elles ne se transforment plus en muscle.'});
+    } else if(progActif()!=='rot5'){
+      /* Déjà sur la meilleure structure disponible : la fréquence est
+         épuisée. Proposer un troisième passage violerait la récupération
+         qu'on prêche, et proposer « passe en Haut/Bas » à quelqu'un qui y
+         est déjà serait absurde. Le seul levier restant est la série, sur
+         les machines qui portent ces muscles en moteur. */
+      var ser=seriesAAjouter();
+      var quoi = ser
+        ? ' <b>J\'ajoute une série ici : '+ser[0].nom+'</b> ('+ser[0].de+' → '+(ser[0].de+1)+
+          '), pour '+MUSCLES_DET[ser[0].m].n.toLowerCase()+'. Une seule machine à la fois, pour savoir ce qui agit.'
+        : ' Tes machines sont déjà chargées au maximum utile : c\'est la charge qui doit monter, pas le nombre de séries.';
+      out.push({code:'plafondProg', p:56, action: ser?'series':null,
+        t:'<b>La fréquence ne peut plus rien pour toi.</b> '+struct.length+' muscle'+(struct.length>1?'s':'')+
+          ' sur '+total+' reste'+(struct.length>1?'nt':'')+' juste sous la cible — '+pires+
+          ' — et tu passes déjà deux fois sur chacun. Un troisième passage casserait la récupération '+
+          'qu\'on protège depuis le début.'+quoi});
     } else {
       /* la séance ajoutée laisse plus de muscles courts qu'elle n'en
          comble (ou n'en comble aucun) : ce n'est plus un trou, c'est le
          découpage qui est dépassé. On le dit — et on propose quand même
          le meilleur pas immédiat, parce que les deux sont vrais. */
       var appoint = rat
-        ? ' En attendant, <b>refais '+SESS[rat.g].t+' une seconde fois cette semaine</b> : c\'est le meilleur pas immédiat, il en ramène '+
+        ? ' D\'ici là, <b>refais '+SESS[rat.g].t+' une seconde fois cette semaine</b> : il en ramène '+
           rat.vises.length+' à la cible.'
         : '';
-      out.push({code:'depasse', p:58, action: rat?'rattrapage':null,
+      out.push({code:'depasse', p:58, action:'programme',
         t:'<b>Tu as dépassé ce découpage.</b> '+struct.length+' muscles sur '+total+
           ' restent sous leur cible même en faisant la rotation entière — '+pires+' en tête — '+
           'et une séance ajoutée n\'en règle '+(rat?'que '+rat.vises.length:'aucun')+'. '+
           'Cinq séances qui font passer chaque groupe une fois, c\'est une structure de début de parcours ; '+
-          'à ton niveau il faut <b>deux passages par muscle</b>, donc un autre découpage — <b>haut du corps / bas du corps alterné</b>, deux fois chacun.'+
+          'à ton niveau il faut <b>deux passages par muscle</b>, ce qu\'un découpage en cinq ne peut pas donner. '+
+          '<b>On passe en haut du corps / bas du corps alterné</b> : quatre séances au lieu de cinq, '+
+          'toutes tes cibles tenues, tes charges et tes records conservés. C\'est ma décision, pas une option.'+
           appoint});
     }
   }

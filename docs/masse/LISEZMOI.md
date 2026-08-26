@@ -320,6 +320,91 @@ sienne, le bouton retombait sur le gris par défaut du navigateur.
 muscles nommés dans le message sont ceux que la séance prescrite répare
 vraiment, et cette séance les travaille effectivement.
 
+## Deux programmes, et c'est le coach qui choisit
+
+Jusqu'ici l'app proposait une structure et n'en changeait jamais. Le
+contrôle de cohérence avait pourtant montré que la rotation à cinq
+séances **cesse d'atteindre ses propres cibles dès le deuxième palier** —
+et qu'aucune séance ajoutée ne rattrape ça.
+
+Quatre structures ont été mesurées avant de trancher (`audit-structures.js`) :
+
+| Structure | Séances | Cibles atteintes | Séance la plus longue |
+| --- | --- | --- | --- |
+| Rotation 5 | 5 | ✓ niv. 1 · échoue dès niv. 2 (6, puis 10, puis 12 muscles) | 52 min |
+| Rotation 5 + rattrapage | 6 | ✗ 4 à 7 muscles courts | 52 min |
+| Push/Pull/Legs ×2 | 6 | ✗ 3 à 5 muscles courts à **tous** les niveaux | 52 min |
+| **Haut / Bas ×2** | **4** | **✓ niveaux 1, 2 et 3** | 62 min |
+
+Les deux options à six séances font venir **plus souvent pour un résultat
+moins bon** : c'est le calcul qui les a éliminées, pas une préférence.
+Haut/Bas gagne parce que cinq groupes qui ont besoin de deux passages
+font dix créneaux — impossible en cinq séances si chaque séance ne sert
+qu'un groupe.
+
+### L'historique ne bouge pas d'un gramme
+
+Les deux programmes **partagent les identifiants d'exercice**. Le chest
+press est `push1` dans la rotation et dans HAUT ; le carnet, les records
+et les prescriptions ajustées sont indexés là-dessus. Changer de
+structure ne migre donc rien : la dernière perf s'affiche telle quelle
+sur la machine reprise. `test-hautbas.js` verrouille ce contrat — c'est
+la vérification qui doit hurler si quelqu'un renomme un identifiant.
+
+Techniquement, les sept séances cohabitent dans le DOM et `selActif()`
+(`.sess[data-prog="…"]`) exclut l'inactive de tous les **comptages**.
+`carteMuscles()` fait exception et lit tout : une série enregistrée hier
+sous l'ancienne structure doit garder ses muscles. `groupOf(id)` ne
+devine plus la séance d'après le préfixe de l'identifiant, il la lit dans
+le DOM.
+
+### Le registre : une décision, pas une option
+
+Le message n'est pas une question — « **On passe en haut du corps / bas
+du corps alterné** […] C'est ma décision, pas une option. » Mais on ne
+remplace pas un programme sous les pieds de quelqu'un debout devant une
+machine : l'appui sur **Applique le nouveau programme** ne dit pas
+« j'accepte », il dit « je suis prêt ». Le retour reste offert dans
+**Moi**, et chaque bascule laisse une ligne datée dans le journal.
+
+### Le troisième levier : la série
+
+Une fois en Haut/Bas, la fréquence est épuisée — proposer un troisième
+passage violerait la récupération qu'on prêche par ailleurs, et proposer
+« passe en Haut/Bas » à quelqu'un qui y est déjà serait absurde.
+`fuites()` a donc trois branches, choisies par la mesure :
+
+| Situation | Ce que le coach dit | Ce qu'il fait |
+| --- | --- | --- |
+| une séance ajoutée comble la majorité | « Refais Jambes cette semaine » | la cale dans le planning |
+| elle n'en comble qu'une minorité | « Tu as dépassé ce découpage » | bascule en Haut/Bas |
+| la fréquence est épuisée | « La fréquence ne peut plus rien pour toi » | ajoute **une** série, sur **une** machine |
+
+`seriesAAjouter()` ne charge que les machines qui portent le muscle en
+**moteur** — une série de plus au rowing ne répare pas des trapèzes — et
+plafonne à 6 séries par station. Une seule modification à la fois : deux
+changements simultanés et on ne sait plus lequel a produit l'effet.
+
+### Trois bugs trouvés en construisant
+
+- **Les deux séances générées se sont retrouvées imbriquées dans `#core`.**
+  Mon script d'insertion visait la mauvaise fermeture de `div`. Effet :
+  `closest('.sess')` répondait `#haut` pour des stations censées être dans
+  `#push`, et `groupOf('push1')` renvoyait `haut` alors que la rotation
+  était active. La vérification de parenté est maintenant une assertion.
+- **`volumeNominal()` comptait un passage par séance.** Vrai pour la
+  rotation, faux pour Haut/Bas qui en prévoit deux — le coach voyait une
+  dette structurelle dans le programme qu'il venait lui-même de
+  prescrire. Les programmes déclarent désormais leurs `passages`.
+- **Le coach ajoutait une série puis reprochait de ne pas l'avoir faite.**
+  La semaine écoulée avait été menée sous l'ancienne prescription.
+  `enTransition(m)` écarte du reproche tout muscle dont une machine a
+  changé depuis moins de sept jours.
+
+Le repli `SESSIONS.indexOf(last)>=0 ? last : 'push'` a aussi dû sauter :
+après la bascule, `push` n'existe plus dans le sélecteur et l'onglet
+s'ouvrait sur rien.
+
 ## La série stimulante
 
 Toutes les séries ne se valent pas. L'hypertrophie augmente à mesure qu'une
