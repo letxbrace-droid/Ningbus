@@ -610,6 +610,53 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## La bande de la semaine conseillait une semaine impossible (v34)
+
+Trouvé par un **audit de cohérence** écrit après coup : plutôt que de
+tester des fonctions une à une, il fait tourner l'app avec un historique
+plausible et compare ce que les différents blocs *racontent du même fait*.
+C'est la classe de défaut qui était passée trois fois dans la journée.
+
+Sur les jours libres, la bande affiche ce que le coach conseillerait. Elle
+appelait `suggestGroup(k, ctx)` avec un `ctx` construit **une seule fois** :
+
+```js
+var ctx=planCtx();          /* construit une fois… */
+for(var i=0;i<7;i++){
+  var sug=suggestGroup(k,ctx);   /* …et jamais mis à jour */
+```
+
+Chaque jour libre répondait donc « ce qui irait le mieux ici » sans savoir
+ce que son voisin affichait — et tous donnaient la même réponse. Mesuré
+sur la version livrée, dans les deux programmes :
+
+```
+bande affichée : Lun ·  Mar Bas  Mer Haut  Jeu Haut  Ven Haut  Sam Haut  Dim Haut
+jours que le coach REFUSERAIT dans ce qu'il affiche : 5 sur 5
+```
+
+Le coach montrait, comme son propre conseil, une semaine qu'il rejette sur
+les cinq jours. `proposerSemaine()` chaînait pourtant déjà ses décisions —
+`ctx.plan[k]=g; /* le jour suivant tient compte de celui-ci */`. Deux
+surfaces, la même donnée, deux réponses contraires.
+
+L'affichage chaîne maintenant les siennes, sur une **copie** : ce sont des
+suggestions, pas des engagements, et rien ne doit s'écrire dans le
+planning réel.
+
+```
+après : Mar Bas  Mer Haut  Jeu Bas  Ven Repos  Sam Haut  Dim Bas   → 0 refusé
+```
+
+Quatre vérifications le verrouillent, dans les deux programmes : la bande
+ne conseille aucun jour que le coach refuse, et elle ne répète pas la même
+séance sur tous les jours libres. Passées contre la version livrée, elles
+rapportent `5 refusé(s) sur 5 · Bas Bas Bas Bas Bas`.
+
+**Ce que la batterie ne pouvait pas voir :** 522 vérifications au vert
+pendant que ce défaut était en production. Aucune ne demandait à une
+surface d'être d'accord avec une autre.
+
 ## La conversion respecte la règle qu'elle enseigne (v33)
 
 Livré en v32 et signalé dans l'heure : *« mercredi et jeudi je fais le

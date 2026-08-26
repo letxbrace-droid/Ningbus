@@ -3902,6 +3902,17 @@ function renderGlance(){
 function renderWeekStrip(){
   var box=document.getElementById('weekStrip'); if(!box) return;
   var ctx=planCtx();
+  /* Chaque jour libre se calculait contre le MÊME contexte : aucun ne
+     savait ce que son voisin affichait, et la bande annonçait cinq fois
+     la même séance d'affilée — une semaine que le coach REFUSERAIT sur
+     les cinq jours, montrée comme son propre conseil.
+
+     proposerSemaine() chaîne déjà ses décisions (« le jour suivant tient
+     compte de celui-ci ») ; l'affichage doit chaîner les siennes. On
+     travaille sur une copie : ce sont des suggestions, pas des
+     engagements, et rien ne doit s'écrire dans le planning réel. */
+  var vue={log:ctx.log, plan:{}};
+  Object.keys(ctx.plan).forEach(function(k){ vue.plan[k]=ctx.plan[k]; });
   var today=new Date(); today.setHours(0,0,0,0);
   var tk=dkey(today);
   var monday=new Date(today); monday.setDate(today.getDate()-((today.getDay()+6)%7));
@@ -3915,8 +3926,8 @@ function renderWeekStrip(){
     else if(prevu){ emo=ico(prevu); nom=SESS[prevu].c; }
     else if(k>=tk){
       /* jour libre : le coach dit ce qui irait le mieux ici */
-      var sug=suggestGroup(k,ctx);
-      if(sug){ cls+=' free'; emo=ico(sug); nom=SESS[sug].c; }
+      var sug=suggestGroup(k,vue);
+      if(sug){ cls+=' free'; emo=ico(sug); nom=SESS[sug].c; vue.plan[k]=sug; }
     }
     var ws=document.createElement('div');
     ws.className=cls;
