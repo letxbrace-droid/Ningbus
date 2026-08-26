@@ -1103,17 +1103,15 @@ section{padding:26px 0 10px}
    un tracé SVG c'est la seule voie — un background y peindrait un carré
    plein par-dessus le dessin. */
 .ic.grad{color:var(--accent-ink)}
-.sessbar .sc .ic-push{background:var(--s-push-i)}
-.sessbar .sc .ic-pull{background:var(--s-pull-i)}
-.sessbar .sc .ic-legs{background:var(--s-legs-i)}
-.sessbar .sc .ic-upper{background:var(--s-upper-i)}
-.sessbar .sc .ic-core{background:var(--s-core-i)}
+.sessbar .sc .ic-push{color:var(--s-push-i)}
+.sessbar .sc .ic-pull{color:var(--s-pull-i)}
+.sessbar .sc .ic-legs{color:var(--s-legs-i)}
+.sessbar .sc .ic-upper{color:var(--s-upper-i)}
+.sessbar .sc .ic-core{color:var(--s-core-i)}
 .sessbar .sc.on .ic{color:var(--accent-ink)}
-.ic-push{-webkit-mask-image:url(img/ic-push.webp);mask-image:url(img/ic-push.webp)}
-.ic-pull{-webkit-mask-image:url(img/ic-pull.webp);mask-image:url(img/ic-pull.webp)}
-.ic-legs{-webkit-mask-image:url(img/ic-legs.webp);mask-image:url(img/ic-legs.webp)}
-.ic-upper{-webkit-mask-image:url(img/ic-upper.webp);mask-image:url(img/ic-upper.webp)}
-.ic-core{-webkit-mask-image:url(img/ic-core.webp);mask-image:url(img/ic-core.webp)}
+/* Les cinq masques de séance ont disparu en v31 : toute séance, quel que
+   soit son programme, est dessinée par le pictogramme de sa moitié de
+   corps. Restent les icônes hors séance et de navigation. */
 /* Haut/Bas réutilise deux masques existants : le bras fléchi dit le
    buste, la presse à cuisses dit les jambes. Sans ces deux règles les
    nouvelles séances s'affichaient avec un carré vide — .ic sans masque
@@ -2395,16 +2393,9 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="sheet">
     <h4 id="pickDate">—</h4>
     <div class="psd" id="pickSub">Qu'as-tu fait ce jour ?</div>
-    <div class="pick-grid">
-      <div class="pick" onclick="choisirJour('push')"><i class="ic ic-push pe"></i>Poussée</div>
-      <div class="pick" onclick="choisirJour('pull')"><i class="ic ic-pull pe"></i>Tirage</div>
-      <div class="pick" onclick="choisirJour('legs')"><i class="ic ic-legs pe"></i>Jambes</div>
-      <div class="pick" onclick="choisirJour('upper')"><i class="ic ic-upper pe"></i>Bras</div>
-      <div class="pick" onclick="choisirJour('core')"><i class="ic ic-core pe"></i>Abdos</div>
-      <div class="pick" onclick="choisirJour('swim')"><i class="ic ic-swim pe"></i>Piscine</div>
-      <div class="pick" onclick="choisirJour('cardio')"><i class="ic ic-cardio pe"></i>Cardio</div>
-      <div class="pick" onclick="choisirJour('rest')"><i class="ic ic-rest pe"></i>Repos</div>
-      <div class="pick clear" onclick="choisirJour(null)">Effacer ce jour</div>
+    <!-- rempli depuis le programme actif : coder les séances en dur ici
+         proposait de consigner « Poussée » à quelqu'un en Haut/Bas -->
+    <div class="pick-grid" id="pickGrid"></div>
     </div>
     <div class="verdict" id="pickVerdict"></div>
   </div>
@@ -2499,14 +2490,47 @@ var SESSIONS=PROGRAMMES[progActif()].seances;
 var ALIAS={plan:'semaine', profil:'progres'};
 
 /* une icône = un masque ; le nom de la classe est celui du groupe ou de l'état */
-/* Deux mécaniques cohabitent : les icônes historiques sont des masques
-   WebP (leur couleur vient déjà du CSS), les nouvelles sont des tracés.
-   Le nom reste le même de part et d'autre — c'est ico() qui sait. */
-var ICO_SVG={haut:1, bas:1};
+/* Deux mécaniques cohabitent : les icônes hors séance restent des masques
+   WebP (leur couleur vient déjà du CSS), les séances sont des tracés.
+
+   Quelle moitié du corps pour quelle séance ? Le programme Haut/Bas le
+   dit lui-même : un muscle servi par la séance HAUT est du haut, un
+   muscle servi par BAS est du bas — mesuré, aucun chevauchement. Une
+   séance de la rotation prend donc le pictogramme de la moitié qu'elle
+   travaille réellement. Aucune table à tenir : déplacer une machine
+   déplace l'icône avec elle. */
+var _moitieMus=null;
+function moitieMuscles(){
+  if(_moitieMus) return _moitieMus;
+  _moitieMus={};
+  var carte=carteMuscles();
+  ['haut','bas'].forEach(function(m){
+    document.querySelectorAll('#'+m+' .station').forEach(function(st){
+      (carte[st.getAttribute('data-ex')]||[]).forEach(function(mus){
+        if(!_moitieMus[mus]) _moitieMus[mus]=m;
+      });
+    });
+  });
+  return _moitieMus;
+}
+function moitieDe(g){
+  if(g==='haut'||g==='bas') return g;
+  if(SEANCES_CONNUES.indexOf(g)<0) return null;
+  var moitie=moitieMuscles(), carte=carteMuscles(), n={haut:0, bas:0}, vus={};
+  document.querySelectorAll('#'+g+' .station').forEach(function(st){
+    (carte[st.getAttribute('data-ex')]||[]).forEach(function(mus){
+      if(vus[mus]) return; vus[mus]=1;
+      if(moitie[mus]) n[moitie[mus]]++;
+    });
+  });
+  if(!n.haut && !n.bas) return null;
+  return n.haut>=n.bas ? 'haut' : 'bas';
+}
 function ico(n, extra){
   var cls='ic ic-'+n+(extra?' '+extra:'');
-  return ICO_SVG[n]
-    ? '<svg class="'+cls+'" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-'+n+'"/></svg>'
+  var m=moitieDe(n);
+  return m
+    ? '<svg class="'+cls+'" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-'+m+'"/></svg>'
     : '<i class="'+cls+'"></i>';
 }
 /* Le casque du coach est permanent : sa couleur porte l'état, pas sa forme.
@@ -3944,6 +3968,19 @@ function renderStreaks(){
 }
 
 /* --- sheet de sélection --- */
+/* Le sélecteur listait les cinq séances de la rotation, écrites dans le
+   HTML. Passé en Haut/Bas, il proposait donc de consigner des séances qui
+   n'existent plus dans le programme. Il se construit désormais depuis
+   SESSIONS, et les activités hors programme le suivent. */
+function renderPickGrid(){
+  var g=document.getElementById('pickGrid'); if(!g) return;
+  var cases=SESSIONS.concat(['swim','cardio','rest']).map(function(k){
+    return '<div class="pick" onclick="choisirJour(\''+k+'\')">'+
+      ico(k,'pe')+SESS[k].t+'</div>';
+  });
+  cases.push('<div class="pick clear" onclick="choisirJour(null)">Effacer ce jour</div>');
+  g.innerHTML=cases.join('');
+}
 function openPick(k){
   pickKey=k; pickPending=null;
   var p=k.split('-');
@@ -5828,6 +5865,7 @@ function annoncerProgramme(){
 migrerFuturs();
 annoncerProgramme();
 peindreCartes();
+renderPickGrid();
 refreshPlan();
 annoncerNiveau();
 

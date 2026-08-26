@@ -610,6 +610,49 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+### Toute séance parle la langue du programme (v31)
+
+Restaient les cinq icônes de la rotation — des dessins de machines, en
+WebP, illisibles à la taille du calendrier et étrangères au découpage
+Haut/Bas. Elles prennent le pictogramme de la **moitié du corps** qu'elles
+travaillent.
+
+Sans table écrite à la main : c'est le programme Haut/Bas lui-même qui
+classe les muscles. Un muscle servi par la séance HAUT est du haut, un
+muscle servi par BAS est du bas — mesuré avant de coder, **zéro
+chevauchement, aucun muscle non classé** :
+
+```
+push   haut:4  bas:0   → HAUT
+pull   haut:5  bas:0   → HAUT
+legs   haut:0  bas:4   → BAS
+upper  haut:6  bas:0   → HAUT
+core   haut:0  bas:6   → BAS
+```
+
+Déplacer une machine d'une séance à l'autre déplace donc l'icône avec
+elle. `img/` tombe à 72 Ko, et le poids d'assets mesuré par la suite passe
+de 187 à **51 Ko**.
+
+Le test change de forme avec la règle. « Aucune séance n'emprunte le
+dessin d'une autre » était juste tant qu'une icône valait pour une
+séance ; le partage est maintenant **voulu** — Poussée, Tirage et Bras
+travaillent tous le haut. La règle devient plus forte : l'icône doit
+correspondre à la moitié réellement travaillée, et c'est le programme qui
+en juge.
+
+### Un bug trouvé en chemin : le sélecteur mentait
+
+Le sélecteur de jour du calendrier listait les cinq séances de la rotation
+**écrites en dur dans le HTML**. Depuis que Haut/Bas est le programme par
+défaut, taper un jour proposait donc de consigner « Poussée », « Tirage »
+ou « Abdos » — des séances absentes du programme, qu'aucun coach n'avait
+prescrites. Livré en v29, vu par personne.
+
+Il se construit désormais depuis `SESSIONS`, et une vérification le
+verrouille : le sélecteur ne propose que les séances du programme actif,
+et aucune autre.
+
 ### Les cartes de séance de la v29
 
 `img/mus-haut.webp` et `img/mus-bas.webp` sont composées des planches
