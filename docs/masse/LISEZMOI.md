@@ -610,6 +610,45 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## La conversion respecte la règle qu'elle enseigne (v33)
+
+Livré en v32 et signalé dans l'heure : *« mercredi et jeudi je fais le
+haut, pourquoi ? »*
+
+`migrerPlanProgramme()` convertissait chaque jour **indépendamment**.
+Poussée mercredi et Tirage jeudi étaient deux séances **différentes** ;
+devenues Haut et Haut, elles se retrouvaient à 24 h l'une de l'autre —
+quand la fiche de la séance dit, en toutes lettres :
+
+> À faire **deux fois dans la semaine**, avec au moins **48 h** entre les
+> deux.
+
+L'app rejetait donc son propre planning. Mesuré sur le cas réel, avant
+correction :
+
+```
+jour +1 → haut   verdict : stop   « Trop serré. Tu as déjà haut du corps le lendemain. »
+jour +2 → haut   verdict : stop   « Trop tôt. Un muscle a besoin de 48 h pour se reconstruire. »
+```
+
+Préserver la moitié du corps ne suffisait pas : il fallait aussi préserver
+l'**espacement**. La conversion repasse maintenant chaque jour devant
+`verdictJour()` — la règle de l'app, pas une règle réécrite à côté — en
+avançant dans l'ordre du calendrier et en ne jugeant que contre les jours
+déjà arbitrés. Conséquence voulue : **le premier jour garde ce qui était
+prévu, c'est le suivant qui cède.** Si aucune des deux moitiés ne passe,
+le jour est libéré et le planificateur le repropose.
+
+Deux vérifications le verrouillent : un planning converti ne laisse aucun
+jour que le coach refuse, et c'est bien le jour suivant qui bouge.
+Passées contre la v32 livrée, elles rapportent `5 jour(s) en stop · haut
+haut haut bas bas`.
+
+**La leçon, la même que la veille :** une migration qui préserve une
+propriété (la moitié du corps) peut en casser une autre (la récupération).
+Le garde-fou n'est pas de relire le code, c'est de faire repasser le
+résultat devant le juge que l'app possède déjà.
+
 ## Le calendrier finit d'apprendre Haut/Bas (v32)
 
 Les icônes étaient corrigées, mais **cinq surfaces supposaient encore la
