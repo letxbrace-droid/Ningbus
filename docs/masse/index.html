@@ -710,6 +710,26 @@ section{padding:26px 0 10px}
 .prio .pt{font-size:15px;line-height:1.55;color:var(--text-2);font-weight:500}
 .prio .pt b{color:var(--text);font-weight:700}
 .prio .pn{margin-top:10px;font-size:12.5px;color:var(--text-2);font-weight:700}
+/* la correction se pose d'un appui : la cible tactile fait 44 px comme
+   toutes les commandes de séance, l'encre est celle qu'exige l'aplat clair */
+/* Il n'existe pas de règle .primary générique : elle est portée à chaque
+   fois par son contexte (.io-b, .verdict-act, .planbar). Sans la sienne,
+   ce bouton retombait sur le gris par défaut du navigateur — lisible,
+   mais hors palette et différent des autres boutons d'action. */
+.prio .pact{margin-top:12px}
+.prio .pact button.primary{display:inline-flex;align-items:center;gap:8px;min-height:44px;
+  padding:0 16px;border:none;border-radius:11px;font-size:14px;font-weight:700;
+  background:var(--accent);color:var(--accent-on)}
+.prio .pact .gi{width:16px;height:16px}
+/* le journal du coach : une date, une phrase, rien de cliquable */
+.jnote{margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--text-2)}
+.jvide{font-size:13.5px;line-height:1.55;color:var(--text-3)}
+.jrow{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--bord)}
+.jrow:first-child{border-top:0;padding-top:0}
+.jrow .jd{flex:0 0 auto;min-width:64px;font-family:var(--mono);font-size:12px;
+  font-weight:700;color:var(--text-3);padding-top:2px}
+.jrow .jt{font-size:13.5px;line-height:1.55;color:var(--text-2)}
+.jrow .jt b{color:var(--text);font-weight:700}
 .wd{cursor:pointer}
 .wd:active{transform:scale(.99)}
 
@@ -1872,6 +1892,14 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="block-h"><span class="num"><svg class="gi"><use href="#i-book"/></svg></span><span class="tag">La méthode</span><span class="line"></span></div>
   <details class="fold">
+    <summary>Ce que le coach a changé de lui-même</summary>
+    <div class="fold-b">
+      <p class="jnote">Le coach peut caler une séance dans ton planning quand ton programme n'atteint plus ses cibles. Chaque décision qu'il prend à ta place est écrite ici, datée et motivée — et rien n'est verrouillé : un jour proposé se change d'un appui dans le calendrier.</p>
+      <div id="journalCoach"></div>
+    </div>
+  </details>
+
+  <details class="fold">
     <summary>Les principes et le mode d'emploi du carnet</summary>
     <div class="fold-b">
     <div class="info">
@@ -2458,7 +2486,7 @@ var PRESCKEY='inrun_prescriptions';
 function loadPrescs(){ try{ return JSON.parse(localStorage.getItem(PRESCKEY))||{}; }catch(e){ return {}; } }
 /* le volume nominal est calculé sur les prescriptions : il se recalcule
    dès qu'on en change une */
-function savePrescs(o){ _nominal=null; try{ localStorage.setItem(PRESCKEY, JSON.stringify(o)); }catch(e){} }
+function savePrescs(o){ _nominal=null; _volSeance={}; try{ localStorage.setItem(PRESCKEY, JSON.stringify(o)); }catch(e){} }
 function parseRepRange(txt){
   var m=String(txt).match(/(\d+)\s*[-–]\s*(\d+)/);
   if(m) return {lo:+m[1], hi:+m[2]};
@@ -3234,6 +3262,16 @@ var LEGERES=['cardio','swim','rest'];
 /* récupération minimale avant de retravailler un groupe : les abdos
    encaissent une fréquence plus élevée que les gros groupes */
 function recupMin(g){ return g==='core' ? 1 : 2; }
+/* combien de séries un passage complet de cette séance délivre, lu dans
+   les prescriptions : toute règle qui compare du volume à un seuil doit
+   partir de là, pas d'un nombre écrit à la main */
+var _volSeance={};
+function volumeSeance(g){
+  if(_volSeance[g]!==undefined) return _volSeance[g];
+  var n=0;
+  document.querySelectorAll('#'+g+' .station').forEach(function(st){ n+=getPresc(st).sets; });
+  _volSeance[g]=n; return n;
+}
 /* un compteur par groupe musculaire — une seule source, pour qu'un nouveau
    groupe n'oublie jamais un compteur au passage */
 function zeroGroups(){ var o={}; MUSCLES.forEach(function(g){ o[g]=0; }); return o; }
@@ -3386,7 +3424,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ _cal=null; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); }
+function refreshPlan(){ _cal=null; _ratFait=false; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); renderJournal(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -3505,7 +3543,15 @@ function verdictJour(k, g, ctx, noAlt){
 
   /* 2. enchaînement sans repos — un avancé encaisse un jour de plus */
   var niv=niveauActuel();
-  var maxCons=niv>=5?5:4, plafond=niv>=5?26:22, maxSem=niv>=5?4:3;
+  /* Le plafond de saturation ne peut pas être inférieur à ce que la
+     séance elle-même prescrit, sinon le coach interdit son propre
+     programme : en v24 j'ai ajouté une série au leg curl, la séance
+     Jambes est passée à 23 séries pour un plafond de 22, et le
+     planificateur a cessé de proposer les jambes — un groupe musculaire
+     entier disparu de toutes les semaines. Le plafond se déduit donc du
+     contenu : un passage complet, plus la moitié d'un second. */
+  var maxCons=niv>=5?5:4, maxSem=niv>=5?4:3;
+  var plafond=Math.max(niv>=5?26:22, Math.round(volumeSeance(g)*1.5));
   if(cons>=maxCons){
     return {niveau:'warn', rest:true, alt:alt,
       txt:'<b>'+cons+' jours d\'affilée.</b> Au-delà de '+(maxCons-1)+', la fatigue s\'accumule et tes charges baissent. Un repos ici te ferait progresser plus que cette séance.'};
@@ -3558,12 +3604,18 @@ function suggestGroup(k,ctx){
   if(consecutiveWith(ctx,k)>=4) return 'rest';
   var best=null, score=-1e9;
   MUSCLES.forEach(function(g){
-    if(verdictJour(k,g,ctx,true).niveau!=='ok') return;
+    var v=verdictJour(k,g,ctx,true);
+    /* un « stop » interdit, un « warn » COÛTE. Traiter les deux comme un
+       veto faisait disparaître un groupe entier de toutes les semaines
+       proposées dès qu'une réserve douce le concernait — ce qui est
+       arrivé aux jambes en v24. Une réserve se pèse, elle ne bannit pas. */
+    if(v.niveau==='stop') return;
     var prev=daysSincePrev(ctx,k,g);
     var sem=countGroupInWeek(ctx,k,g);
     /* jamais travaillé passe devant tout, puis le plus longtemps négligé,
        et on pénalise un groupe déjà servi cette semaine */
     var s=(prev===null?60:prev)*10 - sem*22;
+    if(v.niveau==='warn') s-=45;
     if(s>score){ score=s; best=g; }
   });
   return best;
@@ -3614,6 +3666,21 @@ function poserRepos(){ if(pickPending) appliquerJour('rest', pickPending.k); }
    ---------------------------------------------------------------- */
 function proposerSemaine(){
   var ctx=planCtx(), plan=loadPlan(), t=todayKey(), poses=0, liste=[];
+
+  /* Le rattrapage prescrit se RÉSERVE avant tout le reste. Le laisser
+     émerger d'un score le faisait perdre : le coach ordonnait « refais
+     Jambes cette semaine » et son propre planificateur calait autre
+     chose. Un bonus de points aurait marché par hasard ; réserver le
+     jour marche par construction. */
+  var rat=ratCache();
+  if(rat){
+    var kr=jourPourRattrapage(rat);
+    if(kr && !typeOn(ctx,kr) && countGroupInWeek(ctx,kr,rat.g)<2){
+      plan[kr]=rat.g; ctx.plan[kr]=rat.g;
+      poses++; liste.push(SESS[rat.g].t+' '+libelleJour(kr)+' (2ᵉ passage)');
+    }
+  }
+
   for(var i=1;i<=7;i++){
     var k=shiftKey(t,i);
     if(typeOn(ctx,k)) continue;                 /* on ne touche jamais à un jour déjà décidé */
@@ -3894,6 +3961,133 @@ function volumeNominal(){
    pas : c'est alors la fréquence qu'il faut changer, pas l'effort. */
 function detteStructurelle(m){
   return volumeNominal()[m] < cibleMuscle(m).min;
+}
+
+/* ================================================================
+   LE RATTRAPAGE — le coach prescrit, il ne se contente pas de constater
+   ----------------------------------------------------------------
+   Dire « il te faudrait une séance de plus » sans dire LAQUELLE, c'est
+   renvoyer le travail à celui qui paie. On mesure donc quelle séance
+   répare le plus.
+
+   La mesure qui compte est le nombre de muscles RAMENÉS À LA CIBLE, pas
+   le total de séries versées. Trié sur les séries, l'app prescrivait la
+   séance Abdos parce qu'elle arrose six muscles à qui il manquait peu —
+   pendant que le message, lui, nommait les deltoïdes et les quadriceps,
+   auxquels cette séance n'apporte rien. Le coach se contredisait dans le
+   même paragraphe.
+
+   Et quand AUCUNE séance ajoutée ne comble quoi que ce soit, on ne
+   prescrit pas un rattrapage cosmétique : c'est le découpage lui-même
+   qui est dépassé, et c'est ça qu'il faut dire (fuite « depasse »).
+   ================================================================ */
+/* le calcul parcourt tout le DOM des stations : on ne le refait pas sept
+   fois d'affilée quand le planificateur propose une semaine entière. */
+var _rat=null, _ratFait=false;
+function ratCache(){
+  if(!_ratFait){ _rat=seanceARattraper(); _ratFait=true; }
+  return _rat;
+}
+function seanceARattraper(){
+  var struct=[];
+  try{
+    var volM=volumeParMuscle(7);
+    struct=musclesEnDette(volM).filter(function(x){ return detteStructurelle(x.m); });
+  }catch(e){ return null; }
+  if(!struct.length) return null;
+
+  var manque={};
+  struct.forEach(function(x){ manque[x.m]=x.manque; });
+  var carte=carteMuscles(), score={}, repare={};
+  SESSIONS.forEach(function(g){ score[g]=0; repare[g]={}; });
+  document.querySelectorAll('.station').forEach(function(st){
+    var sess=st.closest('.sess'); if(!sess) return;
+    var g=sess.id; if(score[g]===undefined) return;
+    var mus=carte[st.getAttribute('data-ex')]||[], nb=getPresc(st).sets;
+    mus.forEach(function(m,i){
+      if(manque[m]===undefined) return;
+      repare[g][m]=(repare[g][m]||0)+nb*(i===0?1:0.5);
+    });
+  });
+  /* ce que chaque séance COMBLE vraiment, et ce qu'elle ne fait qu'aider */
+  var comble={}, gain={};
+  SESSIONS.forEach(function(g){
+    comble[g]=[]; gain[g]=0;
+    Object.keys(repare[g]).forEach(function(m){
+      gain[g]+=Math.min(manque[m], repare[g][m]);
+      if(repare[g][m]>=manque[m]) comble[g].push(m);
+    });
+  });
+  var best=null;
+  SESSIONS.forEach(function(g){
+    if(best===null) { best=g; return; }
+    if(comble[g].length>comble[best].length ||
+       (comble[g].length===comble[best].length && gain[g]>gain[best])) best=g;
+  });
+  /* aucune séance ne ramène un seul muscle à la cible : le découpage est
+     dépassé, pas incomplet. On le dit ailleurs, on ne bricole pas ici. */
+  if(best===null || !comble[best].length) return null;
+  var vises=comble[best].slice().sort(function(a,b){ return manque[b]-manque[a]; });
+  return {g:best, gain:Math.round(gain[best]*10)/10, vises:vises,
+          reste:struct.length-vises.length, tous:struct.map(function(x){ return x.m; })};
+}
+
+/* le premier jour libre où cette séance ne casse rien : on ne propose
+   pas une date que le coach lui-même refuserait le lendemain */
+function jourPourRattrapage(r){
+  var ctx=planCtx(), t=todayKey();
+  for(var i=1;i<=7;i++){
+    var k=shiftKey(t,i);
+    if(typeOn(ctx,k)) continue;
+    if(verdictJour(k, r.g, ctx, true).niveau!=='ok') continue;
+    return k;
+  }
+  return null;
+}
+
+function calerRattrapage(){
+  var r=seanceARattraper();
+  if(!r){ coachToast('Rien à rattraper : la rotation suffit cette semaine.', false); return; }
+  var k=jourPourRattrapage(r);
+  if(!k){
+    coachToast('<b>Aucun jour libre ne convient</b> dans les 7 qui viennent — tes autres séances sont trop rapprochées. Libère un jour et redemande-moi.', false);
+    return;
+  }
+  var plan=loadPlan(); plan[k]=r.g; savePlan(plan);
+  var noms=r.vises.slice(0,3).map(function(m){ return MUSCLES_DET[m].n; }).join(', ');
+  journalCoach('Second passage <b>'+SESS[r.g].t+'</b> calé '+libelleJour(k)+
+    ' — '+noms+' reste'+(r.vises.length>1?'nt':'')+' sous la cible même en faisant la rotation entière.');
+  refreshPlan(); buzz(25);
+  coachToast('<b>'+SESS[r.g].t+' calé '+libelleJour(k)+'.</b> Ce second passage remet '+noms+' à la cible. Touche le jour si tu veux le déplacer.', false);
+}
+
+/* ----------------------------------------------------------------
+   LE JOURNAL DU COACH — ce qu'il a changé, quand, et pourquoi
+   ----------------------------------------------------------------
+   Un programme qui bouge tout seul sans dire pourquoi est pire qu'un
+   programme figé : on ne sait plus ce qu'on teste. Toute décision que
+   le coach prend à ta place laisse donc une ligne datée, et rien de ce
+   qu'il pose n'est verrouillé — un jour proposé se change d'un appui.
+   ---------------------------------------------------------------- */
+var JOURKEY='inrun_journal_coach';
+function loadJournal(){ return litTableau(JOURKEY); }
+function journalCoach(txt){
+  var j=loadJournal();
+  j.push({d:todayKey(), t:txt});
+  if(j.length>40) j=j.slice(-40);
+  try{ localStorage.setItem(JOURKEY, JSON.stringify(j)); }catch(e){}
+  renderJournal();
+}
+function renderJournal(){
+  var box=document.getElementById('journalCoach'); if(!box) return;
+  var j=loadJournal();
+  if(!j.length){
+    box.innerHTML='<div class="jvide">Le coach n\'a encore rien changé de lui-même. Quand il le fera, ce sera écrit ici, daté et motivé.</div>';
+    return;
+  }
+  box.innerHTML=j.slice().reverse().map(function(e){
+    return '<div class="jrow"><span class="jd">'+fmtDateLongue(e.d)+'</span><span class="jt">'+e.t+'</span></div>';
+  }).join('');
 }
 
 /* les muscles en dette, du plus en retard au moins : seuls comptent ceux
@@ -4247,10 +4441,15 @@ function renderPrio(){
      seule limite vient du programme, le titre doit le dire aussi :
      accuser quelqu'un de ce que le plan rend impossible, c'est le
      démotiver pour rien. */
-  var struct=f[0].code==='structurel';
+  var struct=(f[0].code==='structurel' || f[0].code==='depasse');
+  /* quand la correction est chiffrable, le coach la POSE : un bouton, pas
+     une consigne à aller exécuter soi-même dans les réglages. */
+  var acte = f[0].action==='rattrapage'
+    ? '<div class="pact"><button class="primary" onclick="calerRattrapage()">'+
+      gi('cal-check')+'Cale ce second passage</button></div>' : '';
   box.innerHTML='<div class="ph">'+gi(struct?'bulb':'target')+
       (struct?'La limite de ton programme':'Ce qui te coûte le plus')+'</div>'+
-    '<div class="pt">'+f[0].t+'</div>'+
+    '<div class="pt">'+f[0].t+'</div>'+ acte +
     (f.length>1 ? '<div class="pn">'+(f.length-1)+' autre'+(f.length>2?'s':'')+' point'+(f.length>2?'s':'')+' à régler ensuite — un à la fois.</div>' : '');
 }
 
@@ -4527,15 +4726,46 @@ function fuites(){
         majuscule(dm.mot)+'. <b>Ce muscle passe en premier à ta prochaine séance</b>, pas en dernier quand tu es cuit.'+autres});
   }
   if(struct.length){
-    var noms=struct.slice(0,3).map(function(x){ return MUSCLES_DET[x.m].n; }).join(', ');
-    var s0=cibleMuscle(struct[0].m);
-    out.push({code:'structurel', p:55,
-      t:'<b>Ce n\'est pas toi, c\'est le programme.</b> '+noms+
-        ' reste'+(struct.length>1?'nt':'')+' sous la cible même en faisant la rotation entière : '+
-        MUSCLES_DET[struct[0].m].n+' plafonne à '+volumeNominal()[struct[0].m]+' séries pour un minimum de '+s0.min+
-        '. La rotation ne fait passer chaque groupe qu\'une fois, et à ton niveau la barre est plus haute que ce qu\'un passage peut donner. '+
-        '<b>Une séance de plus dans la semaine — un second passage sur la séance concernée — règle ça d\'un coup.</b> '+
-        'Pas plus de séries le même jour : au-delà d\'un certain point elles ne se transforment plus en muscle.'});
+    /* Le message NOMME les muscles que la séance prescrite répare, pas les
+       plus en retard dans l'absolu : citer les deltoïdes puis ordonner une
+       séance d'abdos, c'est se contredire dans le même paragraphe. */
+    var rat=ratCache();
+    var pires=struct.slice(0,3).map(function(x){ return MUSCLES_DET[x.m].n; }).join(', ');
+    var total=Object.keys(MUSCLES_DET).length;
+    /* Le registre dépend de ce que la séance ajoutée répare RÉELLEMENT.
+       « Refais Abdos » quand douze muscles sont courts et que deux seront
+       comblés, c'est du déni par arithmétique : le chiffre décide du
+       discours, pas l'inverse. */
+    if(rat && rat.reste<=rat.vises.length){
+      var noms=rat.vises.slice(0,3).map(function(m){ return MUSCLES_DET[m].n; }).join(', ');
+      var m0=rat.vises[0], c0=cibleMuscle(m0);
+      var quand=jourPourRattrapage(rat);
+      out.push({code:'structurel', p:55, action:'rattrapage',
+        t:'<b>Ce n\'est pas toi, c\'est le programme.</b> '+noms+
+          ' reste'+(rat.vises.length>1?'nt':'')+' sous la cible même en faisant la rotation entière : '+
+          MUSCLES_DET[m0].n+' plafonne à '+volumeNominal()[m0]+' séries pour un minimum de '+c0.min+
+          '. La rotation ne fait passer chaque groupe qu\'une fois. '+
+          '<b>Refais '+SESS[rat.g].t+' une seconde fois cette semaine'+(quand?', '+libelleJour(quand):'')+'.</b> '+
+          'C\'est cette séance qui les remet à la cible'+
+          (rat.reste>0 ? ' — il restera '+rat.reste+' muscle'+(rat.reste>1?'s':'')+' en dessous, on les prendra ensuite.' : '.')+
+          ' Pas plus de séries le même jour : au-delà d\'un certain point elles ne se transforment plus en muscle.'});
+    } else {
+      /* la séance ajoutée laisse plus de muscles courts qu'elle n'en
+         comble (ou n'en comble aucun) : ce n'est plus un trou, c'est le
+         découpage qui est dépassé. On le dit — et on propose quand même
+         le meilleur pas immédiat, parce que les deux sont vrais. */
+      var appoint = rat
+        ? ' En attendant, <b>refais '+SESS[rat.g].t+' une seconde fois cette semaine</b> : c\'est le meilleur pas immédiat, il en ramène '+
+          rat.vises.length+' à la cible.'
+        : '';
+      out.push({code:'depasse', p:58, action: rat?'rattrapage':null,
+        t:'<b>Tu as dépassé ce découpage.</b> '+struct.length+' muscles sur '+total+
+          ' restent sous leur cible même en faisant la rotation entière — '+pires+' en tête — '+
+          'et une séance ajoutée n\'en règle '+(rat?'que '+rat.vises.length:'aucun')+'. '+
+          'Cinq séances qui font passer chaque groupe une fois, c\'est une structure de début de parcours ; '+
+          'à ton niveau il faut <b>deux passages par muscle</b>, donc un autre découpage — <b>haut du corps / bas du corps alterné</b>, deux fois chacun.'+
+          appoint});
+    }
   }
 
   out.sort(function(a,b){ return b.p-a.p; });
