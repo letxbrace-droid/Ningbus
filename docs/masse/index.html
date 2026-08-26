@@ -1105,6 +1105,12 @@ section{padding:26px 0 10px}
 .ic-legs{-webkit-mask-image:url(img/ic-legs.webp);mask-image:url(img/ic-legs.webp)}
 .ic-upper{-webkit-mask-image:url(img/ic-upper.webp);mask-image:url(img/ic-upper.webp)}
 .ic-core{-webkit-mask-image:url(img/ic-core.webp);mask-image:url(img/ic-core.webp)}
+/* Haut/Bas réutilise deux masques existants : le bras fléchi dit le
+   buste, la presse à cuisses dit les jambes. Sans ces deux règles les
+   nouvelles séances s'affichaient avec un carré vide — .ic sans masque
+   ne dessine rien du tout. */
+.ic-haut{-webkit-mask-image:url(img/ic-upper.webp);mask-image:url(img/ic-upper.webp)}
+.ic-bas{-webkit-mask-image:url(img/ic-legs.webp);mask-image:url(img/ic-legs.webp)}
 .ic-today{-webkit-mask-image:url(img/ic-today.webp);mask-image:url(img/ic-today.webp)}
 .ic-semaine{-webkit-mask-image:url(img/ic-semaine.webp);mask-image:url(img/ic-semaine.webp)}
 .ic-progres{-webkit-mask-image:url(img/ic-progres.webp);mask-image:url(img/ic-progres.webp)}
@@ -1770,7 +1776,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="sh-g"><span>~62′</span><span>11 machines</span><span>32 séries</span></div>
   <p class="sh-lead">Tout le buste en une séance, deux fois par semaine. C’est la fréquence qui construit, pas la longueur : chaque muscle reçoit deux stimulus au lieu d’un.</p>
   </div>
-  <img class="sh-mus" src="img/mus-push.webp" alt="Muscles travaillés" loading="lazy">
+  <img class="sh-mus" src="img/mus-haut.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -1960,7 +1966,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="sh-g"><span>~57′</span><span>9 machines</span><span>29 séries</span></div>
   <p class="sh-lead">Jambes et ceinture ensemble, deux fois par semaine. La plus grosse masse musculaire du corps ne peut pas se contenter d’un passage.</p>
   </div>
-  <img class="sh-mus" src="img/mus-legs.webp" alt="Muscles travaillés" loading="lazy">
+  <img class="sh-mus" src="img/mus-bas.webp" alt="Muscles travaillés" loading="lazy">
 </div></div>
 <section><div class="wrap">
 
@@ -2428,10 +2434,13 @@ var PROGRAMMES={
          passages:{haut:2, bas:2},
          mot:'quatre séances, chaque muscle deux fois par semaine'}
 };
+/* Haut/Bas est le programme par défaut depuis la v29 : c'est celui qui
+   tient ses cibles, et la rotation à cinq reste disponible dans Moi
+   pour qui la préfère. Un choix déjà enregistré prime toujours. */
 function progActif(){
   var v=null;
   try{ v=localStorage.getItem(PROGKEY); }catch(e){}
-  return PROGRAMMES[v] ? v : 'rot5';
+  return PROGRAMMES[v] ? v : 'hb';
 }
 function selActif(){ return '.sess[data-prog="'+progActif()+'"]'; }
 var SESSIONS=PROGRAMMES[progActif()].seances;
@@ -4811,10 +4820,18 @@ function renderProgramme(){
      bouton nommé « revenir » est le chemin pour découvrir un programme.
      Le verbe suit maintenant l'histoire réelle. */
   var vus=loadJournal().map(function(e){ return e.t; }).join(' ');
+  /* Le journal ne suffit pas à dire ce qu'on a vécu : la bascule de v29
+     déplace vers Haut/Bas quelqu'un qui a passé des semaines en rotation,
+     et « Passer en Rotation 5 » lui proposerait comme une nouveauté le
+     programme qu'il vient de quitter. Les séances réellement faites
+     tranchent. */
+  var log=loadTLog(), vecu={};
+  Object.keys(log).forEach(function(k){ if(isTraining(log[k])) vecu[log[k]]=1; });
   el.innerHTML='<div class="pg-now"><b>'+P.t+'</b> — '+P.mot+'</div>'+
     Object.keys(PROGRAMMES).filter(function(k){ return k!==a; }).map(function(k){
       var Q=PROGRAMMES[k];
-      var dejaVu=vus.indexOf('→ <b>'+Q.t+'</b>')>=0;
+      var dejaVu=vus.indexOf('→ <b>'+Q.t+'</b>')>=0 ||
+        Q.seances.some(function(s){ return vecu[s]; });
       return '<button class="pg-alt" onclick="basculerProgramme(\''+k+'\',\'choix manuel depuis les réglages\')">'+
         (dejaVu ? 'Revenir à ' : 'Passer en ')+Q.t+
         ' <span class="pg-mot">'+Q.mot+'</span></button>';
@@ -5705,7 +5722,28 @@ function analyzeTraining(){
   }).join('');
 }
 
+/* Le défaut a changé en v29 : qui n'a jamais choisi de structure passe en
+   Haut/Bas. basculerProgramme() écrit une ligne datée à chaque changement
+   — un changement de défaut n'en écrivait aucune. Ouvrir l'app un matin
+   et trouver une autre semaine sans un mot, c'est précisément ce que le
+   journal existe pour empêcher. On pose donc la ligne ici, et seulement
+   pour qui avait un historique à déplacer : arriver sur Haut/Bas au
+   premier jour n'est pas un changement, c'est le programme. */
+function annoncerProgramme(){
+  var choisi=null;
+  try{ choisi=localStorage.getItem(PROGKEY); }catch(e){}
+  if(PROGRAMMES[choisi]) return;
+  try{ localStorage.setItem(PROGKEY, 'hb'); }catch(e){}
+  var log=loadTLog();
+  var vecu=Object.keys(log).some(function(k){ return isTraining(log[k]); });
+  if(!vecu) return;
+  journalCoach('Programme : <b>Rotation 5</b> → <b>Haut / Bas</b> — un passage par groupe ne tenait plus tes cibles au-delà du premier niveau. '+
+    'Chaque muscle passe à deux fois par semaine, en quatre séances au lieu de cinq. '+
+    'Tes charges et tes records sont conservés : les machines sont les mêmes.');
+}
+
 migrerFuturs();
+annoncerProgramme();
 refreshPlan();
 annoncerNiveau();
 
