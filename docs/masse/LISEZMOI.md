@@ -253,6 +253,73 @@ supérieur soit reconnue comme structurelle — sans quoi le coach mentirait.
 `test-coherence.js` vérifie les deux surfaces (priorité et analyse) à un
 niveau où la barre a monté.
 
+## Le coach prescrit la correction, il ne la sous-traite pas
+
+La v24 apprenait au coach à distinguer une dette qui vient de toi d'une
+dette qui vient du programme. Il la constatait, et s'arrêtait là :
+« il te faudrait une séance de plus » — sans dire laquelle, ni quand.
+Renvoyer le travail à celui qui paie, exactement ce qu'on lui reproche.
+
+**`seanceARattraper()`** mesure quelle séance répare le plus. La mesure
+qui compte est le nombre de muscles **ramenés à la cible**, pas le total
+de séries versées : trié sur les séries, l'app prescrivait la séance
+Abdos parce qu'elle arrose six muscles à qui il manquait peu, pendant que
+le message nommait les deltoïdes et les quadriceps, auxquels cette séance
+n'apporte rien. Le coach se contredisait dans le même paragraphe.
+
+**`jourPourRattrapage()`** cherche le premier jour libre où cette séance
+passe le verdict — on ne propose pas une date que le coach refuserait le
+lendemain. Un bouton la pose. `proposerSemaine()` **réserve ce jour avant
+tout le reste** : laisser le second passage émerger d'un score le faisait
+perdre, et le planificateur calait autre chose que ce que le coach venait
+d'ordonner. Un bonus de points aurait marché par hasard ; réserver le
+jour marche par construction.
+
+Le registre suit ce que la séance ajoutée répare réellement :
+
+| Ce qu'une séance de plus règle | Ce que le coach dit |
+| --- | --- |
+| tout | « Refais Jambes cette semaine, ça les remet à la cible. » |
+| la majorité | « … il restera 3 muscles en dessous, on les prendra ensuite. » |
+| une minorité | « **Tu as dépassé ce découpage.** 12 muscles sur 16 […] une séance ajoutée n'en règle que 5 → haut du corps / bas du corps alterné. » |
+
+Ce dernier cas est le garde-fou contre le déni par arithmétique : dire
+« refais Abdos » quand douze muscles sont courts et que deux seront
+comblés, c'est faire semblant. Le chiffre décide du discours.
+
+### Le journal du coach
+
+Un programme qui bouge tout seul sans dire pourquoi est pire qu'un
+programme figé : on ne sait plus ce qu'on teste. Toute décision que le
+coach prend à ta place laisse une ligne datée et motivée dans **Moi → Ce
+que le coach a changé de lui-même**, et rien n'est verrouillé — un jour
+proposé se change d'un appui dans le calendrier.
+
+### Deux bugs trouvés en chemin
+
+**Un groupe musculaire entier avait disparu.** La série ajoutée au leg
+curl en v24 a fait passer la séance Jambes à 23 séries pour un plafond de
+saturation écrit en dur à 22. Le planificateur écartant tout groupe en
+`warn`, **les jambes ne figuraient plus dans aucune semaine proposée**,
+aux niveaux 1 à 4 — pendant que le coach signalait les quadriceps en
+retard. Deux corrections : le plafond se déduit maintenant du contenu de
+la séance (`volumeSeance(g) × 1,5`), parce qu'un seuil qui condamne la
+prescription du coach est faux par construction ; et un `warn` **coûte
+des points au lieu de bannir** — une réserve se pèse, elle n'exclut pas.
+
+Aucune suite ne l'avait vu. `test-plan.js` vérifie désormais l'invariant
+lui-même — *une semaine proposée sert les cinq groupes* — aux six
+niveaux, et cette vérification échoue bien sur la version qui portait le
+bug. Un test de régression qui n'attrape pas la régression ne vaut rien.
+
+**Le bouton était hors palette.** Il n'existe aucune règle `.primary`
+générique — elle est portée à chaque fois par son contexte. Sans la
+sienne, le bouton retombait sur le gris par défaut du navigateur.
+
+`test-rattrapage.js` : 23 vérifications, dont le contrat central — les
+muscles nommés dans le message sont ceux que la séance prescrite répare
+vraiment, et cette séance les travaille effectivement.
+
 ## La série stimulante
 
 Toutes les séries ne se valent pas. L'hypertrophie augmente à mesure qu'une
