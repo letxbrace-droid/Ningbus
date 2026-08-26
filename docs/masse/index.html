@@ -716,6 +716,23 @@ section{padding:26px 0 10px}
    fois par son contexte (.io-b, .verdict-act, .planbar). Sans la sienne,
    ce bouton retombait sur le gris par défaut du navigateur — lisible,
    mais hors palette et différent des autres boutons d'action. */
+/* ───── bilan de fin de séance ───── */
+.bilan{display:none;margin:22px 0 0;padding:16px 18px;border-radius:14px;
+  background:var(--surface-2);border:1px solid var(--bord)}
+.bilan.show{display:block}
+.bilan .bh{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2);margin-bottom:12px}
+.bilan .bh .gi{width:15px;height:15px}
+.bilan .bp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px}
+.bpz{display:inline-flex;align-items:baseline;gap:6px;padding:6px 11px;border-radius:9px;
+  font-size:12.5px;font-weight:700;background:var(--surface);border:1px solid var(--bord);color:var(--text-2)}
+.bpz b{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+.bpz.haut{border-color:var(--accent);color:var(--accent-ink)}
+.bpz.bas{border-color:var(--warn);color:var(--warn)}
+.bilan .bt{font-size:14.5px;line-height:1.55;color:var(--text-2)}
+.bilan .bt b{color:var(--text);font-weight:700}
+.bilan .bil-meta{margin-top:11px;font-family:var(--mono);font-size:11.5px;color:var(--text-3);
+  font-variant-numeric:tabular-nums}
 .prio .pact{margin-top:12px}
 .prio .pact button.primary{display:inline-flex;align-items:center;gap:8px;min-height:44px;
   padding:0 16px;border:none;border-radius:11px;font-size:14px;font-weight:700;
@@ -1302,6 +1319,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
+  <div class="bilan" id="bilan-push"></div>
+
   <div class="total"><div class="big">50<small>min</small></div><div class="t">Poussée complète : pecs, épaules et triceps en force puis isolation.</div></div>
 </div></section>
 </div>
@@ -1403,6 +1422,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
+  <div class="bilan" id="bilan-pull"></div>
+
   <div class="total"><div class="big">50<small>min</small></div><div class="t">Tirage complet : dos en largeur et épaisseur, biceps sous deux angles.</div></div>
 </div></section>
 </div>
@@ -1503,6 +1524,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=mollets+machine+calf+raise+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
+
+  <div class="bilan" id="bilan-legs"></div>
 
   <div class="total"><div class="big">50<small>min</small></div><div class="t">Jambes complètes : quadriceps, ischios, fessiers et mollets. La séance qui fait tout progresser.</div></div>
 </div></section>
@@ -1621,6 +1644,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
+  <div class="bilan" id="bilan-upper"></div>
+
   <div class="total"><div class="big">50<small>min</small></div><div class="t">Focus bras : buste entretenu, biceps et triceps travaillés en priorité pour le volume.</div></div>
 </div></section>
 </div>
@@ -1648,7 +1673,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
       <div class="st-desc">La machine à abdos, dossier réglé pour que ton nombril soit à hauteur de l'axe. Enroule le buste vers le bassin, souffle en fin de course, remonte lentement. Ce sont des muscles comme les autres : ils grossissent avec de la charge, pas avec 100 répétitions.</div>
-      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
@@ -1730,6 +1755,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 
   <div class="tipbox"><span class="e"><svg class="gi"><use href="#i-timer"/></svg></span><span><b>Le gainage en bonus.</b> Deux planches de 30 à 45 secondes pour finir, si tu as le temps. Elles ne se notent pas ici — le carnet suit des charges, pas des chronos — mais elles complètent bien la séance.</span></div>
+
+  <div class="bilan" id="bilan-core"></div>
 
   <div class="total"><div class="big">30<small>min</small></div><div class="t">Ceinture complète : face avant chargée, obliques en rotation, lombaires en équilibre — plus le second passage mollets, que le jour des jambes ne peut pas absorber seul.</div></div>
 </div></section>
@@ -1918,6 +1945,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
+  <div class="bilan" id="bilan-haut"></div>
+
   <div class="total"><div class="big">62<small>min</small></div><div class="t">Buste complet · pecs, dos, les trois faisceaux d’épaule et les bras. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
 </div></section>
 </div>
@@ -2035,7 +2064,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
       <div class="st-desc">La machine à abdos, dossier réglé pour que ton nombril soit à hauteur de l'axe. Enroule le buste vers le bassin, souffle en fin de course, remonte lentement. Ce sont des muscles comme les autres : ils grossissent avec de la charge, pas avec 100 répétitions.</div>
-      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
@@ -2075,6 +2104,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rotary+torso+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
+
+  <div class="bilan" id="bilan-bas"></div>
 
   <div class="total"><div class="big">57<small>min</small></div><div class="t">Bas complet · quadriceps, chaîne postérieure, mollets et ceinture. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
 </div></section>
@@ -2425,7 +2456,7 @@ function show(id, el, garderPosition){
   if(!page) return;
   document.querySelectorAll('.day').forEach(function(d){d.classList.remove('show');});
   page.classList.add('show');
-  var nav=document.querySelectorAll('.bn');
+  var nav=document.querySelectorAll('.bottomnav .bn');
   if(!el){ var i=PAGES.indexOf(id); el = i>=0 ? nav[i] : null; }
   nav.forEach(function(t){t.classList.remove('active');});
   if(el) el.classList.add('active');
@@ -2892,6 +2923,26 @@ function defaultPresc(st){
   return {sets:st._pdef.sets, lo:st._pdef.lo, hi:st._pdef.hi, rest:st._pdef.rest};
 }
 /* remplace l'ancien getPresc : même forme plate {sets, lo, hi} */
+/* ================================================================
+   LE RIR N'EST PAS LE MÊME PARTOUT
+   ----------------------------------------------------------------
+   Prescrire « 1 à 2 reps en réserve » sur tout le programme mélange
+   deux gestes qui ne coûtent pas la même chose. Une presse à cuisses
+   menée à l'échec coûte des jours de récupération et met le dos en
+   jeu ; une élévation latérale menée à l'échec ne coûte presque rien
+   et c'est justement près de l'échec qu'elle produit son effet.
+
+   Le type se lit dans la prescription elle-même, pas dans une table à
+   tenir à jour : le programme code déjà « gros exercice = fourchette
+   basse » (8-10) et « isolation = fourchette haute » (12-20). Un seuil
+   à 10 classe correctement les 26 stations, rear delt et curl marteau
+   compris — ce qu'un comptage de muscles ratait.
+   ================================================================ */
+function typeExo(p){ return p.lo<=10 ? 'poly' : 'iso'; }
+function cibleRIR(p){
+  return typeExo(p)==='poly' ? {bas:2, haut:3, t:'2-3'} : {bas:0, haut:1, t:'0-1'};
+}
+
 function getPresc(st){
   var d=defaultPresc(st), p=loadPrescs()[st.getAttribute('data-ex')];
   if(p){
@@ -2904,6 +2955,10 @@ function getPresc(st){
 }
 function renderPresc(st){
   var p=getPresc(st), d=defaultPresc(st), c=st.querySelectorAll('.presc .cv');
+  /* l'intitulé de la ligne RIR porte la cible du geste : sans ça,
+     l'utilisateur applique 1-2 partout comme avant */
+  var rl=st.querySelector('.rirrow .rl');
+  if(rl) rl.textContent='RIR '+cibleRIR(p).t;
   if(c.length>=2){ c[0].textContent=p.sets; c[1].textContent=fmtRange(p.lo,p.hi); }
   var box=st.querySelector('.presc');
   var modif=(p.sets!==d.sets || p.lo!==d.lo || p.hi!==d.hi);
@@ -3316,6 +3371,7 @@ function verdict(sets, p, id, step){
   /* tout le verdict se juge sur la charge de référence et sur les seules
      séries faites à cette charge : une série d'essai plus lourde ou un
      repli plus léger ne doit pas contaminer le jugement. */
+  var cRIR=cibleRIR(p);
   var wRef=chargeRef(sets);
   var wMax=Math.max.apply(null, sets.map(function(s){ return s.w; }));
   var serRef=sets.filter(function(s){ return s.w===wRef; });
@@ -3367,7 +3423,7 @@ function verdict(sets, p, id, step){
     }
     var frais=(fat==='forme');
     var nPlus=Math.max(p.sets, serRef.length)+1;
-    if(streakTop>=2 && rir!==null && rir>=2 && nPlus<=8){
+    if(streakTop>=2 && rir!==null && rir>=cRIR.haut && nPlus<=8){
       return {cls:'up', txt:'Deux séances au plafond avec <b>'+rir.toFixed(1).replace('.',',')+' reps en réserve</b> : tu as de la marge. Ajoute une <b>'+nPlus+'ᵉ série</b> à '+fmtKg(wRef)+' kg, ou monte à '+fmtKg(wRef+step)+' kg.'+note};
     }
     if(streakTop>=2){
@@ -3383,9 +3439,17 @@ function verdict(sets, p, id, step){
   }
 
   /* 7. dans la fourchette */
+  /* Le même RIR ne se juge pas pareil selon le geste : 2 reps en réserve
+     est la cible sur une presse, c'est deux reps laissées sur la table
+     sur une élévation latérale. */
   var sup='';
-  if(rir!==null && rir>=3) sup=' Avec '+rir.toFixed(1).replace('.',',')+' reps en réserve, tu peux même viser directement '+p.hi+' reps.';
-  else if(rir!==null && rir<=1) sup=' Tu finis près de l\'échec : consolide avant de charger.';
+  if(rir!==null && rir>cRIR.haut){
+    sup = typeExo(p)==='iso'
+      ? ' Avec '+rir.toFixed(1).replace('.',',')+' reps en réserve tu t\'arrêtes trop tôt : sur un exercice d\'isolation, <b>c\'est près de l\'échec que ça travaille</b>, et ça ne coûte presque rien à récupérer. Vise 0-1.'
+      : ' Avec '+rir.toFixed(1).replace('.',',')+' reps en réserve, tu peux viser directement '+p.hi+' reps.';
+  } else if(rir!==null && rir<cRIR.bas && typeExo(p)==='poly'){
+    sup=' Tu finis trop près de l\'échec pour un gros mouvement : garde 2 reps en réserve, la récupération te coûtera moins cher que le kilo gagné.';
+  }
   return {cls:'', txt:'Tu es dans la fourchette ('+minR+'-'+Math.max.apply(null,reps)+'). Garde <b>'+fmtKg(wRef)+' kg</b> et gratte <b>1 rep par série</b>.'+sup+note};
 }
 
@@ -3839,7 +3903,7 @@ function autoMark(type){
 }
 /* majNiveau() passe en premier : les fourchettes de volume et la prescription
    du jour dépendent du niveau, donc il doit être à jour avant le coach. */
-function refreshPlan(){ _cal=null; _ratFait=false; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); renderJournal(); renderProgramme(); }
+function refreshPlan(){ _cal=null; _ratFait=false; cleanPlan(); majNiveau(); initAides(); renderKcal(); renderGlance(); renderWeekStrip(); renderCal(); renderStreaks(); renderSessBar(); updateCoach(); analyzeTraining(); renderNiveau(); renderNivChip(); renderJournal(); renderProgramme(); renderBilan(); }
 
 /* ================================================================
    PLANIFICATION — ce qui est PRÉVU, distinct de ce qui est FAIT
@@ -4385,6 +4449,117 @@ function volumeNominal(){
    pas : c'est alors la fréquence qu'il faut changer, pas l'effort. */
 function detteStructurelle(m){
   return volumeNominal()[m] < cibleMuscle(m).min;
+}
+
+/* ================================================================
+   LE BILAN DE FIN DE SÉANCE
+   ----------------------------------------------------------------
+   Chaque exercice avait déjà son verdict. Ce qui manquait, c'est la
+   phrase qui les rassemble : à la fin d'une séance, on veut savoir si
+   la séance a été bonne, pas relire douze avis.
+
+   La comparaison se fait contre la MOYENNE des trois séances
+   précédentes, jamais contre la dernière : une seule séance faible
+   suffit à faire croire à un recul, et une seule séance forte à faire
+   croire à une progression. Le tonnage (charge × reps) sert de mesure
+   parce qu'il capte à la fois la charge montée et les reps tenues —
+   monter de 2,5 kg en perdant trois reps n'est pas un progrès.
+   ================================================================ */
+function tonnageSeance(sets){
+  var t=0; sets.forEach(function(x){ t+=(+x.w||0)*(+x.r||0); });
+  return t;
+}
+function etatExercice(st, k){
+  var id=st.getAttribute('data-ex'), p=getPresc(st);
+  var jour=setsOn(id, k);
+  if(!jour.length) return null;
+  var ds=sessionsOf(id).filter(function(d){ return d<k; }).slice(-3);
+  var tj=tonnageSeance(jour);
+  var refs=ds.map(function(d){ return tonnageSeance(setsOn(id,d)); }).filter(function(x){ return x>0; });
+  var moy=refs.length ? refs.reduce(function(a,b){ return a+b; },0)/refs.length : null;
+  var ecart=(moy && moy>0) ? (tj-moy)/moy : null;
+  var v=verdict(jour, p, id, stepFor(st, chargeRef(jour)));
+  var etat;
+  if(ecart===null) etat='neuf';                    /* pas d'historique : on ne juge pas */
+  else if(v.cls==='up') etat='haut';               /* le coach ordonne de charger */
+  else if(ecart<=-0.08) etat='bas';                /* recul net, pas du bruit */
+  else etat='stable';
+  return {ex:id, nom:(st.querySelector('.st-name')||{}).textContent||id,
+    etat:etat, tonnage:Math.round(tj), moy:moy?Math.round(moy):null,
+    ecart:ecart===null?null:Math.round(ecart*100), nRef:refs.length,
+    rir:avgRIR(jour), cible:cibleRIR(p), series:jour.length, presc:p.sets};
+}
+function bilanSeance(g, k){
+  k=k||todayKey();
+  var lignes=[];
+  document.querySelectorAll('#'+g+' .station').forEach(function(st){
+    var e=etatExercice(st, k);
+    if(e) lignes.push(e);
+  });
+  if(!lignes.length) return null;
+  var cnt={haut:0, stable:0, bas:0, neuf:0};
+  lignes.forEach(function(x){ cnt[x.etat]++; });
+  var total=document.querySelectorAll('#'+g+' .station').length;
+  var complete=lignes.length>=total;
+  /* le RIR trop loin de la cible, mesuré sur les séries qui en ont un */
+  var mous=lignes.filter(function(x){ return x.rir!==null && x.rir>x.cible.haut+0.5; });
+  var pire=lignes.filter(function(x){ return x.etat==='bas'; })
+    .sort(function(a,b){ return a.ecart-b.ecart; })[0]||null;
+  return {g:g, k:k, lignes:lignes, cnt:cnt, total:total, complete:complete,
+    faites:lignes.length, mous:mous, pire:pire,
+    tonnage:lignes.reduce(function(a,x){ return a+x.tonnage; },0)};
+}
+
+/* le bilan à l'écran : un état par exercice, puis LA phrase à retenir */
+function renderBilan(){
+  SESSIONS.forEach(function(g){
+    var box=document.getElementById('bilan-'+g); if(!box) return;
+    var b=bilanSeance(g);
+    if(!b){ box.className='bilan'; box.innerHTML=''; return; }
+    box.className='bilan show';
+
+    var puces=[
+      {c:'haut', n:b.cnt.haut, t:'à charger'},
+      {c:'stable', n:b.cnt.stable, t:'stable'+(b.cnt.stable>1?'s':'')},
+      {c:'bas', n:b.cnt.bas, t:'en recul'},
+      {c:'neuf', n:b.cnt.neuf, t:'sans repère'}
+    ].filter(function(x){ return x.n>0; });
+
+    /* La consigne : une seule, celle qui compte le plus. L'ordre suit ce
+       que ça coûte — un recul se traite avant une charge à monter. */
+    var dit;
+    if(b.pire){
+      dit='<b>'+b.pire.nom+' recule de '+Math.abs(b.pire.ecart)+' %</b> par rapport à tes '+
+        b.pire.nRef+' dernières séances. Une séance basse arrive ; deux d\'affilée sur le même exercice, '+
+        '<b>c\'est la récupération qu\'il faut regarder</b>, pas la charge.';
+    } else if(b.cnt.haut*2>=b.faites){
+      /* Reprocher un RIR trop tendre pendant que la moitié des machines
+         passent à la charge suivante serait se contredire : on ne laisse
+         pas de stimulus sur la table ET on ne progresse pas partout. */
+      dit='<b>'+b.cnt.haut+' exercice'+(b.cnt.haut>1?'s':'')+' sur '+b.faites+' passent à la charge suivante.</b> '+
+        'C\'est une bonne séance. La consigne exacte est sous chaque machine — monte, puis repars en bas de fourchette.';
+    } else if(b.mous.length){
+      var m=b.mous[0];
+      dit='<b>'+m.nom+' : '+m.rir.toFixed(1).replace('.',',')+' reps en réserve pour une cible de '+
+        m.cible.t+'.</b> Tu laisses du stimulus sur la table — c\'est la fuite la moins visible et la plus chère.';
+    } else if(b.cnt.haut){
+      dit='<b>'+b.cnt.haut+' exercice'+(b.cnt.haut>1?'s':'')+' à charger la prochaine fois.</b> '+
+        'La consigne exacte est sous chaque machine — monte, puis repars en bas de fourchette.';
+    } else if(!b.complete){
+      dit='<b>'+b.faites+' exercice'+(b.faites>1?'s':'')+' sur '+b.total+'.</b> '+
+        'Les exercices qu\'on saute sont toujours les mêmes, et ce sont toujours les petits muscles qui paient.';
+    } else {
+      dit='<b>Séance conforme.</b> Rien à changer : reproduis-la, c\'est la répétition qui construit.';
+    }
+
+    box.innerHTML='<div class="bh">'+gi('check')+'Bilan de la séance</div>'+
+      '<div class="bp">'+puces.map(function(x){
+        return '<span class="bpz '+x.c+'"><b>'+x.n+'</b>'+x.t+'</span>'; }).join('')+'</div>'+
+      '<div class="bt">'+dit+'</div>'+
+      '<div class="bil-meta">'+b.faites+'/'+b.total+' exercices · '+
+        b.lignes.reduce(function(a,x){ return a+x.series; },0)+' séries · '+
+        (b.tonnage>=1000 ? (Math.round(b.tonnage/100)/10+' t') : b.tonnage+' kg')+' soulevés</div>';
+  });
 }
 
 /* ================================================================
