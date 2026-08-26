@@ -3,7 +3,7 @@
    Change la version à chaque modification d'index.html : c'est ce numéro qui
    déclenche l'installation d'un nouveau worker, donc le bandeau « Recharger ».
    ----------------------------------------------------------------------- */
-var VERSION = 'v30';
+var VERSION = 'v31';
 var SHELL   = 'inrun-masse-shell-' + VERSION;   /* l'app elle-même */
 var FONTS   = 'inrun-masse-fonts-' + VERSION;   /* Google Fonts */
 
@@ -20,11 +20,8 @@ var PRECACHE = [
   './icon-maskable-512.png',
   /* icônes, cartes musculaires et fonds : sans eux l'app hors ligne
      afficherait des emplacements vides */
-  './img/ic-push.webp',
-  './img/ic-pull.webp',
-  './img/ic-legs.webp',
-  './img/ic-upper.webp',
-  './img/ic-core.webp',
+  /* les cinq icônes de séance ont disparu en v31 : toute séance est
+     dessinée par le pictogramme de sa moitié de corps, inline */
   './img/ic-today.webp',
   './img/ic-semaine.webp',
   './img/ic-progres.webp',
