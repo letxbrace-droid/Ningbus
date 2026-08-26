@@ -569,6 +569,47 @@ Un `<svg>` sans hauteur explicite retombe sur les **150 px** par défaut des
 carte sortait en 100 × 150 au lieu de 100 × 105. Le rapport se pose donc à
 la main, `aspect-ratio:285/300` — celui du `viewBox`.
 
+### Les icônes de séance cessent d'être des emprunts
+
+En v29, `.ic-haut` réutilisait `ic-upper.webp` — un biceps — et `.ic-bas`
+`ic-legs.webp` — une presse à cuisses. Je les avais rattachées en urgence
+pour éviter deux carrés vides. Deux images de l'ancien découpage, et
+sémantiquement fausses : le Haut n'est pas les bras, le Bas n'est pas
+seulement les jambes.
+
+Trois formes ont été essayées et **mesurées à 16 px**, la taille d'une
+cellule de calendrier — pas à 44 px sur une planche de présentation :
+
+| | verdict |
+|---|---|
+| La silhouette anatomique déjà tracée, moitié allumée | cohérente et gratuite, mais **7 px de large** à cette taille : haut et bas indiscernables |
+| Un pictogramme bicolore, part allumée + part en sourdine | lisible en théorie, **noir sur noir** en pratique |
+| Un pictogramme **monochrome** | retenu |
+
+Le bicolore est l'erreur intéressante. Ces icônes héritent de
+`currentColor`, et les contextes qui les emploient le mettent déjà en
+sourdine : un jour seulement suggéré, un onglet inactif. Sourdine sur
+sourdine — dans la bande de la semaine, le dessin disparaissait. Toutes
+les autres icônes de l'app sont monochromes, et c'est précisément ce qui
+rend son système de couleurs simple. C'est donc la **forme** qui porte la
+différence : buste, épaules et bras d'un côté, bassin et jambes de
+l'autre. 639 octets pour les deux.
+
+Deux mécaniques cohabitent désormais, et `ico()` sait laquelle employer :
+masque WebP pour les icônes historiques, tracé SVG pour Haut et Bas. Le
+nom reste le même de part et d'autre.
+
+**Un piège de cohabitation.** Colorer une icône-masque se fait par
+`background` — `.ic` pose `background:currentColor`. Sur un `<svg>`, ce
+même `background` peint un carré plein **par-dessus** le dessin, et deux
+règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
+`color`, ce qui sert les deux mécaniques sans exception ni `!important`.
+
+`test-assets.js` garde le contrat de la v29 — chaque séance offerte doit
+**dessiner** quelque chose — mais ne le vérifie plus sur le seul masque.
+Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
+et aucune icône vectorielle n'est masquée par un fond plein.
+
 ### Les cartes de séance de la v29
 
 `img/mus-haut.webp` et `img/mus-bas.webp` sont composées des planches
