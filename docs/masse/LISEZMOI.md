@@ -610,6 +610,42 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Neuf exercices n'avaient aucune marche de progression (v35)
+
+La double progression suppose une **fourchette** : on grimpe les reps de
+`lo` vers `hi` à charge constante, et quand toutes les séries touchent
+`hi`, la charge monte à la séance suivante (`auPlafond()`). Une
+prescription où `lo === hi` supprime la première moitié : il n'y a pas de
+reps à gagner, seulement la charge — et sur de l'isolation, le plus petit
+cran d'une machine est souvent un saut de 15 à 20 %.
+
+Neuf stations étaient dans ce cas, mesurées sur la version livrée :
+
+```
+   pull2   · Tirage horizontal              — 4 × 10 reps · polyarticulaire
+   pull3   · Face pull poulie               — 3 × 15 reps · isolation
+   pull4   · Curl machine                   — 3 × 12 reps · isolation
+   pull5   · Curl marteau haltères          — 3 × 12 reps · isolation
+   push4   · Élévations latérales machine   — 4 × 15 reps · isolation
+   legs2   · Presse à cuisses               — 4 × 10 reps · polyarticulaire
+   up3     · Curl machine                   — 3 × 12 reps · isolation
+   up4     · Dips machine                   — 3 × 12 reps · isolation
+   up6     · Extensions poulie corde        — 3 × 15 reps · isolation
+```
+
+Chacune reçoit la fourchette de sa famille : `8-10` pour les
+polyarticulaires, `12-15` pour l'isolation. La contrainte est que
+`typeExo(p)` classe sur `p.lo <= 10`, et que cette classe pilote la cible
+de RIR (2-3 en poly, 0-1 en isolation). Les nouvelles bornes ont donc été
+choisies **du bon côté de 10** : aucune station ne change de famille,
+aucune cible de RIR ne bouge, le volume reste à 166 séries.
+
+Ce défaut-là n'a pas été trouvé en lisant le code. Il l'a été en écrivant
+l'invariant d'abord — *chaque prescription laisse une marche de
+progression en reps* — puis en le laissant échouer : ma première analyse
+n'avait couvert que les séances Haut/Bas et manquait les trois stations
+de la séance « Bras », qui n'existe que dans la Rotation 5.
+
 ## La bande de la semaine conseillait une semaine impossible (v34)
 
 Trouvé par un **audit de cohérence** écrit après coup : plutôt que de
