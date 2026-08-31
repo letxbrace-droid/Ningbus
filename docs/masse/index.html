@@ -219,6 +219,15 @@ h1 .o{color:var(--blue-l);display:block;text-shadow:0 2px 26px var(--cyan-glow)}
 .day{display:none;animation:fade .35s ease}
 .day.show{display:block}
 .sess{display:none;animation:fade .28s ease}
+/* Le repli maison : une porte, pas une option de plus. Discret dans la
+   séance en salle, il ne devient visible que quand on le cherche. */
+.maison-cta{margin:0 0 14px}
+.maison-cta button{width:100%;text-align:left;cursor:pointer;
+  background:var(--surface-2);border:1px dashed var(--bord);border-radius:10px;
+  color:var(--text-2);font:inherit;font-size:13.5px;padding:11px 14px}
+.maison-cta button b{color:var(--accent);font-weight:600}
+.maison-cta button:active{transform:scale(.99)}
+.maison-cta button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sess.show{display:block}
 
 /* ===== EN-TÊTES COMPACTS =====
@@ -1838,6 +1847,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></div>
 <section><div class="wrap">
 
+  <div class="maison-cta"><button type="button" onclick="showSess('mhaut')">Pas de salle aujourd'hui&nbsp;? <b>Version maison, 25 min</b></button></div>
+
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger, puis <b>2 × 15 rotations externes</b> à la poulie basse, coude au corps, très léger. La coiffe des rotateurs ne fait pas de volume mais elle tient l’épaule sur trois développés. Finis par 1 série légère à la première machine.</div>
 
   <div class="phase"><span class="num">01</span><span class="tag">Poussée · les gros d'abord</span><span class="line"></span></div>
@@ -2028,6 +2039,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div></div>
 <section><div class="wrap">
 
+  <div class="maison-cta"><button type="button" onclick="showSess('mbas')">Pas de salle aujourd'hui&nbsp;? <b>Version maison, 25 min</b></button></div>
+
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo léger, puis <b>1 série à vide</b> à la presse et <b>15 montées de mollets</b> au poids du corps. Les genoux et les hanches se préviennent, ils ne s’improvisent pas.</div>
 
   <div class="phase"><span class="num">01</span><span class="tag">Quadriceps · les gros d'abord</span><span class="line"></span></div>
@@ -2174,6 +2187,212 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="bilan" id="bilan-bas"></div>
 
   <div class="total"><div class="big">57<small>min</small></div><div class="t">Bas complet · quadriceps, chaîne postérieure, mollets et ceinture. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
+</div></section>
+</div>
+
+<div class="sess" data-prog="pdc" id="mhaut">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
+  <h2>Haut · à la maison<span class="o">sans matériel</span></h2>
+  <div class="sh-g"><span>~25′</span><span>0 machine</span><span>17 séries</span></div>
+  <p class="sh-lead">Pour les jours où la salle est impossible. Cinq exercices, 25 minutes, une table et deux chaises. Ce n'est pas un remplacement du programme, c'est un filet : deux fois dans la même semaine, c'est un problème d'organisation, pas un imprévu.</p>
+  </div>
+  <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
+</div></div>
+<section><div class="wrap">
+
+  <div class="maison-cta"><button type="button" onclick="showSess('haut')">Retour à la séance <b>Haut</b> en salle</button></div>
+
+  <div class="warmnote"><b>Échauffement · 5 min.</b> Si tu viens de marcher, tu es déjà chaud : passe directement à la première série, en version facile. Sinon, 30 rotations d'épaules, 20 flexions de genoux, et une première série au barreau du dessous.</div>
+
+  <div class="phase"><span class="num">01</span><span class="tag">Sans matériel · la variante remplace la charge</span><span class="line"></span></div>
+
+  <div class="station" data-ex="mh1">
+    <div class="st-head"><div class="st-no">1</div>
+      <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Pompes</div><div class="st-mus">Pectoraux · deltoïde antérieur · triceps</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Corps gainé d'une seule pièce, mains un peu plus larges que les épaules, poitrine qui frôle le sol. <b>Barreaux :</b> 1 mains sur une table · 2 mains sur une chaise · 3 au sol · 4 pieds sur une chaise · 5 sac à dos chargé.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">90″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pompes+technique+musculation"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mh2">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Dos</div><div class="st-name">Rowing sous la table</div><div class="st-mus">Grand dorsal · trapèzes · biceps</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Sous une table solide, mains au bord du plateau, tu tires la poitrine vers la table, corps droit. C'est le seul tirage possible sans barre — ne le saute jamais. <b>Barreaux :</b> 1 genoux pliés · 2 jambes tendues · 3 pieds surélevés · 4 une main.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">90″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=australian+row+table+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mh3">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Épaules</div><div class="st-name">Pompes piquées</div><div class="st-mus">Deltoïde antérieur · deltoïde latéral</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">En V inversé, hanches hautes, tête vers le sol entre les mains. Plus les hanches montent, plus la charge passe sur les épaules. <b>Barreaux :</b> 1 pieds au sol · 2 pieds sur une chaise · 3 poirier contre un mur.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-12</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pike+push+up+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mh4">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Dips entre deux chaises</div><div class="st-mus">Triceps · pectoraux bas</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Deux chaises stables face à face, mains sur les assises. Descends jusqu'à 90° au coude, épaules basses, jamais remontées vers les oreilles. <b>Barreaux :</b> 1 genoux pliés · 2 jambes tendues · 3 talons sur une 3ᵉ chaise · 4 sac à dos sur les cuisses.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=dips+entre+deux+chaises+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mh5">
+    <div class="st-head"><div class="st-no">5</div>
+      <div class="st-tx"><div class="st-cat">Épaules · largeur</div><div class="st-name">Élévations latérales, bouteilles</div><div class="st-mus">Deltoïde latéral</div></div>
+      <span class="st-badge">Charge légère</span></div>
+    <div class="st-body">
+      <div class="st-desc">Une bouteille dans chaque main, bras légèrement fléchis, montée jusqu'à l'horizontale et descente lente. Sans lui, la largeur d'épaules stagne : aucun mouvement au poids du corps ne le touche. <b>Barreaux :</b> 1 bouteilles 1 L · 2 1,5 L · 3 2 L · 4 sacs lestés.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">45″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=elevation+laterale+bouteille+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan-mhaut"></div>
+
+  <div class="total"><div class="big">25<small>min</small></div><div class="t">Haut du corps sans matériel. La <b>colonne « barreau »</b> remplace les kilos : quand toutes tes séries touchent le haut de la fourchette, tu montes d'un barreau et tu redescends au bas de la fourchette. C'est la même double progression qu'en salle.</div></div>
+</div></section>
+</div>
+
+<div class="sess" data-prog="pdc" id="mbas">
+<div class="sess-head"><div class="wrap sh-in">
+  <div class="sh-tx">
+  <h2>Bas · à la maison<span class="o">sans matériel</span></h2>
+  <div class="sh-g"><span>~25′</span><span>0 machine</span><span>16 séries</span></div>
+  <p class="sh-lead">C'est la séance où le poids du corps s'en sort le mieux : tes jambes portent 90 kg toute la journée, il suffit de passer sur une jambe pour retrouver une charge sérieuse.</p>
+  </div>
+  <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
+</div></div>
+<section><div class="wrap">
+
+  <div class="maison-cta"><button type="button" onclick="showSess('bas')">Retour à la séance <b>Bas</b> en salle</button></div>
+
+  <div class="warmnote"><b>Échauffement · 5 min.</b> Si tu viens de marcher, tu es déjà chaud : passe directement à la première série, en version facile. Sinon, 30 rotations d'épaules, 20 flexions de genoux, et une première série au barreau du dessous.</div>
+
+  <div class="phase"><span class="num">01</span><span class="tag">Sans matériel · la variante remplace la charge</span><span class="line"></span></div>
+
+  <div class="station" data-ex="mb1">
+    <div class="st-head"><div class="st-no">1</div>
+      <div class="st-tx"><div class="st-cat">Cuisses</div><div class="st-name">Squat bulgare</div><div class="st-mus">Quadriceps · fessiers</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Pied arrière sur une chaise, buste droit, cuisse avant à l'horizontale en bas. Sur une jambe, tes 90 kg redeviennent une vraie charge. <b>Barreaux :</b> 1 squat deux jambes · 2 squat 3 s de descente · 3 bulgare · 4 bulgare + sac à dos.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">90″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=squat+bulgare+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mb2">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Fessiers</div><div class="st-name">Hip thrust au sol</div><div class="st-mus">Fessiers</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Haut du dos calé sur le bord du canapé, pieds au sol, bassin monté jusqu'à l'alignement genoux-hanches-épaules, une seconde de serrage en haut. <b>C'est le seul travail direct des fessiers de tout le programme.</b> <b>Barreaux :</b> 1 deux jambes · 2 pause 2 s · 3 une jambe · 4 une jambe + sac à dos.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">90″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=hip+thrust+canape+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mb3">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Arrière des cuisses</div><div class="st-name">Pont fessier une jambe</div><div class="st-mus">Ischios · fessiers</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Allongé au sol, un talon sur une chaise, l'autre jambe en l'air, bassin monté en poussant sur le talon. Plus la jambe est tendue, plus les ischios travaillent. <b>Barreaux :</b> 1 deux jambes au sol · 2 deux jambes surélevées · 3 une jambe · 4 une jambe, 3 s de descente.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pont+fessier+une+jambe+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mb4">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets sur une marche</div><div class="st-mus">Mollets</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Avant-pieds au bord d'une marche, talons dans le vide. Descente complète, montée sur la pointe, pause en haut. Aucun rebond. <b>Barreaux :</b> 1 deux jambes · 2 une jambe · 3 une jambe + sac à dos.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">45″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=mollets+marche+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="station" data-ex="mb5">
+    <div class="st-head"><div class="st-no">5</div>
+      <div class="st-tx"><div class="st-cat">Cuisses · unilatéral</div><div class="st-name">Fentes arrière</div><div class="st-mus">Quadriceps · fessiers</div></div>
+      <span class="st-badge">Poids du corps</span></div>
+    <div class="st-body">
+      <div class="st-desc">Un grand pas en arrière, genou arrière vers le sol sans le toucher, retour. Reculer plutôt qu'avancer épargne le genou avant. <b>Barreaux :</b> 1 fentes arrière · 2 fentes marchées · 3 step-up sur chaise · 4 avec sac à dos.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">10-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="barreau" inputmode="numeric"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=fentes+arriere+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan-mbas"></div>
+
+  <div class="total"><div class="big">25<small>min</small></div><div class="t">Bas du corps sans matériel. Note le <b>numéro du barreau</b> à la place du poids. Deux exercices d'ici comblent des trous de la séance en salle : le hip thrust pour les fessiers, les mollets sur une marche pour l'amplitude complète.</div></div>
 </div></section>
 </div>
 
@@ -2488,6 +2707,15 @@ function progActif(){
   return PROGRAMMES[v] ? v : 'hb';
 }
 function selActif(){ return '.sess[data-prog="'+progActif()+'"]'; }
+/* Les séances maison portent data-prog="pdc" : elles ne sont donc dans
+   aucun programme, et selActif() les tient hors de tous les comptages —
+   volume, prescriptions, niveau. Elles ne sont pas une troisième
+   structure, ce sont deux replis de Haut et de Bas. Le journal, lui,
+   n'en sait rien : une séance maison s'inscrit comme un « haut » ou un
+   « bas », sinon la récupération et le calendrier se tromperaient. */
+var MAISON={mhaut:'haut', mbas:'bas'};
+function versSalle(g){ return MAISON[g] || g; }
+function versMaison(g){ for(var k in MAISON){ if(MAISON[k]===g) return k; } return null; }
 var SESSIONS=PROGRAMMES[progActif()].seances;
 /* les anciennes ancres restent valides : raccourcis d'icône du manifeste
    et liens déjà enregistrés continuent de tomber au bon endroit */
@@ -2565,9 +2793,9 @@ function show(id, el, garderPosition){
 /* --- la séance affichée dans l'onglet Aujourd'hui --- */
 var SESSKEY='inrun_last_sess';
 function showSess(g, garderPosition, sansAncre){
-  if(SESSIONS.indexOf(g)<0) return;
+  if(SESSIONS.indexOf(g)<0 && !MAISON[g]) return;
   document.querySelectorAll('.sess').forEach(function(d){ d.classList.toggle('show', d.id===g); });
-  try{ localStorage.setItem(SESSKEY,g); }catch(e){}
+  try{ localStorage.setItem(SESSKEY, versSalle(g)); }catch(e){}
   renderSessBar();
   /* au démarrage on n'écrit pas d'ancre : le navigateur ferait défiler la page
      jusqu'à l'élément correspondant une fois le chargement terminé */
@@ -3169,6 +3397,22 @@ var KCAL_MARCHE=250;
 /* 50 min de machines avec 60-90 s de repos : le coût net tourne autour
    de 300 kcal, EPOC comprise. Bien moins que ce qu'on imagine. */
 var KCAL_SEANCE=300;
+/* Une séance maison de 25 min au poids du corps vaut environ 170 kcal
+   nettes à 90 kg — pas 300. Créditer la même chose reviendrait à
+   s'autoriser 130 kcal jamais dépensées, quatre fois par semaine dans
+   les mauvaises semaines. Le journal ne fait pas la différence entre
+   salle et maison ; le compteur de calories, si. */
+var KCAL_MAISON=170;
+var MAISONKEY='inrun_maison';
+function loadMaison(){ return litObjet(MAISONKEY); }
+function marquerMaison(k){
+  var m=loadMaison(); if(m[k]) return;
+  m[k]=1;
+  var ks=Object.keys(m).sort();
+  while(ks.length>120){ delete m[ks.shift()]; }
+  try{ localStorage.setItem(MAISONKEY, JSON.stringify(m)); }catch(e){}
+}
+function estMaison(k){ return !!loadMaison()[k]; }
 /* L'app s'appelle « Masse », mais le plan suit le CORPS, pas le nom de
    l'app. À IMC 29 on ne mange pas en surplus : on fait une
    recomposition — déficit modéré, protéines hautes, charges qui
@@ -3212,10 +3456,12 @@ function setAct(champ, val){
 }
 /* la dépense d'un jour, et son plafond */
 function bilanKcal(k){
+  k=k||todayKey();
   var mb=metabolismeBase(loadProfil()), obj=objectifNutrition();
   if(!mb || !obj) return null;
   var a=actJour(k), base=Math.round(mb*COEF_ASSIS);
-  var marche=a.b==='marche'?KCAL_MARCHE:0, seance=a.s?KCAL_SEANCE:0;
+  var coutSeance=estMaison(k)?KCAL_MAISON:KCAL_SEANCE;
+  var marche=a.b==='marche'?KCAL_MARCHE:0, seance=a.s?coutSeance:0;
   var depense=base+marche+seance;
   var brut=depense-obj.deficit;
   return {mb:mb, base:base, marche:marche, seance:seance, depense:depense, obj:obj,
@@ -4025,6 +4271,7 @@ function closePick(){
 }
 /* marquage auto quand une perf est enregistrée depuis une séance */
 function autoMark(type){
+  if(MAISON[type]){ marquerMaison(dkey(new Date())); type=MAISON[type]; }
   if(!SESS[type]) return;
   var log=loadTLog(), plan=loadPlan();
   var k=dkey(new Date());
