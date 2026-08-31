@@ -610,6 +610,65 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Les jours sans salle avaient un plan sur le papier, pas dans l'app (v36)
+
+Deux séances au poids du corps entrent dans l'app — **Haut · à la maison**
+et **Bas · à la maison**, cinq exercices chacune, une table et deux chaises.
+On y accède depuis la séance en salle correspondante, par un bouton discret
+placé avant l'échauffement.
+
+**Ce ne sont pas une troisième structure.** Elles portent `data-prog="pdc"`,
+un programme qui n'existe dans aucune rotation. `selActif()` les tient donc
+hors de tous les comptages — volume, niveau, prescriptions, cibles — sans
+qu'une seule ligne de ces calculs ait à les connaître. Le rayon d'action de
+la fonctionnalité tient dans un attribut.
+
+```
+document.querySelectorAll(selActif()+' .station').length
+   avant : 20     après : 20     (les 10 stations maison sont invisibles)
+```
+
+**Le journal, lui, ne doit surtout pas faire la différence.** Une séance
+maison qui s'inscrirait comme `mbas` casserait la récupération (deux jours
+de suite sur la même moitié ne seraient plus détectés), le calendrier et la
+bande de la semaine. `autoMark()` traduit donc avant d'écrire :
+
+```js
+function autoMark(type){
+  if(MAISON[type]){ marquerMaison(dkey(new Date())); type=MAISON[type]; }
+```
+
+**Le compteur de calories, si.** Une séance maison de 25 minutes vaut
+environ 170 kcal nettes à 90 kg, pas 300. Créditer la même chose reviendrait
+à s'autoriser 130 kcal jamais dépensées, plusieurs fois par semaine.
+
+```
+séance en salle    2 280 + 300 − 400 = 2 180 kcal
+séance maison      2 280 + 170 − 400 = 2 050 kcal
+```
+
+**La charge est remplacée par un barreau.** Chaque exercice déclare son
+échelle de variantes — les pompes vont de « mains sur une table » à « sac à
+dos chargé ». Le champ qui recevait des kilos reçoit un numéro de barreau,
+et la double progression fonctionne sans modification : on grimpe les reps
+dans la fourchette, puis on monte d'un barreau.
+
+Deux exercices comblent au passage des trous mesurés du programme en salle :
+le hip thrust est le **seul travail direct des fessiers** de toute l'app, et
+les mollets sur une marche vont chercher l'amplitude que la machine debout
+ne donne pas.
+
+`test-maison.js` verrouille les invariants qui comptent : les stations
+maison restent hors des comptages, le journal traduit vers `haut`/`bas`, le
+plafond calorique descend de 130 kcal, et chaque séance offre son aller et
+son retour.
+
+**Un défaut de test trouvé au passage, sans rapport avec la fonctionnalité.**
+La bande de la semaine était vérifiée en posant un `rest` sur le mardi de la
+semaine en cours — un jour **futur** le lundi. L'app a raison de ne pas
+peindre un repos qui n'a pas eu lieu ; c'était l'assertion qui était fausse,
+et elle passait six jours sur sept. Elle s'ancre maintenant sur aujourd'hui.
+
 ## Neuf exercices n'avaient aucune marche de progression (v35)
 
 La double progression suppose une **fourchette** : on grimpe les reps de
