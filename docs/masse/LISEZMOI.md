@@ -610,6 +610,74 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Les rayons et les tailles de texte n'avaient aucune échelle (v38)
+
+Suite de la v37, et l'inverse d'elle. Là, un système existait et le CSS ne
+le lisait pas ; ici il n'existait rien. Ce n'est donc plus une migration
+mais une conception — **ça déplace des pixels**, et c'est pour ça que ça a
+été fait séparément, après.
+
+Mesuré sur le fichier :
+
+| | avant | après |
+|---|---|---|
+| rayons | 15 valeurs pour 80 usages | **5** |
+| tailles de texte | 27 valeurs pour 191 usages | **12** |
+| espacements | 38 valeurs pour 409 usages | **18** |
+
+Ce n'était pas une palette de valeurs, c'était l'absence de décision : un
+plateau continu de 9 à 16 px sur les rayons — rien n'y distinguait une
+pastille d'une carte — et **67 tailles en demi-pixel** (11,5 / 12,5 / 13,5 /
+14,5 / 15,5), soit 35 % du texte de l'app.
+
+### La contrainte qu'on s'est donnée
+
+**Rien ne devait bouger de plus de 2 px.** Les marches ont donc été choisies
+au plus près de l'existant, pas sur un ratio géométrique — une progression
+« propre » aurait déplacé le corps de texte, ce qui n'était pas le but. Le
+maximum constaté est 2 px, et l'essentiel des tailles bouge d'un demi-pixel.
+Le script refuse d'écrire si un déplacement dépasse la limite.
+
+```
+rayons   4 · 8 · 12 · 16 · 20                                    --r-1…5
+tailles  11 · 12 · 13 · 14 · 15 · 16 · 18 · 20 · 23 · 26 · 30 · 34  --t-1…12
+espaces  grille de 2 px, à partir de 2 px
+```
+
+### Deux choses volontairement laissées de côté
+
+**Les espacements n'ont pas de jetons.** Un jeton se justifie quand on
+voudrait retoucher la valeur globalement : le langage des rayons est une
+décision esthétique unique, l'échelle typographique est l'identité du
+texte — on ne retouche pas « tous les espacements » d'un bloc. Ils tiennent
+sur une grille, et c'est le test qui la garde.
+
+**La grille est de 2 px et non de 4.** Sur les 200 paddings, ceux de 9 à
+15 px pèsent 47 %. Une grille de 4 les déplacerait de 2 px et ferait
+diverger des valeurs aujourd'hui voisines — sur un écran de téléphone où
+les cartes sont serrées, ça se reflue. La grille de 2 divise le nombre de
+valeurs par deux sans jamais bouger de plus d'un pixel.
+
+Un premier passage avait un défaut réel : `round(1/2)*2 = 0` supprimait
+sept espacements de 1 px. Vérification faite, ce sont des calages optiques
+(`margin-left:1px` sur une unité, le padding vertical des pastilles de
+niveau) — un pixel n'est pas une marche d'espacement. La grille commence
+donc à 2, et en dessous on ne touche à rien.
+
+Les deux `clamp()` du titre restent aussi tels quels : leurs bornes ne sont
+pas « une taille sur l'échelle », elles décrivent une plage fluide.
+
+### Ce que ça change à l'écran
+
+Mesuré, pas estimé : entre 6,5 % (Semaine) et 13,6 % (Moi) des pixels
+changent. C'est du reflux de texte et des coins harmonisés, **pas une
+refonte** — l'app se reconnaît immédiatement. Aucun débordement horizontal,
+aucun texte tronqué, aucune erreur JS sur les quatre onglets.
+
+`test-echelles.js` (8 contrôles) tient l'échelle : les deux séries déclarées
+telles quelles, aucun rayon ni aucune taille écrits en pixels, les 267
+lectures qui passent par les jetons, et tout espacement ≥ 2 px pair.
+
 ## Le système de couleurs existait, le CSS ne le lisait pas (v37)
 
 La palette avait été construite sérieusement : primitives en OKLCH, ajustées
