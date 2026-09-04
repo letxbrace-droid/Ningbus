@@ -610,6 +610,99 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Le système de couleurs existait, le CSS ne le lisait pas (v37)
+
+La palette avait été construite sérieusement : primitives en OKLCH, ajustées
+par solveur jusqu'à leur cible de contraste APCA, puis un étage sémantique
+au-dessus. Restait un étage 3, les anciens noms redirigés vers le nouveau,
+dont le commentaire disait lui-même qu'il existait « pour que la migration
+soit vérifiable morceau par morceau, **pas pour durer** ».
+
+Il durait. Mesuré avant de toucher à quoi que ce soit : **191 lectures**
+passaient encore par les noms hérités (`--line`, `--ink`, `--panel`, `--acc`),
+contre 260 par les noms sémantiques. Et **76 couleurs étaient écrites à la
+main** dans le corps du CSS, dont 61 qui recopiaient un jeton existant à
+l'unité près.
+
+Les 191 lectures sont déplacées, l'étage 3 supprimé, et les voiles passent
+par `color-mix(in srgb, var(--jeton) 14%, transparent)` — jamais plus par un
+`rgba(175,250,1,.14)` qui recopie la palette et ment dès qu'elle bouge.
+`color-mix` a été préféré aux canaux (`--lime-c:175 250 1`) parce qu'une
+première tentative par canaux réécrivait les primitives : les jetons
+résolvaient en `rgb(175 250 1)` au lieu de `#affa01`, et quatre contrôles de
+`test-design.js` — qui comparent aux hex documentés et calculent des ΔE —
+tombaient. **L'étage 1 n'a finalement pas bougé d'un octet**, à deux jetons
+près : `--n-000`, le blanc de la palette de référence qui n'en avait pas, et
+`--knob`, son rôle — la pastille d'un interrupteur, seul aplat blanc de
+l'app et seule surface hors de l'échelle sombre.
+
+### Le jeton doit dire un rôle, pas une couleur
+
+Premier jet raté, corrigé : les 73 voiles pointaient sur `var(--lime)`,
+`var(--ambre)`… Des jetons, oui, mais des **primitives** — c'est-à-dire la
+même entorse qu'avant sous un autre nom, alors que le système écrit noir sur
+blanc que l'étage 2 est le seul que le CSS lit.
+
+Le citron était le seul cas ambigu, parce que la palette lui fait porter à la
+fois l'action à faire (`--accent`) et l'état atteint (`--success`) — une
+fusion qu'elle assume explicitement. Plutôt que de trancher au jugé, on a
+laissé l'encre décider : `.arow.good` écrit déjà en `--success-ink`, donc son
+voile est `--success` ; `.tgt.focus` écrit en `--accent-ink`, donc `--accent`.
+17 voiles en `--success`, 21 en `--accent`, et aucun choix inventé.
+
+Un seul jeton catégoriel reste lu directement, `--s-pull` dans l'ambiance
+lumineuse de `body:before` : il n'y dit pas un état, et les `--s-*` sont une
+famille sémantique à part entière — l'identité d'une séance — pas des
+primitives.
+
+### Cinq couleurs venaient d'une palette qui n'existe plus
+
+C'est ce que le comptage a mis au jour. Onze occurrences, cinq teintes, qui
+n'appartenaient à **aucun** jeton — des restes de la palette d'avant, laissés
+en place quand l'encre voisine, elle, avait été migrée :
+
+| Trouvé | Où | Devenu |
+|---|---|---|
+| `#f87171` | `.verdict.stop`, `.coach-ic.t-alerte` | `--rouge` |
+| `#ffb547` | `.arow.warn` | `--ambre` |
+| `#5cc8ff` | `.arow.tip`, le chevron du sélecteur | `--cyan-f`, `--cyan-i` |
+| `#8ba6c8` | `.coach-ic.t-calme` | `--n-300` |
+| `#0c0c0c` | `.ctoast` | `--surface-3` |
+
+Deux méritent d'être nommées. `.verdict.stop` portait déjà `var(--danger-ink)`
+sur un fond rouge d'une autre palette : la moitié de la règle avait été
+migrée, l'autre non. Et `.arow.warn` affichait un ambre **différent** de celui
+de `.verdict.warn` deux lignes plus bas, pour dire exactement la même chose.
+
+Le toast du coach est le seul changement qu'on voit vraiment : il était noir
+sur fond noir, il devient `--surface-3` — la marche que le système lui
+assigne depuis toujours, son commentaire dit « modale, toast ». Une surface
+flottante plus sombre que les cartes qu'elle survole inversait l'échelle
+d'élévation.
+
+Un sixième défaut est tombé au passage : `.bpz`, les pastilles du bilan
+hebdomadaire, lisaient `var(--surface)` — un jeton qui n'a jamais existé.
+Elles n'avaient donc aucun fond.
+
+### Comment on sait que rien d'autre n'a bougé
+
+Un renommage de jetons ne doit changer aucun pixel. `couleurs.js` relève,
+dans un vrai navigateur, la couleur résolue de **4 506 éléments** plus 23
+états fabriqués à la main (`.verdict.stop`, `.coach-ic.t-calme`… qui
+n'existent pas dans le DOM au repos), avant et après. Résultat : **7 écarts,
+tous voulus**, et zéro valeur de jeton modifiée.
+
+`test-jetons.js` (8 contrôles) transforme le nettoyage en propriété tenue :
+aucun nom hérité redéfini ni lu, aucune couleur en dur, aucun hex hors
+palette, toute lecture `var()` sans repli visant un jeton défini, et l'en-tête
+qui ne promet plus trois étages. Sans lui, la prochaine règle écrite à la
+main remettrait un `rgba()` et personne ne le verrait.
+
+**Ce qui n'est pas fait :** les rayons, les tailles de texte et les gouttières
+n'ont aucune échelle — 15 rayons distincts pour 77 usages, 24 tailles pour
+187, 14 gouttières pour 78. Les régler serait *concevoir* un système, pas en
+appliquer un, et ça déplacerait des pixels partout. C'est un autre chantier.
+
 ## Les jours sans salle avaient un plan sur le papier, pas dans l'app (v36)
 
 Deux séances au poids du corps entrent dans l'app — **Haut · à la maison**
