@@ -610,6 +610,50 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Les titres de section deviennent des plaques en relief (v38)
+
+Un titre de section — `.block-h` sur une page, `.phase` dans une séance,
+28 au total — n'était qu'une icône, un mot en capitales et un filet de 1 px.
+Sur un téléphone où tout défile d'un bloc, ça ne posait aucun palier : rien
+ne disait où une section commençait, et l'œil devait relire pour se situer.
+
+Ils deviennent des plaques. **Le relief se fait avec de la lumière, pas avec
+un contour** — et la source est en haut, ce qui est déjà la convention du
+fichier : les jauges portent un liseré clair sur leur arête haute depuis
+leur création. Cinq ombres disent la même chose :
+
+| | |
+|---|---|
+| dégradé clair → sombre | la face est éclairée d'en haut |
+| liseré clair, arête haute | l'arête reçoit la lumière |
+| liseré sombre, arête basse | l'arête opposée est dans l'ombre |
+| ombre nette de 2 px dessous | l'épaisseur de la plaque |
+| ombre diffuse plus bas | ce qu'elle projette sur la page |
+
+Le filet devient une **rainure creusée** : sombre en haut, clair en bas,
+l'exact inverse de la plaque. C'est ce contraire qui le fait lire comme un
+creux et non comme une deuxième arête — un relief qui se contredit dans la
+même image ne se lit plus comme un relief du tout. Même logique pour le
+numéro de phase, enfoncé dans la plaque : face plus sombre qu'elle, lumière
+inversée.
+
+### Le premier jet coûtait du contraste, le test l'a dit
+
+La plaque prenait les deux marches les plus hautes de l'échelle
+(`--surface-3 → --surface-2`). `test-contraste.js` est passé de 6 ✓ à 5 ✓ :
+l'APCA moyen de l'app tombait de 91,5 à 91,4.
+
+Vérification faite, **aucun texte ne passait sous son seuil** — le titre
+restait à 96,4 (seuil 95) et son icône à 76,2 (seuil 75). Mais de peu, et
+c'est une marge de lisibilité entamée pour deux nuances de gris. Le fond de
+page étant un noir pur, `--surface-2 → --surface-1` se détache tout aussi
+nettement : le titre remonte à 99,0 et l'icône à 78,7, et la moyenne repasse
+à 91,6. Le seuil du test n'a pas bougé — c'est la plaque qui a cédé.
+
+(Au passage : mon premier calcul APCA se trompait de polarité et annonçait
+l'icône à 69, sous le plancher. C'était faux. La formule clair-sur-dark n'est
+pas la même que sombre-sur-clair.)
+
 ## Les rayons et les tailles de texte n'avaient aucune échelle (v38)
 
 Suite de la v37, et l'inverse d'elle. Là, un système existait et le CSS ne

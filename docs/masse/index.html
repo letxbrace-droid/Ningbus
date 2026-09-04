@@ -338,11 +338,56 @@ section{padding:26px 0 10px}
 .gi{width:1em;height:1em;flex:0 0 auto;display:inline-block;vertical-align:-.125em;
   fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .gi.f{fill:currentColor;stroke:none}
+/* ===== LES TITRES DE SECTION SONT DES PLAQUES =====
+   Un titre n'était qu'un mot suivi d'un filet de 1 px. Sur un téléphone où
+   tout défile d'un bloc, ça ne posait aucun palier : rien ne disait où une
+   section commençait, et l'œil devait relire pour se situer.
+
+   Le relief se fait avec de la LUMIÈRE, pas avec un contour — et la source
+   est en haut, ce qui est déjà la convention du fichier : les jauges
+   portent un liseré clair sur leur arête haute depuis leur création. Une
+   plaque, c'est donc cinq ombres qui disent la même chose :
+
+     dégradé clair -> sombre        la face est éclairée d'en haut
+     liseré clair, arête haute      l'arête reçoit la lumière
+     liseré sombre, arête basse     l'arête opposée est dans l'ombre
+     ombre nette de 2 px dessous    l'épaisseur de la plaque
+     ombre diffuse plus bas         ce qu'elle projette sur la page
+
+   Et le filet devient une rainure creusée : sombre en haut, clair en bas —
+   l'exact inverse de la plaque. C'est ce contraire qui le fait lire comme
+   un creux et non comme une deuxième arête. Un relief qui se contredit
+   dans la même image ne se lit plus comme un relief du tout. */
+.phase, .block-h{
+  padding:10px 14px;
+  border-radius:var(--r-3);
+  /* La plaque prend deux marches de l'échelle, pas les plus hautes : le
+     fond de page est un noir pur, donc surface-2 -> surface-1 se détache
+     déjà nettement, et chaque marche gagnée coûte du contraste au titre
+     posé dessus. Mesuré en APCA : sur surface-3 le titre tombe à 96,4 et
+     son icône à 76,2 — au-dessus des seuils (95 et 75), mais de peu, et
+     assez pour faire baisser la moyenne de l'app. Sur surface-2 ils
+     remontent à 99,0 et 78,7. Le relief ne vaut pas qu'on entame la
+     marge de lisibilité pour deux nuances de gris. */
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  border:1px solid var(--bord-fort);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11),
+             inset 0 -1px 0 rgba(0,0,0,.50),
+             0 2px 0 rgba(0,0,0,.50),
+             0 8px 16px rgba(0,0,0,.32);
+}
+.phase .line, .block-h .line{height:2px;border-radius:var(--r-1);
+  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(255,255,255,.07))}
+.phase .tag, .block-h .tag{text-shadow:0 1px 0 rgba(0,0,0,.50)}
+
 .phase{display:flex;align-items:center;gap:12px;margin:22px 0 14px}
+/* le numéro de phase est enfoncé DANS la plaque : sa face est plus sombre
+   qu'elle et sa lumière est inversée — creux en haut, arête en bas */
 .phase .num{font-family:var(--mono);font-weight:700;font-size:var(--t-4);color:var(--text-3);
-  border:1px solid var(--bord-fort);border-radius:var(--r-2);padding:4px 8px;background:var(--surface-1)}
+  border:1px solid var(--bord-fort);border-radius:var(--r-2);padding:4px 8px;background:var(--surface-1);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.06)}
 .phase .tag{font-family:var(--disp);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:var(--t-4);color:var(--text);}
-.phase .line{flex:1;height:1px;background:var(--bord)}
+.phase .line{flex:1}
 /* en-têtes secondaires : même grammaire que .phase */
 .block-h{display:flex;align-items:center;gap:12px;margin:28px 0 14px}
 /* l'icône d'en-tête : même taille que le titre, teinte de l'accent
@@ -354,7 +399,7 @@ section{padding:26px 0 10px}
 .phase .num:has(.gi){border:none;background:none;padding:0;display:flex;align-items:center;color:var(--text-3)}
 .phase .num .gi{width:19px;height:19px}
 .block-h .tag{font-family:var(--disp);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:var(--t-4);color:var(--text)}
-.block-h .line{flex:1;height:1px;background:var(--bord)}
+.block-h .line{flex:1}
 /* L'explication passait AVANT la donnée : trois lignes de texte à lire
    la première fois, à sauter les quarante suivantes. Elle se replie
    derrière un « ? », ouvert d'office tant qu'il n'y a aucun historique. */
