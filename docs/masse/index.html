@@ -3208,6 +3208,68 @@ function archivePerf(id, w, r){
   try{ localStorage.setItem(HISTKEY, JSON.stringify(h)); }catch(e){}
   return bestBefore>0 && epley(w,r)>bestBefore;   /* record battu ? */
 }
+
+/* ===== LA SUPPRESSION D'UNE SÉRIE DOIT REDESCENDRE JUSQU'À L'HISTORIQUE =====
+   archivePerf() n'était appelée qu'à l'AJOUT. delSet() retirait bien la série
+   de inrun_sets, mais sa 1RM restait dans inrun_hist POUR TOUJOURS. Deux
+   conséquences, et la seconde est la pire :
+     1. le graphe montrait un sommet jamais tenu, puis une « chute » quand
+        l'exercice reprenait à sa vraie valeur ;
+     2. ce sommet fantôme devenait la référence de `bestBefore` — donc un
+        VRAI record pouvait ne plus être détecté.
+   Relevé sur une sauvegarde réelle : 3 points faux sur 41, tous vers le haut,
+   dont un curl marteau affiché à 34 de 1RM pour 18 réels. L'app annonçait une
+   régression de 34 à 20 là où il y avait une progression de 18 à 20.
+
+   La vérité est inrun_sets. Tout le reste s'en déduit. */
+function resyncPerf(id, jour){
+  var all=loadExSets();
+  var ss=(all[id]||{})[jour]||[];
+  var mieux=function(l){ return l.slice().sort(function(a,b){ return epley(b.w,b.r)-epley(a.w,a.r); })[0]; };
+
+  /* l'historique 1RM : on réécrit le point du jour, ou on le retire */
+  var h=loadHist();
+  if(h[id]){
+    h[id]=h[id].filter(function(e){ return e.d!==jour; });
+    if(ss.length){ var b=mieux(ss); h[id].push({d:jour, w:b.w, r:b.r, rm:epley(b.w,b.r)}); }
+    h[id].sort(function(a,b){ return a.d<b.d?-1:1; });
+    if(!h[id].length) delete h[id];
+    try{ localStorage.setItem(HISTKEY, JSON.stringify(h)); }catch(e){}
+  }
+
+  /* le carnet « dernière fois » suit la même vérité : la meilleure série du
+     jour le plus récent où il reste quelque chose. Sans ça, effacer la seule
+     série d'une séance laissait l'app proposer une charge qu'on n'a pas faite. */
+  var logs=loadLogs(), tout=(loadExSets()[id])||{};
+  var jours=Object.keys(tout).filter(function(d){ return tout[d].length; }).sort();
+  if(!jours.length){ delete logs[id]; }
+  else{
+    var dd=jours[jours.length-1], b2=mieux(tout[dd]);
+    logs[id]={w:b2.w, r:b2.r, date:dd.slice(8,10)+'/'+dd.slice(5,7)};
+  }
+  saveLogs(logs);
+}
+
+/* Réparation des historiques déjà faussés. Elle ne fait que réaligner
+   inrun_hist sur inrun_sets, donc elle est idempotente : la relancer ne
+   change rien. Un point sans séries correspondantes est laissé intact —
+   il vient d'une version de l'app antérieure à inrun_sets, et l'écraser
+   effacerait de l'historique légitime. */
+function reparerHistorique(){
+  var h=loadHist(), all=loadExSets(), n=0;
+  Object.keys(h).forEach(function(id){
+    h[id].forEach(function(e){
+      var ss=(all[id]||{})[e.d];
+      if(!ss || !ss.length) return;
+      var b=ss.slice().sort(function(x,y){ return epley(y.w,y.r)-epley(x.w,x.r); })[0];
+      var rm=epley(b.w,b.r);
+      if(e.rm!==rm || e.w!==b.w || e.r!==b.r){ e.w=b.w; e.r=b.r; e.rm=rm; n++; }
+    });
+  });
+  if(n){ try{ localStorage.setItem(HISTKEY, JSON.stringify(h)); }catch(e){} }
+  return n;
+}
+
 /* map id -> nom lisible, construit depuis le DOM */
 function exerciseMap(){
   var m={};
@@ -3680,9 +3742,14 @@ function delSet(id, i){
   all[id][tk].splice(i,1);
   if(!all[id][tk].length) delete all[id][tk];
   saveExSets(all);
+  /* l'historique 1RM et le carnet suivent la suppression — sans ça la 1RM
+     de la série effacée restait affichée, et servait de référence au
+     prochain « record battu » */
+  resyncPerf(id, tk);
   var st=document.querySelector('.station[data-ex="'+id+'"]');
   if(st) refreshStation(st);
   refreshPlan();
+  annoncerNiveau();   /* une série de moins peut faire redescendre un palier */
   buzz(12);
 }
 
@@ -6414,6 +6481,9 @@ function confetti(n){
   })(t0);
 }
 
+/* Avant de dessiner quoi que ce soit : réaligner l'historique 1RM sur les
+   séries réellement enregistrées. Silencieux et idempotent. */
+reparerHistorique();
 initSets();
 
 /* ===== PWA : manifest + service worker en fichiers réels =====

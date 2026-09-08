@@ -610,6 +610,60 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Supprimer une série laissait sa 1RM dans l'historique (v39)
+
+Trouvé en analysant une sauvegarde réelle, pas en relisant le code.
+
+`archivePerf()` n'était appelée qu'à **l'ajout** d'une série. `delSet()`
+retirait bien la série de `inrun_sets`, mais sa 1RM restait dans
+`inrun_hist` **pour toujours**. Deux conséquences, et la seconde est la
+pire :
+
+1. le graphe affichait un sommet jamais tenu, puis une « chute » quand
+   l'exercice reprenait à sa vraie valeur ;
+2. ce sommet fantôme devenait la référence de `bestBefore` — donc **un vrai
+   record pouvait ne plus être détecté**.
+
+Sur la sauvegarde analysée : **3 points faux sur 41**, tous vers le haut.
+
+| exercice | jour | l'app retenait | réel |
+|---|---|---|---|
+| Curl marteau corde | 23/08 | 27×8 → 1RM **34** | 13,5×10 → **18** |
+| Rowing machine assis | 26/08 | 45×8 → **57** | 39×10 → **52** |
+| Élévations latérales poulie | 24/08 | 6,8×10 → **9** | 4,5×10 → **6** |
+
+L'app annonçait donc une régression de 34 à 20 sur le curl marteau là où il
+y avait une **progression** de 18 à 20.
+
+### Le correctif
+
+`inrun_sets` est la vérité ; tout le reste s'en déduit.
+
+- **`resyncPerf(id, jour)`** recalcule le point d'historique du jour à partir
+  des séries qui restent, ou le retire s'il n'en reste aucune. `delSet()`
+  l'appelle désormais. Le carnet « dernière fois » suit la même règle et
+  retombe sur la séance précédente — sans ça, effacer la seule série d'une
+  séance laissait l'app proposer une charge jamais faite.
+- **`reparerHistorique()`** réaligne les historiques déjà faussés, au
+  démarrage, silencieusement. Elle est **idempotente** : elle ne fait que
+  recopier `inrun_sets` dans `inrun_hist`, donc la relancer ne change rien.
+  Un point **sans** séries correspondantes est laissé intact — il vient
+  d'une version antérieure à `inrun_sets`, et l'écraser effacerait de
+  l'historique légitime.
+
+`delSet()` appelle aussi `annoncerNiveau()` maintenant : une série de moins
+peut faire redescendre un palier, comme une série de plus peut le faire
+monter.
+
+### La vérification
+
+`test-histo.js` (12 contrôles) tourne sur la **vraie sauvegarde**, celle qui
+contient les trois fantômes. Il vérifie qu'aucun point ne contredit les
+séries, que les trois sont corrigés à la bonne valeur, que la réparation est
+idempotente, qu'un point orphelin survit, que supprimer une série fait
+descendre la 1RM du jour (107 → 53) et le carnet avec, qu'effacer la
+dernière retire le point, et qu'aucun sommet n'est un fantôme.
+
 ## Les titres de section deviennent des plaques en relief (v38)
 
 Un titre de section — `.block-h` sur une page, `.phase` dans une séance,
