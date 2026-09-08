@@ -1,6 +1,6 @@
 # Tests — I&N RUN Masse
 
-**575 contrôles sur 23 fichiers.** Ils tournent dans un vrai Chromium contre
+**586 contrôles sur 23 fichiers.** Ils tournent dans un vrai Chromium contre
 `docs/masse/index.html`, servi en local. Rien n'est simulé : ce qui est
 vérifié est ce que le navigateur rend.
 
@@ -37,7 +37,7 @@ binaire du navigateur ; sinon `contexte.js` le cherche dans
 | `test-equilibre.js` | 16 | l'équilibre du volume entre groupes |
 | `test-charge.js` | 26 | la double progression et le choix de charge |
 | `test-design.js` | 55 | la palette, les états, la cohérence visuelle |
-| `test-calories.js` | 21 | le modèle calorique et ses plafonds |
+| `test-calories.js` | 32 | le modèle calorique, ses plafonds, **et la cohérence déficit ↔ fourchette** |
 | `test-exigeant.js` | 23 | le coach reste exigeant quand il faut |
 | `test-coherence.js` | 23 | l'app ne se contredit pas d'un écran à l'autre |
 | `test-rattrapage.js` | 26 | le rattrapage après une semaine manquée |

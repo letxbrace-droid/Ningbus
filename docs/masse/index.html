@@ -503,6 +503,11 @@ section{padding:26px 0 10px}
   color:var(--text);font-variant-numeric:tabular-nums}
 .kcal .kc-v .u,.kc-sem .kc-v .u{font-family:var(--mono);font-size:var(--t-2);font-weight:600;
   color:var(--text-3);margin-left:4px}
+/* les protéines : même gabarit que le plafond, une marche en dessous.
+   Pas de filet au-dessus — elles appartiennent au même bloc, elles
+   n'ouvrent pas une section. */
+.kcal .kc-out.kc-sec{margin-top:10px;padding-top:0;border-top:0}
+.kcal .kc-out.kc-sec .kc-v{font-size:var(--t-8)}
 .kcal .kc-d,.kc-d{font-size:var(--t-3);font-weight:500;color:var(--text-2);line-height:1.5;margin-top:8px}
 .kc-d b{color:var(--warn-ink);font-weight:700}
 .kc-vide{font-size:var(--t-4);font-weight:500;color:var(--text-2);line-height:1.55}
@@ -3584,10 +3589,19 @@ function objectifNutrition(){
   var p=loadProfil(), h=parseFloat(p.h), w=parseFloat(p.w);
   if(!h || !w) return null;
   var imc=w/((h/100)*(h/100));
+  /* La fourchette suit le déficit, elle ne le contredit pas. 400 kcal
+     par jour font 2 800 kcal par semaine, soit 0,36 kg de gras : viser
+     0,7 était arithmétiquement hors d'atteinte, et l'app annonçait
+     « trop lent » les semaines où la consigne était suivie à la lettre.
+     Le seul moyen d'y arriver était de sauter des repas — et ce qui
+     part alors n'est plus du gras. La fourchette encadre maintenant ce
+     que le déficit produit vraiment : 0,36 kg tombe au milieu de 0,2–0,5.
+     Les bornes restent sur la grille du dixième parce que fmtKg arrondit
+     à ce pas — sinon l'app affiche « jusqu'à 0,6 » et gronde à 0,58. */
   if(imc>=27) return {code:'seche', t:'recomposition', deficit:400,
-    bas:-0.7, haut:-0.4, mot:'perdre du gras en gardant le muscle'};
+    bas:-0.5, haut:-0.2, mot:'perdre du gras en gardant le muscle'};
   if(imc>=23) return {code:'recomp', t:'recomposition', deficit:200,
-    bas:-0.4, haut:-0.1, mot:'affiner sans perdre de force'};
+    bas:-0.3, haut:-0.1, mot:'affiner sans perdre de force'};
   return {code:'masse', t:'prise de masse', deficit:-250,
     bas:0.2, haut:0.4, mot:'prendre du muscle sans prendre de gras'};
 }
@@ -3637,6 +3651,12 @@ function renderKcal(){
       return;
     }
     var a=b.act;
+    /* Le plafond seul ne dit que la moitié du travail : on peut le
+       respecter en ne mangeant rien, et perdre du muscle. Les protéines
+       sont le plancher qui va avec — 1,8 g par kilo, le même chiffre
+       que la méthode annonce. Affiché tous les jours, à côté du
+       plafond, parce que c'est celui des deux qu'on rate. */
+    var pw=parseFloat(loadProfil().w)||0, prot=Math.round(pw*1.8);
     var det=[fmtKcal(b.base)+' base'];
     if(b.marche) det.push('+'+b.marche+' marche');
     if(b.seance) det.push('+'+b.seance+' séance');
@@ -3649,6 +3669,8 @@ function renderKcal(){
       '</div>'+
       '<div class="kc-out"><span class="kc-l">Plafond aujourd\'hui</span>'+
         '<span class="kc-v">'+fmtKcal(b.plafond)+'<span class="u">kcal</span></span></div>'+
+      (prot?'<div class="kc-out kc-sec"><span class="kc-l">Protéines, minimum</span>'+
+        '<span class="kc-v">'+prot+'<span class="u">g</span></span></div>':'')+
       '<div class="kc-d">'+det.join(' · ')+
         (b.sousPlancher?' — <b>plancher à '+fmtKcal(PLANCHER)+'</b>, en dessous tu ne récupères plus':'')+'</div>';
     box.querySelectorAll('[data-b]').forEach(function(x){

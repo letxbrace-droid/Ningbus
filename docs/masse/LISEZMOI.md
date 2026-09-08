@@ -610,6 +610,34 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Le déficit et la balance ne pouvaient pas être d'accord (v41)
+
+`objectifNutrition()` prescrivait **−400 kcal par jour** et surveillait une
+perte de **0,4 à 0,7 kg par semaine**. Les deux ne peuvent pas être vrais
+en même temps : 400 × 7 = 2 800 kcal, soit **0,36 kg** de gras à 7 700
+kcal/kg. Suivre la consigne parfaitement produisait « trop lent pour une
+recomposition » toutes les semaines, et le seul moyen d'atteindre 0,7 était
+de sauter des repas — ce qui part alors n'est plus du gras.
+
+La fourchette encadre désormais ce que le déficit produit réellement :
+**0,2 à 0,5 kg** en recomposition (0,36 tombe au milieu), **0,1 à 0,3** en
+affinage. La branche prise de masse était déjà cohérente et n'a pas bougé.
+
+Les bornes restent sur la grille du dixième parce que `fmtKg` arrondit à ce
+pas : une borne à 0,55 ferait afficher « jusqu'à 0,6 » et gronder à 0,58.
+Le seuil montré est le seuil appliqué.
+
+**Le plafond seul ne protège pas le muscle** — on peut le respecter en ne
+mangeant rien. Le module calories affiche donc une seconde ligne sous le
+plafond : *Protéines, minimum*, à **1,8 g par kilo**, le même chiffre que
+la méthode annonce depuis le début. C'est celui des deux qu'on rate.
+
+`test-calories.js` monte de 21 à 32 contrôles. Les neuf nouveaux vérifient,
+pour chacun des trois objectifs, que le déficit prescrit produit bien une
+perte **dans** la fourchette surveillée, que les bornes tombent sur la
+grille d'affichage, et que déficit et fourchette vont dans le même sens.
+Aucun test ne tenait cette cohérence : c'est pour ça qu'elle a pu diverger.
+
 ## L'ordre de la séance décidait quels muscles ne travaillaient jamais (v40)
 
 Analyse d'une sauvegarde réelle : sur 11 séances, **4 ne sont pas loguées** et

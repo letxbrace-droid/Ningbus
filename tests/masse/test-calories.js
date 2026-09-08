@@ -119,6 +119,59 @@ const check = (n, c, d) => (c ? ok : bad).push(n + (d ? ' — ' + d : ''));
   check('la séance se coche et se décoche, et vaut bien 300 kcal',
     bascule.ecart === 300, JSON.stringify(bascule));
 
+  // ====== 4bis · le déficit et la fourchette disent la même chose ======
+  /* Le contrôle qui manquait. L'app prescrivait −400 kcal/jour et
+     surveillait −0,4 à −0,7 kg/semaine : 400 × 7 = 2 800 kcal, soit
+     0,36 kg de gras (7 700 kcal/kg). Suivre la consigne à la lettre
+     donnait « trop lent » toutes les semaines. Un objectif dont la
+     consigne ne peut pas atteindre la cible n'est pas un objectif,
+     c'est un reproche permanent. */
+  const coherents = await p.evaluate(() => {
+    const KCAL_PAR_KG = 7700;
+    const cas = [[175, 88], [175, 78], [175, 62]];   /* seche · recomp · masse */
+    return cas.map(([h, w]) => {
+      localStorage.setItem('inrun_profil', JSON.stringify({ h: h, w: w, a: 35 }));
+      const o = objectifNutrition();
+      const attendu = Math.abs(o.deficit) * 7 / KCAL_PAR_KG;
+      const lo = Math.min(Math.abs(o.bas), Math.abs(o.haut));
+      const hi = Math.max(Math.abs(o.bas), Math.abs(o.haut));
+      return {
+        code: o.code, attendu: Math.round(attendu * 100) / 100, lo: lo, hi: hi,
+        dedans: attendu >= lo && attendu <= hi,
+        /* fmtKg arrondit au dixième : une borne hors grille ferait
+           afficher un seuil différent de celui qui est appliqué */
+        surGrille: Math.abs(lo * 10 - Math.round(lo * 10)) < 1e-9
+                && Math.abs(hi * 10 - Math.round(hi * 10)) < 1e-9,
+        signe: (o.deficit > 0) === (o.bas < 0),
+      };
+    });
+  });
+  coherents.forEach(c => {
+    check('« ' + c.code + ' » : le déficit produit ' + c.attendu
+      + ' kg/sem, dans la fourchette ' + c.lo + '–' + c.hi,
+      c.dedans, JSON.stringify(c));
+    check('« ' + c.code + ' » : les bornes sont sur la grille du dixième',
+      c.surGrille, JSON.stringify(c));
+    check('« ' + c.code + ' » : déficit et fourchette vont dans le même sens',
+      c.signe, JSON.stringify(c));
+  });
+
+  // ============ 4ter · le plancher protéines est affiché ================
+  /* On peut respecter le plafond en ne mangeant rien : le plafond seul
+     ne protège pas le muscle. Le chiffre affiché doit être celui que la
+     méthode annonce — 1,8 g par kilo — et pas un autre. */
+  const prot = await p.evaluate(() => {
+    localStorage.setItem('inrun_profil', JSON.stringify({ h: 175, w: 88, a: 35 }));
+    renderKcal();
+    const box = document.querySelector('[data-kcal]');
+    const l = box.querySelector('.kc-out.kc-sec');
+    return { txt: l ? l.textContent : null, attendu: Math.round(88 * 1.8) };
+  });
+  check('le plancher protéines est affiché à côté du plafond', prot.txt !== null);
+  check('… et vaut 1,8 g par kilo, le chiffre de la méthode',
+    prot.txt && prot.txt.indexOf(String(prot.attendu)) >= 0
+      && /g/.test(prot.txt), JSON.stringify(prot));
+
   // ============ 5 · sans profil, on ne devine pas =======================
   const vide = await p.evaluate(() => {
     localStorage.clear();
