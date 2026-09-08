@@ -637,6 +637,11 @@ section{padding:26px 0 10px}
   border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-4);color:var(--text-2);margin-bottom:14px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .warmnote b{color:var(--text);font-weight:700}
+/* la note de méthode : même boîte que l'échauffement, mais liseré
+   d'information — elle explique comment faire, elle n'avertit de rien */
+.ssnote{background:var(--surface-1);border:1px solid var(--bord);border-left:3px solid var(--info);
+  border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-3);color:var(--text-2);margin-bottom:14px}
+.ssnote b{color:var(--info-ink);font-weight:700}
 
 .total{display:flex;align-items:center;gap:16px;margin:20px 0 8px;padding:16px;border-radius:var(--r-4);
   background:var(--surface-1);border:1px solid var(--bord);
@@ -1928,7 +1933,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Haut du corps<span class="o">pecs · dos · épaules · bras</span></h2>
-  <div class="sh-g"><span>~62′</span><span>11 machines</span><span>32 séries</span></div>
+  <div class="sh-g"><span>~55′</span><span>11 machines</span><span>32 séries</span></div>
   <p class="sh-lead">Tout le buste en une séance, deux fois par semaine. C’est la fréquence qui construit, pas la longueur : chaque muscle reçoit deux stimulus au lieu d’un.</p>
   </div>
   <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
@@ -1939,8 +1944,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger, puis <b>2 × 15 rotations externes</b> à la poulie basse, coude au corps, très léger. La coiffe des rotateurs ne fait pas de volume mais elle tient l’épaule sur trois développés. Finis par 1 série légère à la première machine.</div>
 
-  <div class="phase"><span class="num">01</span><span class="tag">Poussée · les gros d'abord</span><span class="line"></span></div>
-  <div class="station" data-ex="push1">
+      <div class="phase"><span class="num">01</span><span class="tag">Force · les gros d'abord</span><span class="line"></span></div>
+<div class="station" data-ex="push1">
     <div class="st-head"><div class="st-no">1</div>
       <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Chest press</div><div class="st-mus">Pectoraux · triceps · épaules</div></div>
       <span class="st-badge">Machine</span></div>
@@ -1955,23 +1960,22 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=chest+press+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="push3">
+<div class="station" data-ex="pull2">
     <div class="st-head"><div class="st-no">2</div>
-      <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Pec deck (écarté)</div><div class="st-mus">Pectoraux (isolation)</div></div>
+      <div class="st-tx"><div class="st-cat">Dos · épaisseur</div><div class="st-name">Rowing machine assis</div><div class="st-mus">Dos moyen · trapèzes · biceps</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Isole les pecs sans les triceps. Serre les coudes vers l'avant, contracte fort la poitrine, contrôle l'ouverture. Étire bien en fin de course.</div>
-      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="st-desc">Le tirage horizontal donne l'épaisseur. Tire vers le ventre en serrant les omoplates, dos droit, sans balancer. Contrôle le retour complet.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pec+deck+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rowing+machine+assis+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="phase"><span class="num">02</span><span class="tag">Tirage · dos et épaisseur</span><span class="line"></span></div>
-  <div class="station" data-ex="pull1">
+<div class="station" data-ex="pull1">
     <div class="st-head"><div class="st-no">3</div>
       <div class="st-tx"><div class="st-cat">Dos · largeur</div><div class="st-name">Tirage vertical</div><div class="st-mus">Grand dorsal · biceps</div></div>
       <span class="st-badge">Machine</span></div>
@@ -1986,39 +1990,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lat+pulldown+tirage+vertical+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="pull2">
+    <div class="phase"><span class="num">02</span><span class="tag">Épaules · la largeur</span><span class="line"></span></div>
+    <div class="ssnote"><b>En superséries.</b> Enchaîne deux machines voisines sans repos entre elles, puis souffle 90 s avant la paire suivante — pendant que l'une travaille, l'autre récupère. Ça enlève un sixième du temps de séance sans enlever une seule série. Si les deux machines sont prises, fais-les à la suite normalement.</div>
+<div class="station" data-ex="push4">
     <div class="st-head"><div class="st-no">4</div>
-      <div class="st-tx"><div class="st-cat">Dos · épaisseur</div><div class="st-name">Rowing machine assis</div><div class="st-mus">Dos moyen · trapèzes · biceps</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Le tirage horizontal donne l'épaisseur. Tire vers le ventre en serrant les omoplates, dos droit, sans balancer. Contrôle le retour complet.</div>
-      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rowing+machine+assis+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="phase"><span class="num">03</span><span class="tag">Épaules · les trois faisceaux</span><span class="line"></span></div>
-  <div class="station" data-ex="push2">
-    <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Épaules</div><div class="st-name">Développé épaules machine</div><div class="st-mus">Deltoïdes · triceps</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Shoulder press guidé. Pousse droit au-dessus de la tête, redescends contrôlé jusqu'aux épaules. Construit des épaules larges sans risque d'équilibre.</div>
-      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=shoulder+press+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="station" data-ex="push4">
-    <div class="st-head"><div class="st-no">6</div>
       <div class="st-tx"><div class="st-cat">Épaules · largeur</div><div class="st-name">Élévations latérales machine</div><div class="st-mus">Deltoïde latéral</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
@@ -2033,8 +2008,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lateral+raise+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="up5">
-    <div class="st-head"><div class="st-no">7</div>
+<div class="station" data-ex="up5">
+    <div class="st-head"><div class="st-no">5</div>
       <div class="st-tx"><div class="st-cat">Épaules · largeur</div><div class="st-name">Élévations latérales poulie</div><div class="st-mus">Deltoïde latéral</div></div>
       <span class="st-badge">Poulie</span></div>
     <div class="st-body">
@@ -2048,8 +2023,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=cable+lateral+raise+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="pull3">
-    <div class="st-head"><div class="st-no">8</div>
+<div class="station" data-ex="pull3">
+    <div class="st-head"><div class="st-no">6</div>
       <div class="st-tx"><div class="st-cat">Arrière épaules · dos</div><div class="st-name">Rear delt (oiseau machine)</div><div class="st-mus">Deltoïde postérieur · dos haut</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
@@ -2063,8 +2038,39 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rear+delt+machine+oiseau+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="phase"><span class="num">04</span><span class="tag">Bras · finition</span><span class="line"></span></div>
-  <div class="station" data-ex="push5">
+<div class="station" data-ex="push2">
+    <div class="st-head"><div class="st-no">7</div>
+      <div class="st-tx"><div class="st-cat">Épaules</div><div class="st-name">Développé épaules machine</div><div class="st-mus">Deltoïdes · triceps</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Shoulder press guidé. Pousse droit au-dessus de la tête, redescends contrôlé jusqu'aux épaules. Construit des épaules larges sans risque d'équilibre.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=shoulder+press+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+    <div class="phase"><span class="num">03</span><span class="tag">Finition</span><span class="line"></span></div>
+    <div class="ssnote"><b>En superséries.</b> Enchaîne deux machines voisines sans repos entre elles, puis souffle 90 s avant la paire suivante — pendant que l'une travaille, l'autre récupère. Ça enlève un sixième du temps de séance sans enlever une seule série. Si les deux machines sont prises, fais-les à la suite normalement.</div>
+<div class="station" data-ex="push3">
+    <div class="st-head"><div class="st-no">8</div>
+      <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Pec deck (écarté)</div><div class="st-mus">Pectoraux (isolation)</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Isole les pecs sans les triceps. Serre les coudes vers l'avant, contracte fort la poitrine, contrôle l'ouverture. Étire bien en fin de course.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=pec+deck+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+<div class="station" data-ex="push5">
     <div class="st-head"><div class="st-no">9</div>
       <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
       <span class="st-badge">Machine</span></div>
@@ -2079,7 +2085,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="pull4">
+<div class="station" data-ex="pull4">
     <div class="st-head"><div class="st-no">10</div>
       <div class="st-tx"><div class="st-cat">Biceps</div><div class="st-name">Curl machine</div><div class="st-mus">Biceps</div></div>
       <span class="st-badge">Machine</span></div>
@@ -2094,7 +2100,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=curl+biceps+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="pull5">
+<div class="station" data-ex="pull5">
     <div class="st-head"><div class="st-no">11</div>
       <div class="st-tx"><div class="st-cat">Brachial · biceps</div><div class="st-name">Curl marteau à la corde</div><div class="st-mus">Brachial · biceps</div></div>
       <span class="st-badge">Machine</span></div>
@@ -2110,6 +2116,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
     </div>
   </div>
 
+
   <div class="bilan" id="bilan-haut"></div>
 
   <div class="total"><div class="big">62<small>min</small></div><div class="t">Buste complet · pecs, dos, les trois faisceaux d’épaule et les bras. À faire <b>deux fois dans la semaine</b>, avec au moins 48 h entre les deux.</div></div>
@@ -2120,7 +2127,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Bas du corps<span class="o">jambes · fessiers · ceinture</span></h2>
-  <div class="sh-g"><span>~57′</span><span>9 machines</span><span>29 séries</span></div>
+  <div class="sh-g"><span>~55′</span><span>9 machines</span><span>29 séries</span></div>
   <p class="sh-lead">Jambes et ceinture ensemble, deux fois par semaine. La plus grosse masse musculaire du corps ne peut pas se contenter d’un passage.</p>
   </div>
   <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
@@ -2131,86 +2138,9 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo léger, puis <b>1 série à vide</b> à la presse et <b>15 montées de mollets</b> au poids du corps. Les genoux et les hanches se préviennent, ils ne s’improvisent pas.</div>
 
-  <div class="phase"><span class="num">01</span><span class="tag">Quadriceps · les gros d'abord</span><span class="line"></span></div>
-  <div class="station" data-ex="legs1">
+      <div class="phase"><span class="num">01</span><span class="tag">Mollets · d'abord, plus jamais en dernier</span><span class="line"></span></div>
+<div class="station" data-ex="legs5">
     <div class="st-head"><div class="st-no">1</div>
-      <div class="st-tx"><div class="st-cat">Quadriceps · fessiers</div><div class="st-name">Presse à cuisses</div><div class="st-mus">Cuisses · fessiers</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Ton gros exercice jambes, sûr pour le dos. Pieds largeur épaules, descends jusqu'à ~90° aux genoux, pousse sans verrouiller. Ne décolle pas les fesses.</div>
-      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′30</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=presse+%C3%A0+cuisses+leg+press+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="station" data-ex="legs2">
-    <div class="st-head"><div class="st-no">2</div>
-      <div class="st-tx"><div class="st-cat">Ischios · fessiers</div><div class="st-name">Hack squat ou presse inclinée</div><div class="st-mus">Cuisses · fessiers</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Deuxième angle pour les cuisses. Le hack squat cible bien les quadriceps avec le dos calé. Descends contrôlé, pousse dans les talons.</div>
-      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=hack+squat+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="station" data-ex="legs3">
-    <div class="st-head"><div class="st-no">3</div>
-      <div class="st-tx"><div class="st-cat">Quadriceps</div><div class="st-name">Leg extension</div><div class="st-mus">Avant des cuisses</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Isole l'avant de la cuisse. Tends les jambes, pause en haut, redescends lentement. Cherche la brûlure sur les dernières reps.</div>
-      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+extension+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="phase"><span class="num">02</span><span class="tag">Chaîne postérieure</span><span class="line"></span></div>
-  <div class="station" data-ex="legs4">
-    <div class="st-head"><div class="st-no">4</div>
-      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
-      <span class="st-badge">Machine</span></div>
-    <div class="st-body">
-      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
-      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+curl+machine+ischio+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="station" data-ex="core4">
-    <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Lombaires</div><div class="st-name">Extension lombaire au banc</div><div class="st-mus">Lombaires · fessiers · ischios</div></div>
-      <span class="st-badge">Banc</span></div>
-    <div class="st-body">
-      <div class="st-desc">Banc à lombaires réglé aux hanches, disque tenu contre la poitrine quand ça devient facile. Descends jusqu'à sentir l'étirement, remonte jusqu'à l'alignement — jamais en cambrant au-delà. C'est ce qui protège ton dos sur la presse et le rowing.</div>
-      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+lombaire+banc+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="phase"><span class="num">03</span><span class="tag">Mollets</span><span class="line"></span></div>
-  <div class="station" data-ex="legs5">
-    <div class="st-head"><div class="st-no">6</div>
       <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
@@ -2224,8 +2154,87 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=mollets+machine+calf+raise+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="phase"><span class="num">04</span><span class="tag">Ceinture</span><span class="line"></span></div>
-  <div class="station" data-ex="core1">
+    <div class="phase"><span class="num">02</span><span class="tag">Force · les gros</span><span class="line"></span></div>
+<div class="station" data-ex="legs1">
+    <div class="st-head"><div class="st-no">2</div>
+      <div class="st-tx"><div class="st-cat">Quadriceps · fessiers</div><div class="st-name">Presse à cuisses</div><div class="st-mus">Cuisses · fessiers</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Ton gros exercice jambes, sûr pour le dos. Pieds largeur épaules, descends jusqu'à ~90° aux genoux, pousse sans verrouiller. Ne décolle pas les fesses.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′30</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=presse+%C3%A0+cuisses+leg+press+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+<div class="station" data-ex="legs2">
+    <div class="st-head"><div class="st-no">3</div>
+      <div class="st-tx"><div class="st-cat">Ischios · fessiers</div><div class="st-name">Hack squat ou presse inclinée</div><div class="st-mus">Cuisses · fessiers</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Deuxième angle pour les cuisses. Le hack squat cible bien les quadriceps avec le dos calé. Descends contrôlé, pousse dans les talons.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">8-10</div><div class="ck">reps</div></div><div class="c"><div class="cv">2′</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=hack+squat+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+    <div class="phase"><span class="num">03</span><span class="tag">Cuisses · finition</span><span class="line"></span></div>
+    <div class="ssnote"><b>En superséries.</b> Enchaîne deux machines voisines sans repos entre elles, puis souffle 90 s avant la paire suivante — pendant que l'une travaille, l'autre récupère. Ça enlève un sixième du temps de séance sans enlever une seule série. Si les deux machines sont prises, fais-les à la suite normalement.</div>
+<div class="station" data-ex="legs3">
+    <div class="st-head"><div class="st-no">4</div>
+      <div class="st-tx"><div class="st-cat">Quadriceps</div><div class="st-name">Leg extension</div><div class="st-mus">Avant des cuisses</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Isole l'avant de la cuisse. Tends les jambes, pause en haut, redescends lentement. Cherche la brûlure sur les dernières reps.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+extension+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+<div class="station" data-ex="legs4">
+    <div class="st-head"><div class="st-no">5</div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <span class="st-badge">Machine</span></div>
+    <div class="st-body">
+      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=leg+curl+machine+ischio+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+<div class="station" data-ex="core4">
+    <div class="st-head"><div class="st-no">6</div>
+      <div class="st-tx"><div class="st-cat">Lombaires</div><div class="st-name">Extension lombaire au banc</div><div class="st-mus">Lombaires · fessiers · ischios</div></div>
+      <span class="st-badge">Banc</span></div>
+    <div class="st-body">
+      <div class="st-desc">Banc à lombaires réglé aux hanches, disque tenu contre la poitrine quand ça devient facile. Descends jusqu'à sentir l'étirement, remonte jusqu'à l'alignement — jamais en cambrant au-delà. C'est ce qui protège ton dos sur la presse et le rowing.</div>
+      <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+lombaire+banc+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+    <div class="phase"><span class="num">04</span><span class="tag">Ceinture</span><span class="line"></span></div>
+    <div class="ssnote"><b>En superséries.</b> Enchaîne deux machines voisines sans repos entre elles, puis souffle 90 s avant la paire suivante — pendant que l'une travaille, l'autre récupère. Ça enlève un sixième du temps de séance sans enlever une seule série. Si les deux machines sont prises, fais-les à la suite normalement.</div>
+<div class="station" data-ex="core1">
     <div class="st-head"><div class="st-no">7</div>
       <div class="st-tx"><div class="st-cat">Grands droits</div><div class="st-name">Crunch machine</div><div class="st-mus">Grands droits · transverse</div></div>
       <span class="st-badge">Machine</span></div>
@@ -2240,23 +2249,8 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=ab+crunch+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
-  <div class="station" data-ex="core2">
+<div class="station" data-ex="core3">
     <div class="st-head"><div class="st-no">8</div>
-      <div class="st-tx"><div class="st-cat">Bas des abdos</div><div class="st-name">Crunch à la poulie haute</div><div class="st-mus">Grands droits · obliques</div></div>
-      <span class="st-badge">Poulie</span></div>
-    <div class="st-body">
-      <div class="st-desc">À genoux devant la poulie haute, corde derrière la nuque. Descends le buste en enroulant la colonne vertèbre par vertèbre — ce sont les abdos qui tirent, pas les bras ni les hanches. Remonte en contrôle.</div>
-      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
-      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
-        <div class="sets" data-sets></div>
-        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
-        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
-        <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=crunch+poulie+haute+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
-    </div>
-  </div>
-  <div class="station" data-ex="core3">
-    <div class="st-head"><div class="st-no">9</div>
       <div class="st-tx"><div class="st-cat">Obliques</div><div class="st-name">Rotation buste machine</div><div class="st-mus">Obliques · transverse</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
@@ -2271,6 +2265,22 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=rotary+torso+machine+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
+<div class="station" data-ex="core2">
+    <div class="st-head"><div class="st-no">9</div>
+      <div class="st-tx"><div class="st-cat">Bas des abdos</div><div class="st-name">Crunch à la poulie haute</div><div class="st-mus">Grands droits · obliques</div></div>
+      <span class="st-badge">Poulie</span></div>
+    <div class="st-body">
+      <div class="st-desc">À genoux devant la poulie haute, corde derrière la nuque. Descends le buste en enroulant la colonne vertèbre par vertèbre — ce sont les abdos qui tirent, pas les bras ni les hanches. Remonte en contrôle.</div>
+      <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
+      <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
+        <div class="sets" data-sets></div>
+        <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
+        <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
+        <div class="advice" data-advice></div></div>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=crunch+poulie+haute+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+    </div>
+  </div>
+
 
   <div class="bilan" id="bilan-bas"></div>
 

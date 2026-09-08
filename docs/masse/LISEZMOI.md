@@ -610,6 +610,59 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## L'ordre de la séance décidait quels muscles ne travaillaient jamais (v40)
+
+Analyse d'une sauvegarde réelle : sur 11 séances, **4 ne sont pas loguées** et
+les 7 autres sont terminées à **60 % en moyenne**. Conséquence directe, quatre
+exercices n'ont **jamais** été faits en trois semaines :
+
+| exercice | position dans la séance | séries prescrites | faites |
+|---|---|---|---|
+| Mollets machine | 6ᵉ sur 9 | 6 | **0** |
+| Extension lombaire | 5ᵉ sur 9 | 3 | **0** |
+| Crunch à la poulie | 8ᵉ sur 9 | 2 | **0** |
+| Élévations latérales machine | 6ᵉ sur 11 | 3 | **0** |
+
+Le programme n'oublie pas ces muscles — l'utilisateur n'arrive jamais jusqu'à
+eux. « Les gros d'abord » est juste sur le principe, mais quand on s'arrête à
+60 %, ça garantit que ce sont toujours les **derniers** qui sautent.
+
+### Ce qui n'a PAS changé, et pourquoi
+
+Une première version retirait quatre exercices, sur la foi d'un calcul faux.
+Mon script d'analyse comptait chaque muscle d'une machine pour une série
+pleine ; **`volumeNominalDe()` pondère depuis toujours le muscle moteur à 1 et
+l'assistance à 0,5**. Avec la bonne comptabilité, le programme n'a **aucun**
+muscle hors fourchette, et six y sont exactement à leur plancher — deltoïde
+latéral, deltoïde postérieur, lombaires, mollets, trapèzes, triceps.
+
+Il n'y a donc rien à couper : une série de moins sort un muscle. Un solveur
+lancé sous la vraie contrainte ne gagne que 11 % (61 → 54 séries), et en
+concentrant le volume sur moins de mouvements — c'est un mauvais échange.
+Vérifié aussi : Rotation 5 a des séances plus courtes mais **rate 10 cibles
+sur 16**. Haut/Bas les tient toutes. C'est bien lui qu'il faut garder.
+
+**Le volume est donc strictement identique : 32 séries en haut, 29 en bas.**
+
+### Les deux seuls leviers qui ne coûtent pas une série
+
+**L'ordre.** Les mollets passent **premiers** en bas. Les épaules remontent en
+4ᵉ, 5ᵉ et 6ᵉ position en haut, avant les bras.
+
+**Les superséries** sur les blocs d'isolation. Le repos d'un muscle est le
+travail de l'autre : environ un sixième de temps en moins, volume inchangé.
+Aux temps de repos prescrits la séance demandait ~67 min pour un temps de
+travail mesuré de 43 — c'est le seul levier qui réduit l'écart sans toucher
+au stimulus.
+
+### Un piège de découpage
+
+Le premier passage perdait une station : couper les blocs au caractère
+marchait tant que la dernière station restait la dernière — c'est elle qui
+portait les `</div>` de fermeture de la séance. Dès qu'on réordonne, ces
+fermetures se retrouvent au milieu, le bloc `.sess` se ferme trop tôt et une
+station tombe dehors. Le découpage équilibre désormais les balises.
+
 ## Supprimer une série laissait sa 1RM dans l'historique (v39)
 
 Trouvé en analysant une sauvegarde réelle, pas en relisant le code.
