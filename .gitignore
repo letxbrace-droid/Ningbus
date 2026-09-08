@@ -32,3 +32,8 @@ Thumbs.db
 # Playwright traces / screenshots
 playwright-report/
 test-results/
+
+# tests
+tests/masse/node_modules/
+tests/masse/.sortie/
+tests/masse/resultat.txt
