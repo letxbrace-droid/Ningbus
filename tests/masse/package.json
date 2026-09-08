@@ -1,0 +1,12 @@
+{
+  "name": "inrun-masse-tests",
+  "private": true,
+  "description": "Suite de tests de la PWA I&N RUN Masse",
+  "scripts": {
+    "test": "bash batterie.sh",
+    "serveur": "python3 serveur.py"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}
