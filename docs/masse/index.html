@@ -643,9 +643,14 @@ section{padding:26px 0 10px}
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .warmnote b{color:var(--text);font-weight:700}
 /* la note de méthode : même boîte que l'échauffement, mais liseré
-   d'information — elle explique comment faire, elle n'avertit de rien */
+   d'information — elle explique comment faire, elle n'avertit de rien.
+   Encre PLEINE, pas secondaire : ce n'est pas une légende, c'est une
+   consigne qu'on lit debout entre deux séries, dans une salle éclairée
+   au néon et l'écran couvert de traces de doigts. La v42 l'a corrigé —
+   en --text-2 elle tirait la moyenne APCA sous son seuil, et le test
+   avait raison de le signaler. */
 .ssnote{background:var(--surface-1);border:1px solid var(--bord);border-left:3px solid var(--info);
-  border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-3);color:var(--text-2);margin-bottom:14px}
+  border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-3);color:var(--text);margin-bottom:14px}
 .ssnote b{color:var(--info-ink);font-weight:700}
 
 .total{display:flex;align-items:center;gap:16px;margin:20px 0 8px;padding:16px;border-radius:var(--r-4);
@@ -1478,17 +1483,17 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="station" data-ex="push5">
     <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extension triceps overhead</div><div class="st-mus">Triceps</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Poulie haute, corde ou barre. Coudes fixes collés au corps, tends les bras vers le bas, contrôle la remontée. Les triceps font les 2/3 du volume du bras.</div>
+      <div class="st-desc"><b>Dos à la poulie, corde au-dessus de la tête</b>, coudes hauts et serrés. Tends les bras vers l'avant, laisse les mains redescendre <b>derrière la nuque</b> jusqu'à sentir l'étirement. C'est cette position qui compte : la <b>longue portion</b> du triceps s'attache sur l'omoplate, elle ne s'allonge donc que bras au-dessus de la tête. Un pushdown coudes au corps ne la touche presque pas — et c'est elle qui fait les deux tiers du volume du bras.</div>
       <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 
@@ -1668,10 +1673,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="station" data-ex="legs4">
     <div class="st-head"><div class="st-no">4</div>
-      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl (assis de préférence)</div><div class="st-mus">Arrière des cuisses</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="st-desc"><b>Prends la version assise si ta salle l'a</b>, pas la couchée : hanche pliée, l'ischio-jambier est déjà étiré avant même que tu commences, et c'est en position longue qu'un muscle grossit le plus. Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour <b>jusqu'à jambes tendues</b>. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
       <div class="presc"><div class="c"><div class="cv acc">6</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -1687,7 +1692,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Monte sur la pointe le plus haut possible, pause en haut, descends jusqu'à <b>l'étirement complet</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
+      <div class="st-desc">Monte sur la pointe le plus haut possible, puis descends jusqu'à <b>l'étirement complet</b> et <b>tiens deux secondes en bas</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
       <div class="presc"><div class="c"><div class="cv acc">7</div><div class="ck">séries</div></div><div class="c"><div class="cv">15-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -1813,7 +1818,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 
@@ -1938,7 +1943,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Haut du corps<span class="o">pecs · dos · épaules · bras</span></h2>
-  <div class="sh-g"><span>~55′</span><span>11 machines</span><span>32 séries</span></div>
+  <div class="sh-g"><span>~47′</span><span>11 machines</span><span>32 séries</span></div>
   <p class="sh-lead">Tout le buste en une séance, deux fois par semaine. C’est la fréquence qui construit, pas la longueur : chaque muscle reçoit deux stimulus au lieu d’un.</p>
   </div>
   <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
@@ -1950,6 +1955,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger, puis <b>2 × 15 rotations externes</b> à la poulie basse, coude au corps, très léger. La coiffe des rotateurs ne fait pas de volume mais elle tient l’épaule sur trois développés. Finis par 1 série légère à la première machine.</div>
 
       <div class="phase"><span class="num">01</span><span class="tag">Force · les gros d'abord</span><span class="line"></span></div>
+      <div class="ssnote"><b>Les deux premières en superserie antagoniste.</b> Une série de <b>chest press</b>, puis directement une série de <b>rowing</b>, et seulement là tu souffles 2 min. Pousser et tirer ne se gênent pas — pendant que les pectoraux travaillent, le dos récupère, et inversement. Tu rends la moitié du repos sans toucher aux charges : <b>environ 8 minutes de gagnées</b> sur le bloc le plus long de la séance. Le tirage vertical se fait normalement, à la suite.</div>
 <div class="station" data-ex="push1">
     <div class="st-head"><div class="st-no">1</div>
       <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Chest press</div><div class="st-mus">Pectoraux · triceps · épaules</div></div>
@@ -2077,17 +2083,17 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 <div class="station" data-ex="push5">
     <div class="st-head"><div class="st-no">9</div>
-      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extension triceps overhead</div><div class="st-mus">Triceps</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Poulie haute, corde ou barre. Coudes fixes collés au corps, tends les bras vers le bas, contrôle la remontée. Les triceps font les 2/3 du volume du bras.</div>
+      <div class="st-desc"><b>Dos à la poulie, corde au-dessus de la tête</b>, coudes hauts et serrés. Tends les bras vers l'avant, laisse les mains redescendre <b>derrière la nuque</b> jusqu'à sentir l'étirement. C'est cette position qui compte : la <b>longue portion</b> du triceps s'attache sur l'omoplate, elle ne s'allonge donc que bras au-dessus de la tête. Un pushdown coudes au corps ne la touche presque pas — et c'est elle qui fait les deux tiers du volume du bras.</div>
       <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 <div class="station" data-ex="pull4">
@@ -2149,7 +2155,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Monte sur la pointe le plus haut possible, pause en haut, descends jusqu'à <b>l'étirement complet</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
+      <div class="st-desc">Monte sur la pointe le plus haut possible, puis descends jusqu'à <b>l'étirement complet</b> et <b>tiens deux secondes en bas</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
       <div class="presc"><div class="c"><div class="cv acc">6</div><div class="ck">séries</div></div><div class="c"><div class="cv">15-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -2209,10 +2215,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 <div class="station" data-ex="legs4">
     <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl (assis de préférence)</div><div class="st-mus">Arrière des cuisses</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="st-desc"><b>Prends la version assise si ta salle l'a</b>, pas la couchée : hanche pliée, l'ischio-jambier est déjà étiré avant même que tu commences, et c'est en position longue qu'un muscle grossit le plus. Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour <b>jusqu'à jambes tendues</b>. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
       <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
