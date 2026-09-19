@@ -17,6 +17,22 @@ android {
         versionName = "1.0"
     }
 
+    // Clé de débogage figée dans le dépôt, et non celle que chaque machine
+    // engendre dans son coin. Sans cela, deux APK construits sur deux runners
+    // différents portent deux signatures différentes : Android refuse alors
+    // d'installer la nouvelle version par-dessus l'ancienne, et il faut
+    // désinstaller — donc perdre ses réglages — à chaque mise à jour.
+    // Ce sont les identifiants publics et conventionnels d'une clé de débogage
+    // Android : ils ne protègent rien et n'ont rien d'un secret.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

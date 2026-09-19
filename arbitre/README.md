@@ -179,13 +179,30 @@ L'application n'est pas sur le Play Store : elle lit les notifications d'autres
 applications, ce qui relève d'une permission que Google n'accorde qu'à un
 usage justifié. Elle s'installe donc de côté (« sideload »).
 
-### Récupérer l'APK sans rien installer
+### Depuis le téléphone — la page Releases
 
-1. Onglet **Actions** du dépôt → workflow **Arbitre (Android)** ;
-2. ouvrir le dernier passage vert, section **Artifacts** ;
-3. télécharger `arbitre-debug-apk`, le dézipper, transférer l'APK sur le
-   téléphone et l'ouvrir. Autoriser « installer des applications inconnues »
-   pour le navigateur ou le gestionnaire de fichiers utilisé.
+[**Dernière version**](https://github.com/letxbrace-droid/Ningbus/releases/latest) :
+le fichier `.apk` s'y télécharge directement, sans compte GitHub et sans
+dézippage. L'ouvrir suffit ; Android demandera d'autoriser « installer des
+applications inconnues » pour le navigateur.
+
+Une nouvelle version se publie en poussant une étiquette :
+
+```bash
+git tag arbitre-v1.1 && git push origin arbitre-v1.1
+```
+
+L'APK est signé avec la clé de débogage versionnée dans `app/debug.keystore`,
+et non avec celle que chaque machine engendre dans son coin. C'est ce qui
+permet d'installer une mise à jour par-dessus la précédente sans désinstaller
+— donc sans perdre ses réglages ni son journal.
+
+### Depuis un ordinateur — l'artefact de la CI
+
+Chaque passage du workflow **Arbitre (Android)** publie un APK, y compris sur
+les branches de travail : onglet **Actions** → dernier passage vert → section
+**Artifacts** → `arbitre-debug-apk`. Il faut être connecté à GitHub, et
+l'artefact arrive sous forme de `.zip` à décompresser.
 
 ### Compiler soi-même
 
