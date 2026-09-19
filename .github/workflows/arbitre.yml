@@ -1,0 +1,61 @@
+name: Arbitre (Android)
+
+# Construit l'APK à chaque modification du dossier arbitre/, et le publie en
+# artefact téléchargeable : pas besoin d'Android Studio pour installer l'app.
+on:
+  push:
+    paths:
+      - "arbitre/**"
+      - ".github/workflows/arbitre.yml"
+  pull_request:
+    paths:
+      - "arbitre/**"
+  workflow_dispatch:
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: arbitre
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Préparer le SDK Android
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;35.0.0"
+
+      - name: Rendre le wrapper exécutable
+        run: chmod +x gradlew
+
+      # Le moteur de calcul est du Kotlin pur : il se teste sans émulateur,
+      # et c'est lui qui décide si une course est rentable.
+      - name: Tester le moteur d'arbitrage
+        run: ./gradlew :moteur:test
+
+      - name: Construire l'APK de débogage
+        run: ./gradlew :app:assembleDebug
+
+      - name: Publier l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: arbitre-debug-apk
+          path: arbitre/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Publier le rapport de tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-tests-moteur
+          path: arbitre/moteur/build/reports/tests/test
+          if-no-files-found: ignore

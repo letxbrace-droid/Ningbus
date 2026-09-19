@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Dessiner la bulle par-dessus l'application chauffeur. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Repli quand la bulle n'est pas autorisée : une notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Signal haptique : le verdict se sent sans quitter la route des yeux. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/nom_app"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.Arbitre">
+
+        <activity
+            android:name=".ActivitePrincipale"
+            android:exported="true"
+            android:label="@string/nom_app">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ActiviteJournal"
+            android:exported="false"
+            android:label="@string/titre_journal"
+            android:parentActivityName=".ActivitePrincipale" />
+
+        <!--
+            Le service est lié par le système dès que l'accès aux
+            notifications est accordé. Il reste vivant tant que l'accès
+            n'est pas retiré : rien à démarrer, rien à maintenir en tâche
+            de fond, donc aucune latence au moment où la course tombe.
+        -->
+        <service
+            android:name=".EcouteNotifications"
+            android:exported="true"
+            android:label="@string/nom_app"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

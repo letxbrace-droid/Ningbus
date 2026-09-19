@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    La bulle d'arbitrage.
+
+    Lecture en trois temps : le mot (PRENDS / LIMITE / LAISSE), le chiffre
+    (€ par heure réellement mobilisée), puis le détail pour qui a le temps.
+    Le reste n'est là que pour justifier le verdict après coup.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/carte"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/fond_bulle"
+        android:elevation="8dp"
+        android:orientation="vertical">
+
+        <!-- Bandeau du verdict : la teinte est posée à l'exécution. -->
+        <LinearLayout
+            android:id="@+id/entete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fond_entete"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/verdict"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="0.08"
+                android:textColor="@color/bulle_texte"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Le délai réellement mesuré entre la notification et l'écran. -->
+            <TextView
+                android:id="@+id/latence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/bulle_texte"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="true"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/euro_heure"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="38sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/euro_km"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/bulle_texte_doux"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <!-- Jauge : le trait central marque l'objectif horaire. -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:layout_marginTop="6dp">
+
+                <ProgressBar
+                    android:id="@+id/jauge"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_gravity="center_vertical"
+                    android:max="100"
+                    android:progress="50" />
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="12dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@color/bulle_texte" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/objectif"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center_horizontal"
+                android:textColor="@color/bulle_texte_doux"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/resume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/bulle_texte"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/bulle_texte_doux"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/approche"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/bulle_texte_doux"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/trafic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/bulle_texte_doux"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/alertes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/ambre"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

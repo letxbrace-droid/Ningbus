@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Les trois couleurs du verdict. Assez saturées pour être lues en
+         plein soleil derrière un pare-brise. -->
+    <color name="vert">#FF16A75C</color>
+    <color name="ambre">#FFE08A00</color>
+    <color name="rouge">#FFD93A31</color>
+    <color name="gris">#FF6B7683</color>
+
+    <!-- La bulle garde ses propres couleurs : elle se pose par-dessus
+         n'importe quelle application et ne peut hériter d'aucun thème. -->
+    <color name="bulle_fond">#F00E1116</color>
+    <color name="bulle_texte">#FFFFFFFF</color>
+    <color name="bulle_texte_doux">#FFB9C2CC</color>
+
+    <color name="fond_icone">#FF0E1116</color>
+</resources>

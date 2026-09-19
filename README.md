@@ -4,6 +4,7 @@ Ce dépôt contient :
 
 - **`radar-decode/`** — Radar Décodé : veille automatique de l'actu (RSS multi-médias + alerte Telegram). Voir `radar-decode/README.md`.
 - **`docs/masse/`** — **I&N RUN Masse**, PWA de suivi d'entraînement (prise de masse sur machines), déployée via GitHub Pages : installable, fonctionne hors ligne. Voir `docs/masse/LISEZMOI.md`.
+- **`arbitre/`** — **Arbitre**, application Android qui se superpose à l'app chauffeur : elle lit la notification d'une offre de course, calcule ce qu'elle laisse réellement par heure (approche, bouchons, retour à vide, coût au kilomètre) et affiche un verdict en quelques dizaines de millisecondes. Voir `arbitre/README.md`.
 
 Le projet TrendTrack (scraper Meta Ads) qui occupait précédemment ce dépôt a été retiré.
 

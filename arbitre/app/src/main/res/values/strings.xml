@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nom_app">Arbitre</string>
+    <string name="sous_titre">Le verdict d\'une course avant que le compte à rebours ne s\'épuise.</string>
+
+    <string name="titre_permissions">Les deux permissions indispensables</string>
+    <string name="permission_notif">Accès aux notifications — pour voir l\'offre de course dès son affichage.</string>
+    <string name="permission_superposition">Superposition d\'écran — pour poser le verdict par-dessus l\'application chauffeur.</string>
+    <string name="accorde">accordée</string>
+    <string name="a_accorder">à accorder</string>
+    <string name="ouvrir_reglages">Ouvrir</string>
+
+    <string name="titre_bareme">Ton barème</string>
+    <string name="aide_bareme">Ces chiffres sont l\'arbitrage. Un prix ne dit rien tant qu\'on ne sait pas ce qu\'il te reste une fois les kilomètres à vide payés.</string>
+    <string name="titre_apps">Applications écoutées</string>
+    <string name="aide_apps">Coche les applications chauffeur installées. Les noms de paquets changent selon les versions : celles que l\'app repère toute seule apparaissent en dessous.</string>
+    <string name="apps_reperees">Repérées automatiquement (elles ont envoyé une notification qui ressemble à une course) :</string>
+    <string name="ajouter">Ajouter</string>
+    <string name="indice_paquet">nom de paquet, ex. com.ubercab.driver</string>
+
+    <string name="arbitrage_actif">Arbitrage actif</string>
+    <string name="vibration_active">Verdict vibré</string>
+    <string name="prudence_active">Majorer les durées dans les bouchons</string>
+    <string name="decouverte_active">Repérer les applications inconnues</string>
+    <string name="duree_bulle">Affichage de la bulle, en s</string>
+
+    <string name="tester">Essayer avec une course fictive</string>
+    <string name="titre_journal">Journal des courses</string>
+    <string name="reinitialiser">Remettre le barème d\'origine</string>
+    <string name="bareme_reinitialise">Barème d\'origine rétabli.</string>
+    <string name="superposition_requise">Accorde d\'abord la superposition d\'écran.</string>
+    <string name="reglages_introuvables">Écran de réglages introuvable sur ce téléphone.</string>
+
+    <string name="canal_verdicts">Verdicts de course</string>
+    <string name="journal_vide">Aucune course arbitrée pour le moment.</string>
+    <string name="journal_vide_resume">Le journal se remplira à la première offre de course.</string>
+    <string name="copier_journal">Copier le journal</string>
+    <string name="vider_journal">Vider</string>
+    <string name="journal_copie">Journal copié dans le presse-papiers.</string>
+    <string name="aide_journal">Le texte brut de chaque notification est conservé : c\'est lui qui permet de corriger l\'analyseur quand une plateforme change ses libellés.</string>
+</resources>
