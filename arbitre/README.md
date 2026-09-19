@@ -186,11 +186,15 @@ le fichier `.apk` s'y télécharge directement, sans compte GitHub et sans
 dézippage. L'ouvrir suffit ; Android demandera d'autoriser « installer des
 applications inconnues » pour le navigateur.
 
-Une nouvelle version se publie en poussant une étiquette :
+Une nouvelle version se publie de deux façons :
 
 ```bash
 git tag arbitre-v1.1 && git push origin arbitre-v1.1
 ```
+
+ou, sans ligne de commande, depuis l'onglet **Actions** → **Arbitre —
+publication** → **Run workflow**, en donnant le numéro de version. L'étiquette
+est alors créée par la Release elle-même.
 
 L'APK est signé avec la clé de débogage versionnée dans `app/debug.keystore`,
 et non avec celle que chaque machine engendre dans son coin. C'est ce qui

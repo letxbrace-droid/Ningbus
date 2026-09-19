@@ -5,12 +5,20 @@ name: Arbitre — publication
 # depuis le téléphone en un appui. Les artefacts de la CI, eux, exigent
 # d'être connecté et livrent un .zip.
 #
-# Déclenchement : pousser une étiquette « arbitre-vX.Y ».
-#   git tag arbitre-v1.0 && git push origin arbitre-v1.0
+# Deux façons de déclencher :
+#   - pousser une étiquette :  git tag arbitre-v1.1 && git push origin arbitre-v1.1
+#   - onglet Actions → « Arbitre — publication » → Run workflow, en donnant
+#     le numéro de version. L'étiquette est alors créée par la Release.
 on:
   push:
     tags:
       - "arbitre-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Numéro de version, par exemple 1.0"
+        required: true
+        default: "1.0"
 
 permissions:
   contents: write
@@ -47,11 +55,22 @@ jobs:
       - name: Construire l'APK
         run: ./gradlew :app:assembleDebug
 
-      - name: Nommer l'APK d'après l'étiquette
+      - name: Déterminer la version
+        env:
+          VERSION_DEMANDEE: ${{ inputs.version }}
         run: |
-          version="${GITHUB_REF_NAME#arbitre-v}"
-          cp app/build/outputs/apk/debug/app-debug.apk "arbitre-$version.apk"
-          echo "version=$version" >> "$GITHUB_ENV"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            etiquette="$GITHUB_REF_NAME"
+            version="${etiquette#arbitre-v}"
+          else
+            version="$VERSION_DEMANDEE"
+            etiquette="arbitre-v${version}"
+          fi
+          cp app/build/outputs/apk/debug/app-debug.apk "arbitre-${version}.apk"
+          {
+            echo "version=$version"
+            echo "etiquette=$etiquette"
+          } >> "$GITHUB_ENV"
 
       - name: Publier la Release
         env:
@@ -67,9 +86,8 @@ jobs:
           1. Télécharger `arbitre-VERSION.apk` ci-dessous depuis le téléphone.
           2. L'ouvrir ; autoriser « installer des applications inconnues » pour
              le navigateur si Android le demande.
-          3. Au premier lancement, accorder les deux permissions depuis
-             l'écran d'accueil : **accès aux notifications** et
-             **superposition d'écran**.
+          3. Au premier lancement, accorder les deux permissions depuis l'écran
+             d'accueil : **accès aux notifications** et **superposition d'écran**.
           4. Cocher son application chauffeur, régler son barème, puis
              **« Essayer avec une course fictive »** pour placer la bulle.
 
@@ -78,13 +96,14 @@ jobs:
 
           ## À savoir
 
-          Build de débogage, signé avec la clé de débogage du dépôt. Elle est
-          fixe, donc les versions suivantes s'installeront par-dessus celle-ci
-          sans désinstallation et sans perte de réglages.
+          Build de débogage, signé avec la clé de débogage versionnée dans le
+          dépôt. Elle est fixe, donc les versions suivantes s'installeront
+          par-dessus celle-ci sans désinstallation et sans perte de réglages.
 
           Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
           TEXTE
-          sed -i "s/arbitre-VERSION.apk/arbitre-${version}.apk/; s|ETIQUETTE|${GITHUB_REF_NAME}|" notes.md
-          gh release create "$GITHUB_REF_NAME" "arbitre-${version}.apk" \
+          sed -i "s/arbitre-VERSION.apk/arbitre-${version}.apk/; s|ETIQUETTE|${etiquette}|" notes.md
+          gh release create "$etiquette" "arbitre-${version}.apk" \
+            --target "$GITHUB_SHA" \
             --title "Arbitre ${version}" \
             --notes-file notes.md
