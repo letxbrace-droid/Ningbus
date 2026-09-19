@@ -1,24 +1,18 @@
 name: Arbitre — publication
 
-# Publie l'APK en Release, c'est-à-dire en téléchargement direct : un lien
-# .apk qui s'ouvre sans compte GitHub et sans dézippage, donc installable
-# depuis le téléphone en un appui. Les artefacts de la CI, eux, exigent
-# d'être connecté et livrent un .zip.
+# Publie l'APK en Release, c'est-à-dire en téléchargement direct : sur un
+# dépôt public, un fichier de Release s'ouvre sans compte GitHub et sans
+# dézippage, donc s'installe depuis le téléphone en un appui. Les artefacts
+# de la CI, eux, exigent d'être connecté et livrent un .zip.
 #
-# Deux façons de déclencher :
-#   - pousser une étiquette :  git tag arbitre-v1.1 && git push origin arbitre-v1.1
-#   - onglet Actions → « Arbitre — publication » → Run workflow, en donnant
-#     le numéro de version. L'étiquette est alors créée par la Release.
+# Déclenchement : modifier arbitre/VERSION et pousser. Le numéro qu'il
+# contient donne le nom de la Release et de l'étiquette, que le workflow
+# crée lui-même. Publier une nouvelle version tient donc en un chiffre.
 on:
   push:
-    tags:
-      - "arbitre-v*"
+    paths:
+      - "arbitre/VERSION"
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Numéro de version, par exemple 1.0"
-        required: true
-        default: "1.0"
 
 permissions:
   contents: write
@@ -55,21 +49,17 @@ jobs:
       - name: Construire l'APK
         run: ./gradlew :app:assembleDebug
 
-      - name: Déterminer la version
-        env:
-          VERSION_DEMANDEE: ${{ inputs.version }}
+      - name: Nommer l'APK d'après VERSION
         run: |
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            etiquette="$GITHUB_REF_NAME"
-            version="${etiquette#arbitre-v}"
-          else
-            version="$VERSION_DEMANDEE"
-            etiquette="arbitre-v${version}"
+          version="$(tr -d ' \t\r\n' < VERSION)"
+          if [ -z "$version" ]; then
+            echo "arbitre/VERSION est vide" >&2
+            exit 1
           fi
           cp app/build/outputs/apk/debug/app-debug.apk "arbitre-${version}.apk"
           {
             echo "version=$version"
-            echo "etiquette=$etiquette"
+            echo "etiquette=arbitre-v${version}"
           } >> "$GITHUB_ENV"
 
       - name: Publier la Release
@@ -83,7 +73,7 @@ jobs:
 
           ## Installer
 
-          1. Télécharger `arbitre-VERSION.apk` ci-dessous depuis le téléphone.
+          1. Télécharger `arbitre-VERSION.apk` ci-dessous, depuis le téléphone.
           2. L'ouvrir ; autoriser « installer des applications inconnues » pour
              le navigateur si Android le demande.
           3. Au premier lancement, accorder les deux permissions depuis l'écran
@@ -103,7 +93,19 @@ jobs:
           Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
           TEXTE
           sed -i "s/arbitre-VERSION.apk/arbitre-${version}.apk/; s|ETIQUETTE|${etiquette}|" notes.md
-          gh release create "$etiquette" "arbitre-${version}.apk" \
-            --target "$GITHUB_SHA" \
-            --title "Arbitre ${version}" \
-            --notes-file notes.md
+
+          # Republier la même version (relance du workflow, correctif) remplace
+          # le fichier au lieu d'échouer.
+          if gh release view "$etiquette" >/dev/null 2>&1; then
+            gh release upload "$etiquette" "arbitre-${version}.apk" --clobber
+            gh release edit "$etiquette" --notes-file notes.md
+          else
+            gh release create "$etiquette" "arbitre-${version}.apk" \
+              --target "$GITHUB_SHA" \
+              --title "Arbitre ${version}" \
+              --notes-file notes.md
+          fi
+
+      - name: Rappeler le lien
+        run: |
+          echo "APK : https://github.com/${GITHUB_REPOSITORY}/releases/download/${etiquette}/arbitre-${version}.apk"
