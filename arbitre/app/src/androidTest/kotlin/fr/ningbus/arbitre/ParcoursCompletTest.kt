@@ -42,6 +42,22 @@ class ParcoursCompletTest {
     fun preparerLeTelephone() {
         shell("appops set $paquet SYSTEM_ALERT_WINDOW allow")
         shell("appops set $SIMULATEUR SYSTEM_ALERT_WINDOW allow")
+
+        // Les réglages AVANT l'activation du service, et l'ordre inverse était
+        // une faute : le filtre par application est posé une fois pour toutes
+        // au moment où le système lie le service. Activer d'abord, configurer
+        // ensuite, revenait à poser un filtre qui ignore le simulateur — le
+        // système ne délivrait alors aucun événement, et le journal restait
+        // vide sans que rien ne soit cassé dans l'application.
+        Reglages(contexte).apply {
+            actif = true
+            ecouteToutesApps = true
+            filtrerEcrans = true
+            vibration = false
+            boutonFlottant = false
+        }
+        LectureEcran.rafraichirFiltre()
+
         shell("settings put secure enabled_accessibility_services $composant")
         shell("settings put secure accessibility_enabled 1")
 
@@ -53,14 +69,7 @@ class ParcoursCompletTest {
             shell("settings get secure enabled_accessibility_services").contains("LectureEcran")
         }
         SystemClock.sleep(3_000)
-
-        Reglages(contexte).apply {
-            actif = true
-            ecouteToutesApps = true
-            filtrerEcrans = true
-            vibration = false
-            boutonFlottant = false
-        }
+        LectureEcran.rafraichirFiltre()
         fermerOffre()
     }
 

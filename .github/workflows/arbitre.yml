@@ -102,21 +102,21 @@ jobs:
           arch: x86_64
           disable-animations: true
           working-directory: arbitre
-          # Gradle ne montre que la première ligne d'un message d'assertion.
-          # Les résultats XML, eux, portent le message entier : sans ce
-          # vidage, un échec sur émulateur coûte un aller-retour complet
-          # rien que pour savoir ce qu'il disait.
           script: |
             ./gradlew :simulateur:installDebug
-            set +e
             ./gradlew :app:connectedDebugAndroidTest
-            CODE=$?
-            set -e
-            echo "===================== RÉSULTATS DÉTAILLÉS ====================="
-            find app/build/outputs/androidTest-results -name '*.xml' -exec cat {} \; || true
-            echo "===================== LOGCAT ARBITRE =========================="
-            adb logcat -d -s Arbitre:V BancEssai:V || true
-            exit $CODE
+
+      # Étape distincte, et exécutée quoi qu'il arrive : le shell de l'action
+      # sort dès l'échec de Gradle, si bien qu'un vidage placé à sa suite ne
+      # s'exécute jamais. Or Gradle ne montre que la première ligne d'un
+      # message d'assertion, tandis que les résultats XML portent le message
+      # entier — sans quoi un échec coûte un aller-retour rien que pour
+      # savoir ce qu'il disait.
+      - name: Résultats détaillés du banc d'essai
+        if: always()
+        run: |
+          find app/build/outputs/androidTest-results -name '*.xml' \
+            -exec cat {} \; || echo "aucun résultat"
 
       - name: Publier le rapport du banc d'essai
         if: always()
