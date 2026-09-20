@@ -97,10 +97,11 @@ jobs:
       # Arbitre est *installé*, le simulateur est *instrumenté* : le service
       # d'accessibilité tourne alors comme sur le téléphone du chauffeur.
       #
-      # Les relevés sont pris ici, dans la session de l'émulateur : une fois
-      # l'action terminée, la machine virtuelle n'existe plus et `adb` n'a
-      # plus personne à qui parler. On neutralise donc l'arrêt sur erreur le
-      # temps de tout recueillir, puis on rend le code de sortie de Gradle.
+      # Une seule ligne, et tout le reste dans banc-essai.sh : cette action
+      # exécute le script ligne par ligne, chacune dans son propre `sh -c`.
+      # Une continuation de ligne y fait attendre l'interpréteur sur son
+      # entrée jusqu'au garde-fou de quarante-cinq minutes, et aucune
+      # variable ne survit d'une ligne à la suivante.
       - name: Jouer le parcours complet sur émulateur
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -109,25 +110,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           working-directory: arbitre
-          script: |
-            set +e
-            ./gradlew :app:installDebug :simulateur:installDebug
-            pose=$?
-            ./gradlew :simulateur:connectedDebugAndroidTest
-            essais=$?
-            echo "::group::dumpsys accessibility"
-            adb shell dumpsys accessibility
-            echo "::endgroup::"
-            echo "::group::journal d'Arbitre"
-            adb shell run-as fr.ningbus.arbitre \
-              cat /data/data/fr.ningbus.arbitre/shared_prefs/journal.xml
-            echo "::endgroup::"
-            echo "::group::logcat"
-            adb logcat -d -v time -s Arbitre:V AccessibilityManagerService:V \
-              AndroidRuntime:E ActivityManager:E
-            echo "::endgroup::"
-            if [ $pose -ne 0 ]; then exit $pose; fi
-            exit $essais
+          script: bash banc-essai.sh
 
       # Étape distincte, et exécutée quoi qu'il arrive : le shell de l'action
       # sort dès l'échec de Gradle, si bien qu'un vidage placé à sa suite ne
