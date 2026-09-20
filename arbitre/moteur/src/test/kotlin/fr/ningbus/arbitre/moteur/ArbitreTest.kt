@@ -3,6 +3,7 @@ package fr.ningbus.arbitre.moteur
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ArbitreTest {
@@ -187,5 +188,48 @@ class ArbitreTest {
         assertEquals("3,2", fmt1(3.24))
         assertEquals("25", fmt0(24.6))
         assertEquals("—", fmt1(null))
+    }
+}
+
+class CompletionTest {
+
+    @Test
+    fun `une lecture partielle est completee par la precedente`() {
+        // L'écran a d'abord été lu alors que seul le prix était attaché à
+        // l'arbre des vues ; les lignes du trajet sont arrivées après.
+        val prixSeul = Course(prix = 12.51, texteBrut = "UberX 12,51 €")
+        val trajetSeul = Course(
+            minutesApproche = 9.0, kmApproche = 2.5, kmTrajet = 12.6,
+            texteBrut = "9 min (à 2.5 km) … Course de 12.6 km",
+        )
+        val c = trajetSeul.completer(prixSeul)
+        assertEquals(12.51, c.prix)
+        assertEquals(2.5, c.kmApproche)
+        assertEquals(12.6, c.kmTrajet)
+        assertTrue(c.exploitable)
+        assertTrue(c.texteBrut.contains("Course de"))
+    }
+
+    @Test
+    fun `deux prix differents ne se melangent pas`() {
+        val offreA = Course(prix = 12.51, kmTrajet = 12.6)
+        val offreB = Course(prix = 30.00)
+        assertEquals(30.00, offreB.completer(offreA).prix)
+        assertNull(offreB.completer(offreA).kmTrajet)
+    }
+
+    @Test
+    fun `sans precedente, rien ne change`() {
+        val c = Course(prix = 9.0)
+        assertEquals(c, c.completer(null))
+    }
+
+    @Test
+    fun `le meme prix autorise la fusion`() {
+        val a = Course(prix = 12.51, kmApproche = 2.5)
+        val b = Course(prix = 12.51, kmTrajet = 12.6)
+        val f = b.completer(a)
+        assertEquals(2.5, f.kmApproche)
+        assertEquals(12.6, f.kmTrajet)
     }
 }

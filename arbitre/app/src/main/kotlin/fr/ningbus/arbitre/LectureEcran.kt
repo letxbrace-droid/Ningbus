@@ -11,6 +11,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.Toast
 import fr.ningbus.arbitre.moteur.Course
+import fr.ningbus.arbitre.moteur.completer
 
 /**
  * Lecture de la carte d'offre affichée dans l'application chauffeur.
@@ -29,7 +30,15 @@ import fr.ningbus.arbitre.moteur.Course
  */
 class LectureEcran : AccessibilityService() {
 
+    private val principal = Handler(Looper.getMainLooper())
+    private val devoiler = Runnable { devoilerIncomplet() }
+
     private var derniereLecture = 0L
+
+    /** Lecture partielle en cours de complétion. */
+    private var attente: Attente? = null
+
+    private class Attente(val paquet: String, val course: Course, val instant: Long)
 
     override fun onServiceConnected() {
         instance = this
@@ -103,28 +112,65 @@ class LectureEcran : AccessibilityService() {
 
         val racine = fenetreCourante() ?: return false
         val texte = texteDe(racine)
-        if (!Arbitrage.ressembleAUneCourse(texte)) {
+
+        // Une lecture qui en complète une autre n'a pas à reporter de montant :
+        // c'est précisément la partie qui manquait la fois d'avant.
+        val enCours = attente?.takeIf { it.paquet == paquet }
+        if (!Arbitrage.ressembleAUneCourse(texte) && enCours == null) {
             if (force) signaler(R.string.rien_a_lire)
             return false
         }
 
-        val course = Arbitrage.lire(paquet, texte)
-        if (!force && reglages.filtrerEcrans && !estUneOffre(texte, course)) {
+        val course = Arbitrage.lire(paquet, texte).completer(enCours?.course)
+
+        if (!force && enCours == null && reglages.filtrerEcrans && !estUneOffre(texte, course)) {
             // Écran portant un montant mais écarté : on le note pour pouvoir
             // élargir les marqueurs si des courses passent à travers.
             if (course.prix != null) Journal.signalerEcranIgnore(this, paquet, texte)
             return false
         }
 
-        // eventTime est exprimé dans le temps d'activité du système, comme
-        // uptimeMillis : l'écart mesure le délai réellement vécu.
-        val latence = (SystemClock.uptimeMillis() - instantEvenement).coerceAtLeast(0L)
+        // L'instant de référence est celui de la première lecture partielle :
+        // la latence affichée reste le délai vécu depuis l'apparition de
+        // l'offre, pas depuis la lecture qui a fini de la compléter.
+        val debut = enCours?.instant ?: instantEvenement
+
+        // Un écran ne se dessine pas d'un bloc. Une lecture incomplète est
+        // bien plus souvent une carte à moitié construite qu'une carte
+        // illisible : on laisse sa chance à la suivante plutôt que de rendre
+        // un verdict creux sur ce qu'on a vu au millième de seconde près.
+        if (!force && !course.exploitable) {
+            if (course.prix != null || course.kmTrajet != null || course.minutesTrajet != null) {
+                attente = Attente(paquet, course, debut)
+                principal.removeCallbacks(devoiler)
+                principal.postDelayed(devoiler, DELAI_INCOMPLET_MS)
+            }
+            return false
+        }
+
+        principal.removeCallbacks(devoiler)
+        attente = null
+
+        val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
         val rendu = Arbitrage.rendre(this, paquet, course, Source.ECRAN, latence, force)
         if (force && !rendu) {
             Journal.signalerEcranIgnore(this, paquet, texte)
             signaler(R.string.montant_introuvable)
         }
         return rendu
+    }
+
+    /**
+     * Le délai est écoulé et la lecture n'a jamais été complétée : la carte a
+     * fini de se dessiner, ce qui manque manque vraiment. Mieux vaut le dire
+     * que se taire — un « INCOMPLET » invite à décider à la main, un silence
+     * laisse croire qu'il n'y avait rien à arbitrer.
+     */
+    private fun devoilerIncomplet() {
+        val a = attente ?: return
+        attente = null
+        val latence = (SystemClock.uptimeMillis() - a.instant).coerceAtLeast(0L)
+        Arbitrage.rendre(this, a.paquet, a.course, Source.ECRAN, latence)
     }
 
     /**
@@ -201,8 +247,19 @@ class LectureEcran : AccessibilityService() {
         /** Pas minimal entre deux lectures de l'arbre des vues. */
         private const val PAS_MINIMAL_MS = 400L
 
-        /** Borne de parcours : une carte d'offre en compte quelques dizaines. */
-        private const val NOEUDS_MAX = 600
+        /**
+         * Borne de parcours. Généreuse à dessein : l'écran d'une application
+         * chauffeur porte une carte entière, dont les milliers de nœuds
+         * précèdent la carte d'offre dans l'arbre des vues. Une borne trop
+         * basse épuise le budget avant d'atteindre les lignes du trajet, et
+         * l'offre paraît alors illisible alors qu'elle est simplement plus
+         * loin. Trois mille nœuds se parcourent en une fraction de
+         * milliseconde.
+         */
+        private const val NOEUDS_MAX = 3000
+
+        /** Attente maximale avant de rendre un verdict sur données partielles. */
+        private const val DELAI_INCOMPLET_MS = 2500L
 
         /** Textes du bouton qui accepte la course, selon les plateformes. */
         private val MARQUEURS = listOf(

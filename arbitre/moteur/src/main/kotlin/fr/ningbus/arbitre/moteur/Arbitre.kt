@@ -59,7 +59,7 @@ object Arbitre {
             return Verdict(
                 decision = Decision.INCOMPLET,
                 course = course,
-                alertes = alertes + "aucun montant lu dans la notification",
+                alertes = alertes + "aucun montant lu dans l'offre",
                 resume = "Montant illisible — décide à la main",
             )
         }
@@ -89,7 +89,7 @@ object Arbitre {
             return Verdict(
                 decision = Decision.INCOMPLET,
                 course = course,
-                alertes = alertes + "trajet illisible dans la notification",
+                alertes = alertes + "trajet illisible dans l'offre",
                 resume = "Trajet illisible — décide à la main",
             )
         }

@@ -28,6 +28,38 @@ data class Course(
         get() = prix != null && (kmTrajet != null || minutesTrajet != null)
 }
 
+/**
+ * Complète une lecture partielle par la précédente.
+ *
+ * Un écran ne se dessine pas d'un bloc : le prix peut être attaché à l'arbre
+ * des vues avant les lignes du trajet, et une lecture déclenchée au millième
+ * de seconde près attrape une carte à moitié construite. Plutôt que de rendre
+ * un verdict sur ce qu'on a vu à cet instant, on cumule les lectures
+ * successives — chaque champ manquant se remplit à la première lecture qui
+ * le porte.
+ *
+ * Deux prix différents désignent deux offres différentes : dans ce cas on ne
+ * mélange rien, au risque sinon d'arbitrer une course qui n'existe pas.
+ */
+fun Course.completer(precedente: Course?): Course {
+    if (precedente == null) return this
+    if (prix != null && precedente.prix != null && prix != precedente.prix) return this
+    return copy(
+        plateforme = plateforme.ifEmpty { precedente.plateforme },
+        prix = prix ?: precedente.prix,
+        minutesApproche = minutesApproche ?: precedente.minutesApproche,
+        kmApproche = kmApproche ?: precedente.kmApproche,
+        minutesTrajet = minutesTrajet ?: precedente.minutesTrajet,
+        kmTrajet = kmTrajet ?: precedente.kmTrajet,
+        texteBrut = if (texteBrut.length >= precedente.texteBrut.length) {
+            texteBrut
+        } else {
+            precedente.texteBrut
+        },
+        remarques = (remarques + precedente.remarques).distinct(),
+    )
+}
+
 /** État de la circulation, déduit de la vitesse moyenne implicite. */
 enum class Trafic(val libelle: String) {
     INCONNU("—"),
