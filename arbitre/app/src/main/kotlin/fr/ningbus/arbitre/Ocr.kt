@@ -49,7 +49,7 @@ object Ocr {
      * rapprochées — mais s'en remettre à lui reviendrait à dépenser une
      * capture pour recevoir une erreur.
      */
-    const val PAS_MINIMAL_MS = 1_500L
+    const val PAS_MINIMAL_MS = 2_500L
 
     /** Au-delà, l'image est réduite avant reconnaissance. */
     private const val LARGEUR_MAX = 1_280

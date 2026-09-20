@@ -170,13 +170,33 @@ class BancEssaiTest {
     @Test
     fun uneOffreDessineeEstLueParReconnaissanceDeTexte() {
         val avant = verdicts().length()
-        afficher("ULIS", "CANVAS")
-        val verdict = attendreUnVerdictDePlus(avant, 40_000L)
+
+        // Une première offre, écrite celle-là, pour qu'une bulle d'Arbitre
+        // soit posée à l'écran au moment de la suivante. C'est le cas qui a
+        // fait tomber deux corrections successives : d'abord la bulle était
+        // relue comme une offre, ensuite sa seule présence interdisait toute
+        // capture. Les deux se rencontrent ici.
+        afficher("ULIS", "FLOTTANTE")
+        attendreUnVerdictDePlus(avant)
+        val apresLaPremiere = verdicts().length()
+
+        // La seconde est peinte : aucun nœud de texte, donc invisible à
+        // l'arbre. Seule la reconnaissance de texte peut la voir — et elle
+        // doit y parvenir alors que la bulle précédente est encore affichée.
+        fermerOffre()
+        afficher("BRIIS", "CANVAS")
+        val verdict = attendreUnVerdictDePlus(apresLaPremiere, 40_000L)
 
         assertTrue(
             "la carte dessinée n'a pas été lue — l'arbre n'en dit rien, " +
                 "et la reconnaissance de texte n'a pas pris le relais.\n${diagnostic()}",
-            verdict.optString("brut").contains("12.6 km"),
+            verdict.optString("brut").contains("12.1 km"),
+        )
+        assertTrue(
+            "la bulle affichée a été relue comme une offre : " +
+                "${verdicts().length() - apresLaPremiere} verdicts au lieu d'un.\n" +
+                diagnostic(),
+            verdicts().length() == apresLaPremiere + 1,
         )
     }
 

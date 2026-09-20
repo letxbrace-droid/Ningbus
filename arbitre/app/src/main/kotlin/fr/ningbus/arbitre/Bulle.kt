@@ -82,6 +82,24 @@ object Bulle {
     val visible: Boolean
         get() = vue != null
 
+    /**
+     * Efface la bulle le temps d'une capture d'écran.
+     *
+     * Le premier remède au défaut trouvé par le banc était d'interdire toute
+     * capture tant qu'une bulle était affichée. Il marchait, et il était
+     * faux : une offre qui arrive pendant qu'un verdict traîne encore à
+     * l'écran est précisément une offre qu'il ne faut pas manquer. Ce n'est
+     * pas la capture qu'il faut empêcher, c'est notre propre verdict qu'il
+     * faut absenter de l'image.
+     */
+    fun eclipser() {
+        vue?.alpha = 0f
+    }
+
+    fun reparaitre() {
+        vue?.alpha = 1f
+    }
+
     // --- Pose ---------------------------------------------------------------
 
     private fun poser(

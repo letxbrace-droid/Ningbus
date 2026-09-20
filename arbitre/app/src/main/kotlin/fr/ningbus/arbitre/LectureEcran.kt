@@ -39,6 +39,16 @@ class LectureEcran : AccessibilityService() {
     /** Lecture partielle en cours de complétion. */
     private var attente: Attente? = null
 
+    /**
+     * Empreinte de l'écran ayant motivé la dernière capture.
+     *
+     * Un écran figé ne doit coûter qu'une capture, quel que soit le nombre
+     * d'événements qu'il émet. Un délai minimal n'y suffirait pas : une
+     * application chauffeur laissée en place des minutes entières
+     * déclencherait une capture à chaque créneau.
+     */
+    private var derniereEmpreinte = 0
+
     /** Paquets effectivement lus au dernier parcours, pour le diagnostic. */
     private var paquetLu: String? = null
     private var paquetsLus: List<String> = emptyList()
@@ -305,13 +315,6 @@ class LectureEcran : AccessibilityService() {
         if (!Ocr.disponible || !reglages.ocrSecours) return refuser("désactivé ou indisponible")
         if (issue == Issue.RENDU) return false
 
-        // Jamais pendant qu'une bulle est affichée. Une capture ne connaît
-        // pas les paquets : elle prendrait notre propre verdict, où
-        // l'analyseur retrouverait un montant, une approche et une distance —
-        // les siens. Le banc l'a pris sur le fait, en arbitrant deux fois la
-        // même course dont la seconde lecture était la bulle de la première.
-        if (Bulle.visible) return refuser("une bulle est déjà affichée")
-
         // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
         // de secours, il n'a pas à être économe.
         if (force) return true
@@ -324,21 +327,39 @@ class LectureEcran : AccessibilityService() {
         val connu = reglages.ecoute(nom) || paquetsLus.any { reglages.ecoute(it) }
         if (!connu) return refuser("paquet inconnu ($nom, vus : $paquetsLus)")
 
+        // Une empreinte par écran : un écran figé ne coûte qu'une capture.
+        // C'est ce qui remplace la longueur du texte comme garde-fou — voir
+        // plus bas pourquoi celle-ci était une mauvaise idée.
+        val empreinte = (nom + texte).hashCode()
+        if (empreinte == derniereEmpreinte) return refuser("écran déjà capturé")
+
         return when (issue) {
             // La carte était reconnue mais illisible : la moitié manquante
             // est peut-être dessinée plutôt qu'écrite.
             Issue.INCOMPLET -> true
 
-            // Une application écoutée dont une fenêtre s'ouvre sans exposer
-            // le moindre texte : c'est la signature d'une carte dessinée sur
-            // Canvas, ou composée sans sémantique. On ne s'y risque qu'à
-            // l'apparition d'une fenêtre — une session de navigation entière
-            // déclencherait sinon des captures en boucle.
-            Issue.RIEN_A_LIRE ->
-                fenetreNouvelle || refuser("écran vide, mais pas de fenêtre nouvelle")
-            Issue.PAS_UNE_OFFRE ->
-                (fenetreNouvelle && texte.length < TEXTE_MAIGRE) ||
-                    refuser("texte sans offre (${texte.length} car., fenêtre=$fenetreNouvelle)")
+            // Une fenêtre vient de s'ouvrir dans une application écoutée et
+            // l'arbre n'en a rien tiré d'arbitrable. C'est la signature d'une
+            // carte dessinée sur Canvas — et **on ne peut pas faire mieux que
+            // ce soupçon**, puisqu'une carte peinte ne laisse par définition
+            // aucune trace dans l'arbre.
+            //
+            // Le garde-fou précédent exigeait en plus que le texte lu soit
+            // court, au motif qu'un écran muet devait l'être vraiment. Il
+            // était faux, et le banc l'a montré chiffre en main : la carte
+            // peinte cohabitait avec une autre fenêtre bavarde, l'arbre
+            // rendait 324 caractères, et la capture était refusée à cause de
+            // ce que disait une fenêtre voisine. Décider d'une carte
+            // invisible d'après le bavardage de sa voisine n'a aucun sens.
+            //
+            // Le coût est tenu autrement : une seule capture par écran
+            // distinct, un créneau minimal entre deux, et rien tant qu'une
+            // fenêtre ne s'ouvre pas.
+            Issue.RIEN_A_LIRE, Issue.PAS_UNE_OFFRE ->
+                fenetreNouvelle || refuser("pas de fenêtre nouvelle")
+
+            // Écarté par le détecteur : l'écran a bien été lu, et jugé. Le
+            // relire en pixels ne dirait rien de plus.
             else -> refuser("issue $issue")
         }
     }
@@ -364,19 +385,32 @@ class LectureEcran : AccessibilityService() {
             return
         }
         Log.i(TAG, "capture d'écran pour $nom (arbre : ${texteArbre.length} car.)")
+        derniereEmpreinte = (nom + texteArbre).hashCode()
 
-        // La pastille s'efface le temps de la capture : elle affiche le
-        // dernier « 31 €/h », et l'analyseur retenant le montant le plus
-        // élevé, ce chiffre-là prendrait la place du vrai prix de l'offre.
-        // Le délai laisse au système le temps de dessiner une image sans
-        // elle — une capture demandée dans la foulée montrerait encore la
-        // trame précédente.
+        // Nos deux fenêtres s'effacent le temps de la capture.
+        //
+        // Une image ne connaît pas les paquets : elle prend tout ce qui est
+        // dessiné. La bulle y exposerait le verdict précédent — montant,
+        // approche, distance — que l'analyseur relirait comme une offre, et
+        // la pastille son « 31 €/h », qui deviendrait le prix de la course
+        // puisque le montant le plus élevé l'emporte. Le banc a pris les deux
+        // sur le fait.
+        //
+        // Absenter nos fenêtres de l'image vaut mieux qu'interdire la
+        // capture : une offre qui arrive pendant qu'un verdict traîne encore
+        // à l'écran est précisément une offre qu'il ne faut pas manquer.
+        //
+        // Le délai laisse au système le temps de dessiner une trame sans
+        // elles — une capture demandée dans la foulée montrerait encore la
+        // précédente.
+        Bulle.eclipser()
         BoutonFlottant.eclipser()
         principal.postDelayed({ capturer(nom, texteArbre, instantEvenement, force) }, DELAI_ECLIPSE_MS)
     }
 
     private fun capturer(nom: String, texteArbre: String, instantEvenement: Long, force: Boolean) {
         Ocr.lire(this) { reconnu ->
+            Bulle.reparaitre()
             BoutonFlottant.reparaitre()
             try {
                 if (reconnu.isEmpty()) {
@@ -567,14 +601,6 @@ class LectureEcran : AccessibilityService() {
 
         /** Attente maximale avant de rendre un verdict sur données partielles. */
         private const val DELAI_INCOMPLET_MS = 2500L
-
-        /**
-         * En deçà de ce nombre de caractères, un écran n'expose à peu près
-         * rien : quelques libellés de barre système, un titre. C'est le seuil
-         * au-delà duquel il devient raisonnable de soupçonner une carte
-         * dessinée plutôt qu'écrite, et d'aller la regarder.
-         */
-        private const val TEXTE_MAIGRE = 120
 
         /**
          * Temps laissé au système pour dessiner une image sans notre pastille.
