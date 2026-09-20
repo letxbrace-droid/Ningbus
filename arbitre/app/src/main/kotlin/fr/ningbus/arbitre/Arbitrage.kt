@@ -10,7 +10,21 @@ import fr.ningbus.arbitre.moteur.Plateformes
 /** Par où l'offre est arrivée. */
 enum class Source(val libelle: String) {
     NOTIFICATION("notification"),
+
+    /** Arbre d'accessibilité : le texte tel que l'application l'a écrit. */
     ECRAN("écran"),
+
+    /**
+     * Reconnaissance de texte sur une capture.
+     *
+     * Distinguée de [ECRAN] à dessein, et le terrain a montré pourquoi en une
+     * seule course : une approche de 1,6 km lue « 6,0 km », parce qu'une
+     * décimale avait été coupée en deux. L'arbre rend le texte exact, l'image
+     * rend une hypothèse — deux choses qu'un journal ne doit pas confondre
+     * quand il s'agit de comprendre un chiffre faux.
+     */
+    IMAGE("image"),
+
     ESSAI("essai"),
 }
 

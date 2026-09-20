@@ -10,6 +10,7 @@ import android.view.Display
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import fr.ningbus.arbitre.moteur.recoudreNombres
 
 /**
  * Lire l'écran là où l'arbre d'accessibilité ne dit rien.
@@ -155,10 +156,12 @@ object Ocr {
      * chaque ligne.
      */
     private fun ordonner(texte: com.google.mlkit.vision.text.Text): String =
-        texte.textBlocks
-            .flatMap { it.lines }
-            .sortedBy { it.boundingBox?.top ?: 0 }
-            .joinToString("\n") { it.text }
+        recoudreNombres(
+            texte.textBlocks
+                .flatMap { it.lines }
+                .sortedBy { it.boundingBox?.top ?: 0 }
+                .joinToString("\n") { it.text }
+        )
 
     private fun reduire(image: Bitmap): Bitmap {
         if (image.width <= LARGEUR_MAX) return image

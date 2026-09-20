@@ -226,6 +226,7 @@ class LectureEcran : AccessibilityService() {
         texte: String,
         instantEvenement: Long,
         force: Boolean,
+        source: Source = Source.ECRAN,
     ): Issue {
         if (texte.isEmpty()) return Issue.RIEN_A_LIRE
 
@@ -278,7 +279,7 @@ class LectureEcran : AccessibilityService() {
         attente = null
 
         val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
-        val rendu = Arbitrage.rendre(this, nom, course, Source.ECRAN, latence, force)
+        val rendu = Arbitrage.rendre(this, nom, course, source, latence, force)
         return if (rendu) Issue.RENDU else Issue.SANS_SUITE
     }
 
@@ -425,7 +426,14 @@ class LectureEcran : AccessibilityService() {
                     return@lire
                 }
                 val fusion = fusionner(reconnu, texteArbre)
-                val issue = conclure(Reglages(this), nom, fusion, instantEvenement, force)
+                val issue = conclure(
+                    Reglages(this),
+                    nom,
+                    fusion,
+                    instantEvenement,
+                    force,
+                    Source.IMAGE,
+                )
                 if (issue == Issue.RENDU) {
                     Log.i(TAG, "offre lue par reconnaissance de texte")
                 } else {
@@ -482,16 +490,29 @@ class LectureEcran : AccessibilityService() {
     }
 
     /**
-     * Le texte reconnu d'abord, celui de l'arbre ensuite, sans doublon.
+     * Assemble les deux lectures, sans doublon, et dans le bon ordre.
      *
      * L'ordre est décisif : l'analyseur se sert de la position des nombres
-     * quand aucun mot ne désigne l'approche, et seul l'OCR rend l'ordre
-     * *visuel* — celui que le chauffeur voit. L'arbre n'ajoute ensuite que ce
-     * que lui seul savait, une description de contenu par exemple.
+     * quand aucun mot ne désigne l'approche.
+     *
+     * **L'arbre passe devant dès qu'il ressemble à une offre**, et c'est une
+     * course de Grigny qui l'a imposé. L'image y annonçait une approche de
+     * 1,6 km comme « 1. 6 km » — une décimale coupée en deux — et l'analyseur
+     * en retenait 6,0 km, soit quatre fois trop. L'arbre, lui, rend le texte
+     * exact par construction : quand il a quelque chose à dire, c'est lui
+     * qu'il faut croire. L'image ne complète alors que ce que lui seul a vu.
+     *
+     * Quand l'arbre est muet — la carte peinte — l'ordre s'inverse, et c'est
+     * l'image qui donne l'ordre visuel, celui que le chauffeur voit.
      */
     private fun fusionner(reconnu: String, arbre: String): String {
         val lignes = LinkedHashSet<String>(64)
-        for (source in listOf(reconnu, arbre)) {
+        val ordre = if (Arbitrage.ressembleAUneCourse(arbre)) {
+            listOf(arbre, reconnu)
+        } else {
+            listOf(reconnu, arbre)
+        }
+        for (source in ordre) {
             source.lineSequence()
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
