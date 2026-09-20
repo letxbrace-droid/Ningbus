@@ -6,26 +6,45 @@ calcule ce que la course laisse réellement par heure de travail, et affiche
 un mot :
 
 ```
-┌──────────────────────────────────────┐
-│  PRENDS                      ⚡ 84 ms│
-│                                      │
-│  31 €/h                    1,45 €/km │
-│  ──────────────────●─────            │
-│            objectif 25 €/h           │
-│                                      │
-│  31 €/h pour 25 visés                │
-│  12,40 € net · 24 min · 8,6 km       │
-│  approche 4 min · 1,2 km             │
-│  circulation dense · 18 km/h         │
-│  ⚠ retour à vide compté à 35 %       │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  LAISSE                          ⚡ 594 ms   │  1. la décision
+├──────────────────────────────────────────────┤
+│  20 €/h                          0,36 €/km   │  2. l'argent
+│  ━━━━━━━━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━      │
+│            objectif 25 €/h                   │
+│                                              │
+│  ⚠ Approche de 6,0 km avant la prise en      │  le motif
+│    charge                                    │
+│                                              │
+│  28,1 km · 30 min mobilisées · 10,24 € net   │  3. les contraintes
+│                                              │
+│  course 16,4 km · durée estimée              │  4. l'explication
+│  approche 6,0 km · 5 min                     │
+│  ↩ retour à vide 5,7 km (supposé)            │
+│  circulation voie rapide · 57 km/h           │
+│                                              │
+│  lecture : image · offre 90/100 ·            │  5. le diagnostic
+│  confiance 93 %                              │
+└──────────────────────────────────────────────┘
 ```
 
-Un appui la referme, un glissement vertical la déplace et retient sa position.
+**Cinq étages, et le chauffeur doit pouvoir s'arrêter au premier.** Tout ce qui
+suit le deuxième est là pour justifier après coup, jamais pour décider.
+
+Trois gestes, aucun qui demande de viser au volant : un appui la réduit à ses
+deux premiers étages — `🔴 20 €/h — LAISSE` — et le choix est retenu d'une
+offre à l'autre ; un glissement vertical la déplace et retient sa place ; un
+appui long ouvre le journal.
+
 Elle se pose **en haut** de l'écran et sa fenêtre est déclarée non focalisable :
 le bouton « Accepter » de l'application chauffeur, toujours en bas, reste
 atteignable. Un widget qui coûte une course acceptée coûterait plus cher qu'il
 ne rapporte.
+
+**Les trois kilométrages ne sont jamais additionnés.** « 28,1 km » ne dit rien ;
+« 16,4 de course, 6,0 d'approche, 5,7 de retour à vide » dit tout — et rend
+criante une approche lue quatre fois trop grande, ce qui est exactement
+arrivé sur la course reproduite ci-dessus.
 
 ---
 

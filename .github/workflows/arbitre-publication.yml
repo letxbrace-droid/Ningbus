@@ -117,6 +117,31 @@ jobs:
 
           ## Ce que cette version ajoute
 
+          **La bulle se lit par étages** : la décision, puis l'argent, puis les
+          contraintes, puis l'explication, puis le diagnostic. Tu dois pouvoir
+          t'arrêter au premier. Un appui la réduit au verdict et à
+          l'euro/heure, un appui long ouvre le journal, un glissement la
+          déplace.
+
+          **Les trois kilométrages ne sont plus additionnés** : course,
+          approche, retour à vide, chacun sur sa ligne. C'est ce qui distingue
+          une course rentable d'une course qui t'exile — et ce qui rend
+          criant un chiffre aberrant.
+
+          **Le verdict dit pourquoi.** « LAISSE — 14 €/h » laissait deviner ;
+          « LAISSE — approche plus longue que la course » permet de s'étonner,
+          ou non, en connaissance de cause.
+
+          **La source de lecture est affichée** — écran ou image. Une première
+          course lue sur la route a donné une approche de 1,6 km comme 6,0 km,
+          parce qu'une décimale avait été coupée en deux par la reconnaissance
+          d'image. Le texte reconnu est désormais recousu avant analyse, et
+          l'arbre d'accessibilité, qui ne coupe rien, passe devant l'image dès
+          qu'il a quelque chose à dire.
+
+          **Les réglages se rangent en quatre rubriques** : rentabilité,
+          course, affichage, diagnostic.
+
           **Lecture en image.** Les applications chauffeur passent à des cartes
           dessinées plutôt qu'écrites, où le texte n'existe pas en tant que
           tel : le service voyait un écran vide là où le chauffeur voit une
