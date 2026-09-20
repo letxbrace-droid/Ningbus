@@ -64,19 +64,30 @@ class EcouteNotifications : NotificationListenerService() {
         // Tracé avant tout filtrage : c'est ce qui permet de distinguer
         // « la notification n'est jamais arrivée » de « elle est arrivée mais
         // n'a pas été retenue », et de lire le nom de paquet exact.
-        val ressemble = Arbitrage.ressembleAUneCourse(texte)
-        if (ressemble) Journal.signalerVue(this, paquet, texte)
+        // Le filet est large à dessein : une notification de course dont le
+        // montant est dans une vue personnalisée n'arrive ici qu'en
+        // « Nouvelle course ». La retenir quand même est ce qui permet de
+        // voir, après coup, ce que la plateforme envoie vraiment.
+        val interessante = Arbitrage.pourraitEtreUneCourse(texte)
+        if (interessante) Journal.signalerVue(this, paquet, texte)
 
         if (!reglages.ecoute(paquet)) {
-            if (reglages.modeDecouverte && ressemble) Journal.signalerInconnu(this, paquet)
+            if (reglages.modeDecouverte && interessante) Journal.signalerInconnu(this, paquet)
             return
         }
-        if (!ressemble) return
+        if (!interessante) return
 
         // postTime est l'horodatage d'affichage par le système : la
         // différence mesure bien le délai vu par le chauffeur.
         val latence = (System.currentTimeMillis() - sbn.postTime).coerceAtLeast(0L)
-        Arbitrage.rendre(this, paquet, Arbitrage.lire(paquet, texte), Source.NOTIFICATION, latence)
+        val rendu = Arbitrage.rendre(
+            this, paquet, Arbitrage.lire(paquet, texte), Source.NOTIFICATION, latence,
+        )
+
+        // La notification n'a pas suffi : la carte correspondante est en train
+        // d'apparaître à l'écran, et elle, elle porte tous les chiffres. La
+        // notification sert alors de déclencheur, l'écran de source.
+        if (!rendu) LectureEcran.analyserApres(DELAI_RELECTURE_MS)
     }
 
     /**
@@ -106,6 +117,9 @@ class EcouteNotifications : NotificationListenerService() {
 
     companion object {
         private const val TAG = "Arbitre"
+
+        /** Temps laissé à la carte d'offre pour se dessiner après la notification. */
+        private const val DELAI_RELECTURE_MS = 700L
 
         /**
          * Vrai quand le système a réellement lié le service. Une permission

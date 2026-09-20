@@ -63,8 +63,23 @@ class ActiviteJournal : AppCompatActivity() {
         for (ligne in lignes) conteneur.addView(carte(ligne))
         // Surtout pas après un retour anticipé : c'est quand aucune course
         // n'a été arbitrée que les écrans écartés expliquent pourquoi.
+        ajouterCaptures(conteneur)
         ajouterEcarts(conteneur)
         ajouterVues(conteneur)
+    }
+
+    /** Le texte brut relevé à l'écran, la pièce à conviction. */
+    private fun ajouterCaptures(conteneur: LinearLayout) {
+        val captures = Journal.captures(this)
+        if (captures.isEmpty()) return
+        conteneur.addView(titre(R.string.titre_captures))
+        conteneur.addView(TextView(this).apply {
+            text = getString(R.string.aide_captures)
+            textSize = 11f
+            alpha = 0.6f
+            setPadding(0, 0, 0, dp(4))
+        })
+        for ((paquet, brut) in captures) conteneur.addView(bloc(paquet, brut))
     }
 
     /**
@@ -193,7 +208,8 @@ class ActiviteJournal : AppCompatActivity() {
         val lignes = Journal.lignes(this)
         val ecarts = Journal.ecransEcartes(this)
         val vues = Journal.notificationsVues(this)
-        if (lignes.isEmpty() && ecarts.isEmpty() && vues.isEmpty()) {
+        val captures = Journal.captures(this)
+        if (lignes.isEmpty() && ecarts.isEmpty() && vues.isEmpty() && captures.isEmpty()) {
             Toast.makeText(this, R.string.journal_vide, Toast.LENGTH_SHORT).show()
             return
         }
@@ -205,6 +221,12 @@ class ActiviteJournal : AppCompatActivity() {
             if (ecarts.isNotEmpty()) {
                 append("\n\n--- ").append(getString(R.string.titre_ecarts)).append(" ---")
                 for ((paquet, brut) in ecarts) append("\n\n").append(paquet).append("\n").append(brut)
+            }
+            if (captures.isNotEmpty()) {
+                append("\n\n--- ").append(getString(R.string.titre_captures)).append(" ---")
+                for ((paquet, brut) in captures) {
+                    append("\n\n").append(paquet).append("\n").append(brut)
+                }
             }
             if (vues.isNotEmpty()) {
                 append("\n\n--- ").append(getString(R.string.titre_vues)).append(" ---")

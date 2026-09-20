@@ -12,7 +12,7 @@
     <string name="toutes_apps">Écouter toutes les applications</string>
     <string name="aide_toutes_apps">Recommandé. Les noms de paquets des applications chauffeur changent selon les versions et les pays : une liste qui se trompe ne donne pas d\'erreur, elle donne du silence. En mode automatique, c\'est le contenu qui décide — un montant, une distance, une durée. Décocher pour n\'écouter que les applications cochées plus bas : moins d\'écrans parcourus, donc moins de batterie.</string>
     <string name="bouton_flottant">Pastille d\'analyse manuelle</string>
-    <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran ; un appui analyse l\'écran tel qu\'il est. C\'est le chemin qui ne dépend d\'aucune détection : si une offre passe inaperçue, il répond quand même. Glisse-la où elle ne gêne pas.</string>
+    <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran. Un appui analyse l\'écran tel qu\'il est — le chemin qui ne dépend d\'aucune détection. Un appui long capture le texte brut de l\'écran dans le journal, pour comprendre pourquoi une offre n\'a pas été lue. Glisse-la où elle ne gêne pas.</string>
     <string name="titre_diagnostic">État réel des services</string>
     <string name="service_lie">lié et à l\'écoute</string>
     <string name="service_non_lie">autorisé mais non lié — décoche puis recoche la permission, ou redémarre le téléphone</string>
@@ -22,6 +22,9 @@
     <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
     <string name="titre_vues">Notifications vues, avant tout filtrage</string>
     <string name="aide_vues">Si cette liste est vide alors qu\'une offre est arrivée, la notification n\'atteint pas l\'application. Si elle contient l\'offre, c\'est la lecture qui a échoué — et le texte est là pour la corriger.</string>
+    <string name="ecran_capture">Écran capturé : %1$s, %2$d caractères. Ouvre le journal et copie-le.</string>
+    <string name="titre_captures">Captures d\'écran brutes (appui long sur la pastille)</string>
+    <string name="aide_captures">Le texte exact que le service a lu, sans interprétation. C\'est ce qu\'il faut envoyer quand une offre n\'est pas analysée.</string>
     <string name="titre_ecarts">Écrans écartés (ils portaient un montant sans être reconnus comme offre)</string>
     <string name="accorde">accordée</string>
     <string name="a_accorder">à accorder</string>

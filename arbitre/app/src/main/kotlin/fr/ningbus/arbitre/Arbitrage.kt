@@ -97,4 +97,20 @@ object Arbitrage {
         val trajet = t.contains("km") || t.contains("min")
         return montant && trajet
     }
+
+    /**
+     * Filet volontairement large, pour la trace de diagnostic seulement.
+     *
+     * Une notification de course dont les chiffres vivent dans une vue
+     * personnalisée n'arrive souvent qu'en « Nouvelle course » : exiger un
+     * montant la rendrait invisible, et avec elle la raison du silence.
+     */
+    fun pourraitEtreUneCourse(texte: String): Boolean {
+        val t = texte.lowercase()
+        return MOTS_DE_COURSE.any { t.contains(it) }
+    }
+
+    private val MOTS_DE_COURSE = listOf(
+        "€", "eur", " km", "min", "course", "trajet", "trip", "ride",
+    )
 }

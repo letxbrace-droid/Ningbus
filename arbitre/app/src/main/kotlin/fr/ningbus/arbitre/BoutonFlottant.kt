@@ -36,6 +36,9 @@ object BoutonFlottant {
     /** Glissement minimal, en pixels, avant de considérer que l'on déplace. */
     private const val SEUIL = 12
 
+    /** Durée d'appui à partir de laquelle on capture l'écran brut. */
+    private const val APPUI_LONG_MS = 550L
+
     fun montrer(contexte: Context) {
         val app = contexte.applicationContext
         principal.post {
@@ -111,6 +114,15 @@ object BoutonFlottant {
         var toucheX = 0f
         var toucheY = 0f
         var deplace = false
+        var capture = false
+
+        // Appui long : le texte brut de l'écran part au journal, sans
+        // interprétation. Quand une offre échappe à l'analyse, c'est la seule
+        // façon de savoir ce que le service a vu au lieu de le supposer.
+        val capturer = Runnable {
+            capture = true
+            LectureEcran.capturer(contexte)
+        }
 
         racine.setOnTouchListener { v, evenement ->
             when (evenement.action) {
@@ -120,6 +132,8 @@ object BoutonFlottant {
                     toucheX = evenement.rawX
                     toucheY = evenement.rawY
                     deplace = false
+                    capture = false
+                    principal.postDelayed(capturer, APPUI_LONG_MS)
                     true
                 }
 
@@ -128,6 +142,7 @@ object BoutonFlottant {
                     val dy = (evenement.rawY - toucheY).toInt()
                     if (abs(dx) > SEUIL || abs(dy) > SEUIL) {
                         deplace = true
+                        principal.removeCallbacks(capturer)
                         lp.x = (xInitial + dx).coerceAtLeast(0)
                         lp.y = (yInitial + dy).coerceAtLeast(0)
                         try {
@@ -140,12 +155,17 @@ object BoutonFlottant {
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    if (deplace) {
-                        reglages.boutonX = lp.x
-                        reglages.boutonY = lp.y
-                    } else {
-                        v.performClick()
-                        LectureEcran.analyserMaintenant(contexte)
+                    principal.removeCallbacks(capturer)
+                    when {
+                        deplace -> {
+                            reglages.boutonX = lp.x
+                            reglages.boutonY = lp.y
+                        }
+                        capture -> Unit // déjà traité par l'appui long
+                        else -> {
+                            v.performClick()
+                            LectureEcran.analyserMaintenant(contexte)
+                        }
                     }
                     true
                 }

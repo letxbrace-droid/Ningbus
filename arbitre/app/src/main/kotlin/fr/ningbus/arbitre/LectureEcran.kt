@@ -8,25 +8,25 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.Toast
 import fr.ningbus.arbitre.moteur.Course
 import fr.ningbus.arbitre.moteur.completer
 
 /**
- * Lecture de la carte d'offre affichée dans l'application chauffeur.
+ * Lecture de la carte d'offre affichée par l'application chauffeur.
  *
  * C'est le chemin principal, et non un complément : quand l'application est
  * au premier plan — c'est-à-dire tout le temps où l'on travaille — Uber
  * dessine l'offre directement à l'écran **sans poster aucune notification**.
  *
- * Deux façons de déclencher la lecture :
+ * Trois façons de déclencher la lecture :
  *
  *  - **automatiquement**, sur les changements d'écran ;
- *  - **à la demande**, par la pastille flottante. Ce chemin-là ne dépend
- *    d'aucune heuristique : ni du nom du paquet, ni de la forme de l'écran,
- *    ni d'un mot dans un bouton. Quand la détection automatique se trompe,
- *    elle se trompe en silence — un appui, lui, répond toujours.
+ *  - **à la demande**, par un appui sur la pastille flottante ;
+ *  - **par capture**, par un appui long sur la pastille : le texte brut de
+ *    l'écran part dans le journal, sans interprétation. C'est le seul moyen
+ *    de savoir ce que le service a réellement vu quand une offre échappe à
+ *    l'analyse — deviner à sa place coûte un aller-retour à chaque fois.
  */
 class LectureEcran : AccessibilityService() {
 
@@ -110,14 +110,20 @@ class LectureEcran : AccessibilityService() {
         if (!reglages.actif) return false
         if (!force && !reglages.ecoute(paquet)) return false
 
-        val racine = fenetreCourante() ?: return false
-        val texte = texteDe(racine)
+        val texte = texteEcran(paquet)
+        if (texte.isEmpty()) {
+            if (force) signaler(R.string.rien_a_lire)
+            return false
+        }
 
         // Une lecture qui en complète une autre n'a pas à reporter de montant :
         // c'est précisément la partie qui manquait la fois d'avant.
         val enCours = attente?.takeIf { it.paquet == paquet }
         if (!Arbitrage.ressembleAUneCourse(texte) && enCours == null) {
-            if (force) signaler(R.string.rien_a_lire)
+            if (force) {
+                Journal.signalerCapture(this, paquet, texte)
+                signaler(R.string.rien_a_lire)
+            }
             return false
         }
 
@@ -154,7 +160,7 @@ class LectureEcran : AccessibilityService() {
         val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
         val rendu = Arbitrage.rendre(this, paquet, course, Source.ECRAN, latence, force)
         if (force && !rendu) {
-            Journal.signalerEcranIgnore(this, paquet, texte)
+            Journal.signalerCapture(this, paquet, texte)
             signaler(R.string.montant_introuvable)
         }
         return rendu
@@ -164,35 +170,101 @@ class LectureEcran : AccessibilityService() {
      * Le délai est écoulé et la lecture n'a jamais été complétée : la carte a
      * fini de se dessiner, ce qui manque manque vraiment. Mieux vaut le dire
      * que se taire — un « INCOMPLET » invite à décider à la main, un silence
-     * laisse croire qu'il n'y avait rien à arbitrer.
+     * laisse croire qu'il n'y avait rien à arbitrer. Le texte part au journal
+     * en même temps, puisque c'est un cas où l'analyse a échoué.
      */
     private fun devoilerIncomplet() {
         val a = attente ?: return
         attente = null
+        Journal.signalerCapture(this, a.paquet, a.course.texteBrut)
         val latence = (SystemClock.uptimeMillis() - a.instant).coerceAtLeast(0L)
         Arbitrage.rendre(this, a.paquet, a.course, Source.ECRAN, latence)
     }
 
+    // --- Ce qui est réellement à l'écran ------------------------------------
+
     /**
-     * La fenêtre à lire.
+     * Le texte de **toutes** les fenêtres affichées, pas seulement de la
+     * fenêtre active.
      *
-     * `rootInActiveWindow` suffit presque toujours. Mais la pastille est une
-     * fenêtre de superposition : selon les constructeurs, un appui dessus peut
-     * déplacer la fenêtre active. On retombe alors sur la fenêtre
-     * d'application la plus en avant, qui est celle que le chauffeur regarde.
+     * C'est la correction décisive. `rootInActiveWindow` ne rend que la
+     * fenêtre qui a le focus, et une offre de course n'y est presque jamais :
+     * les applications chauffeur l'affichent dans une fenêtre flottante
+     * par-dessus l'accueil ou par-dessus une autre application, et le focus
+     * reste à celle du dessous. On lisait donc consciencieusement le mauvais
+     * écran — d'où un prix attrapé au hasard et aucune distance.
+     *
+     * Les fenêtres de l'application qui a émis l'événement sont préférées
+     * quand il y en a ; sinon on prend tout ce qui n'est pas à nous, car une
+     * offre vaut mieux lue avec du bruit autour que pas lue du tout.
      */
-    private fun fenetreCourante(): AccessibilityNodeInfo? {
-        rootInActiveWindow?.let { if (it.packageName != packageName) return it }
-        return try {
-            windows
-                .filter { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
-                .sortedByDescending { it.layer }
-                .firstNotNullOfOrNull { fenetre ->
-                    fenetre.root?.takeIf { it.packageName != packageName }
-                }
-        } catch (e: Exception) {
-            null
+    private fun texteEcran(paquet: String): String {
+        val racines = racines(paquet)
+        if (racines.isEmpty()) return ""
+
+        val morceaux = LinkedHashSet<String>(64)
+        var budget = NOEUDS_MAX
+        for (racine in racines) {
+            budget = ramasser(racine, morceaux, budget)
+            if (budget <= 0) break
         }
+        return morceaux.joinToString("\n")
+    }
+
+    private fun racines(paquet: String): List<AccessibilityNodeInfo> {
+        val toutes = ArrayList<AccessibilityNodeInfo>(4)
+
+        // De la fenêtre la plus en avant vers la plus en arrière : une offre
+        // posée par-dessus le reste se lit d'abord.
+        try {
+            for (fenetre in windows.sortedByDescending { it.layer }) {
+                val racine = fenetre.root ?: continue
+                if (racine.packageName == packageName) continue
+                toutes += racine
+            }
+        } catch (e: Exception) {
+            // Certaines surcouches refusent la liste des fenêtres.
+        }
+
+        rootInActiveWindow?.let { active ->
+            if (active.packageName != packageName && toutes.none { it == active }) {
+                toutes += active
+            }
+        }
+
+        val duPaquet = toutes.filter { it.packageName == paquet }
+        return if (duPaquet.isNotEmpty()) duPaquet else toutes
+    }
+
+    /**
+     * Ramasse les textes d'un arbre de vues, en ordre de lecture.
+     *
+     * L'ordre compte : quand aucun mot ne désigne l'approche, c'est la
+     * position qui tranche, une offre annonçant toujours l'approche avant la
+     * course. Le parcours est donc en profondeur d'abord, et borné pour ne
+     * jamais peser sur l'application du dessous.
+     *
+     * @return le budget de nœuds restant
+     */
+    private fun ramasser(
+        racine: AccessibilityNodeInfo,
+        morceaux: MutableSet<String>,
+        budgetInitial: Int,
+    ): Int {
+        var budget = budgetInitial
+        val pile = ArrayDeque<AccessibilityNodeInfo>()
+        pile.addLast(racine)
+
+        while (pile.isNotEmpty() && budget > 0) {
+            val noeud = pile.removeLast()
+            budget--
+            noeud.text?.toString()?.trim()?.let { if (it.isNotEmpty()) morceaux += it }
+            noeud.contentDescription?.toString()?.trim()?.let { if (it.isNotEmpty()) morceaux += it }
+            for (i in noeud.childCount - 1 downTo 0) {
+                noeud.getChild(i)?.let { pile.addLast(it) }
+            }
+        }
+        return budget
     }
 
     /**
@@ -209,36 +281,12 @@ class LectureEcran : AccessibilityService() {
             (course.kmApproche != null && course.kmTrajet != null)
     }
 
-    /**
-     * Ramasse les textes de l'arbre des vues, en ordre de lecture.
-     *
-     * L'ordre compte : quand aucun mot ne désigne l'approche, c'est la
-     * position qui tranche, une offre annonçant toujours l'approche avant la
-     * course. Le parcours est donc en profondeur d'abord, et borné pour ne
-     * jamais peser sur l'application du dessous.
-     */
-    private fun texteDe(racine: AccessibilityNodeInfo): String {
-        val morceaux = ArrayList<String>(48)
-        val pile = ArrayDeque<AccessibilityNodeInfo>()
-        pile.addLast(racine)
-        var vus = 0
-
-        while (pile.isNotEmpty() && vus < NOEUDS_MAX) {
-            val noeud = pile.removeLast()
-            vus++
-            noeud.text?.toString()?.trim()?.let { if (it.isNotEmpty()) morceaux += it }
-            noeud.contentDescription?.toString()?.trim()?.let { if (it.isNotEmpty()) morceaux += it }
-            for (i in noeud.childCount - 1 downTo 0) {
-                noeud.getChild(i)?.let { pile.addLast(it) }
-            }
-        }
-        return morceaux.distinct().joinToString("\n")
+    private fun signaler(message: Int) {
+        principal.post { Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
     }
 
-    private fun signaler(message: Int) {
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
+    private fun signaler(message: String) {
+        principal.post { Toast.makeText(this, message, Toast.LENGTH_LONG).show() }
     }
 
     companion object {
@@ -248,13 +296,12 @@ class LectureEcran : AccessibilityService() {
         private const val PAS_MINIMAL_MS = 400L
 
         /**
-         * Borne de parcours. Généreuse à dessein : l'écran d'une application
-         * chauffeur porte une carte entière, dont les milliers de nœuds
-         * précèdent la carte d'offre dans l'arbre des vues. Une borne trop
-         * basse épuise le budget avant d'atteindre les lignes du trajet, et
-         * l'offre paraît alors illisible alors qu'elle est simplement plus
-         * loin. Trois mille nœuds se parcourent en une fraction de
-         * milliseconde.
+         * Borne de parcours, tous écrans confondus. Généreuse à dessein :
+         * l'écran d'une application chauffeur porte une carte entière, dont
+         * les milliers de nœuds précèdent la carte d'offre dans l'arbre des
+         * vues. Une borne trop basse épuise le budget avant d'atteindre les
+         * lignes du trajet, et l'offre paraît illisible alors qu'elle est
+         * simplement plus loin.
          */
         private const val NOEUDS_MAX = 3000
 
@@ -284,22 +331,67 @@ class LectureEcran : AccessibilityService() {
          * dépend ni du nom du paquet, ni de la forme de l'écran.
          */
         fun analyserMaintenant(contexte: Context) {
-            val service = instance
-            if (service == null) {
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        contexte.applicationContext,
-                        R.string.lecture_ecran_requise,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                }
-                return
-            }
+            val service = instance ?: return refuser(contexte)
             try {
-                val paquet = service.rootInActiveWindow?.packageName?.toString() ?: "écran"
-                service.lire(paquet, SystemClock.uptimeMillis(), force = true)
+                service.lire(paquetDevant(service), SystemClock.uptimeMillis(), force = true)
             } catch (e: Exception) {
                 Log.w(TAG, "analyse manuelle impossible : ${e.message}")
+            }
+        }
+
+        /**
+         * Relit l'écran après un délai.
+         *
+         * Sert quand une notification annonce une course : la carte
+         * correspondante est en train d'apparaître, et le texte de la
+         * notification est souvent plus pauvre que celui de l'écran.
+         */
+        fun analyserApres(delaiMs: Long) {
+            val service = instance ?: return
+            service.principal.postDelayed({
+                try {
+                    service.lire(paquetDevant(service), SystemClock.uptimeMillis(), force = false)
+                } catch (e: Exception) {
+                    Log.w(TAG, "relecture impossible : ${e.message}")
+                }
+            }, delaiMs)
+        }
+
+        /**
+         * Envoie le texte brut de l'écran au journal, sans l'interpréter.
+         *
+         * Quand une offre échappe à l'analyse, c'est la seule donnée qui
+         * permette de comprendre pourquoi plutôt que de supposer.
+         */
+        fun capturer(contexte: Context) {
+            val service = instance ?: return refuser(contexte)
+            try {
+                val paquet = paquetDevant(service)
+                val texte = service.texteEcran(paquet)
+                Journal.signalerCapture(contexte, paquet, texte, force = true)
+                service.signaler(
+                    contexte.getString(R.string.ecran_capture, paquet, texte.length)
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "capture impossible : ${e.message}")
+            }
+        }
+
+        /** Le paquet de la fenêtre la plus en avant qui ne soit pas la nôtre. */
+        private fun paquetDevant(service: LectureEcran): String {
+            service.rootInActiveWindow?.packageName?.toString()?.let {
+                if (it != service.packageName) return it
+            }
+            return service.racines("").firstOrNull()?.packageName?.toString() ?: "écran"
+        }
+
+        private fun refuser(contexte: Context) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    contexte.applicationContext,
+                    R.string.lecture_ecran_requise,
+                    Toast.LENGTH_LONG,
+                ).show()
             }
         }
     }

@@ -92,7 +92,7 @@ object Journal {
     fun vider(contexte: Context) {
         dejaNotes.clear()
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
-            .edit().remove(CLE).remove(CLE_ECARTES).remove(CLE_VUES).apply()
+            .edit().remove(CLE).remove(CLE_ECARTES).remove(CLE_VUES).remove(CLE_CAPTURES).apply()
     }
 
     // --- Mode découverte ---------------------------------------------------
@@ -166,7 +166,34 @@ object Journal {
     fun ecransEcartes(contexte: Context): List<Pair<String, String>> =
         depiler(contexte, CLE_ECARTES)
 
-    // --- Petite pile bornée, partagée par les deux traces ------------------
+    // --- Captures brutes ----------------------------------------------------
+
+    private const val CLE_CAPTURES = "captures"
+    private const val MAX_CAPTURES = 6
+
+    /**
+     * Le texte de l'écran, tel quel, sans interprétation.
+     *
+     * Quand une offre échappe à l'analyse, c'est la seule donnée qui permette
+     * de comprendre plutôt que de supposer : elle dit exactement ce que le
+     * service a vu, et donc où la lecture s'est arrêtée.
+     *
+     * @param force capture demandée par l'utilisateur : elle passe outre le
+     *   dédoublonnage, car appuyer deux fois veut dire vouloir deux relevés.
+     */
+    @Synchronized
+    fun signalerCapture(contexte: Context, paquet: String, texte: String, force: Boolean = false) {
+        if (!force) {
+            val empreinte = (paquet + texte).hashCode()
+            if (!dejaNotes.add(empreinte)) return
+            if (dejaNotes.size > 64) dejaNotes.clear()
+        }
+        empiler(contexte, CLE_CAPTURES, MAX_CAPTURES, paquet, texte)
+    }
+
+    fun captures(contexte: Context): List<Pair<String, String>> = depiler(contexte, CLE_CAPTURES)
+
+    // --- Petite pile bornée, partagée par les traces -----------------------
 
     private fun empiler(
         contexte: Context,
@@ -187,7 +214,7 @@ object Journal {
             JSONObject().apply {
                 put("t", System.currentTimeMillis())
                 put("paquet", paquet)
-                put("brut", texte.take(1200))
+                put("brut", texte.take(4000))
             }
         )
         for (i in 0 until minOf(tableau.length(), maximum - 1)) reduit.put(tableau.get(i))
