@@ -58,6 +58,16 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 
+    // Reconnaissance de texte, en secours de l'arbre d'accessibilité : les
+    // applications chauffeur passent à Compose et au dessin sur Canvas, où le
+    // texte n'existe simplement pas en tant que nœud.
+    //
+    // La variante *groupée* embarque le modèle dans l'APK — d'où cinq
+    // mégaoctets de plus — au lieu de le télécharger par Google Play Services.
+    // C'est ce qui permet de tenir la promesse : rien ne sort du téléphone,
+    // et la première offre lue par ce chemin l'est sans attendre.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+
     // Le banc d'essai vit dans :simulateur, et non ici : Arbitre y est une
     // application installée comme les autres, ce qu'il doit être pour que le
     // banc prouve quoi que ce soit.

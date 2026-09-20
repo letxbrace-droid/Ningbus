@@ -63,6 +63,9 @@ class ActivitePrincipale : AppCompatActivity() {
         val offre = Offres.parCle(intent?.getStringExtra("offre"))
         when (mode) {
             "FLOTTANTE" -> afficherFlottante(offre)
+            // La même offre, mais peinte : aucun nœud de texte à lire, donc
+            // seule une reconnaissance de texte peut la voir.
+            "CANVAS" -> afficherFlottante(offre, dessinee = true)
             "PLEIN_ECRAN" -> afficherPleinEcran(offre)
             "FERMER" -> retirerFlottante()
         }
@@ -128,14 +131,14 @@ class ActivitePrincipale : AppCompatActivity() {
      * garde le focus et le cas dégénère en « plein écran », qui ne prouve
      * rien.
      */
-    private fun afficherFlottante(offre: Offre) {
+    private fun afficherFlottante(offre: Offre, dessinee: Boolean = false) {
         if (!Settings.canDrawOverlays(this)) {
             Toast.makeText(this, R.string.superposition_requise, Toast.LENGTH_LONG).show()
             return
         }
         retirerFlottante()
 
-        val vue = carte(offre)
+        val vue = if (dessinee) CarteDessinee(this, offre.lignes) else carte(offre)
         val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val lp = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,

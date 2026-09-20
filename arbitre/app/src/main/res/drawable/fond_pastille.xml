@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rectangle à grand rayon, et non un cercle : la même vue sert de pastille
+    ronde quand elle n'affiche que « €/h », et de pilule allongée quand elle
+    porte le dernier verdict. Une seule fenêtre flottante, donc, au lieu de
+    deux qui se disputeraient l'écran.
+
+    Le trait est redessiné à l'exécution, à la couleur du verdict.
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
+    android:shape="rectangle">
     <solid android:color="@color/bulle_fond" />
+    <corners android:radius="26dp" />
     <stroke
         android:width="2dp"
         android:color="@color/vert" />

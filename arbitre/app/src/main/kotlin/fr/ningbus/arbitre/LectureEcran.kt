@@ -54,6 +54,10 @@ class LectureEcran : AccessibilityService() {
         instance = this
         appliquerFiltre()
         BoutonFlottant.synchroniser(this)
+        // La liaison du service est l'un des moments où l'application a le
+        // droit de démarrer un service au premier plan : c'est donc ici que
+        // la veille se rattrape si le téléphone l'a arrêtée.
+        ServiceVeille.synchroniser(this)
         Log.i(TAG, "lecture d'écran active")
     }
 
@@ -106,10 +110,16 @@ class LectureEcran : AccessibilityService() {
         if (maintenant - derniereLecture < PAS_MINIMAL_MS) return
         derniereLecture = maintenant
 
+        // Une fenêtre qui s'ouvre, par opposition à un contenu qui se
+        // rafraîchit : c'est le seul instant où une capture d'écran vaut son
+        // coût, et c'est précisément celui où une carte d'offre apparaît.
+        val fenetreNouvelle = e.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+            e.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+
         try {
             // L'apparition d'une fenêtre flottante est annoncée sans nom de
             // paquet : on regarde alors toutes les applications écoutées.
-            lire(paquet, e.eventTime, force = false)
+            lire(paquet, e.eventTime, force = false, fenetreNouvelle = fenetreNouvelle)
         } catch (ex: Exception) {
             // Un arbre de vues qui disparaît en cours de parcours ne doit pas
             // faire tomber le service : le système ne le relierait qu'au
@@ -122,11 +132,40 @@ class LectureEcran : AccessibilityService() {
 
     // --- Lecture ------------------------------------------------------------
 
+    /** Pourquoi une lecture n'a pas abouti — ce qui décide de la suite. */
+    private enum class Issue {
+        /** Un verdict a été rendu. */
+        RENDU,
+
+        /** L'écran n'a livré aucun texte. */
+        RIEN_A_LIRE,
+
+        /** Du texte, mais rien qui ressemble à une offre. */
+        PAS_UNE_OFFRE,
+
+        /** Une offre possible, écartée par le filtre d'écrans. */
+        ECARTE,
+
+        /** Une offre reconnue, mais dont il manque de quoi conclure. */
+        INCOMPLET,
+
+        /** Tout était là sauf le montant, ou c'était un doublon. */
+        SANS_SUITE,
+    }
+
     /**
      * @param force analyse demandée par l'utilisateur : ni filtre d'écran, ni
      *   dédoublonnage — s'il appuie deux fois, il veut deux réponses.
+     * @param fenetreNouvelle une fenêtre vient d'apparaître, par opposition à
+     *   un simple rafraîchissement de contenu. C'est le seul moment où la
+     *   reconnaissance de texte vaut son coût.
      */
-    private fun lire(paquet: String?, instantEvenement: Long, force: Boolean): Boolean {
+    private fun lire(
+        paquet: String?,
+        instantEvenement: Long,
+        force: Boolean,
+        fenetreNouvelle: Boolean = false,
+    ): Boolean {
         val reglages = Reglages(this)
         if (!reglages.actif) return false
         if (!force && paquet != null && !reglages.ecoute(paquet)) return false
@@ -143,22 +182,43 @@ class LectureEcran : AccessibilityService() {
             else -> { p -> reglages.ecoute(p) }
         }
         val texte = texteEcran(critere)
-        if (texte.isEmpty()) {
-            if (force) signaler(R.string.rien_a_lire)
+        val nom = paquet ?: paquetLu ?: "écran"
+
+        val issue = conclure(reglages, nom, texte, instantEvenement, force)
+        if (issue == Issue.RENDU) return true
+
+        // L'arbre n'a rien donné d'exploitable. Avant de conclure au silence,
+        // on regarde l'écran tel qu'il est dessiné.
+        if (ocrUtile(reglages, nom, texte, issue, force, fenetreNouvelle)) {
+            tenterOcr(nom, texte, instantEvenement, force)
             return false
         }
 
+        rapporter(issue, nom, texte, force)
+        return false
+    }
+
+    /**
+     * Analyse un texte d'écran et rend un verdict s'il y a lieu.
+     *
+     * Séparée de [lire] parce qu'elle sert deux fois : sur le texte de
+     * l'arbre d'accessibilité, puis, le cas échéant, sur celui qu'a reconnu
+     * l'OCR. Elle ne parle pas à l'utilisateur — c'est [rapporter] qui le
+     * fait, une fois seulement, quand tous les chemins ont été essayés.
+     */
+    private fun conclure(
+        reglages: Reglages,
+        nom: String,
+        texte: String,
+        instantEvenement: Long,
+        force: Boolean,
+    ): Issue {
+        if (texte.isEmpty()) return Issue.RIEN_A_LIRE
+
         // Une lecture qui en complète une autre n'a pas à reporter de montant :
         // c'est précisément la partie qui manquait la fois d'avant.
-        val nom = paquet ?: paquetLu ?: "écran"
         val enCours = attente?.takeIf { it.paquet == nom }
-        if (!Arbitrage.ressembleAUneCourse(texte) && enCours == null) {
-            if (force) {
-                Journal.signalerCapture(this, nom, texte)
-                signaler(R.string.rien_a_lire)
-            }
-            return false
-        }
+        if (!Arbitrage.ressembleAUneCourse(texte) && enCours == null) return Issue.PAS_UNE_OFFRE
 
         val course = Arbitrage.lire(nom, texte).completer(enCours?.course)
 
@@ -166,7 +226,7 @@ class LectureEcran : AccessibilityService() {
             // Écran portant un montant mais écarté : on le note pour pouvoir
             // élargir les marqueurs si des courses passent à travers.
             if (course.prix != null) Journal.signalerEcranIgnore(this, nom, texte)
-            return false
+            return Issue.ECARTE
         }
 
         // L'instant de référence est celui de la première lecture partielle :
@@ -184,7 +244,7 @@ class LectureEcran : AccessibilityService() {
                 principal.removeCallbacks(devoiler)
                 principal.postDelayed(devoiler, DELAI_INCOMPLET_MS)
             }
-            return false
+            return Issue.INCOMPLET
         }
 
         principal.removeCallbacks(devoiler)
@@ -192,11 +252,107 @@ class LectureEcran : AccessibilityService() {
 
         val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
         val rendu = Arbitrage.rendre(this, nom, course, Source.ECRAN, latence, force)
-        if (force && !rendu) {
-            Journal.signalerCapture(this, nom, texte)
-            signaler(R.string.montant_introuvable)
+        return if (rendu) Issue.RENDU else Issue.SANS_SUITE
+    }
+
+    /**
+     * Ce que l'utilisateur apprend d'une lecture qui n'a rien donné.
+     *
+     * Uniquement quand il l'a demandée : une analyse automatique qui ne
+     * trouve rien doit se taire, sans quoi l'application passerait sa journée
+     * à signaler des écrans qui ne sont pas des offres.
+     */
+    private fun rapporter(issue: Issue, nom: String, texte: String, force: Boolean) {
+        if (!force || issue == Issue.RENDU) return
+        if (texte.isNotEmpty()) Journal.signalerCapture(this, nom, texte)
+        signaler(
+            if (issue == Issue.SANS_SUITE) R.string.montant_introuvable else R.string.rien_a_lire
+        )
+    }
+
+    // --- Le second rideau : reconnaissance de texte --------------------------
+
+    /**
+     * L'OCR mérite-t-il son coût, ici et maintenant ?
+     *
+     * Une capture d'écran suivie d'une reconnaissance coûte mille fois un
+     * parcours de nœuds. Le déclencher à chaque rafraîchissement d'une
+     * application chauffeur — qui redessine sa carte en continu — viderait la
+     * batterie pour rien. Trois portes, donc, et il faut les passer toutes.
+     */
+    private fun ocrUtile(
+        reglages: Reglages,
+        nom: String,
+        texte: String,
+        issue: Issue,
+        force: Boolean,
+        fenetreNouvelle: Boolean,
+    ): Boolean {
+        if (!Ocr.disponible || !reglages.ocrSecours) return false
+        if (issue == Issue.RENDU) return false
+
+        // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
+        // de secours, il n'a pas à être économe.
+        if (force) return true
+
+        if (!reglages.ecoute(nom)) return false
+        return when (issue) {
+            // La carte était reconnue mais illisible : la moitié manquante
+            // est peut-être dessinée plutôt qu'écrite.
+            Issue.INCOMPLET -> true
+
+            // Une application écoutée dont une fenêtre s'ouvre sans exposer
+            // le moindre texte : c'est la signature d'une carte dessinée sur
+            // Canvas, ou composée sans sémantique. On ne s'y risque qu'à
+            // l'apparition d'une fenêtre — une session de navigation entière
+            // déclencherait sinon des captures en boucle.
+            Issue.RIEN_A_LIRE -> fenetreNouvelle
+            Issue.PAS_UNE_OFFRE -> fenetreNouvelle && texte.length < TEXTE_MAIGRE
+            else -> false
         }
-        return rendu
+    }
+
+    private fun tenterOcr(nom: String, texteArbre: String, instantEvenement: Long, force: Boolean) {
+        if (!Ocr.creneauLibre()) {
+            rapporter(Issue.RIEN_A_LIRE, nom, texteArbre, force)
+            return
+        }
+        Ocr.lire(this) { reconnu ->
+            try {
+                if (reconnu.isEmpty()) {
+                    rapporter(Issue.RIEN_A_LIRE, nom, texteArbre, force)
+                    return@lire
+                }
+                val fusion = fusionner(reconnu, texteArbre)
+                val issue = conclure(Reglages(this), nom, fusion, instantEvenement, force)
+                if (issue == Issue.RENDU) {
+                    Log.i(TAG, "offre lue par reconnaissance de texte")
+                } else {
+                    rapporter(issue, nom, fusion, force)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "analyse du texte reconnu impossible : ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Le texte reconnu d'abord, celui de l'arbre ensuite, sans doublon.
+     *
+     * L'ordre est décisif : l'analyseur se sert de la position des nombres
+     * quand aucun mot ne désigne l'approche, et seul l'OCR rend l'ordre
+     * *visuel* — celui que le chauffeur voit. L'arbre n'ajoute ensuite que ce
+     * que lui seul savait, une description de contenu par exemple.
+     */
+    private fun fusionner(reconnu: String, arbre: String): String {
+        val lignes = LinkedHashSet<String>(64)
+        for (source in listOf(reconnu, arbre)) {
+            source.lineSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .forEach { lignes += it }
+        }
+        return lignes.joinToString("\n")
     }
 
     /**
@@ -362,6 +518,14 @@ class LectureEcran : AccessibilityService() {
         /** Attente maximale avant de rendre un verdict sur données partielles. */
         private const val DELAI_INCOMPLET_MS = 2500L
 
+        /**
+         * En deçà de ce nombre de caractères, un écran n'expose à peu près
+         * rien : quelques libellés de barre système, un titre. C'est le seuil
+         * au-delà duquel il devient raisonnable de soupçonner une carte
+         * dessinée plutôt qu'écrite, et d'aller la regarder.
+         */
+        private const val TEXTE_MAIGRE = 120
+
         /** Textes du bouton qui accepte la course, selon les plateformes. */
         private val MARQUEURS = listOf(
             "mise en relation", "accepter", "accept", "j'accepte",
@@ -404,7 +568,14 @@ class LectureEcran : AccessibilityService() {
             val service = instance ?: return
             service.principal.postDelayed({
                 try {
-                    service.lire(null, SystemClock.uptimeMillis(), force = false)
+                    // Une carte est en train d'apparaître : c'est exactement
+                    // le cas où la reconnaissance de texte doit être permise.
+                    service.lire(
+                        null,
+                        SystemClock.uptimeMillis(),
+                        force = false,
+                        fenetreNouvelle = true,
+                    )
                 } catch (e: Exception) {
                     Log.w(TAG, "relecture impossible : ${e.message}")
                 }

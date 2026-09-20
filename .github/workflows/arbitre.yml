@@ -45,6 +45,22 @@ jobs:
       - name: Construire l'APK de débogage
         run: ./gradlew :app:assembleDebug
 
+      # ML Kit déclare l'accès réseau pour sa télémétrie, et le manifeste le
+      # retire. Une promesse qu'on ne vérifie pas est une promesse qu'on
+      # finira par rompre sans s'en apercevoir : celle-ci se vérifie en une
+      # commande, sur l'APK réellement livré.
+      - name: Vérifier qu'aucune permission réseau n'a survécu à la fusion
+        run: |
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          aapt="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          echo "Permissions déclarées :"
+          "$aapt" dump permissions "$apk" | sed -n 's/^uses-permission: name=//p'
+          if "$aapt" dump permissions "$apk" | grep -qE 'INTERNET|ACCESS_NETWORK_STATE'; then
+            echo "::error::Une permission réseau s'est glissée dans l'APK." >&2
+            exit 1
+          fi
+          echo "Aucune permission réseau : la promesse tient."
+
       - name: Publier l'APK
         uses: actions/upload-artifact@v4
         with:

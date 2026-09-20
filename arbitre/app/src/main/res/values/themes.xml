@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Thème sombre en toutes circonstances, et non « selon le réglage du
+    téléphone ».
+
+    L'application se consulte au volant, souvent de nuit, et presque toujours
+    juste avant ou juste après une bulle qui est noire elle aussi. Basculer en
+    blanc au petit matin ferait pire que ne rien faire : l'œil met plusieurs
+    secondes à se réadapter, et ces secondes-là sont celles du compte à
+    rebours.
+-->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.Arbitre" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Arbitre" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/vert</item>
-        <item name="android:statusBarColor" tools:targetApi="21">?attr/colorSurface</item>
+        <item name="colorOnPrimary">@color/nuit</item>
+        <item name="colorSecondary">@color/vert</item>
+        <item name="android:colorBackground">@color/nuit</item>
+        <item name="colorSurface">@color/nuit_carte</item>
+        <item name="colorSurfaceVariant">@color/nuit_relief</item>
+        <item name="android:textColorPrimary">@color/bulle_texte</item>
+        <item name="android:textColorSecondary">@color/bulle_texte_doux</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@color/nuit</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">@color/nuit</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
 </resources>

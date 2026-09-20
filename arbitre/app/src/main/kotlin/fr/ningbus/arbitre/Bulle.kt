@@ -3,6 +3,7 @@ package fr.ningbus.arbitre
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -108,6 +109,11 @@ object Bulle {
         vue = racine
         gestionnaire = wm
 
+        // La carte s'efface, la pilule reste. C'est ce qui permet de la
+        // laisser courte sans rien perdre : douze secondes suffisent à
+        // décider, une minute à se souvenir de ce qu'on a laissé passer.
+        BoutonFlottant.montrerVerdict(contexte, verdict.euroHeure, verdict.decision)
+
         principal.removeCallbacks(fermeture)
         principal.postDelayed(fermeture, reglages.secondesAffichage * 1000L)
     }
@@ -136,10 +142,39 @@ object Bulle {
         val ctx = racine.context
         val teinte = couleur(ctx, verdict.decision)
 
+        // Le contour porte le verdict avant que le mot ne soit lu : de nuit,
+        // au coin de l'œil, c'est la couleur qui arrive la première. Il est
+        // dessiné plutôt que déclaré, parce qu'une teinte posée sur la
+        // ressource entière colorerait aussi le fond — et un aplat fluo
+        // par-dessus une carte de navigation est illisible.
+        val densite = ctx.resources.displayMetrics.density
+        racine.findViewById<View>(R.id.carte).background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 18f * densite
+            setColor(ContextCompat.getColor(ctx, R.color.bulle_fond))
+            setStroke((2 * densite).toInt(), teinte)
+        }
+
         racine.findViewById<View>(R.id.entete).backgroundTintList = ColorStateList.valueOf(teinte)
-        racine.findViewById<TextView>(R.id.verdict).text = verdict.decision.libelle
-        racine.findViewById<TextView>(R.id.latence).text =
-            "${latenceLisible(latenceMs)} · ${source.libelle}"
+
+        // Sur un néon clair, l'encre doit être noire. Le blanc y descend sous
+        // 2:1 de contraste, ce qui se lit mal au soleil et pas du tout en
+        // mouvement.
+        val encre = ContextCompat.getColor(
+            ctx,
+            when (verdict.decision) {
+                Decision.PRENDS, Decision.LIMITE -> R.color.nuit
+                Decision.LAISSE, Decision.INCOMPLET -> R.color.bulle_texte
+            },
+        )
+        racine.findViewById<TextView>(R.id.verdict).apply {
+            text = verdict.decision.libelle
+            setTextColor(encre)
+        }
+        racine.findViewById<TextView>(R.id.latence).apply {
+            text = "${latenceLisible(latenceMs)} · ${source.libelle}"
+            setTextColor(encre)
+        }
 
         val euroHeure = racine.findViewById<TextView>(R.id.euro_heure)
         euroHeure.text = verdict.euroHeure?.let { "${fmt0(it)} €/h" } ?: "—"

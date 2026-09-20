@@ -11,9 +11,27 @@
     <string name="filtre_ecrans">Écarter les écrans qui ne sont pas des offres</string>
     <string name="toutes_apps">Écouter toutes les applications</string>
     <string name="aide_toutes_apps">À n\'activer que si ton application chauffeur est absente de la liste plus bas. Tout écouter transforme l\'application en machine à faux positifs : n\'importe quel texte portant un prix et deux distances devient une offre — une page web, une conversation, l\'écran d\'accueil. Le mode découverte donne le nom exact d\'une application manquante, qu\'il suffit ensuite de cocher.</string>
+    <string name="pastille_repos">€/h</string>
     <string name="bouton_flottant">Pastille d\'analyse manuelle</string>
     <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran. Un appui analyse l\'écran tel qu\'il est — le chemin qui ne dépend d\'aucune détection. Un appui long capture le texte brut de l\'écran dans le journal, pour comprendre pourquoi une offre n\'a pas été lue. Glisse-la où elle ne gêne pas.</string>
     <string name="titre_diagnostic">État réel des services</string>
+    <string name="aide_diagnostic">Ce que les réglages Android ne disent pas. Une puce rouge ici, et aucune offre ne sera vue — même si tout paraît coché par ailleurs.</string>
+    <string name="sante_ecran">Lecture d\'écran</string>
+    <string name="sante_superposition">Superposition d\'écran</string>
+    <string name="sante_notifications">Accès aux notifications</string>
+    <string name="sante_veille">Veille anti-arrêt</string>
+    <string name="sante_batterie">Optimisation batterie</string>
+    <string name="sante_ocr">Lecture en image</string>
+    <string name="sante_ok">actif</string>
+    <string name="sante_eteint">éteint</string>
+    <string name="sante_indisponible">Android 10 ou plus ancien</string>
+
+    <string name="titre_simulateur">Simulateur</string>
+    <string name="aide_simulateur">Déplace un curseur : le verdict se recalcule sous tes yeux, sur une course fictive. C\'est la façon la plus rapide de trouver ton barème sans attendre de vraies offres pour t\'en rendre compte.</string>
+    <string name="curseur_objectif">Objectif</string>
+    <string name="curseur_cout">Coût de roulage</string>
+    <string name="curseur_retour">Retour à vide</string>
+    <string name="voir_bulle">Voir la bulle par-dessus l\'écran</string>
     <string name="service_lie">lié et à l\'écoute</string>
     <string name="service_non_lie">autorisé mais non lié — décoche puis recoche la permission, ou redémarre le téléphone</string>
     <string name="service_absent">permission non accordée</string>
@@ -52,6 +70,21 @@
     <string name="reglages_introuvables">Écran de réglages introuvable sur ce téléphone.</string>
 
     <string name="canal_verdicts">Verdicts de course</string>
+    <string name="canal_veille">Veille (notification permanente)</string>
+    <string name="canal_detachement">Alerte de détachement</string>
+    <string name="veille_titre">Arbitre veille</string>
+    <string name="veille_active">Lecture d\'écran active</string>
+    <string name="veille_detachee">Lecture d\'écran détachée — touche ici</string>
+    <string name="detachement_titre">La lecture d\'écran s\'est détachée</string>
+    <string name="detachement_texte">Android l\'affiche encore comme autorisée, mais elle ne reçoit plus rien : les offres passeront inaperçues. Touche ici, puis décoche et recoche la permission d\'accessibilité.</string>
+
+    <string name="veille">Veille anti-arrêt</string>
+    <string name="aide_veille">Une notification permanente et discrète maintient le processus en vie. Elle ne calcule rien : son seul effet est d\'élever l\'importance de l\'application pour les surcouches qui arrêtent les processus en arrière-plan — et d\'avertir si la lecture d\'écran se détache.</string>
+    <string name="ocr_secours">Lire l\'écran en image si le texte est absent</string>
+    <string name="aide_ocr">Quand une application chauffeur dessine sa carte d\'offre au lieu de l\'écrire, aucun texte n\'existe à lire : le service voit un écran vide. Une capture d\'écran est alors analysée sur le téléphone même, sans réseau et sans que l\'image sorte d\'ici. Coûteux, donc réservé aux écrans qui n\'ont rien donné.</string>
+    <string name="batterie">Optimisation de la batterie</string>
+    <string name="batterie_desactivee">désactivée pour Arbitre</string>
+    <string name="batterie_active">active — elle peut couper la détection</string>
     <string name="journal_vide">Aucune course arbitrée pour le moment.</string>
     <string name="journal_vide_resume">Le journal se remplira à la première offre de course.</string>
     <string name="copier_journal">Copier le journal</string>

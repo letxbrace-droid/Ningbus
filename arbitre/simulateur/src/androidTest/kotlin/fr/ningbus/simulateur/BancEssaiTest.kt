@@ -155,6 +155,32 @@ class BancEssaiTest {
     }
 
     /**
+     * L'angle mort de l'arbre d'accessibilité, éprouvé plutôt que supposé.
+     *
+     * La carte est ici **peinte** sur un `Canvas` : aucun nœud de texte,
+     * aucune description de contenu, rien à lire. C'est le cas vers lequel
+     * les applications chauffeur se dirigent, et le seul où la lecture d'écran
+     * classique ne peut rien. Si ce verdict sort, il ne peut venir que de la
+     * reconnaissance de texte.
+     *
+     * L'attente est plus longue que les autres : la première reconnaissance
+     * charge le modèle embarqué, ce qui ne se produit qu'une fois mais coûte
+     * une seconde ou deux.
+     */
+    @Test
+    fun uneOffreDessineeEstLueParReconnaissanceDeTexte() {
+        val avant = verdicts().length()
+        afficher("ULIS", "CANVAS")
+        val verdict = attendreUnVerdictDePlus(avant, 40_000L)
+
+        assertTrue(
+            "la carte dessinée n'a pas été lue — l'arbre n'en dit rien, " +
+                "et la reconnaissance de texte n'a pas pris le relais.\n${diagnostic()}",
+            verdict.optString("brut").contains("12.6 km"),
+        )
+    }
+
+    /**
      * Une carte d'offre se redessine à chaque seconde du compte à rebours, et
      * chaque redessin est un événement. Sans ce dédoublonnage, une seule
      * course ferait surgir vingt bulles — et c'est lui qui a fait échouer un
@@ -311,8 +337,11 @@ class BancEssaiTest {
         .replace("&gt;", ">")
         .replace("&amp;", "&")
 
-    private fun attendreUnVerdictDePlus(avant: Int): JSONObject {
-        val limite = SystemClock.uptimeMillis() + ATTENTE_VERDICT_MS
+    private fun attendreUnVerdictDePlus(
+        avant: Int,
+        limiteMs: Long = ATTENTE_VERDICT_MS,
+    ): JSONObject {
+        val limite = SystemClock.uptimeMillis() + limiteMs
         while (SystemClock.uptimeMillis() < limite) {
             val rendus = runCatching { verdicts() }.getOrDefault(JSONArray())
             if (rendus.length() > avant) {

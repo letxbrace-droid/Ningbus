@@ -2,11 +2,14 @@ package fr.ningbus.arbitre
 
 import android.Manifest
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.text.InputType
 import android.view.Gravity
@@ -16,6 +19,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +29,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import fr.ningbus.arbitre.moteur.Arbitre
 import fr.ningbus.arbitre.moteur.Bareme
+import fr.ningbus.arbitre.moteur.Decision
 import fr.ningbus.arbitre.moteur.Plateformes
+import fr.ningbus.arbitre.moteur.fmt0
 import fr.ningbus.arbitre.moteur.fmt2
 
 /**
@@ -100,9 +106,17 @@ class ActivitePrincipale : AppCompatActivity() {
         interrupteur(R.id.prudence, reglages.bareme.prudenceTrafic) {
             reglages.bareme = reglages.bareme.copy(prudenceTrafic = it)
         }
+        interrupteur(R.id.ocr, reglages.ocrSecours) { reglages.ocrSecours = it }
+        interrupteur(R.id.veille, reglages.veille) {
+            reglages.veille = it
+            ServiceVeille.synchroniser(this)
+        }
 
         construireChamps()
+        construireCurseurs()
         demanderNotifications()
+        ServiceVeille.creerCanaux(this)
+        ServiceVeille.synchroniser(this)
     }
 
     override fun onResume() {
@@ -110,6 +124,7 @@ class ActivitePrincipale : AppCompatActivity() {
         etatPermissions()
         peuplerChamps()
         peuplerApplications()
+        rafraichirApercu()
     }
 
     override fun onPause() {
@@ -126,28 +141,158 @@ class ActivitePrincipale : AppCompatActivity() {
         etat(R.id.etat_notif, R.id.bouton_notif, accesNotifications())
         etat(R.id.etat_superposition, R.id.bouton_superposition, Settings.canDrawOverlays(this))
         etat(R.id.etat_ecran, R.id.bouton_ecran, lectureEcranActive())
+        peuplerSante()
         findViewById<TextView>(R.id.diagnostic).text = diagnostic()
         BoutonFlottant.synchroniser(this)
     }
 
+    // --- Tableau de santé ---------------------------------------------------
+
+    /** Un organe et son état, tels qu'ils s'affichent dans le tableau. */
+    private class Organe(
+        val nom: String,
+        val etat: String,
+        /** Vert : rien à faire. Ambre : dégradé. Rouge : rien ne marchera. */
+        val couleur: Int,
+        /** Ce qu'un appui doit ouvrir, s'il y a quelque chose à ouvrir. */
+        val action: (() -> Unit)? = null,
+    )
+
     /**
-     * Ce que les réglages système ne disent pas : un service peut être
-     * autorisé sans être lié. C'est le cas le plus déroutant — tout paraît en
-     * ordre et rien ne se produit — donc il mérite d'être affiché tel quel.
+     * L'état réel, ligne par ligne, et non une liste de phrases.
+     *
+     * La distinction décisive est celle entre *autorisé* et *lié* : Android
+     * affiche un service d'accessibilité comme coché alors qu'il ne reçoit
+     * plus rien. C'est la panne la plus déroutante qui soit — tout paraît en
+     * ordre, et aucune offre n'arrive — donc elle mérite une puce rouge, pas
+     * une ligne de texte perdue au milieu de quatre autres.
      */
+    private fun peuplerSante() {
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_sante)
+        conteneur.removeAllViews()
+        val reglages = Reglages(this)
+
+        val organes = listOf(
+            Organe(
+                getString(R.string.sante_ecran),
+                when {
+                    !lectureEcranActive() -> getString(R.string.service_absent)
+                    LectureEcran.lie -> getString(R.string.service_lie)
+                    else -> getString(R.string.service_non_lie)
+                },
+                when {
+                    !lectureEcranActive() -> R.color.rouge
+                    LectureEcran.lie -> R.color.vert
+                    else -> R.color.ambre
+                },
+                { ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+            ),
+            Organe(
+                getString(R.string.sante_superposition),
+                if (Settings.canDrawOverlays(this)) {
+                    getString(R.string.accorde)
+                } else {
+                    getString(R.string.a_accorder)
+                },
+                if (Settings.canDrawOverlays(this)) R.color.vert else R.color.rouge,
+                {
+                    ouvrir(
+                        Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName"),
+                        )
+                    )
+                },
+            ),
+            Organe(
+                getString(R.string.sante_notifications),
+                when {
+                    !accesNotifications() -> getString(R.string.service_absent)
+                    EcouteNotifications.lie -> getString(R.string.service_lie)
+                    else -> getString(R.string.service_non_lie)
+                },
+                when {
+                    !accesNotifications() -> R.color.ambre
+                    EcouteNotifications.lie -> R.color.vert
+                    else -> R.color.ambre
+                },
+                { ouvrir(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
+            ),
+            Organe(
+                getString(R.string.sante_batterie),
+                if (batterieLibre()) {
+                    getString(R.string.batterie_desactivee)
+                } else {
+                    getString(R.string.batterie_active)
+                },
+                if (batterieLibre()) R.color.vert else R.color.ambre,
+                { demanderExemptionBatterie() },
+            ),
+            Organe(
+                getString(R.string.sante_veille),
+                if (reglages.veille) getString(R.string.sante_ok) else getString(R.string.sante_eteint),
+                if (reglages.veille) R.color.vert else R.color.gris,
+            ),
+            Organe(
+                getString(R.string.sante_ocr),
+                when {
+                    !Ocr.disponible -> getString(R.string.sante_indisponible)
+                    reglages.ocrSecours -> getString(R.string.sante_ok)
+                    else -> getString(R.string.sante_eteint)
+                },
+                when {
+                    !Ocr.disponible -> R.color.gris
+                    reglages.ocrSecours -> R.color.vert
+                    else -> R.color.gris
+                },
+            ),
+        )
+
+        for (organe in organes) conteneur.addView(ligneSante(organe))
+    }
+
+    private fun ligneSante(organe: Organe): View {
+        val teinte = ContextCompat.getColor(this, organe.couleur)
+        val ligne = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), dp(9), dp(8), dp(9))
+            organe.action?.let { action ->
+                isClickable = true
+                setOnClickListener { action() }
+            }
+        }
+        ligne.addView(
+            View(this).apply {
+                background = ContextCompat.getDrawable(context, R.drawable.fond_puce)
+                backgroundTintList = ColorStateList.valueOf(teinte)
+                layoutParams = LinearLayout.LayoutParams(dp(10), dp(10)).apply {
+                    marginEnd = dp(10)
+                }
+            }
+        )
+        ligne.addView(
+            TextView(this).apply {
+                text = organe.nom
+                textSize = 15f
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            }
+        )
+        ligne.addView(
+            TextView(this).apply {
+                text = organe.etat
+                textSize = 13f
+                setTextColor(teinte)
+                gravity = Gravity.END
+            }
+        )
+        return ligne
+    }
+
+    /** Ce qui reste utile sans mériter une puce : des compteurs. */
     private fun diagnostic(): String {
         val reglages = Reglages(this)
-        val lignes = listOf(
-            "Lecture d'écran : " + when {
-                !lectureEcranActive() -> getString(R.string.service_absent)
-                LectureEcran.lie -> getString(R.string.service_lie)
-                else -> getString(R.string.service_non_lie)
-            },
-            "Notifications : " + when {
-                !accesNotifications() -> getString(R.string.service_absent)
-                EcouteNotifications.lie -> getString(R.string.service_lie)
-                else -> getString(R.string.service_non_lie)
-            },
+        return listOf(
             "Pastille : " + if (BoutonFlottant.visible) "affichée" else "masquée",
             "Écoute : " + if (reglages.ecouteToutesApps) {
                 "toutes les applications"
@@ -155,8 +300,42 @@ class ActivitePrincipale : AppCompatActivity() {
                 "${reglages.paquets.size} application(s) cochée(s)"
             },
             "Notifications repérées : ${Journal.notificationsVues(this).size}",
-        )
-        return lignes.joinToString("\n")
+        ).joinToString(" · ")
+    }
+
+    /**
+     * L'application est-elle exemptée des restrictions d'énergie ?
+     *
+     * Un service d'accessibilité n'est pas mis en veille par le Doze — c'est
+     * le système qui le maintient lié. Mais les surcouches constructeur, qui
+     * arrêtent des processus entiers selon leurs propres règles, consultent
+     * bien cette liste. L'exemption ne garantit rien ; c'est simplement le
+     * seul levier qu'une application possède.
+     */
+    private fun batterieLibre(): Boolean = try {
+        val energie = getSystemService(Context.POWER_SERVICE) as PowerManager
+        energie.isIgnoringBatteryOptimizations(packageName)
+    } catch (e: Exception) {
+        false
+    }
+
+    private fun demanderExemptionBatterie() {
+        if (batterieLibre()) {
+            ouvrir(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            return
+        }
+        // L'intention ciblée demande directement l'exemption ; si le
+        // constructeur l'a retirée, on retombe sur la liste complète.
+        try {
+            startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:$packageName"),
+                )
+            )
+        } catch (e: Exception) {
+            ouvrir(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        }
     }
 
     /**
@@ -322,6 +501,123 @@ class ActivitePrincipale : AppCompatActivity() {
         return if (s.contains(',') && s.endsWith("0")) s.dropLast(1) else s
     }
 
+    // --- Simulateur ---------------------------------------------------------
+
+    /**
+     * Un curseur du simulateur : un réglage, une plage, une unité.
+     *
+     * Les mêmes valeurs se saisissent au chiffre près plus bas. Le curseur
+     * n'est pas un doublon pour autant : saisir « 0,18 » à la place de
+     * « 0,22 » ne dit rien tant qu'on n'a pas vu ce que cela change. Le
+     * verdict se recalcule sous le doigt, et c'est toute la différence entre
+     * régler un barème et le comprendre.
+     */
+    private class Curseur(
+        val titre: String,
+        val minimum: Double,
+        val maximum: Double,
+        val unite: String,
+        val decimales: Int,
+        val lire: (Bareme) -> Double,
+        val ecrire: (Bareme, Double) -> Bareme,
+    )
+
+    private val curseurs = listOf(
+        Curseur(
+            "Objectif", 10.0, 60.0, "€/h", 0,
+            { it.objectifHeure }, { b, v -> b.copy(objectifHeure = v) },
+        ),
+        Curseur(
+            "Coût de roulage", 0.0, 0.60, "€/km", 2,
+            { it.coutKm }, { b, v -> b.copy(coutKm = v) },
+        ),
+        Curseur(
+            "Retour à vide", 0.0, 100.0, "% du trajet", 0,
+            { it.partRetour * 100.0 }, { b, v -> b.copy(partRetour = v / 100.0) },
+        ),
+    )
+
+    private val etiquettes = mutableListOf<Pair<Curseur, TextView>>()
+
+    private fun construireCurseurs() {
+        findViewById<TextView>(R.id.course_essai).text = COURSE_ESSAI.replace('\n', ' ')
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_curseurs)
+
+        for (c in curseurs) {
+            val etiquette = TextView(this).apply {
+                textSize = 13f
+                setPadding(0, dp(8), 0, 0)
+            }
+            val glissiere = SeekBar(this).apply {
+                max = PAS_CURSEUR
+                progress = versPas(c, c.lire(reglages.bareme))
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(barre: SeekBar, valeur: Int, duUtilisateur: Boolean) {
+                        if (!duUtilisateur) return
+                        reglages.bareme = c.ecrire(reglages.bareme, depuisPas(c, valeur))
+                        rafraichirApercu()
+                        peuplerChamps()
+                    }
+
+                    override fun onStartTrackingTouch(barre: SeekBar) = Unit
+                    override fun onStopTrackingTouch(barre: SeekBar) = Unit
+                })
+            }
+            conteneur.addView(etiquette)
+            conteneur.addView(glissiere)
+            etiquettes += c to etiquette
+        }
+    }
+
+    private fun versPas(c: Curseur, valeur: Double): Int =
+        (((valeur - c.minimum) / (c.maximum - c.minimum)) * PAS_CURSEUR)
+            .toInt().coerceIn(0, PAS_CURSEUR)
+
+    private fun depuisPas(c: Curseur, pas: Int): Double =
+        c.minimum + (c.maximum - c.minimum) * pas / PAS_CURSEUR
+
+    /**
+     * Recalcule le verdict de la course fictive et l'affiche.
+     *
+     * Le calcul passe par le moteur réel, pas par une approximation
+     * d'aperçu : un simulateur qui ne simule pas exactement induit en erreur
+     * plus sûrement qu'il ne renseigne.
+     */
+    private fun rafraichirApercu() {
+        val bareme = reglages.bareme
+        for ((c, etiquette) in etiquettes) {
+            val valeur = c.lire(bareme)
+            etiquette.text = "${c.titre} : ${arrondi(valeur, c.decimales)} ${c.unite}"
+        }
+
+        val verdict = Arbitre.arbitrer(COURSE_ESSAI, "Essai", bareme)
+        val teinte = ContextCompat.getColor(
+            this,
+            when (verdict.decision) {
+                Decision.PRENDS -> R.color.vert
+                Decision.LIMITE -> R.color.ambre
+                Decision.LAISSE -> R.color.rouge
+                Decision.INCOMPLET -> R.color.gris
+            },
+        )
+
+        findViewById<TextView>(R.id.apercu_verdict).apply {
+            text = buildString {
+                append(verdict.decision.libelle)
+                verdict.euroHeure?.let { append("  ·  ").append(fmt0(it)).append(" €/h") }
+            }
+            setTextColor(teinte)
+        }
+        findViewById<TextView>(R.id.apercu_detail).apply {
+            text = verdict.resume
+            setTextColor(teinte)
+            alpha = 0.85f
+        }
+    }
+
+    private fun arrondi(valeur: Double, decimales: Int): String =
+        if (decimales == 0) fmt0(valeur) else fmt2(valeur)
+
     // --- Applications écoutées ----------------------------------------------
 
     private fun peuplerApplications() {
@@ -381,11 +677,7 @@ class ActivitePrincipale : AppCompatActivity() {
             return
         }
         enregistrerChamps()
-        val verdict = Arbitre.arbitrer(
-            "UberX · 18,40 €\n5 min (2,1 km) de vous\n21 min (9,4 km) de trajet",
-            "Essai",
-            reglages.bareme,
-        )
+        val verdict = Arbitre.arbitrer(COURSE_ESSAI, "Essai", reglages.bareme)
         Bulle.afficher(this, verdict, 180L, Source.ESSAI, reglages)
     }
 
@@ -405,4 +697,16 @@ class ActivitePrincipale : AppCompatActivity() {
     }
 
     private fun dp(valeur: Int): Int = (valeur * resources.displayMetrics.density).toInt()
+
+    private companion object {
+        /**
+         * La course du simulateur et du bouton d'essai — la même, pour que
+         * l'aperçu chiffré et la bulle posée à l'écran disent la même chose.
+         */
+        const val COURSE_ESSAI =
+            "UberX · 18,40 €\n5 min (2,1 km) de vous\n21 min (9,4 km) de trajet"
+
+        /** Finesse des curseurs : assez pour le centime, pas plus. */
+        const val PAS_CURSEUR = 200
+    }
 }

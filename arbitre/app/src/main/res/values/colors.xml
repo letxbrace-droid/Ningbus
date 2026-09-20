@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Les trois couleurs du verdict. Assez saturées pour être lues en
-         plein soleil derrière un pare-brise. -->
-    <color name="vert">#FF16A75C</color>
-    <color name="ambre">#FFE08A00</color>
-    <color name="rouge">#FFD93A31</color>
-    <color name="gris">#FF6B7683</color>
+    <!--
+        Les trois couleurs du verdict, en néon.
+
+        Elles servent deux situations opposées : le plein soleil derrière un
+        pare-brise, et la conduite de nuit où l'œil est adapté au noir. D'où
+        une saturation forte et une luminance élevée — sur fond noir pur, le
+        rapport de contraste dépasse 10:1 pour les trois.
+    -->
+    <color name="vert">#FF00E676</color>
+    <color name="ambre">#FFFFAB00</color>
+    <color name="rouge">#FFFF1744</color>
+    <color name="gris">#FF8A94A6</color>
+
+    <!--
+        Noir pur, et non gris foncé : sur une dalle AMOLED, un pixel noir est
+        un pixel éteint. La bulle ne coûte alors presque rien en batterie, et
+        ne fait pas halo la nuit.
+    -->
+    <color name="nuit">#FF000000</color>
+    <color name="nuit_carte">#FF0D0D0D</color>
+    <color name="nuit_relief">#FF16181C</color>
 
     <!-- La bulle garde ses propres couleurs : elle se pose par-dessus
          n'importe quelle application et ne peut hériter d'aucun thème. -->
-    <color name="bulle_fond">#F00E1116</color>
+    <color name="bulle_fond">#F00D0D0D</color>
     <color name="bulle_texte">#FFFFFFFF</color>
-    <color name="bulle_texte_doux">#FFB9C2CC</color>
+    <color name="bulle_texte_doux">#FFC7CED6</color>
 
-    <color name="fond_icone">#FF0E1116</color>
+    <color name="fond_icone">#FF0D0D0D</color>
 </resources>

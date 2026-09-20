@@ -145,20 +145,41 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- ================= État de santé ================= -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="24dp"
             android:text="@string/titre_diagnostic"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.75"
+            android:text="@string/aide_diagnostic"
+            android:textSize="13sp" />
+
+        <!-- Une ligne par organe : une puce, un nom, un état. Les listes de
+             texte se lisent mal d'un coup d'œil ; une puce rouge, non. -->
+        <LinearLayout
+            android:id="@+id/conteneur_sante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/fond_carte"
+            android:orientation="vertical"
+            android:padding="6dp" />
 
         <TextView
             android:id="@+id/diagnostic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="13sp" />
+            android:layout_marginTop="8dp"
+            android:alpha="0.75"
+            android:textSize="12sp" />
 
         <!-- ================= Interrupteurs ================= -->
 
@@ -231,6 +252,91 @@
             android:layout_marginTop="8dp"
             android:text="@string/decouverte_active"
             android:textSize="16sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ocr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/ocr_secours"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_ocr"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/veille"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/veille"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_veille"
+            android:textSize="12sp" />
+
+        <!-- ================= Simulateur ================= -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/titre_simulateur"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.75"
+            android:text="@string/aide_simulateur"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/fond_carte"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:id="@+id/course_essai"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:textSize="13sp" />
+
+            <!-- Le verdict, recalculé à chaque mouvement du doigt. -->
+            <TextView
+                android:id="@+id/apercu_verdict"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/apercu_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/conteneur_curseurs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+        </LinearLayout>
 
         <!-- ================= Barème ================= -->
 

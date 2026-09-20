@@ -2,6 +2,7 @@ package fr.ningbus.arbitre
 
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -11,6 +12,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import fr.ningbus.arbitre.moteur.Decision
+import fr.ningbus.arbitre.moteur.fmt0
 import kotlin.math.abs
 
 /**
@@ -39,6 +44,9 @@ object BoutonFlottant {
     /** Durée d'appui à partir de laquelle on capture l'écran brut. */
     private const val APPUI_LONG_MS = 550L
 
+    /** Temps pendant lequel la pilule garde le dernier verdict. */
+    private const val DUREE_VERDICT_MS = 60_000L
+
     fun montrer(contexte: Context) {
         val app = contexte.applicationContext
         principal.post {
@@ -63,6 +71,66 @@ object BoutonFlottant {
 
     val visible: Boolean
         get() = vue != null
+
+    /**
+     * Mode pilule : la pastille porte le dernier verdict rendu.
+     *
+     * Plutôt qu'une seconde fenêtre flottante — deux objets qui se
+     * disputeraient la place au-dessus du bouton « Accepter » — la carte
+     * complète s'efface après quelques secondes et laisse son résumé ici.
+     * Un coup d'œil suffit ensuite à savoir ce que valait la course qu'on
+     * vient de laisser filer, sans rien rouvrir.
+     *
+     * Elle redevient « €/h » au bout d'une minute : c'est un bouton avant
+     * d'être un afficheur, et son libellé doit finir par le redire.
+     */
+    fun montrerVerdict(contexte: Context, euroHeure: Double?, decision: Decision) {
+        val app = contexte.applicationContext
+        principal.post {
+            val pastille = vue?.findViewById<TextView>(R.id.pastille) ?: return@post
+            val teinte = ContextCompat.getColor(app, teinteDe(decision))
+            pastille.text = euroHeure?.let { "${fmt0(it)} €/h" } ?: decision.libelle
+            pastille.background = fond(app, teinte)
+            pastille.setTextColor(teinte)
+
+            principal.removeCallbacks(repos)
+            principal.postDelayed(repos, DUREE_VERDICT_MS)
+        }
+    }
+
+    /** Remet le libellé d'origine, sans toucher à la position choisie. */
+    private val repos = Runnable {
+        val pastille = vue?.findViewById<TextView>(R.id.pastille) ?: return@Runnable
+        val contexte = pastille.context
+        pastille.text = contexte.getString(R.string.pastille_repos)
+        pastille.background = fond(contexte, ContextCompat.getColor(contexte, R.color.vert))
+        pastille.setTextColor(ContextCompat.getColor(contexte, R.color.bulle_texte))
+    }
+
+    private fun teinteDe(decision: Decision): Int = when (decision) {
+        Decision.PRENDS -> R.color.vert
+        Decision.LIMITE -> R.color.ambre
+        Decision.LAISSE -> R.color.rouge
+        Decision.INCOMPLET -> R.color.gris
+    }
+
+    /**
+     * Le fond de la pilule, redessiné pour porter la couleur du verdict sur
+     * son seul contour.
+     *
+     * Une teinte appliquée à la ressource entière (`backgroundTintList`)
+     * colorerait aussi le remplissage, et un aplat vert fluo par-dessus une
+     * carte de navigation est illisible. Seul le trait doit s'allumer.
+     */
+    private fun fond(contexte: Context, teinte: Int): GradientDrawable {
+        val densite = contexte.resources.displayMetrics.density
+        return GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 26f * densite
+            setColor(ContextCompat.getColor(contexte, R.color.bulle_fond))
+            setStroke((2 * densite).toInt(), teinte)
+        }
+    }
 
     private fun poser(contexte: Context) {
         if (!Settings.canDrawOverlays(contexte)) return

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Pastille d'analyse manuelle. Volontairement petite et translucide : elle
-    reste à l'écran en permanence et ne doit jamais gêner la lecture de
-    l'application chauffeur.
+    Pastille d'analyse manuelle, et pilule du dernier verdict.
+
+    Au repos elle est ronde et ne dit que « €/h ». Après une offre, elle
+    s'allonge le temps d'afficher ce que valait la course — de quoi savoir
+    d'un coup d'œil ce qu'on vient de laisser passer, sans rien rouvrir.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
@@ -10,11 +12,16 @@
     android:padding="6dp">
 
     <TextView
-        android:layout_width="52dp"
-        android:layout_height="52dp"
+        android:id="@+id/pastille"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="@drawable/fond_pastille"
         android:elevation="6dp"
         android:gravity="center"
+        android:minWidth="52dp"
+        android:minHeight="52dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:text="€/h"
         android:textColor="@color/bulle_texte"
         android:textSize="15sp"

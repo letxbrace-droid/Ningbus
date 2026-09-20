@@ -104,6 +104,35 @@ class Reglages(contexte: Context) {
         get() = p.getBoolean("toutesApps", false)
         set(v) = p.edit().putBoolean("toutesApps", v).apply()
 
+    /**
+     * Reconnaissance de texte en secours, quand l'arbre d'accessibilité ne
+     * livre rien d'exploitable.
+     *
+     * Activée par défaut, et il le faut : les applications chauffeur passent
+     * à Compose et au dessin sur Canvas, où le texte n'existe pas en tant que
+     * nœud. Sans ce second chemin, une carte d'offre dessinée est invisible,
+     * et rien dans l'application ne permet de s'en apercevoir.
+     *
+     * Reste désactivable, parce qu'une capture d'écran suivie d'une
+     * reconnaissance coûte mille fois un parcours de nœuds : sur un téléphone
+     * fatigué, on peut vouloir s'en passer.
+     */
+    var ocrSecours: Boolean
+        get() = p.getBoolean("ocrSecours", true)
+        set(v) = p.edit().putBoolean("ocrSecours", v).apply()
+
+    /**
+     * Service de veille : une notification permanente, et rien d'autre.
+     *
+     * Son seul effet est d'élever l'importance du processus. Une surcouche
+     * constructeur qui fait le ménage en arrière-plan emporte le service
+     * d'accessibilité avec le processus, et Android ne le relie pas toujours
+     * ensuite — la panne « autorisé mais non lié ».
+     */
+    var veille: Boolean
+        get() = p.getBoolean("veille", true)
+        set(v) = p.edit().putBoolean("veille", v).apply()
+
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
     var boutonFlottant: Boolean
         get() = p.getBoolean("boutonFlottant", true)
