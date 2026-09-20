@@ -38,6 +38,10 @@ class LectureEcran : AccessibilityService() {
     /** Lecture partielle en cours de complétion. */
     private var attente: Attente? = null
 
+    /** Paquets effectivement lus au dernier parcours, pour le diagnostic. */
+    private var paquetLu: String? = null
+    private var paquetsLus: List<String> = emptyList()
+
     private class Attente(
         val paquet: String,
         val course: Course,
@@ -83,8 +87,17 @@ class LectureEcran : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         val e = event ?: return
-        val paquet = e.packageName?.toString() ?: return
+        val paquet = e.packageName?.toString()
         if (paquet == packageName) return // nos propres fenêtres
+
+        // Le filtre passe AVANT l'étranglement, et l'ordre inverse était un
+        // vrai défaut : une offre arrive par-dessus l'application que le
+        // chauffeur regarde — TikTok, un GPS — et celle-ci émet des dizaines
+        // d'événements par seconde. Étrangler d'abord revenait à dépenser le
+        // budget sur l'application du dessous, puis à jeter l'événement
+        // d'Uber arrivé cent millisecondes plus tard.
+        val reglages = Reglages(this)
+        if (paquet != null && !reglages.ecoute(paquet)) return
 
         // Le contenu d'une carte d'offre change à chaque seconde du compte à
         // rebours. Sans ce pas minimal, on relirait tout l'arbre des vues
@@ -94,6 +107,8 @@ class LectureEcran : AccessibilityService() {
         derniereLecture = maintenant
 
         try {
+            // L'apparition d'une fenêtre flottante est annoncée sans nom de
+            // paquet : on regarde alors toutes les applications écoutées.
             lire(paquet, e.eventTime, force = false)
         } catch (ex: Exception) {
             // Un arbre de vues qui disparaît en cours de parcours ne doit pas
@@ -111,17 +126,23 @@ class LectureEcran : AccessibilityService() {
      * @param force analyse demandée par l'utilisateur : ni filtre d'écran, ni
      *   dédoublonnage — s'il appuie deux fois, il veut deux réponses.
      */
-    private fun lire(paquet: String, instantEvenement: Long, force: Boolean): Boolean {
+    private fun lire(paquet: String?, instantEvenement: Long, force: Boolean): Boolean {
         val reglages = Reglages(this)
         if (!reglages.actif) return false
-        if (!force && !reglages.ecoute(paquet)) return false
+        if (!force && paquet != null && !reglages.ecoute(paquet)) return false
 
-        // Une analyse demandée à la main ne sait pas de quelle application
-        // vient l'écran : elle lit tout. Une analyse automatique, elle, sait,
-        // et ne doit lire que les fenêtres de l'émettrice — sans quoi un
-        // événement d'Uber fait lire la fenêtre d'une autre application et
-        // arbitre son texte sous le nom d'Uber.
-        val texte = texteEcran(if (force) "" else paquet)
+        // Quelles fenêtres lire :
+        //  - analyse à la main : toutes, puisqu'on ne sait pas d'où vient
+        //    l'écran et que l'utilisateur, lui, le voit ;
+        //  - événement d'une application nommée : les siennes, sans quoi on
+        //    arbitrerait le texte d'une autre sous son nom ;
+        //  - événement sans nom de paquet : toutes les applications écoutées.
+        val critere: (String) -> Boolean = when {
+            force -> { _ -> true }
+            paquet != null -> { p -> p == paquet }
+            else -> { p -> reglages.ecoute(p) }
+        }
+        val texte = texteEcran(critere)
         if (texte.isEmpty()) {
             if (force) signaler(R.string.rien_a_lire)
             return false
@@ -129,21 +150,22 @@ class LectureEcran : AccessibilityService() {
 
         // Une lecture qui en complète une autre n'a pas à reporter de montant :
         // c'est précisément la partie qui manquait la fois d'avant.
-        val enCours = attente?.takeIf { it.paquet == paquet }
+        val nom = paquet ?: paquetLu ?: "écran"
+        val enCours = attente?.takeIf { it.paquet == nom }
         if (!Arbitrage.ressembleAUneCourse(texte) && enCours == null) {
             if (force) {
-                Journal.signalerCapture(this, paquet, texte)
+                Journal.signalerCapture(this, nom, texte)
                 signaler(R.string.rien_a_lire)
             }
             return false
         }
 
-        val course = Arbitrage.lire(paquet, texte).completer(enCours?.course)
+        val course = Arbitrage.lire(nom, texte).completer(enCours?.course)
 
         if (!force && enCours == null && reglages.filtrerEcrans && !estUneOffre(texte, course)) {
             // Écran portant un montant mais écarté : on le note pour pouvoir
             // élargir les marqueurs si des courses passent à travers.
-            if (course.prix != null) Journal.signalerEcranIgnore(this, paquet, texte)
+            if (course.prix != null) Journal.signalerEcranIgnore(this, nom, texte)
             return false
         }
 
@@ -158,7 +180,7 @@ class LectureEcran : AccessibilityService() {
         // un verdict creux sur ce qu'on a vu au millième de seconde près.
         if (!force && !course.exploitable) {
             if (course.prix != null || course.kmTrajet != null || course.minutesTrajet != null) {
-                attente = Attente(paquet, course, debut, marqueur(texte))
+                attente = Attente(nom, course, debut, marqueur(texte))
                 principal.removeCallbacks(devoiler)
                 principal.postDelayed(devoiler, DELAI_INCOMPLET_MS)
             }
@@ -169,9 +191,9 @@ class LectureEcran : AccessibilityService() {
         attente = null
 
         val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
-        val rendu = Arbitrage.rendre(this, paquet, course, Source.ECRAN, latence, force)
+        val rendu = Arbitrage.rendre(this, nom, course, Source.ECRAN, latence, force)
         if (force && !rendu) {
-            Journal.signalerCapture(this, paquet, texte)
+            Journal.signalerCapture(this, nom, texte)
             signaler(R.string.montant_introuvable)
         }
         return rendu
@@ -219,9 +241,14 @@ class LectureEcran : AccessibilityService() {
      * quand il y en a ; sinon on prend tout ce qui n'est pas à nous, car une
      * offre vaut mieux lue avec du bruit autour que pas lue du tout.
      */
-    private fun texteEcran(paquet: String): String {
-        val racines = racines(paquet)
-        if (racines.isEmpty()) return ""
+    private fun texteEcran(critere: (String) -> Boolean): String {
+        val racines = racines(critere)
+        if (racines.isEmpty()) {
+            paquetLu = null
+            return ""
+        }
+        paquetLu = racines.first().packageName?.toString()
+        paquetsLus = racines.mapNotNull { it.packageName?.toString() }.distinct()
 
         val morceaux = LinkedHashSet<String>(64)
         var budget = NOEUDS_MAX
@@ -232,9 +259,8 @@ class LectureEcran : AccessibilityService() {
         return morceaux.joinToString("\n")
     }
 
-    private fun racines(paquet: String): List<AccessibilityNodeInfo> {
+    private fun racines(critere: (String) -> Boolean): List<AccessibilityNodeInfo> {
         val toutes = ArrayList<AccessibilityNodeInfo>(4)
-        val tout = paquet.isEmpty()
 
         // De la fenêtre la plus en avant vers la plus en arrière : une offre
         // posée par-dessus le reste se lit d'abord.
@@ -258,7 +284,7 @@ class LectureEcran : AccessibilityService() {
         // nommée : si la sienne n'est pas lisible, il n'y a rien à lire. Lire
         // celle d'à côté produirait un verdict sur le texte d'une autre
         // application, attribué à celle-ci.
-        return if (tout) toutes else toutes.filter { it.packageName == paquet }
+        return toutes.filter { critere(it.packageName?.toString() ?: "") }
     }
 
     /**
@@ -361,7 +387,7 @@ class LectureEcran : AccessibilityService() {
         fun analyserMaintenant(contexte: Context) {
             val service = instance ?: return refuser(contexte)
             try {
-                service.lire(paquetDevant(service), SystemClock.uptimeMillis(), force = true)
+                service.lire(null, SystemClock.uptimeMillis(), force = true)
             } catch (e: Exception) {
                 Log.w(TAG, "analyse manuelle impossible : ${e.message}")
             }
@@ -378,7 +404,7 @@ class LectureEcran : AccessibilityService() {
             val service = instance ?: return
             service.principal.postDelayed({
                 try {
-                    service.lire(paquetDevant(service), SystemClock.uptimeMillis(), force = false)
+                    service.lire(null, SystemClock.uptimeMillis(), force = false)
                 } catch (e: Exception) {
                     Log.w(TAG, "relecture impossible : ${e.message}")
                 }
@@ -394,23 +420,19 @@ class LectureEcran : AccessibilityService() {
         fun capturer(contexte: Context) {
             val service = instance ?: return refuser(contexte)
             try {
-                val paquet = paquetDevant(service)
-                val texte = service.texteEcran(paquet)
-                Journal.signalerCapture(contexte, paquet, texte, force = true)
+                // Toutes les fenêtres, sans exception. Filtrer ici sur
+                // l'application de devant faisait relever TikTok pendant
+                // qu'une offre Uber flottait par-dessus : exactement ce que la
+                // capture est censée révéler.
+                val texte = service.texteEcran { true }
+                val paquets = service.paquetsLus.joinToString(", ").ifEmpty { "aucune fenêtre" }
+                Journal.signalerCapture(contexte, paquets, texte, force = true)
                 service.signaler(
-                    contexte.getString(R.string.ecran_capture, paquet, texte.length)
+                    contexte.getString(R.string.ecran_capture, paquets, texte.length)
                 )
             } catch (e: Exception) {
                 Log.w(TAG, "capture impossible : ${e.message}")
             }
-        }
-
-        /** Le paquet de la fenêtre la plus en avant qui ne soit pas la nôtre. */
-        private fun paquetDevant(service: LectureEcran): String {
-            service.rootInActiveWindow?.packageName?.toString()?.let {
-                if (it != service.packageName) return it
-            }
-            return service.racines("").firstOrNull()?.packageName?.toString() ?: "écran"
         }
 
         private fun refuser(contexte: Context) {
