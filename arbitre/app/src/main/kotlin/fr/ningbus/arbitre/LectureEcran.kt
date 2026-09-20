@@ -438,11 +438,47 @@ class LectureEcran : AccessibilityService() {
                             reconnu.take(400).replace('\n', '|'),
                     )
                     rapporter(issue, nom, fusion, force)
+                    reprendre(nom, texteArbre, instantEvenement, force)
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "analyse du texte reconnu impossible : ${e.message}")
             }
         }
+    }
+
+    /**
+     * Redemande une capture peu après une première restée stérile.
+     *
+     * C'est la correction du quota de captures, qui ne servait à rien tel
+     * qu'il était posé : les tentatives suivantes attendaient un **nouvel
+     * événement de fenêtre**, alors qu'une carte en train de se dessiner n'en
+     * produit aucun. Le banc l'a montré sans appel — la reconnaissance avait
+     * lu l'écran de pilotage jusqu'à son dernier bouton, preuve que la carte
+     * n'était pas encore là.
+     *
+     * La reprise ne repasse donc pas par le créneau global : elle est bornée
+     * par le quota de l'écran, qui est la vraie limite de dépense.
+     */
+    private fun reprendre(
+        nom: String,
+        texteArbre: String,
+        instantEvenement: Long,
+        force: Boolean,
+    ) {
+        if (force || capturesSurEcran >= CAPTURES_PAR_ECRAN) return
+        capturesSurEcran++
+        Log.i(TAG, "reprise de capture ($capturesSurEcran/$CAPTURES_PAR_ECRAN)")
+        principal.postDelayed(
+            {
+                Bulle.eclipser()
+                BoutonFlottant.eclipser()
+                principal.postDelayed(
+                    { capturer(nom, texteArbre, instantEvenement, force) },
+                    DELAI_ECLIPSE_MS,
+                )
+            },
+            DELAI_REPRISE_MS,
+        )
     }
 
     /**
@@ -637,6 +673,14 @@ class LectureEcran : AccessibilityService() {
          * quelques millisecondes.
          */
         private const val CAPTURES_PAR_ECRAN = 3
+
+        /**
+         * Délai avant de redemander une capture restée stérile.
+         *
+         * Assez long pour qu'une carte ait fini de se dessiner, assez court
+         * pour qu'une offre de quinze secondes soit encore à l'écran.
+         */
+        private const val DELAI_REPRISE_MS = 800L
 
         /** Textes du bouton qui accepte la course, selon les plateformes. */
         private val MARQUEURS = listOf(
