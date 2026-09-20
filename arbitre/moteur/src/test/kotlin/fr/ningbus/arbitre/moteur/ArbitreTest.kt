@@ -114,24 +114,54 @@ class ArbitreTest {
     }
 
     @Test
-    fun `duree manquante estimee au rythme de l'approche`() {
-        // Approche : 4 km en 12 min, soit 20 km/h. Le trajet de 10 km est
-        // donc estimé à 30 min, et non aux 22 km/h du réglage par défaut.
+    fun `duree manquante estimee sur la longueur du trajet, corrigee du trafic`() {
+        // Approche : 4 km en 12 min, soit 20 km/h là où l'on attendrait 26 —
+        // le trafic vaut donc 0,77. Le trajet de 10 km, qui se parcourt
+        // normalement à 38 km/h, est estimé à 29 km/h, soit 20,5 min.
         val v = Arbitre.arbitrer(
             Course(prix = 18.0, minutesApproche = 12.0, kmApproche = 4.0, kmTrajet = 10.0),
             nu.copy(approcheMaxMinutes = 20.0),
         )
-        assertEquals(12.0 + 30.0, v.minutesTotal!!, 0.01)
-        assertTrue(v.alertes.any { it.contains("au rythme de l'approche") })
+        assertEquals(12.0 + 20.5, v.minutesTotal!!, 0.2)
+        assertTrue(v.alertes.any { it.contains("trafic mesuré sur l'approche") })
         assertEquals(Decision.LIMITE, v.decision) // jamais vert sur une estimation
     }
 
     @Test
-    fun `sans approche mesurable, la vitesse de reglage sert de repli`() {
+    fun `sans approche mesurable, le trafic est supposé normal`() {
+        // 11 km se parcourent normalement à 38 km/h, soit 17 min.
         val v = Arbitre.arbitrer(Course(prix = 18.0, kmTrajet = 11.0), nu)
-        // 11 km à 22 km/h = 30 min
-        assertEquals(30.0, v.minutesTotal!!, 0.01)
-        assertTrue(v.alertes.any { it.contains("vitesse supposée") })
+        assertEquals(11.0 / 38.0 * 60.0, v.minutesTotal!!, 0.2)
+        assertTrue(v.alertes.any { it.contains("trafic supposé normal") })
+    }
+
+    @Test
+    fun `une approche en ville ne condamne pas un trajet sur route`() {
+        // Le cas des Ulis : 2,5 km de rues en 9 min. Extrapoler cette vitesse
+        // donnerait 45 min pour 12,6 km de départementale — le double du vrai.
+        val v = Arbitre.arbitrer(
+            Course(prix = 12.51, minutesApproche = 9.0, kmApproche = 2.5, kmTrajet = 12.6),
+            nu.copy(approcheMaxMinutes = 20.0),
+        )
+        val trajet = v.minutesTotal!! - 9.0
+        assertTrue(trajet in 18.0..26.0, "durée de trajet invraisemblable : $trajet min")
+    }
+
+    @Test
+    fun `une course longue se parcourt plus vite qu'une course courte`() {
+        assertTrue(vitesseTypique(2.0) < vitesseTypique(15.0))
+        assertTrue(vitesseTypique(15.0) < vitesseTypique(40.0))
+    }
+
+    @Test
+    fun `le facteur de trafic reste borné`() {
+        // Approche de 200 m dans un parking : 1,2 km/h. Sans borne, elle
+        // condamnerait toutes les courses.
+        val etouffe = facteurTrafic(0.2, 10.0)!!
+        assertTrue(etouffe >= 0.6, "facteur non borné : $etouffe")
+        // Approche sur voie rapide : 90 km/h là où l'on attend 26.
+        val degage = facteurTrafic(5.0, 3.3)!!
+        assertTrue(degage <= 1.5, "facteur non borné : $degage")
     }
 
     @Test

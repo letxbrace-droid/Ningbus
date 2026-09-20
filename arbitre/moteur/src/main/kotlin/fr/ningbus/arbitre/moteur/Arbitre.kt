@@ -67,23 +67,33 @@ object Arbitre {
         // --- Trajet payé : compléter la donnée manquante si besoin ----------
         //
         // Uber n'annonce que « Course de 12,1 km » : la durée du trajet
-        // manque. La vitesse de l'approche est alors une bien meilleure
-        // référence qu'une constante de réglage — elle est mesurée sur les
-        // mêmes routes, à la même minute, dans le même trafic.
+        // manque. On part de la vitesse à laquelle se parcourt normalement un
+        // trajet de cette longueur, corrigée par ce que l'approche apprend du
+        // trafic du moment.
+        //
+        // Extrapoler directement depuis la vitesse de l'approche serait une
+        // faute : une approche de 2,5 km de rues à 17 km/h donnerait 45 min
+        // pour 12,6 km de départementale, soit le double du vrai. Une course
+        // longue emprunte des axes, une course courte reste aux carrefours.
         val vitesseApproche = vitesse(course.kmApproche, course.minutesApproche)
-        val vitesseReference = vitesseApproche?.coerceIn(8.0, 60.0) ?: bareme.vitesseParDefaut
-        val origineVitesse =
-            if (vitesseApproche != null) "au rythme de l'approche" else "à la vitesse supposée"
+        val facteur = facteurTrafic(course.kmApproche, course.minutesApproche)
 
         var kmTrajet = course.kmTrajet
         var minutesTrajet = course.minutesTrajet
         if (kmTrajet == null && minutesTrajet != null) {
-            kmTrajet = minutesTrajet / 60.0 * vitesseReference
-            alertes += "distance estimée à ${fmt1(kmTrajet)} km, $origineVitesse"
+            val vitesse = (facteur ?: 1.0) * bareme.vitesseParDefaut
+            kmTrajet = minutesTrajet / 60.0 * vitesse
+            alertes += "distance estimée à ${fmt1(kmTrajet)} km"
         } else if (minutesTrajet == null && kmTrajet != null) {
-            minutesTrajet = kmTrajet / vitesseReference * 60.0
-            alertes += "durée estimée à ${fmt0(minutesTrajet)} min, $origineVitesse " +
-                "(${fmt0(vitesseReference)} km/h)"
+            val vitesse = vitesseTypique(kmTrajet) * (facteur ?: 1.0)
+            minutesTrajet = kmTrajet / vitesse * 60.0
+            val origine = if (facteur != null) {
+                "trafic mesuré sur l'approche"
+            } else {
+                "trafic supposé normal"
+            }
+            alertes += "durée estimée à ${fmt0(minutesTrajet)} min " +
+                "(${fmt0(vitesse)} km/h, $origine)"
         }
         if (kmTrajet == null || minutesTrajet == null) {
             return Verdict(

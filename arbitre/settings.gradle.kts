@@ -1,4 +1,13 @@
 pluginManagement {
+    // Les versions vivent ici, pas dans chaque module : trois modules
+    // appliquent les mêmes plugins, et des versions divergentes se
+    // traduiraient par une erreur de classpath difficile à lire.
+    plugins {
+        id("com.android.application") version "8.7.3"
+        id("org.jetbrains.kotlin.android") version "2.0.21"
+        id("org.jetbrains.kotlin.jvm") version "2.0.21"
+    }
+
     repositories {
         google()
         mavenCentral()
@@ -28,6 +37,9 @@ val sdkAndroid = System.getenv("ANDROID_HOME") != null ||
 
 if (sdkAndroid) {
     include(":app")
+    // Fausse application chauffeur du banc d'essai : elle doit être un
+    // paquet distinct pour être lue comme n'importe quelle autre application.
+    include(":simulateur")
 } else {
     gradle.rootProject {
         logger.lifecycle("SDK Android introuvable — module :app ignoré, seul :moteur est construit.")

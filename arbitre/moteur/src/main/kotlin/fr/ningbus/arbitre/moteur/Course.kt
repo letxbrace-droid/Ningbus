@@ -82,6 +82,38 @@ fun vitesse(km: Double?, minutes: Double?): Double? {
     return km / (minutes / 60.0)
 }
 
+/**
+ * Vitesse moyenne à laquelle se parcourt normalement un trajet de cette
+ * longueur, en km/h.
+ *
+ * Une course longue va plus vite qu'une course courte : elle emprunte des
+ * axes, quand la course courte reste dans les rues et les carrefours. C'est
+ * ce qui interdit d'extrapoler la durée d'un trajet depuis la vitesse de
+ * l'approche — 2,5 km de rues à 17 km/h ne disent rien de 12 km de
+ * départementale.
+ */
+fun vitesseTypique(km: Double): Double = when {
+    km < 3.0 -> 18.0
+    km < 10.0 -> 26.0
+    km < 25.0 -> 38.0
+    else -> 55.0
+}
+
+/**
+ * Ce que l'approche apprend du trafic, et rien de plus.
+ *
+ * Elle est mesurée : distance et durée sont toutes deux annoncées. Comparée
+ * à ce qu'on attendrait normalement sur cette distance, elle donne un
+ * coefficient — 0,8 si ça roule mal aujourd'hui, 1,2 si c'est dégagé — qu'on
+ * applique ensuite à la vitesse typique du trajet. La borne évite qu'une
+ * approche de 300 m dans un parking ne condamne une course de 40 km.
+ */
+fun facteurTrafic(kmApproche: Double?, minutesApproche: Double?): Double? {
+    val mesuree = vitesse(kmApproche, minutesApproche) ?: return null
+    val attendue = vitesseTypique(kmApproche ?: return null)
+    return (mesuree / attendue).coerceIn(0.6, 1.5)
+}
+
 /** Classe une vitesse moyenne en état de circulation. */
 fun trafic(kmh: Double?): Trafic = when {
     kmh == null -> Trafic.INCONNU

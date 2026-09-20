@@ -59,3 +59,57 @@ jobs:
           name: rapport-tests-moteur
           path: arbitre/moteur/build/reports/tests/test
           if-no-files-found: ignore
+
+  # Le banc d'essai : Arbitre face à une vraie carte d'offre, sur un vrai
+  # Android. Toutes les pannes rencontrées vivaient dans la plomberie — la
+  # mauvaise fenêtre lue, l'arbre des vues tronqué, la carte pas encore
+  # dessinée — et aucun test unitaire ne pouvait les voir.
+  banc-essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: arbitre
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Sans accélération matérielle, l'émulateur est trop lent pour être
+      # utilisable : les essais expireraient avant le démarrage du système.
+      - name: Activer KVM
+        working-directory: .
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Rendre le wrapper exécutable
+        run: chmod +x gradlew
+
+      - name: Jouer le parcours complet sur émulateur
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          working-directory: arbitre
+          script: |
+            ./gradlew :simulateur:installDebug
+            ./gradlew :app:connectedDebugAndroidTest
+
+      - name: Publier le rapport du banc d'essai
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-banc-essai
+          path: arbitre/app/build/reports/androidTests
+          if-no-files-found: ignore
