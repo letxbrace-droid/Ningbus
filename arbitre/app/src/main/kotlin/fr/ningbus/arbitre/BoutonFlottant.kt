@@ -73,6 +73,27 @@ object BoutonFlottant {
         get() = vue != null
 
     /**
+     * Efface la pastille le temps d'une capture d'écran.
+     *
+     * Une capture ne connaît pas les paquets : elle prend tout ce qui est
+     * dessiné, nos propres fenêtres comprises. La pastille affichant
+     * « 31 €/h », la reconnaissance de texte lisait ce montant comme s'il
+     * venait de l'offre — et l'analyseur, qui retient le plus élevé, le
+     * préférait au vrai prix. L'application se lisait elle-même.
+     *
+     * On agit sur la transparence et non sur la fenêtre : retirer puis
+     * remettre la vue produirait des événements d'accessibilité, donc une
+     * nouvelle lecture, donc une nouvelle capture.
+     */
+    fun eclipser() {
+        vue?.alpha = 0f
+    }
+
+    fun reparaitre() {
+        vue?.alpha = 1f
+    }
+
+    /**
      * Mode pilule : la pastille porte le dernier verdict rendu.
      *
      * Plutôt qu'une seconde fenêtre flottante — deux objets qui se

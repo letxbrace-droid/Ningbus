@@ -194,6 +194,20 @@ class ActiviteJournal : AppCompatActivity() {
             textSize = 14f
             setPadding(0, dp(4), 0, 0)
         })
+
+        // Le détail champ par champ : ce qui a été lu, ce qui a été estimé,
+        // ce qui manquait. C'est la différence entre « course non détectée »
+        // et « j'ai vu le prix et l'approche, il me manquait la course » —
+        // la première ne mène nulle part, la seconde dit quoi corriger.
+        if (ligne.lectures.isNotEmpty()) {
+            bloc.addView(TextView(this).apply {
+                text = "confiance ${ligne.confiance} %\n${ligne.lectures}"
+                textSize = 12f
+                alpha = 0.8f
+                setPadding(0, dp(6), 0, 0)
+            })
+        }
+
         bloc.addView(TextView(this).apply {
             text = ligne.texteBrut
             textSize = 11f
@@ -216,7 +230,8 @@ class ActiviteJournal : AppCompatActivity() {
         val texte = buildString {
             lignes.joinTo(this, "\n\n") { l ->
                 "[${heure.format(Date(l.horodatage))}] ${l.paquet} · ${l.source} · " +
-                    "${l.decision} · ${l.latenceMs} ms\n${l.texteBrut}"
+                    "${l.decision} · ${l.latenceMs} ms · confiance ${l.confiance} %\n" +
+                    "${l.lectures}\n${l.texteBrut}"
             }
             if (ecarts.isNotEmpty()) {
                 append("\n\n--- ").append(getString(R.string.titre_ecarts)).append(" ---")

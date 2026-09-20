@@ -22,6 +22,16 @@ data class Ligne(
     val latenceMs: Long,
     /** Notification, écran ou essai — pour savoir quel chemin a fonctionné. */
     val source: String,
+    /**
+     * Ce que valait la lecture, de 0 à 100.
+     *
+     * Séparé du verdict à dessein : un LAISSE sur données complètes et un
+     * LAISSE calculé sur une approche inventée se ressemblent dans un journal
+     * et ne s'expliquent pas pareil.
+     */
+    val confiance: Int = 0,
+    /** Le détail champ par champ : ce qui a été lu, estimé, ou manquait. */
+    val lectures: String = "",
 )
 
 /**
@@ -55,6 +65,8 @@ object Journal {
             put("brut", verdict.course.texteBrut)
             put("lat", latenceMs)
             put("source", source.libelle)
+            put("conf", verdict.confiance.pourcent)
+            put("lect", verdict.confiance.lectures.joinToString("\n") { it.toString() })
         }
         val prefs = contexte.applicationContext
             .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
@@ -85,6 +97,8 @@ object Journal {
                 texteBrut = o.optString("brut"),
                 latenceMs = o.optLong("lat"),
                 source = o.optString("source", "?"),
+                confiance = o.optInt("conf"),
+                lectures = o.optString("lect"),
             )
         }
     }

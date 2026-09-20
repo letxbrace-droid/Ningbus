@@ -71,6 +71,17 @@ object Bulle {
         principal.post { retirer() }
     }
 
+    /**
+     * Une bulle est-elle posée en ce moment ?
+     *
+     * Sert à interdire la reconnaissance de texte tant qu'un verdict est
+     * affiché : une capture d'écran prendrait la bulle elle-même, et
+     * l'analyseur y retrouverait un montant, une approche et une distance —
+     * les siens. Le verdict engendrerait un verdict.
+     */
+    val visible: Boolean
+        get() = vue != null
+
     // --- Pose ---------------------------------------------------------------
 
     private fun poser(
@@ -197,6 +208,33 @@ object Bulle {
             append(fmt2(verdict.revenuNet)).append(" € net")
             append(" · ").append(fmt0(verdict.minutesTotal)).append(" min")
             append(" · ").append(fmt1(verdict.kmTotal)).append(" km")
+            // Le kilométrage à vide séparé du total : c'est lui qui fait la
+            // différence entre une course rentable et une course qui exile,
+            // et il ne se déduit pas d'un total.
+            verdict.kmAVide?.let {
+                append("\ndont ").append(fmt1(it)).append(" km à vide")
+                verdict.minutesAVide?.let { m ->
+                    append(" et ").append(fmt0(m)).append(" min non payées")
+                }
+            }
+        }
+
+        // La confiance répond à une autre question que le verdict : non pas
+        // « cette course est-elle rentable ? » mais « ai-je assez lu pour le
+        // dire ? ». Deux LAISSE identiques à l'écran ne se valent pas si l'un
+        // repose sur une approche inventée.
+        racine.findViewById<TextView>(R.id.confiance).apply {
+            val confiance = verdict.confiance
+            text = confiance.resume + confiance.manquants
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString(", ", prefix = " — manque ") { it.champ }
+                .orEmpty()
+            setTextColor(
+                ContextCompat.getColor(
+                    ctx,
+                    if (confiance.fiable) R.color.bulle_texte_doux else R.color.ambre,
+                )
+            )
         }
 
         val c = verdict.course

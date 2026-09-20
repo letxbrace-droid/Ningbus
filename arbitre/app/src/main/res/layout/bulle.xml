@@ -143,6 +143,15 @@
                 android:textColor="@color/bulle_texte_doux"
                 android:textSize="14sp" />
 
+            <!-- Ce que vaut la lecture, et non ce que vaut la course. -->
+            <TextView
+                android:id="@+id/confiance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/bulle_texte_doux"
+                android:textSize="13sp" />
+
             <TextView
                 android:id="@+id/alertes"
                 android:layout_width="match_parent"

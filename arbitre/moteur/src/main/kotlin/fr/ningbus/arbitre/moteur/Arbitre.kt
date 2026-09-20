@@ -34,6 +34,19 @@ data class Verdict(
     val alertes: List<String> = emptyList(),
     /** Une ligne, lisible d'un coup d'œil au volant. */
     val resume: String = "",
+    /**
+     * Ce que vaut le verdict, séparément de ce qu'il dit.
+     *
+     * Deux questions se confondaient en une : « cette course est-elle
+     * rentable ? » et « ai-je assez lu pour le dire ? ». Un LAISSE sur
+     * données complètes et un LAISSE calculé sur une approche inventée se
+     * ressemblent à l'écran et ne se valent pas.
+     */
+    val confiance: Confiance = Confiance(0.0, emptyList()),
+    /** Km parcourus sans être payés : approche et repositionnement. */
+    val kmAVide: Double? = null,
+    /** Minutes mobilisées sans être payées. */
+    val minutesAVide: Double? = null,
 )
 
 /**
@@ -61,6 +74,7 @@ object Arbitre {
                 course = course,
                 alertes = alertes + "aucun montant lu dans l'offre",
                 resume = "Montant illisible — décide à la main",
+                confiance = Confiance.de(course),
             )
         }
 
@@ -101,9 +115,15 @@ object Arbitre {
                 course = course,
                 alertes = alertes + "trajet illisible dans l'offre",
                 resume = "Trajet illisible — décide à la main",
+                confiance = Confiance.de(course),
             )
         }
         val estime = course.kmTrajet == null || course.minutesTrajet == null
+        val confiance = Confiance.de(
+            course,
+            kmTrajetEstime = course.kmTrajet == null,
+            minutesTrajetEstime = course.minutesTrajet == null,
+        )
 
         // --- Trafic : déduit de la vitesse implicite ------------------------
         val vitesseTrajet = vitesse(kmTrajet, minutesTrajet)
@@ -173,8 +193,16 @@ object Arbitre {
             ratio == null -> Decision.INCOMPLET
             ratio >= 1.0 + bareme.marge ->
                 // Jamais de feu vert sur des données trouées : l'approche
-                // manquante gonfle mécaniquement l'euro/heure.
-                if (approcheInconnue || estime) Decision.LIMITE else Decision.PRENDS
+                // manquante gonfle mécaniquement l'euro/heure. La confiance
+                // ne fait que resserrer cette règle, jamais la desserrer —
+                // elle s'ajoute aux deux conditions d'origine au lieu de les
+                // remplacer, pour qu'aucun cas déjà couvert ne se mette à
+                // passer au vert.
+                if (approcheInconnue || estime || !confiance.fiable) {
+                    Decision.LIMITE
+                } else {
+                    Decision.PRENDS
+                }
             ratio >= 1.0 - bareme.marge -> Decision.LIMITE
             else -> Decision.LAISSE
         }
@@ -206,6 +234,9 @@ object Arbitre {
             ratio = ratio,
             alertes = alertes.distinct(),
             resume = resume,
+            confiance = confiance,
+            kmAVide = kmApproche + kmRetour,
+            minutesAVide = minutesMortes,
         )
     }
 

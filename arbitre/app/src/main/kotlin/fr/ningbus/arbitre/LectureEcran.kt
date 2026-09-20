@@ -10,6 +10,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import fr.ningbus.arbitre.moteur.Course
+import fr.ningbus.arbitre.moteur.Detecteur
 import fr.ningbus.arbitre.moteur.completer
 
 /**
@@ -222,10 +223,23 @@ class LectureEcran : AccessibilityService() {
 
         val course = Arbitrage.lire(nom, texte).completer(enCours?.course)
 
-        if (!force && enCours == null && reglages.filtrerEcrans && !estUneOffre(texte, course)) {
-            // Écran portant un montant mais écarté : on le note pour pouvoir
-            // élargir les marqueurs si des courses passent à travers.
-            if (course.prix != null) Journal.signalerEcranIgnore(this, nom, texte)
+        // Le jugement remplace l'ancienne règle binaire — un bouton
+        // d'acceptation *ou* deux distances. Elle tenait, mais ne savait rien
+        // dire : un écran écarté l'était sans motif, et un écran accepté à
+        // tort sans qu'on puisse voir ce qui avait emporté la décision.
+        val jugement = Detecteur.juger(texte, course)
+
+        if (!force && enCours == null && reglages.filtrerEcrans && !jugement.arbitrable) {
+            // Écran portant un montant mais écarté : on note le calcul qui l'a
+            // écarté, pas seulement son texte. C'est la différence entre
+            // « pourquoi cette course est-elle passée ? » et « je vois ».
+            if (course.prix != null) {
+                Journal.signalerEcranIgnore(
+                    this,
+                    nom,
+                    "${jugement.resume} · ${jugement.indices.joinToString(" ")}\n\n$texte",
+                )
+            }
             return Issue.ECARTE
         }
 
@@ -291,6 +305,13 @@ class LectureEcran : AccessibilityService() {
         if (!Ocr.disponible || !reglages.ocrSecours) return false
         if (issue == Issue.RENDU) return false
 
+        // Jamais pendant qu'une bulle est affichée. Une capture ne connaît
+        // pas les paquets : elle prendrait notre propre verdict, où
+        // l'analyseur retrouverait un montant, une approche et une distance —
+        // les siens. Le banc l'a pris sur le fait, en arbitrant deux fois la
+        // même course dont la seconde lecture était la bulle de la première.
+        if (Bulle.visible) return false
+
         // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
         // de secours, il n'a pas à être économe.
         if (force) return true
@@ -317,7 +338,20 @@ class LectureEcran : AccessibilityService() {
             rapporter(Issue.RIEN_A_LIRE, nom, texteArbre, force)
             return
         }
+
+        // La pastille s'efface le temps de la capture : elle affiche le
+        // dernier « 31 €/h », et l'analyseur retenant le montant le plus
+        // élevé, ce chiffre-là prendrait la place du vrai prix de l'offre.
+        // Le délai laisse au système le temps de dessiner une image sans
+        // elle — une capture demandée dans la foulée montrerait encore la
+        // trame précédente.
+        BoutonFlottant.eclipser()
+        principal.postDelayed({ capturer(nom, texteArbre, instantEvenement, force) }, DELAI_ECLIPSE_MS)
+    }
+
+    private fun capturer(nom: String, texteArbre: String, instantEvenement: Long, force: Boolean) {
         Ocr.lire(this) { reconnu ->
+            BoutonFlottant.reparaitre()
             try {
                 if (reconnu.isEmpty()) {
                     rapporter(Issue.RIEN_A_LIRE, nom, texteArbre, force)
@@ -474,17 +508,6 @@ class LectureEcran : AccessibilityService() {
         return budget
     }
 
-    /**
-     * Distingue une offre d'un écran de navigation, qui affiche lui aussi un
-     * prix et des kilomètres.
-     *
-     * Deux signes concordants, l'un textuel et l'autre structurel : le bouton
-     * d'acceptation, ou bien deux distances distinctes — une offre annonce
-     * toujours l'approche *et* la course, une navigation une seule.
-     */
-    private fun estUneOffre(texte: String, course: Course): Boolean =
-        marqueur(texte) || (course.kmApproche != null && course.kmTrajet != null)
-
     /** Le bouton qui accepte la course est visible à l'écran. */
     private fun marqueur(texte: String): Boolean {
         val minuscules = texte.lowercase()
@@ -525,6 +548,15 @@ class LectureEcran : AccessibilityService() {
          * dessinée plutôt qu'écrite, et d'aller la regarder.
          */
         private const val TEXTE_MAIGRE = 120
+
+        /**
+         * Temps laissé au système pour dessiner une image sans notre pastille.
+         *
+         * Deux trames à soixante hertz, arrondies vers le haut : une capture
+         * demandée dans la foulée d'un changement de transparence montrerait
+         * encore la trame précédente, pastille comprise.
+         */
+        private const val DELAI_ECLIPSE_MS = 40L
 
         /** Textes du bouton qui accepte la course, selon les plateformes. */
         private val MARQUEURS = listOf(
