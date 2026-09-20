@@ -1,6 +1,7 @@
 package fr.ningbus.arbitre
 
 import android.content.Intent
+import android.util.Log
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -175,7 +176,11 @@ class ParcoursCompletTest {
             if (runCatching(condition).getOrDefault(false)) return
             SystemClock.sleep(500)
         }
-        throw AssertionError("délai dépassé en attendant : $quoi\n${diagnostic()}")
+        val rapport = diagnostic()
+        // Aussi dans logcat : le message d'assertion est tronqué à sa
+        // première ligne dans la sortie de Gradle.
+        Log.i("BancEssai", "échec — $quoi\n$rapport")
+        throw AssertionError("délai dépassé en attendant : $quoi\n$rapport")
     }
 
     /**
