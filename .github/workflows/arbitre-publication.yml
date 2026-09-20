@@ -12,6 +12,9 @@ on:
   push:
     paths:
       - "arbitre/VERSION"
+      # Les notes d'installation vivent dans ce fichier : les corriger doit
+      # suffire à rectifier la Release, sans inventer un numéro de version.
+      - ".github/workflows/arbitre-publication.yml"
   workflow_dispatch:
 
 permissions:
@@ -67,28 +70,42 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cat > notes.md <<'TEXTE'
-          Widget d'arbitrage des courses : il lit la notification d'une offre,
-          calcule ce qu'elle laisse réellement par heure de travail et affiche
-          un verdict par-dessus l'application chauffeur.
+          Widget d'arbitrage des courses : il repère l'offre qui arrive,
+          calcule ce qu'elle laisse réellement par heure de travail — approche
+          à vide, bouchons, retour à vide, coût au kilomètre — et pose un
+          verdict par-dessus l'application chauffeur.
 
           ## Installer
 
           1. Télécharger `arbitre-VERSION.apk` ci-dessous, depuis le téléphone.
           2. L'ouvrir ; autoriser « installer des applications inconnues » pour
              le navigateur si Android le demande.
-          3. Au premier lancement, accorder les deux permissions depuis l'écran
-             d'accueil : **accès aux notifications** et **superposition d'écran**.
+          3. Au premier lancement, accorder les **trois** permissions depuis
+             l'écran d'accueil :
+             - **lecture de l'écran** (accessibilité) — la plus importante :
+               quand l'application chauffeur est au premier plan, Uber affiche
+               son offre sans envoyer aucune notification. Sans cette
+               permission, ces courses-là passent inaperçues ;
+             - **accès aux notifications** — pour les offres reçues
+               application en arrière-plan ou écran verrouillé ;
+             - **superposition d'écran** — pour dessiner la bulle.
           4. Cocher son application chauffeur, régler son barème, puis
              **« Essayer avec une course fictive »** pour placer la bulle.
 
-          Rien ne sort du téléphone : aucune permission réseau dans le
-          manifeste, aucun compte, aucun serveur.
+          Les deux premières permissions sont larges par nature. Ce qui les
+          borne : la lecture d'écran n'est branchée que sur les applications
+          cochées, et **rien ne sort du téléphone** — aucun compte, aucun
+          serveur, et aucune permission réseau dans le manifeste.
 
           ## À savoir
 
           Build de débogage, signé avec la clé de débogage versionnée dans le
           dépôt. Elle est fixe, donc les versions suivantes s'installeront
           par-dessus celle-ci sans désinstallation et sans perte de réglages.
+
+          Si une offre n'est pas vue, ou mal lue, le **journal** conserve le
+          texte brut de ce qui a été capté et la liste des écrans écartés :
+          « Copier le journal » suffit à faire remonter le cas.
 
           Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
           TEXTE
