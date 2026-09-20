@@ -115,6 +115,34 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
+          ## Ce que cette version ajoute
+
+          **Lecture en image.** Les applications chauffeur passent à des cartes
+          dessinées plutôt qu'écrites, où le texte n'existe pas en tant que
+          tel : le service voyait un écran vide là où le chauffeur voit une
+          offre. Une capture est désormais analysée sur le téléphone même, en
+          second rideau seulement. Le modèle est embarqué dans l'application —
+          aucun réseau, et l'image ne sort pas d'ici.
+
+          **Confiance.** Chaque verdict dit aussi ce que vaut la lecture qui
+          l'a produit, et ce qui manquait. Un LAISSE sur données complètes et
+          un LAISSE calculé sur une approche inventée se ressemblent à l'écran
+          et ne se valent pas. Une donnée manquante n'obtient toujours jamais
+          de feu vert.
+
+          **Motif des écrans écartés.** Un écran qui portait un prix sans être
+          arbitré dit maintenant pourquoi, chiffres à l'appui — de quoi
+          corriger si une vraie course passe à travers.
+
+          **Veille.** Certaines surcouches constructeur arrêtent le processus,
+          et le service de lecture part avec lui. Une notification permanente
+          et discrète maintient l'application en vie, et prévient si la lecture
+          d'écran se détache malgré tout.
+
+          **Km à vide**, séparés des kilomètres payés. **Interface de nuit**,
+          noir pur et verdicts en néon. **Tableau de santé** à six voyants, et
+          un **simulateur à curseurs** qui recalcule le verdict sous le doigt.
+
           ## À savoir
 
           Build de débogage, signé avec la clé de débogage versionnée dans le
@@ -125,15 +153,15 @@ jobs:
           texte brut de ce qui a été capté et la liste des écrans écartés :
           « Copier le journal » suffit à faire remonter le cas.
 
-          Cette version est la première vérifiée de bout en bout sur un vrai
-          Android : une fausse application chauffeur rejoue de vraies cartes
-          d'offre, et cinq essais tournent à chaque modification. Ils
-          établissent que l'offre affichée **en fenêtre flottante** — par-dessus
-          l'écran d'accueil, un GPS ou TikTok, focus laissé au-dessous — est
-          lue avec son approche et sa course, que le prix n'est pas confondu
-          avec le bonus de prise en charge, qu'un écran de navigation ne fait
-          surgir aucune bulle en pleine conduite, et qu'une même course n'est
-          annoncée qu'une fois. La lecture prend environ 130 ms.
+          Six essais tournent sur un vrai Android à chaque modification, face
+          à une fausse application chauffeur qui rejoue de vraies cartes
+          d'offre. Ils établissent que l'offre affichée **en fenêtre
+          flottante** — par-dessus l'écran d'accueil, un GPS ou TikTok, focus
+          laissé au-dessous — est lue avec son approche et sa course, que le
+          prix n'est pas confondu avec le bonus de prise en charge, qu'un
+          écran de navigation ne fait surgir aucune bulle en pleine conduite,
+          qu'une même course n'est annoncée qu'une fois, et qu'une carte
+          **peinte** est lue quand même. La lecture prend environ 130 ms.
 
           Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
           TEXTE

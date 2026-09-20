@@ -86,13 +86,111 @@ interprétation, toutes fenêtres confondues. C'est la seule donnée qui permett
 de comprendre pourquoi une offre n'a pas été lue plutôt que de le supposer —
 trois versions ont été passées à deviner ce que le service voyait.
 
-Un écran de navigation affiche lui aussi un prix et des kilomètres. Pour ne
-pas faire surgir une bulle en pleine conduite, seuls sont retenus les écrans
-qui portent un bouton d'acceptation (« Mise en relation », « Accepter »…) **ou**
-deux distances distinctes — une offre annonce toujours l'approche *et* la
-course, une navigation une seule. Les écrans écartés qui portaient un montant
-sont notés dans le journal : si une course passe à travers, on y voit ce qu'il
-manquait.
+### Reconnaissance de texte, en second rideau
+
+L'arbre d'accessibilité a un angle mort, et il s'élargit : une application qui
+**peint** sa carte d'offre sur un `Canvas`, ou qui compose une vue sans lui
+donner de sémantique, n'expose aucun nœud de texte. Le service lit une fenêtre
+parfaitement vide pendant que le chauffeur, lui, voit une offre.
+
+Une capture d'écran est alors analysée par un moteur de reconnaissance
+embarqué dans l'APK — pas de réseau, pas de Play Services, rien qui sorte du
+téléphone. Elle ne part jamais en premier, et quatre garde-fous la bornent :
+
+- **l'arbre d'abord.** L'OCR ne sert que si l'arbre n'a rien donné
+  d'arbitrable ;
+- **une fenêtre qui s'ouvre**, et non un contenu qui se rafraîchit ;
+- **trois captures par écran distinct**, comptées sur l'empreinte du couple
+  application + texte lu. Un écran figé ne coûte donc que trois captures, quel
+  que soit le nombre d'événements qu'il émet ;
+- **nos propres fenêtres s'effacent** le temps de la prise. Une image ne
+  connaît pas les paquets : sans cela, la bulle du verdict précédent serait
+  relue comme une offre, et la pastille verrait son « 31 €/h » retenu comme
+  prix de la course.
+
+Ce qu'on ne peut pas faire : deviner depuis l'arbre qu'une carte peinte
+existe. C'est le sens même de l'angle mort. Le déclenchement ne dépend donc
+d'aucune propriété de l'arbre — un garde-fou qui s'y fiait refusait la capture
+parce qu'une *autre* fenêtre était bavarde.
+
+### Distinguer une offre du reste de l'écran
+
+Un écran de navigation affiche lui aussi un prix et des kilomètres. Une règle
+binaire — un bouton d'acceptation **ou** deux distances — tenait, mais ne
+savait rien dire : un écran écarté l'était sans motif.
+
+Un score additionne donc des indices qui se défendent seuls, et retranche ce
+qui trahit un autre écran :
+
+| Indice | Poids |
+|---|---|
+| bouton d'acceptation (« Mise en relation », « Accepter »…) | +30 |
+| un montant | +20 |
+| distance d'approche | +15 |
+| distance de course | +15 |
+| une durée | +10 |
+| compte à rebours | +10 |
+| vocabulaire de navigation (« en route », « restants »…) | −30 |
+| vocabulaire d'historique (« gains », « courses terminées »…) | −30 |
+| écran de réglages (« préférences », « tarifs »…) | −40 |
+
+Au-dessus de 55, l'écran est arbitré. En dessous, il est écarté — et le calcul
+part au journal, donc relisible :
+
+```
+pas une offre (5) · +20 montant +15 distance de course -30 vocabulaire de navigation
+```
+
+### Ce que vaut la lecture, séparément de ce qu'elle dit
+
+Deux questions se confondaient en une seule : « cette course est-elle
+rentable ? » et « ai-je assez lu pour le dire ? ». Un LAISSE sur données
+complètes et un LAISSE calculé sur une approche inventée se ressemblent à
+l'écran et ne se valent pas.
+
+Chaque champ est donc pesé par ce que son absence coûte au calcul — prix 40 %,
+distance de course 20 %, distance d'approche 15 %, durée de course 15 %, durée
+d'approche 10 % — un champ reconstitué comptant pour la moitié d'un champ lu.
+La bulle affiche le pourcentage et ce qui manque ; le journal porte le détail :
+
+```
+confiance 93 %
+✓ prix : 12,51 €
+✓ distance de la course : 12,6 km
+✓ distance d'approche : 2,5 km
+≈ durée de la course : estimée
+✓ durée d'approche : 9 min
+```
+
+**La confiance ne peut que resserrer les règles, jamais les desserrer.** Elle
+s'ajoute aux conditions d'origine du feu vert au lieu de les remplacer, et un
+test l'exige explicitement : une mesure de fiabilité qui autoriserait un vert
+refusé jusque-là ferait l'inverse de ce qu'on attend d'elle.
+
+### Quand Android détache le service
+
+Un service d'accessibilité n'est pas mis en veille par le Doze : c'est le
+système qui le maintient lié. La croyance inverse, répandue, est fausse sur un
+Android de référence.
+
+Elle ne l'est pas sur les surcouches. MIUI, EMUI, ColorOS et quelques autres
+arrêtent des **processus** entiers selon leurs propres règles, et le service
+part avec le sien. Le système le relie parfois ensuite, parfois pas — c'est la
+panne « autorisé mais non lié », où tout paraît en ordre et où rien ne se
+produit.
+
+Deux remèdes, et une limite qu'il faut dire :
+
+- un **service au premier plan** qui ne calcule rien, et dont le seul effet est
+  d'élever l'importance du processus ;
+- une **exemption d'optimisation batterie**, proposée depuis le tableau de
+  santé ;
+- **l'application ne peut pas se relier elle-même.** Seul le système lie un
+  service d'accessibilité, et l'y forcer demanderait `WRITE_SECURE_SETTINGS`,
+  que nul n'accorde à une application installée de côté. Elle peut en revanche
+  cesser d'être muette : un battement vérifie la liaison chaque minute et
+  prévient, ce qui transforme une panne inexplicable en notification qui mène
+  droit au réglage à recocher.
 
 ## Les cinq secondes
 
@@ -382,13 +480,15 @@ distinct — la lecture d'écran ignore les fenêtres d'Arbitre lui-même, un
 simulateur logé dans la même application validerait donc un chemin que personne
 n'emprunte. Elle rejoue de vraies cartes d'offre, ligne par ligne et dans
 l'ordre, puisque l'analyseur se sert de la position des nombres. Elle les
-affiche de deux façons — plein écran, et en fenêtre flottante par-dessus
-l'accueil, focus laissé au-dessous.
+affiche de trois façons — plein écran, en fenêtre flottante par-dessus
+l'accueil (focus laissé au-dessous), et **peinte sur un `Canvas`**, sans le
+moindre nœud de texte.
 
-Cinq essais instrumentés tournent sur émulateur à chaque modification :
+Six essais instrumentés tournent sur émulateur à chaque modification :
 
 | Essai | Ce qu'il interdit de casser |
 |---|---|
+| `uneOffreDessineeEstLueParReconnaissanceDeTexte` | une carte peinte est lue, bulle précédente à l'écran, et ne produit qu'un verdict |
 | `uneOffreEnFenetreFlottanteEstLue` | l'offre flottante est lue avec son approche **et** sa course |
 | `uneOffreEnPleinEcranEstLue` | l'offre de Briis est refusée pour la bonne raison |
 | `le_montant_retenu_est_le_prix_et_non_le_bonus` | 12,51 € et non le bonus de 2,43 € |
@@ -416,9 +516,39 @@ Trois précautions gouvernent leur écriture, chacune payée d'un tour perdu :
    les deux qui produisait la panne suivante.
 
 ```bash
-./gradlew :moteur:test                      # 39 cas, sans SDK Android
+./gradlew :moteur:test                      # 50 cas, sans SDK Android
 bash banc-essai.sh                          # tout le parcours, sur un appareil branché
 ```
+
+### Ce que le gardien a trouvé, et que rien d'autre n'aurait trouvé
+
+L'essai de la carte peinte a coûté cinq tours, et à chaque fois pour une
+cause **différente** qui produisait exactement le même symptôme : un silence
+complet, indiscernable de tous les autres silences.
+
+1. **L'application se lisait elle-même.** Une capture d'écran ne connaît pas
+   les paquets : elle prend nos propres fenêtres. La bulle du verdict
+   précédent, relue, contenait un montant, une approche et une distance — les
+   siens. Le verdict engendrait un verdict.
+2. **Le premier remède était trop large.** Interdire toute capture tant
+   qu'une bulle est affichée marchait, mais une offre qui arrive pendant
+   qu'un verdict traîne encore est précisément celle qu'il ne faut pas
+   manquer. Ce n'est pas la capture qu'il faut empêcher, c'est notre verdict
+   qu'il faut absenter de l'image.
+3. **Le déclenchement dépendait de l'arbre.** La capture était refusée parce
+   qu'une *autre* fenêtre exposait 324 caractères — alors qu'une carte peinte
+   ne laisse par définition aucune trace dans l'arbre. Décider d'une carte
+   invisible d'après le bavardage de sa voisine n'a aucun sens.
+4. **La carte du simulateur débordait.** Sur la dalle de 320 × 640 pixels de
+   l'émulateur, une carte de douze lignes ancrée en bas se fait rogner par le
+   haut — donc le montant, en deuxième ligne.
+5. **Le quota de reprises était une porte derrière une porte fermée.** Trois
+   captures étaient permises par écran, mais chaque tentative attendait un
+   nouvel événement de fenêtre — or une carte qui finit de se dessiner n'en
+   produit aucun.
+
+Aucune de ces cinq causes n'était visible en lisant le code, et chacune
+imitait les quatre autres.
 
 Le script existe parce que l'action d'émulateur exécute son champ `script`
 **ligne par ligne**, chacune dans son propre `sh -c` : une continuation de
@@ -498,7 +628,7 @@ arbitre/
 ```
 
 Le moteur ne dépend d'aucune classe Android : c'est ce qui permet de tester
-les 39 cas d'analyse et d'arbitrage sur une simple machine de build — dont la
-carte d'offre Uber reproduite plus haut — et de vérifier un calcul de
-rentabilité à la main plutôt que sur un émulateur. Ce que ces 39 cas ne
-peuvent pas voir, le banc d'essai le voit.
+les 50 cas d'analyse, d'arbitrage, de confiance et de détection sur une simple
+machine de build — dont la carte d'offre Uber reproduite plus haut — et de
+vérifier un calcul de rentabilité à la main plutôt que sur un émulateur. Ce
+que ces 50 cas ne peuvent pas voir, le banc d'essai le voit.
