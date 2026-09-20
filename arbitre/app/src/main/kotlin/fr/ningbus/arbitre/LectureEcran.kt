@@ -38,7 +38,13 @@ class LectureEcran : AccessibilityService() {
     /** Lecture partielle en cours de complétion. */
     private var attente: Attente? = null
 
-    private class Attente(val paquet: String, val course: Course, val instant: Long)
+    private class Attente(
+        val paquet: String,
+        val course: Course,
+        val instant: Long,
+        /** Un bouton d'acceptation était visible : c'était bien une offre. */
+        val marquee: Boolean,
+    )
 
     override fun onServiceConnected() {
         instance = this
@@ -110,7 +116,12 @@ class LectureEcran : AccessibilityService() {
         if (!reglages.actif) return false
         if (!force && !reglages.ecoute(paquet)) return false
 
-        val texte = texteEcran(paquet)
+        // Une analyse demandée à la main ne sait pas de quelle application
+        // vient l'écran : elle lit tout. Une analyse automatique, elle, sait,
+        // et ne doit lire que les fenêtres de l'émettrice — sans quoi un
+        // événement d'Uber fait lire la fenêtre d'une autre application et
+        // arbitre son texte sous le nom d'Uber.
+        val texte = texteEcran(if (force) "" else paquet)
         if (texte.isEmpty()) {
             if (force) signaler(R.string.rien_a_lire)
             return false
@@ -147,7 +158,7 @@ class LectureEcran : AccessibilityService() {
         // un verdict creux sur ce qu'on a vu au millième de seconde près.
         if (!force && !course.exploitable) {
             if (course.prix != null || course.kmTrajet != null || course.minutesTrajet != null) {
-                attente = Attente(paquet, course, debut)
+                attente = Attente(paquet, course, debut, marqueur(texte))
                 principal.removeCallbacks(devoiler)
                 principal.postDelayed(devoiler, DELAI_INCOMPLET_MS)
             }
@@ -176,7 +187,17 @@ class LectureEcran : AccessibilityService() {
     private fun devoilerIncomplet() {
         val a = attente ?: return
         attente = null
+
+        // Le texte est gardé dans tous les cas : c'est la matière du
+        // diagnostic.
         Journal.signalerCapture(this, a.paquet, a.course.texteBrut)
+
+        // Mais on ne dérange le chauffeur que si l'écran portait un bouton
+        // d'acceptation. Un écran de réglages qui mentionne « €1.00/km » n'est
+        // pas une offre illisible : ce n'est pas une offre. Faire surgir un
+        // « INCOMPLET » dessus revient à crier au loup.
+        if (!a.marquee) return
+
         val latence = (SystemClock.uptimeMillis() - a.instant).coerceAtLeast(0L)
         Arbitrage.rendre(this, a.paquet, a.course, Source.ECRAN, latence)
     }
@@ -213,6 +234,7 @@ class LectureEcran : AccessibilityService() {
 
     private fun racines(paquet: String): List<AccessibilityNodeInfo> {
         val toutes = ArrayList<AccessibilityNodeInfo>(4)
+        val tout = paquet.isEmpty()
 
         // De la fenêtre la plus en avant vers la plus en arrière : une offre
         // posée par-dessus le reste se lit d'abord.
@@ -232,8 +254,11 @@ class LectureEcran : AccessibilityService() {
             }
         }
 
-        val duPaquet = toutes.filter { it.packageName == paquet }
-        return if (duPaquet.isNotEmpty()) duPaquet else toutes
+        // Pas de repli sur « toutes les fenêtres » quand une application est
+        // nommée : si la sienne n'est pas lisible, il n'y a rien à lire. Lire
+        // celle d'à côté produirait un verdict sur le texte d'une autre
+        // application, attribué à celle-ci.
+        return if (tout) toutes else toutes.filter { it.packageName == paquet }
     }
 
     /**
@@ -275,10 +300,13 @@ class LectureEcran : AccessibilityService() {
      * d'acceptation, ou bien deux distances distinctes — une offre annonce
      * toujours l'approche *et* la course, une navigation une seule.
      */
-    private fun estUneOffre(texte: String, course: Course): Boolean {
+    private fun estUneOffre(texte: String, course: Course): Boolean =
+        marqueur(texte) || (course.kmApproche != null && course.kmTrajet != null)
+
+    /** Le bouton qui accepte la course est visible à l'écran. */
+    private fun marqueur(texte: String): Boolean {
         val minuscules = texte.lowercase()
-        return MARQUEURS.any { minuscules.contains(it) } ||
-            (course.kmApproche != null && course.kmTrajet != null)
+        return MARQUEURS.any { minuscules.contains(it) }
     }
 
     private fun signaler(message: Int) {

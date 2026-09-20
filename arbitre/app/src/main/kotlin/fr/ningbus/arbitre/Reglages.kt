@@ -17,6 +17,31 @@ class Reglages(contexte: Context) {
     private val p: SharedPreferences =
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
 
+    init {
+        migrer()
+    }
+
+    /**
+     * Corrige les réglages d'une version précédente.
+     *
+     * Changer une valeur par défaut n'atteint que les nouvelles installations :
+     * un réglage déjà écrit sur le téléphone reste tel quel, et l'utilisateur
+     * qui a subi le défaut continue de le subir après la mise à jour. Une
+     * valeur par défaut qu'on regrette doit donc être réécrite une fois, ce
+     * que ce compteur permet sans effacer ce que l'utilisateur a choisi
+     * lui-même par ailleurs.
+     */
+    private fun migrer() {
+        if (p.getInt(SCHEMA, 0) >= SCHEMA_COURANT) return
+        p.edit()
+            .putInt(SCHEMA, SCHEMA_COURANT)
+            // Écouter toutes les applications faisait surgir des bulles sur
+            // l'écran d'accueil et les pages web. La liste d'origine s'étant
+            // révélée exacte, ce mode redevient l'exception.
+            .putBoolean("toutesApps", false)
+            .apply()
+    }
+
     // --- Fonctionnement ----------------------------------------------------
 
     /** Interrupteur général : couper l'arbitrage sans retirer les permissions. */
@@ -61,21 +86,21 @@ class Reglages(contexte: Context) {
     // --- Applications écoutées ---------------------------------------------
 
     /**
-     * Écoute toutes les applications et décide sur le contenu, plutôt que de
-     * se fier à une liste de noms de paquets.
+     * Écoute toutes les applications et décide sur le seul contenu.
      *
-     * C'est le défaut, et pour une raison dure : les noms de paquets des
-     * applications chauffeur changent selon les versions, les pays et les
-     * rachats. Une liste devinée qui se trompe ne produit pas une erreur,
-     * elle produit un silence — l'application paraît installée et ne voit
-     * jamais rien. Une offre reste une offre quel que soit l'expéditeur :
-     * un montant, une distance, une durée.
+     * **Désactivé par défaut, après l'avoir été.** Le journal d'un vrai
+     * téléphone a tranché deux choses : les noms de paquets de la liste
+     * d'origine étaient exacts — com.ubercab.driver, com.heetch.driver,
+     * ee.mtakso.driver s'y trouvaient tous — et tout écouter transforme
+     * l'application en machine à faux positifs. N'importe quel texte portant
+     * un prix et deux distances devient une offre : une page web, une
+     * conversation, l'écran d'accueil.
      *
-     * Restreindre la liste ensuite reste utile : moins d'écrans parcourus,
-     * donc moins de batterie.
+     * Reste disponible pour une application chauffeur absente de la liste,
+     * le temps que le mode découverte en donne le nom exact.
      */
     var ecouteToutesApps: Boolean
-        get() = p.getBoolean("toutesApps", true)
+        get() = p.getBoolean("toutesApps", false)
         set(v) = p.edit().putBoolean("toutesApps", v).apply()
 
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
@@ -144,5 +169,7 @@ class Reglages(contexte: Context) {
 
     companion object {
         private const val FICHIER = "arbitre"
+        private const val SCHEMA = "schema"
+        private const val SCHEMA_COURANT = 2
     }
 }

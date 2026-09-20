@@ -10,7 +10,7 @@
     <string name="description_accessibilite">Lit la carte d\'offre affichée par les applications chauffeur cochées, pour en calculer la rentabilité. Aucune donnée ne quitte le téléphone.</string>
     <string name="filtre_ecrans">Écarter les écrans qui ne sont pas des offres</string>
     <string name="toutes_apps">Écouter toutes les applications</string>
-    <string name="aide_toutes_apps">Recommandé. Les noms de paquets des applications chauffeur changent selon les versions et les pays : une liste qui se trompe ne donne pas d\'erreur, elle donne du silence. En mode automatique, c\'est le contenu qui décide — un montant, une distance, une durée. Décocher pour n\'écouter que les applications cochées plus bas : moins d\'écrans parcourus, donc moins de batterie.</string>
+    <string name="aide_toutes_apps">À n\'activer que si ton application chauffeur est absente de la liste plus bas. Tout écouter transforme l\'application en machine à faux positifs : n\'importe quel texte portant un prix et deux distances devient une offre — une page web, une conversation, l\'écran d\'accueil. Le mode découverte donne le nom exact d\'une application manquante, qu\'il suffit ensuite de cocher.</string>
     <string name="bouton_flottant">Pastille d\'analyse manuelle</string>
     <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran. Un appui analyse l\'écran tel qu\'il est — le chemin qui ne dépend d\'aucune détection. Un appui long capture le texte brut de l\'écran dans le journal, pour comprendre pourquoi une offre n\'a pas été lue. Glisse-la où elle ne gêne pas.</string>
     <string name="titre_diagnostic">État réel des services</string>
