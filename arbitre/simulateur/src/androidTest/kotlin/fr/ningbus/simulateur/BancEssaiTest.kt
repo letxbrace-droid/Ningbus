@@ -1,5 +1,6 @@
 package fr.ningbus.simulateur
 
+import android.app.UiAutomation
 import android.content.Intent
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
@@ -18,19 +19,23 @@ import org.junit.runner.RunWith
  * Le banc d'essai : Arbitre face à une vraie carte d'offre, sur un vrai
  * Android.
  *
- * **Les essais vivent du côté du simulateur, et c'est le point décisif.**
- * Tant qu'ils étaient logés dans le module `:app`, Arbitre tournait sous
- * `am instrument` : le système inscrivait bien son service d'accessibilité
- * parmi les services *activés*, mais ne le *liait* jamais — `Bound
- * services:{}` — si bien qu'aucun événement n'était délivré et que le journal
- * restait désespérément vide. On mesurait un harnais, pas une application.
+ * **Le banc s'éteignait en s'allumant**, et c'est ce qui a coûté le plus de
+ * tours. Le `dumpsys` le disait pourtant ligne à ligne : le service figurait
+ * parmi les services *activés* mais jamais parmi les *liés*, et quelques
+ * lignes plus bas trônait `Ui Automation[eventTypes=TYPES_ALL_MASK]`. Une
+ * instrumentation qui ouvre un automate d'interface devient par défaut le
+ * seul client d'accessibilité du système, qui délie alors tous les autres —
+ * voir [automate]. Rien n'a jamais été cassé dans Arbitre.
  *
- * Ici, Arbitre est installé et lancé comme sur le téléphone du chauffeur :
- * aucun processus d'essai dans son espace, aucun réglage écrit dans son dos.
- * Le banc ne lui parle que par où le système lui parle — une fenêtre qui
- * s'affiche — et ne le relit que par le disque.
+ * Trois précautions gouvernent donc l'écriture de ces essais :
  *
- * Deux autres précautions gouvernent l'écriture de ces essais :
+ *  - **l'automate ne supprime pas les services d'accessibilité.** C'est la
+ *    condition sans laquelle rien de ce qui suit n'a de sens ;
+ *  - **Arbitre est installé et lancé comme sur le téléphone du chauffeur.**
+ *    Les essais vivent du côté du simulateur : aucun processus d'essai dans
+ *    l'espace d'Arbitre, aucun réglage écrit dans son dos. Le banc ne lui
+ *    parle que par où le système lui parle — une fenêtre qui s'affiche — et
+ *    ne le relit que par le disque ;
  *
  *  - **la configuration n'est pas truquée.** Le simulateur figure dans la
  *    liste d'origine des applications écoutées, mais sur émulateur seulement
@@ -46,10 +51,35 @@ class BancEssaiTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private val contexte get() = instrumentation.targetContext
 
+    /**
+     * L'automate d'interface, obtenu en promettant de **ne pas supprimer les
+     * services d'accessibilité**.
+     *
+     * Voilà la cause de tous les bancs vides. Par défaut, une instrumentation
+     * qui ouvre un automate devient le seul client d'accessibilité du
+     * système : tous les autres services sont déliés, et celui d'Arbitre avec
+     * eux. Le banc mesurait donc une application qu'il venait lui-même
+     * d'éteindre, et le journal ne pouvait que rester vide.
+     *
+     * Le drapeau existe depuis Android 7 exactement pour ce cas. Il faut
+     * l'obtenir ainsi **partout** : redemander l'automate sans drapeau le
+     * reconstruit, et la suppression revient. D'où un accesseur, et aucun
+     * appel à `instrumentation.uiAutomation` ailleurs dans ce fichier.
+     */
+    private val automate: UiAutomation
+        get() = instrumentation.getUiAutomation(
+            UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES
+        )
+
     @Before
     fun preparerLeTelephone() {
         shell("appops set $ARBITRE SYSTEM_ALERT_WINDOW allow")
         shell("appops set $SIMULATEUR SYSTEM_ALERT_WINDOW allow")
+
+        // Sans cela, une demande d'autorisation s'ouvre par-dessus tout au
+        // premier lancement d'Arbitre et s'intercale entre l'offre et le
+        // service. Le chauffeur, lui, la voit une fois et l'accorde.
+        shell("pm grant $ARBITRE android.permission.POST_NOTIFICATIONS")
 
         // Une application fraîchement installée est « arrêtée » tant que rien
         // ne l'a lancée. On l'ouvre donc une fois, comme le ferait le
@@ -290,7 +320,7 @@ class BancEssaiTest {
      * conséquence.
      */
     private fun shell(commande: String): String {
-        val descripteur = instrumentation.uiAutomation.executeShellCommand(commande)
+        val descripteur = automate.executeShellCommand(commande)
         return ParcelFileDescriptor.AutoCloseInputStream(descripteur).use {
             it.bufferedReader().readText()
         }

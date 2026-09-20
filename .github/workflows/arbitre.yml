@@ -94,12 +94,8 @@ jobs:
       - name: Rendre le wrapper exécutable
         run: chmod +x gradlew
 
-      # Arbitre est *installé*, le simulateur est *instrumenté*. L'inverse —
-      # instrumenter :app — a coûté plusieurs tours : sous `am instrument`,
-      # le système inscrit le service d'accessibilité parmi les services
-      # activés mais ne le lie jamais (« Bound services:{} »), aucun
-      # événement n'est délivré, et le journal reste vide sans que rien ne
-      # soit cassé dans l'application.
+      # Arbitre est *installé*, le simulateur est *instrumenté* : le service
+      # d'accessibilité tourne alors comme sur le téléphone du chauffeur.
       #
       # Les relevés sont pris ici, dans la session de l'émulateur : une fois
       # l'action terminée, la machine virtuelle n'existe plus et `adb` n'a

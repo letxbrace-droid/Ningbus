@@ -20,12 +20,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Le banc d'essai est instrumenté ici, et non dans :app. Sous
-        // `am instrument`, le système inscrit le service d'accessibilité
-        // d'Arbitre parmi les services activés mais ne le lie jamais : aucun
-        // événement n'est délivré, et l'application paraît en panne alors
-        // qu'elle ne l'est pas. Piloter depuis le simulateur laisse Arbitre
-        // tourner exactement comme sur le téléphone du chauffeur.
+        // Le banc d'essai est instrumenté ici, et non dans :app : Arbitre
+        // tourne alors comme sur le téléphone du chauffeur, sans processus
+        // d'essai dans son espace ni réglage écrit dans son dos.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

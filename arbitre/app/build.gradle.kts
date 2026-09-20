@@ -58,7 +58,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 
-    // Le banc d'essai vit dans :simulateur, et non ici. Instrumenter :app
-    // revenait à faire tourner Arbitre sous `am instrument`, où le système
-    // n'a jamais lié son service d'accessibilité.
+    // Le banc d'essai vit dans :simulateur, et non ici : Arbitre y est une
+    // application installée comme les autres, ce qu'il doit être pour que le
+    // banc prouve quoi que ce soit.
 }
