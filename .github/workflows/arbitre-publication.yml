@@ -92,10 +92,15 @@ jobs:
           4. Régler son barème, puis **« Essayer avec une course fictive »**
              pour placer la bulle.
 
-          Rien à cocher : par défaut l'application écoute toutes les
-          applications et décide sur le contenu — un montant, une distance,
-          une durée. Les noms de paquets des applications chauffeur changent
-          trop souvent pour qu'une liste soit fiable.
+          Rien à cocher dans le cas courant : Uber, Bolt, Heetch, FreeNow,
+          Marcel et Caocao sont écoutés d'origine. Si ton application
+          chauffeur manque, le **mode découverte** donne son nom exact dès
+          qu'elle envoie quelque chose, et il suffit alors de la cocher.
+
+          « Écouter toutes les applications » existe pour ce cas, mais reste
+          éteint : tout écouter transforme l'application en machine à faux
+          positifs — n'importe quel texte portant un prix et deux distances
+          devient une offre, page web ou écran d'accueil compris.
 
           Une **pastille « €/h »** reste à l'écran : un appui analyse l'écran
           tel qu'il est. C'est le chemin qui ne dépend d'aucune détection — si
@@ -119,6 +124,16 @@ jobs:
           Si une offre n'est pas vue, ou mal lue, le **journal** conserve le
           texte brut de ce qui a été capté et la liste des écrans écartés :
           « Copier le journal » suffit à faire remonter le cas.
+
+          Cette version est la première vérifiée de bout en bout sur un vrai
+          Android : une fausse application chauffeur rejoue de vraies cartes
+          d'offre, et cinq essais tournent à chaque modification. Ils
+          établissent que l'offre affichée **en fenêtre flottante** — par-dessus
+          l'écran d'accueil, un GPS ou TikTok, focus laissé au-dessous — est
+          lue avec son approche et sa course, que le prix n'est pas confondu
+          avec le bonus de prise en charge, qu'un écran de navigation ne fait
+          surgir aucune bulle en pleine conduite, et qu'une même course n'est
+          annoncée qu'une fois. La lecture prend environ 130 ms.
 
           Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
           TEXTE
