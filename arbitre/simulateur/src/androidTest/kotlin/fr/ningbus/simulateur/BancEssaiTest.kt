@@ -185,18 +185,32 @@ class BancEssaiTest {
         // doit y parvenir alors que la bulle précédente est encore affichée.
         fermerOffre()
         afficher("BRIIS", "CANVAS")
-        val verdict = attendreUnVerdictDePlus(apresLaPremiere, 40_000L)
+        attendreUnVerdictDePlus(apresLaPremiere, 40_000L)
+
+        // Le compte exact, et l'identité de chacun. Se contenter de « un
+        // verdict est apparu » laisserait passer le défaut d'origine : deux
+        // verdicts pour une même offre, dont le second serait la relecture de
+        // la bulle du premier. Ici les deux courses sont distinctes, et
+        // chacune doit se retrouver à sa place — le journal rendant le plus
+        // récent en tête.
+        val rendus = verdicts()
+        assertTrue(
+            "attendu deux verdicts, obtenu ${rendus.length() - avant}.\n${diagnostic()}",
+            rendus.length() == avant + 2,
+        )
+
+        val dessinee = rendus.optJSONObject(0)?.optString("brut").orEmpty()
+        val ecrite = rendus.optJSONObject(1)?.optString("brut").orEmpty()
 
         assertTrue(
             "la carte dessinée n'a pas été lue — l'arbre n'en dit rien, " +
                 "et la reconnaissance de texte n'a pas pris le relais.\n${diagnostic()}",
-            verdict.optString("brut").contains("12.1 km"),
+            dessinee.contains("12.1 km"),
         )
         assertTrue(
-            "la bulle affichée a été relue comme une offre : " +
-                "${verdicts().length() - apresLaPremiere} verdicts au lieu d'un.\n" +
-                diagnostic(),
-            verdicts().length() == apresLaPremiere + 1,
+            "le second verdict ne porte pas sur l'offre écrite : les deux " +
+                "pourraient être la même course lue deux fois.\n${diagnostic()}",
+            ecrite.contains("12.6 km"),
         )
     }
 
