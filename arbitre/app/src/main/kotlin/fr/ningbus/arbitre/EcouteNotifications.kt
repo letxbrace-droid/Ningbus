@@ -1,30 +1,25 @@
 package fr.ningbus.arbitre
 
 import android.app.Notification
-import android.os.SystemClock
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import fr.ningbus.arbitre.moteur.Analyseur
-import fr.ningbus.arbitre.moteur.Arbitre
-import fr.ningbus.arbitre.moteur.Course
-import fr.ningbus.arbitre.moteur.Plateformes
 
 /**
- * Le point d'entrée : le système livre ici toutes les notifications du
- * téléphone, dès leur affichage.
+ * Lecture des offres arrivées sous forme de notification.
  *
- * Il n'y a ni sondage, ni réseau, ni base de données sur ce chemin. Entre
- * l'arrivée de la notification et la bulle à l'écran il n'y a qu'une lecture
- * de chaîne, quelques expressions régulières et une trentaine
- * d'opérations flottantes : l'ordre de grandeur est la milliseconde, très
- * loin des cinq secondes demandées. La latence réelle est mesurée à chaque
- * course et affichée sur la bulle, pour qu'elle soit vérifiable et non promise.
+ * C'est le chemin qui sert quand l'application chauffeur est en arrière-plan
+ * ou l'écran verrouillé. Quand elle est au premier plan, Uber dessine sa
+ * carte d'offre sans rien notifier : c'est alors [LectureEcran] qui voit
+ * l'offre. Les deux services partagent [Arbitrage], donc une course vue par
+ * les deux chemins ne produit qu'une bulle.
+ *
+ * Rien sur ce chemin n'attend : pas de réseau, pas de base de données, pas de
+ * service à démarrer. Entre l'arrivée de la notification et la bulle il n'y a
+ * qu'une lecture de chaîne, quelques expressions régulières et une trentaine
+ * d'opérations flottantes.
  */
 class EcouteNotifications : NotificationListenerService() {
-
-    private var derniereSignature: String? = null
-    private var dernierInstant = 0L
 
     override fun onListenerConnected() {
         Log.i(TAG, "écoute des notifications active")
@@ -57,32 +52,16 @@ class EcouteNotifications : NotificationListenerService() {
 
         val paquet = sbn.packageName
         if (!reglages.ecoute(paquet)) {
-            if (reglages.modeDecouverte && ressembleAUneCourse(texte)) {
+            if (reglages.modeDecouverte && Arbitrage.ressembleAUneCourse(texte)) {
                 Journal.signalerInconnu(this, paquet)
             }
             return
         }
 
-        val course = Analyseur.analyser(texte, Plateformes.nom(paquet))
-
-        // Une offre de course se réaffiche chaque seconde tant que le compte
-        // à rebours tourne : le libellé change, la course non. On dédoublonne
-        // donc sur les chiffres extraits, jamais sur le texte.
-        val signature = signature(paquet, course)
-        val maintenant = SystemClock.elapsedRealtime()
-        if (signature == derniereSignature && maintenant - dernierInstant < FENETRE_DOUBLON_MS) return
-        derniereSignature = signature
-        dernierInstant = maintenant
-
-        val verdict = Arbitre.arbitrer(course, reglages.bareme)
-
         // postTime est l'horodatage d'affichage par le système : la
         // différence mesure bien le délai vu par le chauffeur.
         val latence = (System.currentTimeMillis() - sbn.postTime).coerceAtLeast(0L)
-
-        Journal.ajouter(this, verdict, paquet, latence)
-        if (reglages.vibration) Haptique.signaler(this, verdict.decision)
-        Bulle.afficher(this, verdict, latence, reglages)
+        Arbitrage.rendre(this, paquet, Arbitrage.lire(paquet, texte), Source.NOTIFICATION, latence)
     }
 
     /**
@@ -110,21 +89,7 @@ class EcouteNotifications : NotificationListenerService() {
             .joinToString("\n")
     }
 
-    /** Signature numérique d'une course, insensible au compte à rebours. */
-    private fun signature(paquet: String, c: Course): String = listOf(
-        paquet, c.prix, c.kmTrajet, c.minutesTrajet, c.kmApproche, c.minutesApproche,
-    ).joinToString("|")
-
-    /** Un montant et une distance ou une durée : c'est probablement une course. */
-    private fun ressembleAUneCourse(texte: String): Boolean {
-        val t = texte.lowercase()
-        val montant = t.contains("€") || t.contains("eur")
-        val trajet = t.contains("km") || t.contains("min")
-        return montant && trajet
-    }
-
     private companion object {
         const val TAG = "Arbitre"
-        const val FENETRE_DOUBLON_MS = 45_000L
     }
 }

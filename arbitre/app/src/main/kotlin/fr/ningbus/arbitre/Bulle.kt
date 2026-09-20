@@ -47,11 +47,17 @@ object Bulle {
     /** Glissement minimal, en pixels, avant de considérer que l'on déplace. */
     private const val SEUIL_GLISSEMENT = 12
 
-    fun afficher(contexte: Context, verdict: Verdict, latenceMs: Long, reglages: Reglages) {
+    fun afficher(
+        contexte: Context,
+        verdict: Verdict,
+        latenceMs: Long,
+        source: Source,
+        reglages: Reglages,
+    ) {
         val app = contexte.applicationContext
         principal.post {
             try {
-                poser(app, verdict, latenceMs, reglages)
+                poser(app, verdict, latenceMs, source, reglages)
             } catch (e: Exception) {
                 // Fenêtre refusée (permission retirée, écran verrouillé…) :
                 // le verdict passe par une notification plutôt que d'être perdu.
@@ -66,7 +72,13 @@ object Bulle {
 
     // --- Pose ---------------------------------------------------------------
 
-    private fun poser(contexte: Context, verdict: Verdict, latenceMs: Long, reglages: Reglages) {
+    private fun poser(
+        contexte: Context,
+        verdict: Verdict,
+        latenceMs: Long,
+        source: Source,
+        reglages: Reglages,
+    ) {
         if (!Settings.canDrawOverlays(contexte)) {
             Repli.notifier(contexte, verdict)
             return
@@ -75,7 +87,7 @@ object Bulle {
 
         val habille = ContextThemeWrapper(contexte, R.style.Theme_Arbitre)
         val racine = LayoutInflater.from(habille).inflate(R.layout.bulle, null)
-        remplir(racine, verdict, latenceMs, reglages.bareme)
+        remplir(racine, verdict, latenceMs, source, reglages.bareme)
 
         val wm = contexte.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val lp = WindowManager.LayoutParams(
@@ -114,13 +126,20 @@ object Bulle {
 
     // --- Contenu ------------------------------------------------------------
 
-    private fun remplir(racine: View, verdict: Verdict, latenceMs: Long, bareme: Bareme) {
+    private fun remplir(
+        racine: View,
+        verdict: Verdict,
+        latenceMs: Long,
+        source: Source,
+        bareme: Bareme,
+    ) {
         val ctx = racine.context
         val teinte = couleur(ctx, verdict.decision)
 
         racine.findViewById<View>(R.id.entete).backgroundTintList = ColorStateList.valueOf(teinte)
         racine.findViewById<TextView>(R.id.verdict).text = verdict.decision.libelle
-        racine.findViewById<TextView>(R.id.latence).text = latenceLisible(latenceMs)
+        racine.findViewById<TextView>(R.id.latence).text =
+            "${latenceLisible(latenceMs)} · ${source.libelle}"
 
         val euroHeure = racine.findViewById<TextView>(R.id.euro_heure)
         euroHeure.text = verdict.euroHeure?.let { "${fmt0(it)} €/h" } ?: "—"

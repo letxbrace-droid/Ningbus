@@ -1,18 +1,21 @@
 package fr.ningbus.arbitre.moteur
 
 /**
- * Extraction des chiffres d'une notification de course.
+ * Extraction des chiffres d'une offre de course.
  *
- * Le texte est du langage naturel, différent d'une plateforme à l'autre et
+ * La matière est du langage naturel — texte d'une notification ou contenu de
+ * la carte d'offre lue à l'écran — différent d'une plateforme à l'autre et
  * d'une version d'app à l'autre. La méthode est donc volontairement tolérante :
  *
  *  1. on repère tous les montants, toutes les durées, toutes les distances,
  *     avec leur position dans le texte ;
  *  2. on classe chaque nombre en « approche » ou « trajet » selon les mots
- *     qui l'entourent ("de vous", "de trajet"…) ;
- *  3. ce qui reste non classé est attribué dans l'ordre de lecture, car
+ *     qui l'entourent ("de vous", "course de", "prise en charge"…) ;
+ *  3. une durée et une distance collées décrivent la même étape — « 16 min
+ *     (à 10,9 km) » — donc le rôle de l'une se transmet à l'autre ;
+ *  4. ce qui reste non classé est attribué dans l'ordre de lecture, car
  *     toutes les plateformes annoncent l'approche avant le trajet ;
- *  4. on vérifie la cohérence du résultat (une vitesse implicite absurde
+ *  5. on vérifie la cohérence du résultat (une vitesse implicite absurde
  *     trahit une mauvaise attribution).
  *
  * Rien n'est deviné en silence : tout ce qui est estimé ou incertain ressort
@@ -31,6 +34,9 @@ object Analyseur {
     private val RE_KM = Regex("""(\d{1,4}(?:[.,]\d{1,3})?)\s*(?:kms?\b|kilom[èe]tres?\b)""")
     private val RE_METRES = Regex("""(\d{2,4})\s*(?:m\b|m[èe]tres?\b)""")
 
+    /** Un vrai mot, par opposition à une préposition d'une ou deux lettres. */
+    private val RE_MOT = Regex("""\p{L}{3,}""")
+
     /** Mots qui désignent le trajet à vide vers le client. */
     private val MOTS_APPROCHE = listOf(
         "de vous", "de toi", "à vous", "a vous", "away", "approche",
@@ -47,15 +53,23 @@ object Analyseur {
     /** Fenêtre de contexte, en caractères, autour d'un nombre. */
     private const val FENETRE = 35
 
+    /**
+     * Écart maximal, en caractères, entre une durée et une distance pour
+     * qu'elles décrivent la même étape. « 16 min (à 10,9 km) » : quatre
+     * caractères les séparent.
+     */
+    private const val ADJACENCE = 12
+
     /** Au-delà, l'attribution durée/distance est forcément fausse. */
     private const val VITESSE_ABSURDE = 130.0
 
     // --- API ---------------------------------------------------------------
 
     /**
-     * Analyse le texte d'une notification (titre et corps concaténés).
+     * Analyse le texte d'une offre de course.
      *
-     * @param texte le contenu brut de la notification
+     * @param texte contenu brut — notification concaténée, ou textes lus sur
+     *   la carte d'offre dans l'ordre de lecture
      * @param plateforme nom lisible de l'app émettrice
      */
     fun analyser(texte: String, plateforme: String = ""): Course {
@@ -63,11 +77,19 @@ object Analyseur {
         val remarques = mutableListOf<String>()
 
         val prix = montant(t, remarques)
-        val durees = durees(t)
-        val distances = distances(t)
+        val durees = durees(t).map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
+        val distances = distances(t).map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
 
-        val (minApp, minTraj) = attribuer(t, durees, "durée", remarques)
-        val (kmApp, kmTraj) = attribuer(t, distances, "distance", remarques)
+        // Première passe : les rôles posés par les mots-clés se transmettent
+        // entre voisines immédiates.
+        propager(t, durees, distances)
+
+        // Les distances se laissent mieux classer que les durées : « course de
+        // 12,1 km » nomme son étape, « 16 min » non. On les attribue donc
+        // d'abord, puis on laisse leurs rôles redescendre sur les durées.
+        val (kmApp, kmTraj) = attribuer(distances, "distance", remarques)
+        propager(t, durees, distances)
+        val (minApp, minTraj) = attribuer(durees, "durée", remarques)
 
         return coherence(
             Course(
@@ -90,9 +112,9 @@ object Analyseur {
      * nombre et le symbole euro), minuscules, lignes réduites à des espaces.
      */
     internal fun normaliser(texte: String): String = texte
-        .replace(' ', ' ')  // espace insécable
-        .replace(' ', ' ')  // espace fine insécable
-        .replace(' ', ' ')  // espace fine
+        .replace('\u00A0', ' ')  // espace insécable
+        .replace('\u202F', ' ')  // espace fine insécable
+        .replace('\u2009', ' ')  // espace fine
         .replace('\n', ' ')
         .replace('\t', ' ')
         .replace("·", " · ")
@@ -101,8 +123,10 @@ object Analyseur {
 
     /**
      * Le montant de la course. Quand plusieurs sommes apparaissent (prix +
-     * bonus, prix + pourboire estimé), on retient la plus grosse et on le
-     * signale : additionner à l'aveugle ferait accepter des courses à perte.
+     * bonus de prise en charge, prix + pourboire estimé), on retient la plus
+     * grosse et on le signale : additionner à l'aveugle ferait accepter des
+     * courses à perte, d'autant que les plateformes annoncent souvent le
+     * bonus comme « inclus » dans le total.
      */
     private fun montant(t: String, remarques: MutableList<String>): Double? {
         val valeurs = RE_MONTANT.findAll(t)
@@ -113,10 +137,10 @@ object Analyseur {
         return valeurs.max()
     }
 
-    private fun durees(t: String): List<Jeton> {
-        val jetons = mutableListOf<Jeton>()
+    private fun durees(t: String): List<Triple<Double, Int, Int>> {
+        val jetons = mutableListOf<Triple<Double, Int, Int>>()
         RE_MINUTES.findAll(t).forEach { m ->
-            nombre(m.groupValues[1])?.let { jetons += Jeton(it, m.range.first, m.range.last) }
+            nombre(m.groupValues[1])?.let { jetons += Triple(it, m.range.first, m.range.last) }
         }
         RE_HEURES.findAll(t).forEach { m ->
             val h = nombre(m.groupValues[1]) ?: return@forEach
@@ -124,78 +148,114 @@ object Analyseur {
             // heure de la journée ("18h30"), pas une durée.
             if (h > 5.0) return@forEach
             val min = nombre(m.groupValues[2]) ?: 0.0
-            jetons += Jeton(h * 60.0 + min, m.range.first, m.range.last)
+            jetons += Triple(h * 60.0 + min, m.range.first, m.range.last)
         }
-        return jetons.sortedBy { it.debut }
+        return jetons.sortedBy { it.second }
     }
 
-    private fun distances(t: String): List<Jeton> {
-        val jetons = mutableListOf<Jeton>()
+    private fun distances(t: String): List<Triple<Double, Int, Int>> {
+        val jetons = mutableListOf<Triple<Double, Int, Int>>()
         RE_KM.findAll(t).forEach { m ->
-            nombre(m.groupValues[1])?.let { jetons += Jeton(it, m.range.first, m.range.last) }
+            nombre(m.groupValues[1])?.let { jetons += Triple(it, m.range.first, m.range.last) }
         }
         RE_METRES.findAll(t).forEach { m ->
             val v = nombre(m.groupValues[1]) ?: return@forEach
             // En dessous de 50 m ce n'est pas une distance de course ;
             // au-delà de 5 km la plateforme aurait écrit des kilomètres.
             if (v < 50.0 || v > 5000.0) return@forEach
-            jetons += Jeton(v / 1000.0, m.range.first, m.range.last)
+            jetons += Triple(v / 1000.0, m.range.first, m.range.last)
         }
-        return jetons.sortedBy { it.debut }
+        return jetons.sortedBy { it.second }
     }
 
     /**
-     * Range les nombres d'un même type en (approche, trajet).
+     * Transmet les rôles entre une durée et une distance qui se touchent.
      *
-     * D'abord par les mots du contexte, puis, pour le reste, par l'ordre de
-     * lecture : l'approche est toujours annoncée avant le trajet.
+     * C'est ce qui fait tenir le format d'Uber : « 16 min (à 10,9 km) » ne
+     * contient aucun mot qui désigne l'approche, mais « course de 12,1 km »
+     * nomme le trajet. Une fois la distance d'approche identifiée par
+     * élimination, la durée collée à elle en hérite.
+     */
+    private fun propager(t: String, durees: List<Nombre>, distances: List<Nombre>) {
+        transmettre(t, durees, distances)
+        transmettre(t, distances, durees)
+    }
+
+    private fun transmettre(t: String, vers: List<Nombre>, depuis: List<Nombre>) {
+        val sources = depuis.filter { it.role != Role.INCONNU }
+        if (sources.isEmpty()) return
+        for (cible in vers) {
+            if (cible.role != Role.INCONNU) continue
+            val voisine = sources
+                .filter { ecart(cible, it) <= ADJACENCE && collees(t, cible, it) }
+                .minByOrNull { ecart(cible, it) } ?: continue
+            cible.role = voisine.role
+        }
+    }
+
+    /**
+     * Deux nombres sont collés si rien d'autre que de la ponctuation les
+     * sépare. Un mot entre eux change le sens : dans « (1,3 km) de vous
+     * 22 min », les neuf caractères qui séparent la distance de la durée
+     * disent précisément qu'elles décrivent deux étapes différentes.
+     */
+    private fun collees(t: String, a: Nombre, b: Nombre): Boolean {
+        val premier = if (a.debut <= b.debut) a else b
+        val second = if (a.debut <= b.debut) b else a
+        val debut = (premier.fin + 1).coerceIn(0, t.length)
+        val fin = second.debut.coerceIn(debut, t.length)
+        return !RE_MOT.containsMatchIn(t.substring(debut, fin))
+    }
+
+    private fun ecart(a: Nombre, b: Nombre): Int = when {
+        a.debut > b.fin -> a.debut - b.fin
+        b.debut > a.fin -> b.debut - a.fin
+        else -> 0
+    }
+
+    /**
+     * Range les nombres d'un même type en (approche, trajet) : d'abord ceux
+     * que les mots-clés ont désignés, puis le reste dans l'ordre de lecture.
      */
     private fun attribuer(
-        t: String,
-        jetons: List<Jeton>,
+        nombres: List<Nombre>,
         quoi: String,
         remarques: MutableList<String>,
     ): Pair<Double?, Double?> {
-        if (jetons.isEmpty()) return null to null
+        if (nombres.isEmpty()) return null to null
 
-        var approche: Double? = null
-        var trajet: Double? = null
-        val reste = mutableListOf<Jeton>()
-
-        for (j in jetons) {
-            when (classer(t, j)) {
-                Role.APPROCHE -> if (approche == null) approche = j.valeur else reste += j
-                Role.TRAJET -> if (trajet == null) trajet = j.valeur else reste += j
-                Role.INCONNU -> reste += j
-            }
-        }
+        var approche = nombres.firstOrNull { it.role == Role.APPROCHE }
+        var trajet = nombres.firstOrNull { it.role == Role.TRAJET }
+        val reste = nombres.filter { it.role == Role.INCONNU }
 
         if (approche == null && trajet == null) {
             when {
                 reste.size >= 2 -> {
-                    approche = reste.first().valeur
-                    trajet = reste[1].valeur
+                    approche = reste[0]
+                    trajet = reste[1]
                 }
                 reste.size == 1 -> {
                     // Un seul nombre et aucun indice : c'est le trajet payé qui
                     // est annoncé partout, l'approche est parfois omise.
-                    trajet = reste.first().valeur
+                    trajet = reste[0]
                     remarques += "approche ($quoi) non détectée — non comptée"
                 }
             }
         } else if (approche == null && reste.isNotEmpty()) {
-            approche = reste.first().valeur
+            approche = reste.first()
         } else if (trajet == null && reste.isNotEmpty()) {
-            trajet = reste.last().valeur
+            trajet = reste.last()
         }
 
-        return approche to trajet
+        approche?.role = Role.APPROCHE
+        trajet?.role = Role.TRAJET
+        return approche?.valeur to trajet?.valeur
     }
 
     /** Rôle d'un nombre d'après les mots qui l'entourent. */
-    private fun classer(t: String, j: Jeton): Role {
-        val debut = (j.debut - FENETRE).coerceAtLeast(0)
-        val fin = (j.fin + FENETRE).coerceAtMost(t.length)
+    private fun classer(t: String, debutJeton: Int, finJeton: Int): Role {
+        val debut = (debutJeton - FENETRE).coerceAtLeast(0)
+        val fin = (finJeton + FENETRE).coerceAtMost(t.length)
         val fenetre = t.substring(debut, fin)
         val app = MOTS_APPROCHE.count { fenetre.contains(it) }
         val traj = MOTS_TRAJET.count { fenetre.contains(it) }
@@ -227,7 +287,12 @@ object Analyseur {
 
     // --- Outils ------------------------------------------------------------
 
-    private data class Jeton(val valeur: Double, val debut: Int, val fin: Int)
+    private class Nombre(
+        val valeur: Double,
+        val debut: Int,
+        val fin: Int,
+        var role: Role,
+    )
 
     private enum class Role { APPROCHE, TRAJET, INCONNU }
 

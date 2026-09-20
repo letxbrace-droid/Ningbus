@@ -20,6 +20,8 @@ data class Ligne(
     val resume: String,
     val texteBrut: String,
     val latenceMs: Long,
+    /** Notification, écran ou essai — pour savoir quel chemin a fonctionné. */
+    val source: String,
 )
 
 /**
@@ -36,7 +38,13 @@ object Journal {
     private const val CLE = "lignes"
     private const val CLE_INCONNUS = "paquets_inconnus"
 
-    fun ajouter(contexte: Context, verdict: Verdict, paquet: String, latenceMs: Long) {
+    fun ajouter(
+        contexte: Context,
+        verdict: Verdict,
+        paquet: String,
+        latenceMs: Long,
+        source: Source,
+    ) {
         val o = JSONObject().apply {
             put("t", System.currentTimeMillis())
             put("paquet", paquet)
@@ -46,6 +54,7 @@ object Journal {
             put("resume", verdict.resume)
             put("brut", verdict.course.texteBrut)
             put("lat", latenceMs)
+            put("source", source.libelle)
         }
         val prefs = contexte.applicationContext
             .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
@@ -75,13 +84,15 @@ object Journal {
                 resume = o.optString("resume"),
                 texteBrut = o.optString("brut"),
                 latenceMs = o.optLong("lat"),
+                source = o.optString("source", "?"),
             )
         }
     }
 
     fun vider(contexte: Context) {
+        dejaNotes.clear()
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
-            .edit().remove(CLE).apply()
+            .edit().remove(CLE).remove(CLE_ECARTES).apply()
     }
 
     // --- Mode découverte ---------------------------------------------------
@@ -104,6 +115,59 @@ object Journal {
     fun inconnus(contexte: Context): Set<String> =
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
             .getStringSet(CLE_INCONNUS, null)?.toSet() ?: emptySet()
+
+    // --- Écrans écartés ----------------------------------------------------
+
+    private const val CLE_ECARTES = "ecrans_ecartes"
+    private const val MAX_ECARTES = 5
+
+    /** Empreintes déjà notées, pour ne pas réécrire à chaque rafraîchissement. */
+    private val dejaNotes = mutableSetOf<Int>()
+
+    /**
+     * Retient un écran qui portait un montant mais n'a pas été reconnu comme
+     * une offre. Si des courses passent à travers le filtre, c'est ici qu'on
+     * voit pourquoi, et quel marqueur ajouter.
+     */
+    @Synchronized
+    fun signalerEcranIgnore(contexte: Context, paquet: String, texte: String) {
+        val empreinte = texte.hashCode()
+        if (!dejaNotes.add(empreinte)) return
+        if (dejaNotes.size > 64) dejaNotes.clear()
+
+        val prefs = contexte.applicationContext
+            .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
+        val tableau = try {
+            JSONArray(prefs.getString(CLE_ECARTES, "[]"))
+        } catch (e: Exception) {
+            JSONArray()
+        }
+        val reduit = JSONArray()
+        reduit.put(
+            JSONObject().apply {
+                put("t", System.currentTimeMillis())
+                put("paquet", paquet)
+                put("brut", texte.take(1200))
+            }
+        )
+        for (i in 0 until minOf(tableau.length(), MAX_ECARTES - 1)) reduit.put(tableau.get(i))
+        prefs.edit().putString(CLE_ECARTES, reduit.toString()).apply()
+    }
+
+    /** Les écrans écartés, du plus récent au plus ancien. */
+    fun ecransEcartes(contexte: Context): List<Pair<String, String>> {
+        val prefs = contexte.applicationContext
+            .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
+        val tableau = try {
+            JSONArray(prefs.getString(CLE_ECARTES, "[]"))
+        } catch (e: Exception) {
+            return emptyList()
+        }
+        return (0 until tableau.length()).mapNotNull { i ->
+            val o = tableau.optJSONObject(i) ?: return@mapNotNull null
+            o.optString("paquet") to o.optString("brut")
+        }
+    }
 
     fun oublierInconnu(contexte: Context, paquet: String) {
         val prefs = contexte.applicationContext

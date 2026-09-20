@@ -113,15 +113,39 @@ class ArbitreTest {
     }
 
     @Test
-    fun `donnee manquante estimee a la vitesse par defaut`() {
+    fun `duree manquante estimee au rythme de l'approche`() {
+        // Approche : 4 km en 12 min, soit 20 km/h. Le trajet de 10 km est
+        // donc estimé à 30 min, et non aux 22 km/h du réglage par défaut.
         val v = Arbitre.arbitrer(
-            Course(prix = 18.0, minutesApproche = 3.0, kmApproche = 1.0, kmTrajet = 11.0),
-            nu,
+            Course(prix = 18.0, minutesApproche = 12.0, kmApproche = 4.0, kmTrajet = 10.0),
+            nu.copy(approcheMaxMinutes = 20.0),
         )
-        // 11 km à 22 km/h = 30 min
-        assertEquals(30.0, v.course.minutesTrajet ?: 30.0, 0.001)
-        assertTrue(v.alertes.any { it.contains("durée estimée") })
+        assertEquals(12.0 + 30.0, v.minutesTotal!!, 0.01)
+        assertTrue(v.alertes.any { it.contains("au rythme de l'approche") })
         assertEquals(Decision.LIMITE, v.decision) // jamais vert sur une estimation
+    }
+
+    @Test
+    fun `sans approche mesurable, la vitesse de reglage sert de repli`() {
+        val v = Arbitre.arbitrer(Course(prix = 18.0, kmTrajet = 11.0), nu)
+        // 11 km à 22 km/h = 30 min
+        assertEquals(30.0, v.minutesTotal!!, 0.01)
+        assertTrue(v.alertes.any { it.contains("vitesse supposée") })
+    }
+
+    @Test
+    fun `la course Uber de Briis-sous-Forges est refusee`() {
+        // 17,08 € pour 16 min et 10,9 km d'approche, puis 12,1 km de course :
+        // l'approche seule dépasse la limite, et l'euro/heure est très en
+        // dessous de l'objectif. C'est exactement le genre de course qu'un
+        // chauffeur accepte au vu du seul montant affiché.
+        val v = Arbitre.arbitrer(
+            Course(prix = 17.08, minutesApproche = 16.0, kmApproche = 10.9, kmTrajet = 12.1),
+            Bareme(),
+        )
+        assertEquals(Decision.LAISSE, v.decision)
+        assertTrue(v.resume.contains("approche", ignoreCase = true))
+        assertTrue(v.euroHeure!! < 20.0, "euro/heure inattendu : ${v.euroHeure}")
     }
 
     @Test

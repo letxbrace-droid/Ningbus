@@ -48,6 +48,16 @@ class Reglages(contexte: Context) {
         get() = p.getBoolean("decouverte", true)
         set(v) = p.edit().putBoolean("decouverte", v).apply()
 
+    /**
+     * N'arbitre, en lecture d'écran, que ce qui ressemble à une carte d'offre :
+     * un bouton d'acceptation, ou une approche et une course distinctes. Sans
+     * ce filtre, l'écran de navigation — qui affiche lui aussi un prix et des
+     * kilomètres — ferait surgir des bulles en pleine conduite.
+     */
+    var filtrerEcrans: Boolean
+        get() = p.getBoolean("filtrerEcrans", true)
+        set(v) = p.edit().putBoolean("filtrerEcrans", v).apply()
+
     // --- Applications écoutées ---------------------------------------------
 
     var paquets: Set<String>

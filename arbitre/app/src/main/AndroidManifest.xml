@@ -37,6 +37,26 @@
             n'est pas retiré : rien à démarrer, rien à maintenir en tâche
             de fond, donc aucune latence au moment où la course tombe.
         -->
+        <!--
+            Lecture de la carte d'offre affichée dans l'application chauffeur.
+            C'est le chemin principal : au premier plan, Uber dessine son
+            offre sans poster la moindre notification. La liste des
+            applications écoutées est posée à l'exécution, de sorte que le
+            système lui-même écarte tout le reste du téléphone.
+        -->
+        <service
+            android:name=".LectureEcran"
+            android:exported="true"
+            android:label="@string/nom_app"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/lecture_ecran" />
+        </service>
+
         <service
             android:name=".EcouteNotifications"
             android:exported="true"

@@ -32,7 +32,7 @@ class AnalyseurTest {
 
     @Test
     fun `espace insecable avant l'euro`() {
-        val c = Analyseur.analyser("Course à 12,50 € · 15 min (6 km) de trajet")
+        val c = Analyseur.analyser("Course à 12,50\u00A0€ · 15 min (6 km) de trajet")
         proche(12.50, c.prix)
     }
 
@@ -106,6 +106,76 @@ class AnalyseurTest {
         proche(5.0, c.minutesApproche)
         proche(17.0, c.minutesTrajet)
         proche(8.4, c.kmTrajet)
+    }
+
+    /**
+     * La carte d'offre affichée dans l'application Uber, relevée à l'écran.
+     * Aucune notification n'est postée quand l'app est au premier plan : ce
+     * texte est celui que lit le service d'accessibilité, dans l'ordre où les
+     * vues apparaissent.
+     */
+    private val CARTE_UBER = """
+        UberX Priority
+        17,08 €
+        4,80
+        Montant net de frais
+        +2,34 € inclus pour la prise en charge
+        16 min (à 10.9 km)
+        125 Rue Lieutenant André Lemoal, 91640 Briis-sous-Forges, France
+        Course de 12.1 km
+        121 Chem. du Vieux Pavé de Bruyères le Châtel, 91310 Saint-Germain-lès-Arpajon, France
+        Mise en relation
+    """.trimIndent()
+
+    @Test
+    fun `carte d'offre Uber lue a l'ecran`() {
+        val c = Analyseur.analyser(CARTE_UBER, "Uber")
+        proche(17.08, c.prix)          // et non le bonus de 2,34 €
+        proche(16.0, c.minutesApproche)
+        proche(10.9, c.kmApproche)
+        proche(12.1, c.kmTrajet)
+        assertNull(c.minutesTrajet)    // Uber ne l'annonce pas sur cette carte
+        assertTrue(c.exploitable)
+    }
+
+    @Test
+    fun `la note du chauffeur n'est pas un montant`() {
+        // « ★ 4,80 » n'a pas de symbole euro : il ne doit jamais être lu
+        // comme un prix, sous peine de refuser toutes les courses.
+        val c = Analyseur.analyser(CARTE_UBER, "Uber")
+        assertTrue(c.prix!! > 5.0, "la note 4,80 a été prise pour le prix")
+    }
+
+    @Test
+    fun `les codes postaux ne sont ni des metres ni des kilometres`() {
+        val c = Analyseur.analyser(CARTE_UBER, "Uber")
+        // 91640 et 91310 traînent dans les adresses ; seules 10.9 et 12.1
+        // sont des distances.
+        proche(10.9, c.kmApproche)
+        proche(12.1, c.kmTrajet)
+    }
+
+    @Test
+    fun `carte Uber sans ligne de bonus`() {
+        // Sans « prise en charge », plus aucun mot ne désigne l'approche :
+        // seule l'adjacence « 16 min (à 10.9 km) » permet de la retrouver,
+        // une fois « Course de 12.1 km » identifié comme le trajet.
+        val c = Analyseur.analyser(
+            """
+            UberX
+            14,20 €
+            Montant net de frais
+            16 min (à 10.9 km)
+            125 Rue Lieutenant André Lemoal, 91640 Briis-sous-Forges
+            Course de 12.1 km
+            121 Chem. du Vieux Pavé, 91310 Saint-Germain-lès-Arpajon
+            """.trimIndent(),
+            "Uber",
+        )
+        proche(14.20, c.prix)
+        proche(16.0, c.minutesApproche)
+        proche(10.9, c.kmApproche)
+        proche(12.1, c.kmTrajet)
     }
 
     @Test

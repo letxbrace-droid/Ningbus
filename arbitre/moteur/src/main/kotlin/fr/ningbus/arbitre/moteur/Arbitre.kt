@@ -65,14 +65,25 @@ object Arbitre {
         }
 
         // --- Trajet payé : compléter la donnée manquante si besoin ----------
+        //
+        // Uber n'annonce que « Course de 12,1 km » : la durée du trajet
+        // manque. La vitesse de l'approche est alors une bien meilleure
+        // référence qu'une constante de réglage — elle est mesurée sur les
+        // mêmes routes, à la même minute, dans le même trafic.
+        val vitesseApproche = vitesse(course.kmApproche, course.minutesApproche)
+        val vitesseReference = vitesseApproche?.coerceIn(8.0, 60.0) ?: bareme.vitesseParDefaut
+        val origineVitesse =
+            if (vitesseApproche != null) "au rythme de l'approche" else "à la vitesse supposée"
+
         var kmTrajet = course.kmTrajet
         var minutesTrajet = course.minutesTrajet
         if (kmTrajet == null && minutesTrajet != null) {
-            kmTrajet = minutesTrajet / 60.0 * bareme.vitesseParDefaut
-            alertes += "distance estimée à ${fmt1(kmTrajet)} km"
+            kmTrajet = minutesTrajet / 60.0 * vitesseReference
+            alertes += "distance estimée à ${fmt1(kmTrajet)} km, $origineVitesse"
         } else if (minutesTrajet == null && kmTrajet != null) {
-            minutesTrajet = kmTrajet / bareme.vitesseParDefaut * 60.0
-            alertes += "durée estimée à ${fmt0(minutesTrajet)} min"
+            minutesTrajet = kmTrajet / vitesseReference * 60.0
+            alertes += "durée estimée à ${fmt0(minutesTrajet)} min, $origineVitesse " +
+                "(${fmt0(vitesseReference)} km/h)"
         }
         if (kmTrajet == null || minutesTrajet == null) {
             return Verdict(
@@ -95,7 +106,7 @@ object Arbitre {
         val minutesApproche = course.minutesApproche ?: 0.0
         val kmApproche = course.kmApproche
             ?: (minutesApproche / 60.0 * bareme.vitesseParDefaut)
-        val traficApproche = trafic(vitesse(course.kmApproche, course.minutesApproche))
+        val traficApproche = trafic(vitesseApproche)
         val coefApproche = if (bareme.prudenceTrafic) {
             prudence(if (traficApproche == Trafic.INCONNU) traficTrajet else traficApproche)
         } else 1.0

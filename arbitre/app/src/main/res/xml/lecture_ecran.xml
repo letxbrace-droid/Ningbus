@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    La liste des applications écoutées n'est pas fixée ici mais posée à
+    l'exécution (LectureEcran.appliquerFiltre), pour suivre les cases cochées
+    dans les réglages.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/description_accessibilite"
+    android:notificationTimeout="100"
+    android:settingsActivity="fr.ningbus.arbitre.ActivitePrincipale" />

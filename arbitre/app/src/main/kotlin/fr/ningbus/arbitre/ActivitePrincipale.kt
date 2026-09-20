@@ -1,6 +1,7 @@
 package fr.ningbus.arbitre
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -28,7 +29,7 @@ import fr.ningbus.arbitre.moteur.Plateformes
 import fr.ningbus.arbitre.moteur.fmt2
 
 /**
- * L'écran de réglages : les deux permissions à accorder, le barème du
+ * L'écran de réglages : les trois permissions à accorder, le barème du
  * chauffeur, les applications écoutées.
  *
  * Les champs numériques sont engendrés à partir d'une liste de descripteurs
@@ -56,6 +57,9 @@ class ActivitePrincipale : AppCompatActivity() {
                 )
             )
         }
+        findViewById<Button>(R.id.bouton_ecran).setOnClickListener {
+            ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
         findViewById<Button>(R.id.bouton_test).setOnClickListener { essai() }
         findViewById<Button>(R.id.bouton_journal).setOnClickListener {
             startActivity(Intent(this, ActiviteJournal::class.java))
@@ -77,6 +81,7 @@ class ActivitePrincipale : AppCompatActivity() {
         interrupteur(R.id.actif, reglages.actif) { reglages.actif = it }
         interrupteur(R.id.vibration, reglages.vibration) { reglages.vibration = it }
         interrupteur(R.id.decouverte, reglages.modeDecouverte) { reglages.modeDecouverte = it }
+        interrupteur(R.id.filtre_ecrans, reglages.filtrerEcrans) { reglages.filtrerEcrans = it }
         interrupteur(R.id.prudence, reglages.bareme.prudenceTrafic) {
             reglages.bareme = reglages.bareme.copy(prudenceTrafic = it)
         }
@@ -105,6 +110,22 @@ class ActivitePrincipale : AppCompatActivity() {
     private fun etatPermissions() {
         etat(R.id.etat_notif, R.id.bouton_notif, accesNotifications())
         etat(R.id.etat_superposition, R.id.bouton_superposition, Settings.canDrawOverlays(this))
+        etat(R.id.etat_ecran, R.id.bouton_ecran, lectureEcranActive())
+    }
+
+    /**
+     * Le système ne donne pas d'API directe : on lit la liste des services
+     * d'accessibilité activés, où le nôtre apparaît sous forme de composant.
+     */
+    private fun lectureEcranActive(): Boolean {
+        val actifs = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+        ) ?: return false
+        val attendu = ComponentName(this, LectureEcran::class.java)
+        return actifs.split(':').any {
+            ComponentName.unflattenFromString(it.trim()) == attendu
+        }
     }
 
     private fun etat(idTexte: Int, idBouton: Int, accorde: Boolean) {
@@ -154,7 +175,7 @@ class ActivitePrincipale : AppCompatActivity() {
         ),
         Champ(
             "Commission prélevée, en %",
-            "À laisser à 0 si la notification annonce déjà ta part et non le prix client.",
+            "À laisser à 0 si l'offre annonce déjà ta part et non le prix client — c'est le cas d'Uber, qui écrit « Montant net de frais ».",
             100.0, { it.commission }, { b, v -> b.copy(commission = v.coerceIn(0.0, 0.9)) },
         ),
         Champ(
@@ -294,6 +315,10 @@ class ActivitePrincipale : AppCompatActivity() {
                 } else {
                     reglages.retirerPaquet(paquet)
                 }
+                // Le filtre d'écoute est appliqué par le système : sans ce
+                // rappel, une application tout juste cochée n'enverrait
+                // jamais le premier événement.
+                LectureEcran.rafraichirFiltre()
             }
         }
     }
@@ -315,7 +340,7 @@ class ActivitePrincipale : AppCompatActivity() {
             "Essai",
             reglages.bareme,
         )
-        Bulle.afficher(this, verdict, 180L, reglages)
+        Bulle.afficher(this, verdict, 180L, Source.ESSAI, reglages)
     }
 
     private fun interrupteur(id: Int, valeur: Boolean, action: (Boolean) -> Unit) {

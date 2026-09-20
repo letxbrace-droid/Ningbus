@@ -1,8 +1,9 @@
 # Arbitre — le verdict d'une course avant la fin du compte à rebours
 
 Application Android qui se pose **par-dessus** ton application chauffeur. Dès
-qu'une offre de course arrive, elle lit la notification, calcule ce que la
-course laisse réellement par heure de travail, et affiche un mot :
+qu'une offre de course apparaît — sur l'écran ou en notification — elle la lit,
+calcule ce que la course laisse réellement par heure de travail, et affiche
+un mot :
 
 ```
 ┌──────────────────────────────────────┐
@@ -28,26 +29,61 @@ ne rapporte.
 
 ---
 
+## Deux façons de voir l'offre, parce qu'une seule ne suffit pas
+
+C'est le point le plus important, et celui sur lequel la première version se
+trompait : **quand l'application chauffeur est au premier plan — c'est-à-dire
+pendant tout le temps où l'on travaille — Uber dessine sa carte d'offre sans
+poster la moindre notification.** Un service d'écoute des notifications ne voit
+alors strictement rien, et la course passe.
+
+L'application écoute donc par deux chemins :
+
+| Chemin | Quand il sert | Permission |
+|---|---|---|
+| **Lecture de l'écran** | l'app chauffeur est au premier plan — le cas courant | accessibilité |
+| **Notification** | l'app est en arrière-plan ou l'écran verrouillé | accès aux notifications |
+
+Les deux passent par le même arbitrage et le même dédoublonnage : une course
+vue par les deux chemins ne produit qu'une bulle.
+
+La lecture d'écran n'est branchée **que sur les applications cochées**. Le
+filtre est posé dans `setServiceInfo`, donc appliqué par le système lui-même :
+les événements des autres applications n'atteignent jamais ce code.
+
+Un écran de navigation affiche lui aussi un prix et des kilomètres. Pour ne
+pas faire surgir une bulle en pleine conduite, seuls sont retenus les écrans
+qui portent un bouton d'acceptation (« Mise en relation », « Accepter »…) **ou**
+deux distances distinctes — une offre annonce toujours l'approche *et* la
+course, une navigation une seule. Les écrans écartés qui portaient un montant
+sont notés dans le journal : si une course passe à travers, on y voit ce qu'il
+manquait.
+
 ## Les cinq secondes
 
 Demandé : voir la course en moins de 5 s. Obtenu : **de l'ordre de la
 centaine de millisecondes**, et le chiffre est affiché sur chaque bulle
 plutôt que promis.
 
-Le chemin complet, entre l'affichage de la notification et celui de la bulle :
+Le chemin complet, entre l'apparition de l'offre et celle de la bulle :
 
-1. Android livre la notification à un `NotificationListenerService`, que le
-   système maintient lié en permanence. Rien à réveiller, rien à démarrer.
-2. Les textes de la notification sont concaténés (titre, corps, texte déplié).
+1. Android livre l'événement au service — d'écoute des notifications ou
+   d'accessibilité — que le système maintient lié en permanence. Rien à
+   réveiller, rien à démarrer.
+2. Les textes sont rassemblés : titre, corps et texte déplié pour une
+   notification ; parcours en profondeur de l'arbre des vues, borné à 600
+   nœuds, pour une carte d'offre.
 3. Quelques expressions régulières en extraient prix, durées et distances.
 4. Une trentaine d'opérations flottantes produisent le verdict.
 5. La vue est ajoutée au `WindowManager`.
 
 Aucun appel réseau, aucune base de données, aucun service à lancer sur ce
 chemin — c'est ce qui rend le délai structurellement court, et pas seulement
-court en moyenne. La latence mesurée est l'écart entre `postTime` (l'horodatage
-système d'affichage de la notification) et la pose de la bulle : le délai tel
-que le chauffeur le vit, pas le temps de calcul.
+court en moyenne. La latence mesurée est l'écart entre l'horodatage système de
+l'événement — `postTime` pour une notification, `eventTime` pour un
+changement d'écran — et la pose de la bulle : le délai tel que le chauffeur
+le vit, pas le temps de calcul. Le journal note aussi par quel chemin chaque
+course est arrivée.
 
 Le **journal** affiche la médiane et le pire cas relevés sur les dernières
 courses : la promesse est vérifiable sur ton propre téléphone.
@@ -98,7 +134,7 @@ Comparé à ton objectif horaire, avec une bande de tolérance de ±15 % :
 | **PRENDS** | au-dessus de l'objectif + 15 % |
 | **LIMITE** | dans la bande autour de l'objectif |
 | **LAISSE** | en dessous de l'objectif − 15 % |
-| **INCOMPLET** | la notification n'était pas lisible |
+| **INCOMPLET** | l'offre n'était pas lisible |
 
 Trois **vetos** écrasent le calcul, quel que soit l'euro/heure : prix sous ton
 plancher, approche au-dessus de ta limite, ou roulage plus coûteux que la
@@ -134,7 +170,7 @@ la vitesse.
 - « approche inconnue — verdict optimiste »
 - « plus de vide que de charge »
 - « X % du temps n'est pas payé » (au-delà de 45 %)
-- « durée estimée » quand la notification n'en donnait pas
+- « durée estimée » quand l'offre n'en donnait pas
 
 **Une donnée manquante n'obtient jamais de feu vert.** Si l'approche n'a pas pu
 être lue, l'euro/heure est mécaniquement gonflé : le verdict est alors plafonné
@@ -142,30 +178,58 @@ la vitesse.
 
 ---
 
-## Lire la notification
+## Lire l'offre
 
 Le texte varie d'une plateforme à l'autre et d'une version d'app à l'autre.
-L'analyseur procède en quatre temps :
+L'analyseur procède en cinq temps :
 
 1. repérer tous les montants, durées et distances, **avec leur position** ;
 2. classer chaque nombre en « approche » ou « trajet » selon les mots qui
    l'entourent (`de vous`, `de trajet`, `away`, `prise en charge`…) ;
-3. attribuer le reste dans l'ordre de lecture — toutes les plateformes
+3. transmettre le rôle entre une durée et une distance **collées** — « 16 min
+   (à 10,9 km) » décrit une seule étape. La transmission ne saute que de la
+   ponctuation : dans « (1,3 km) de vous 22 min », les mots qui séparent les
+   deux nombres disent précisément qu'il s'agit d'étapes différentes ;
+4. attribuer le reste dans l'ordre de lecture — toutes les plateformes
    annoncent l'approche avant le trajet ;
-4. vérifier la cohérence : « 12,50 € · 3 min · 8 km » donnerait 160 km/h, ce
+5. vérifier la cohérence : « 12,50 € · 3 min · 8 km » donnerait 160 km/h, ce
    qui trahit une mauvaise attribution — les 3 min sont l'approche.
+
+C'est ce qui fait tenir le format réel d'Uber, où rien ne nomme l'approche :
+
+```
+UberX Priority          17,08 €          Montant net de frais
++2,34 € inclus pour la prise en charge
+16 min (à 10.9 km)      125 Rue Lieutenant André Lemoal, 91640 Briis-sous-Forges
+Course de 12.1 km       121 Chem. du Vieux Pavé, 91310 Saint-Germain-lès-Arpajon
+```
+
+« Course de 12,1 km » nomme le trajet ; 10,9 km est donc l'approche par
+élimination ; et « 16 min », collé à elle, en hérite. Le prix retenu est 17,08 €
+et non le bonus de 2,34 € qui y est déjà inclus, ni la note 4,80 du chauffeur —
+qui n'a pas de symbole euro. Les codes postaux 91640 et 91310 ne sont pas lus
+comme des distances.
+
+Cette course-là, au barème par défaut, rapporte **moins de 16 €/h** et se fait
+refuser sur la seule approche : 16 minutes et 10,9 km à vide pour 12,1 km
+payés.
 
 Sont gérés : virgule et point décimaux, espaces insécables avant le symbole
 euro, mètres comme kilomètres, `1 h 15` comme `75 min`, et les heures de la
 journée (`18h30`) qui ne sont pas des durées.
 
+Uber n'annonce pas la durée du trajet, seulement sa distance. Elle est alors
+estimée **au rythme de l'approche** — mesurée sur les mêmes routes, à la même
+minute, dans le même trafic — et non à une constante de réglage. Le verdict est
+dans ce cas plafonné à `LIMITE` : une durée estimée ne mérite pas de feu vert.
+
 Les offres de course se réaffichent chaque seconde tant que le compte à rebours
 tourne. Le dédoublonnage porte donc sur **les chiffres extraits**, jamais sur le
 libellé : la bulle ne clignote pas.
 
-### Quand une notification est mal lue
+### Quand une offre est mal lue
 
-Le journal conserve le **texte brut** de chaque notification, et le bouton
+Le journal conserve le **texte brut** de chaque offre, et le bouton
 « Copier le journal » le met dans le presse-papiers. C'est la seule matière qui
 permette de corriger l'analyseur quand une plateforme change ses libellés — les
 motifs sont dans `moteur/src/main/kotlin/…/Analyseur.kt`, les cas de test dans
@@ -219,18 +283,25 @@ Le module `:app` n'est inclus dans la construction que si un SDK Android est
 présent (`ANDROID_HOME`, `ANDROID_SDK_ROOT` ou un `local.properties`). Le
 moteur, lui, se teste sur n'importe quelle machine dotée d'un JDK.
 
-### Les deux permissions
+### Les trois permissions
 
-Au premier lancement, l'écran d'accueil mène aux deux réglages système :
+Au premier lancement, l'écran d'accueil mène aux trois réglages système :
 
-- **Accès aux notifications** — pour voir l'offre dès son affichage. C'est la
-  permission sensible : elle donne accès à *toutes* les notifications du
-  téléphone. L'application n'en lit que le texte, ne retient que celles des
-  applications cochées, et **rien ne sort du téléphone** : ni compte, ni
-  serveur, ni analytique, ni permission réseau dans le manifeste.
+- **Lecture de l'écran** (accessibilité) — la plus importante : sans elle,
+  toutes les offres reçues pendant que l'app chauffeur est au premier plan
+  passent inaperçues. Elle n'est branchée que sur les applications cochées.
+- **Accès aux notifications** — pour les offres reçues app en arrière-plan ou
+  écran verrouillé. Elle donne accès à *toutes* les notifications du
+  téléphone ; l'application n'en lit que le texte et ne retient que celles des
+  applications cochées.
 - **Superposition d'écran** — pour dessiner par-dessus l'application chauffeur.
   Si elle est refusée, le verdict arrive par notification classique plutôt que
   d'être perdu.
+
+Ces deux premières permissions sont larges par nature. Ce qui les borne ici :
+**rien ne sort du téléphone** — ni compte, ni serveur, ni analytique, et
+aucune permission réseau dans le manifeste. Le code qui le vérifie tient en une
+ligne : `grep INTERNET app/src/main/AndroidManifest.xml` ne renvoie rien.
 
 Le bouton **« Essayer avec une course fictive »** affiche une bulle immédiatement :
 de quoi la placer où l'on veut et régler son barème sans attendre une vraie offre.
@@ -298,7 +369,9 @@ arbitre/
 │       └── Plateformes.kt  Noms de paquets des applications chauffeur
 └── app/                    Module Android
     └── src/main/kotlin/…/
-        ├── EcouteNotifications.kt  NotificationListenerService — le point d'entrée
+        ├── LectureEcran.kt         AccessibilityService — lit la carte d'offre
+        ├── EcouteNotifications.kt  NotificationListenerService — l'autre chemin
+        ├── Arbitrage.kt            Le chemin commun aux deux, et le dédoublonnage
         ├── Bulle.kt                La superposition d'écran
         ├── Repli.kt                Notification de secours
         ├── Haptique.kt             Le verdict vibré
@@ -309,5 +382,6 @@ arbitre/
 ```
 
 Le moteur ne dépend d'aucune classe Android : c'est ce qui permet de tester
-les 26 cas d'analyse et d'arbitrage sur une simple machine de build, et de
-vérifier un calcul de rentabilité à la main plutôt que sur un émulateur.
+les 32 cas d'analyse et d'arbitrage sur une simple machine de build — dont la
+carte d'offre Uber reproduite plus haut — et de vérifier un calcul de
+rentabilité à la main plutôt que sur un émulateur.

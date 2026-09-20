@@ -59,9 +59,40 @@ class ActiviteJournal : AppCompatActivity() {
                 alpha = 0.7f
                 setPadding(0, dp(16), 0, 0)
             })
-            return
         }
         for (ligne in lignes) conteneur.addView(carte(ligne))
+        // Surtout pas après un retour anticipé : c'est quand aucune course
+        // n'a été arbitrée que les écrans écartés expliquent pourquoi.
+        ajouterEcarts(conteneur)
+    }
+
+    /**
+     * Les écrans porteurs d'un montant que le filtre n'a pas retenus. Si une
+     * course est passée à travers, c'est ici qu'on voit ce qu'il manquait.
+     */
+    private fun ajouterEcarts(conteneur: LinearLayout) {
+        val ecarts = Journal.ecransEcartes(this)
+        if (ecarts.isEmpty()) return
+
+        conteneur.addView(TextView(this).apply {
+            text = getString(R.string.titre_ecarts)
+            textSize = 13f
+            alpha = 0.75f
+            setPadding(0, dp(18), 0, dp(2))
+        })
+        for ((paquet, brut) in ecarts) {
+            conteneur.addView(TextView(this).apply {
+                text = "$paquet\n$brut"
+                textSize = 11f
+                alpha = 0.55f
+                setBackgroundResource(R.drawable.fond_carte)
+                setPadding(dp(12), dp(8), dp(12), dp(8))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = dp(6) }
+            })
+        }
     }
 
     /** Ce que le journal apprend sur la session : latence réelle et tri. */
@@ -116,7 +147,7 @@ class ActiviteJournal : AppCompatActivity() {
 
         bloc.addView(TextView(this).apply {
             text = "${ligne.plateforme} · ${heure.format(Date(ligne.horodatage))} · " +
-                "détectée en ${ligne.latenceMs} ms"
+                "par ${ligne.source} en ${ligne.latenceMs} ms"
             textSize = 12f
             alpha = 0.7f
         })
@@ -137,13 +168,20 @@ class ActiviteJournal : AppCompatActivity() {
     /** Copie tout le journal, texte brut compris, pour affiner l'analyseur. */
     private fun copier() {
         val lignes = Journal.lignes(this)
-        if (lignes.isEmpty()) {
+        val ecarts = Journal.ecransEcartes(this)
+        if (lignes.isEmpty() && ecarts.isEmpty()) {
             Toast.makeText(this, R.string.journal_vide, Toast.LENGTH_SHORT).show()
             return
         }
-        val texte = lignes.joinToString("\n\n") { l ->
-            "[${heure.format(Date(l.horodatage))}] ${l.paquet} · ${l.decision} · " +
-                "${l.latenceMs} ms\n${l.texteBrut}"
+        val texte = buildString {
+            lignes.joinTo(this, "\n\n") { l ->
+                "[${heure.format(Date(l.horodatage))}] ${l.paquet} · ${l.source} · " +
+                    "${l.decision} · ${l.latenceMs} ms\n${l.texteBrut}"
+            }
+            if (ecarts.isNotEmpty()) {
+                append("\n\n--- ").append(getString(R.string.titre_ecarts)).append(" ---")
+                for ((paquet, brut) in ecarts) append("\n\n").append(paquet).append("\n").append(brut)
+            }
         }
         val presse = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         presse.setPrimaryClip(ClipData.newPlainText("journal arbitre", texte))
