@@ -92,7 +92,7 @@ object Journal {
     fun vider(contexte: Context) {
         dejaNotes.clear()
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
-            .edit().remove(CLE).remove(CLE_ECARTES).apply()
+            .edit().remove(CLE).remove(CLE_ECARTES).remove(CLE_VUES).apply()
     }
 
     // --- Mode découverte ---------------------------------------------------
@@ -116,6 +116,30 @@ object Journal {
         contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
             .getStringSet(CLE_INCONNUS, null)?.toSet() ?: emptySet()
 
+    // --- Tout ce qui a été vu ----------------------------------------------
+
+    private const val CLE_VUES = "notifications_vues"
+    private const val MAX_VUES = 12
+
+    /**
+     * Retient toute notification qui ressemble à une course, **avant** tout
+     * filtrage par application.
+     *
+     * C'est le diagnostic qui manquait : quand rien ne se passe, il permet de
+     * distinguer « la notification n'est jamais arrivée » de « elle est
+     * arrivée mais n'a pas été retenue », et donne le nom de paquet exact.
+     */
+    @Synchronized
+    fun signalerVue(contexte: Context, paquet: String, texte: String) {
+        val empreinte = (paquet + texte).hashCode()
+        if (!dejaNotes.add(empreinte)) return
+        if (dejaNotes.size > 64) dejaNotes.clear()
+        empiler(contexte, CLE_VUES, MAX_VUES, paquet, texte)
+    }
+
+    fun notificationsVues(contexte: Context): List<Pair<String, String>> =
+        depiler(contexte, CLE_VUES)
+
     // --- Écrans écartés ----------------------------------------------------
 
     private const val CLE_ECARTES = "ecrans_ecartes"
@@ -135,10 +159,26 @@ object Journal {
         if (!dejaNotes.add(empreinte)) return
         if (dejaNotes.size > 64) dejaNotes.clear()
 
+        empiler(contexte, CLE_ECARTES, MAX_ECARTES, paquet, texte)
+    }
+
+    /** Les écrans écartés, du plus récent au plus ancien. */
+    fun ecransEcartes(contexte: Context): List<Pair<String, String>> =
+        depiler(contexte, CLE_ECARTES)
+
+    // --- Petite pile bornée, partagée par les deux traces ------------------
+
+    private fun empiler(
+        contexte: Context,
+        cle: String,
+        maximum: Int,
+        paquet: String,
+        texte: String,
+    ) {
         val prefs = contexte.applicationContext
             .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
         val tableau = try {
-            JSONArray(prefs.getString(CLE_ECARTES, "[]"))
+            JSONArray(prefs.getString(cle, "[]"))
         } catch (e: Exception) {
             JSONArray()
         }
@@ -150,16 +190,15 @@ object Journal {
                 put("brut", texte.take(1200))
             }
         )
-        for (i in 0 until minOf(tableau.length(), MAX_ECARTES - 1)) reduit.put(tableau.get(i))
-        prefs.edit().putString(CLE_ECARTES, reduit.toString()).apply()
+        for (i in 0 until minOf(tableau.length(), maximum - 1)) reduit.put(tableau.get(i))
+        prefs.edit().putString(cle, reduit.toString()).apply()
     }
 
-    /** Les écrans écartés, du plus récent au plus ancien. */
-    fun ecransEcartes(contexte: Context): List<Pair<String, String>> {
+    private fun depiler(contexte: Context, cle: String): List<Pair<String, String>> {
         val prefs = contexte.applicationContext
             .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
         val tableau = try {
-            JSONArray(prefs.getString(CLE_ECARTES, "[]"))
+            JSONArray(prefs.getString(cle, "[]"))
         } catch (e: Exception) {
             return emptyList()
         }

@@ -64,6 +64,46 @@ class ActiviteJournal : AppCompatActivity() {
         // Surtout pas après un retour anticipé : c'est quand aucune course
         // n'a été arbitrée que les écrans écartés expliquent pourquoi.
         ajouterEcarts(conteneur)
+        ajouterVues(conteneur)
+    }
+
+    /**
+     * Les notifications repérées avant tout filtrage.
+     *
+     * C'est le diagnostic décisif quand rien ne se passe : liste vide, la
+     * notification n'atteint pas l'application ; liste pleine, c'est la
+     * lecture qui a échoué — et le texte exact est là pour la corriger.
+     */
+    private fun ajouterVues(conteneur: LinearLayout) {
+        val vues = Journal.notificationsVues(this)
+        if (vues.isEmpty()) return
+        conteneur.addView(titre(R.string.titre_vues))
+        conteneur.addView(TextView(this).apply {
+            text = getString(R.string.aide_vues)
+            textSize = 11f
+            alpha = 0.6f
+            setPadding(0, 0, 0, dp(4))
+        })
+        for ((paquet, brut) in vues) conteneur.addView(bloc(paquet, brut))
+    }
+
+    private fun titre(id: Int): TextView = TextView(this).apply {
+        text = getString(id)
+        textSize = 13f
+        alpha = 0.75f
+        setPadding(0, dp(18), 0, dp(2))
+    }
+
+    private fun bloc(paquet: String, brut: String): TextView = TextView(this).apply {
+        text = "$paquet\n$brut"
+        textSize = 11f
+        alpha = 0.55f
+        setBackgroundResource(R.drawable.fond_carte)
+        setPadding(dp(12), dp(8), dp(12), dp(8))
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply { topMargin = dp(6) }
     }
 
     /**
@@ -74,25 +114,8 @@ class ActiviteJournal : AppCompatActivity() {
         val ecarts = Journal.ecransEcartes(this)
         if (ecarts.isEmpty()) return
 
-        conteneur.addView(TextView(this).apply {
-            text = getString(R.string.titre_ecarts)
-            textSize = 13f
-            alpha = 0.75f
-            setPadding(0, dp(18), 0, dp(2))
-        })
-        for ((paquet, brut) in ecarts) {
-            conteneur.addView(TextView(this).apply {
-                text = "$paquet\n$brut"
-                textSize = 11f
-                alpha = 0.55f
-                setBackgroundResource(R.drawable.fond_carte)
-                setPadding(dp(12), dp(8), dp(12), dp(8))
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                ).apply { topMargin = dp(6) }
-            })
-        }
+        conteneur.addView(titre(R.string.titre_ecarts))
+        for ((paquet, brut) in ecarts) conteneur.addView(bloc(paquet, brut))
     }
 
     /** Ce que le journal apprend sur la session : latence réelle et tri. */
@@ -169,7 +192,8 @@ class ActiviteJournal : AppCompatActivity() {
     private fun copier() {
         val lignes = Journal.lignes(this)
         val ecarts = Journal.ecransEcartes(this)
-        if (lignes.isEmpty() && ecarts.isEmpty()) {
+        val vues = Journal.notificationsVues(this)
+        if (lignes.isEmpty() && ecarts.isEmpty() && vues.isEmpty()) {
             Toast.makeText(this, R.string.journal_vide, Toast.LENGTH_SHORT).show()
             return
         }
@@ -181,6 +205,10 @@ class ActiviteJournal : AppCompatActivity() {
             if (ecarts.isNotEmpty()) {
                 append("\n\n--- ").append(getString(R.string.titre_ecarts)).append(" ---")
                 for ((paquet, brut) in ecarts) append("\n\n").append(paquet).append("\n").append(brut)
+            }
+            if (vues.isNotEmpty()) {
+                append("\n\n--- ").append(getString(R.string.titre_vues)).append(" ---")
+                for ((paquet, brut) in vues) append("\n\n").append(paquet).append("\n").append(brut)
             }
         }
         val presse = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

@@ -51,14 +51,20 @@ object Arbitrage {
         course: Course,
         source: Source,
         latenceMs: Long,
+        force: Boolean = false,
     ): Boolean {
         // Sans montant il n'y a pas d'offre : une carte de navigation ou un
         // écran d'attente ne doit pas déclencher de bulle.
         if (course.prix == null) return false
 
+        // Une analyse demandée à la main n'est jamais un doublon : si le
+        // chauffeur appuie deux fois, il attend deux réponses.
         val signature = signature(paquet, course)
         val maintenant = SystemClock.elapsedRealtime()
-        if (signature == derniereSignature && maintenant - dernierInstant < FENETRE_DOUBLON_MS) {
+        if (!force &&
+            signature == derniereSignature &&
+            maintenant - dernierInstant < FENETRE_DOUBLON_MS
+        ) {
             return false
         }
         derniereSignature = signature

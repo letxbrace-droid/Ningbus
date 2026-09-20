@@ -60,6 +60,37 @@ class Reglages(contexte: Context) {
 
     // --- Applications écoutées ---------------------------------------------
 
+    /**
+     * Écoute toutes les applications et décide sur le contenu, plutôt que de
+     * se fier à une liste de noms de paquets.
+     *
+     * C'est le défaut, et pour une raison dure : les noms de paquets des
+     * applications chauffeur changent selon les versions, les pays et les
+     * rachats. Une liste devinée qui se trompe ne produit pas une erreur,
+     * elle produit un silence — l'application paraît installée et ne voit
+     * jamais rien. Une offre reste une offre quel que soit l'expéditeur :
+     * un montant, une distance, une durée.
+     *
+     * Restreindre la liste ensuite reste utile : moins d'écrans parcourus,
+     * donc moins de batterie.
+     */
+    var ecouteToutesApps: Boolean
+        get() = p.getBoolean("toutesApps", true)
+        set(v) = p.edit().putBoolean("toutesApps", v).apply()
+
+    /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
+    var boutonFlottant: Boolean
+        get() = p.getBoolean("boutonFlottant", true)
+        set(v) = p.edit().putBoolean("boutonFlottant", v).apply()
+
+    var boutonX: Int
+        get() = p.getInt("boutonX", 0)
+        set(v) = p.edit().putInt("boutonX", v).apply()
+
+    var boutonY: Int
+        get() = p.getInt("boutonY", 300)
+        set(v) = p.edit().putInt("boutonY", v).apply()
+
     var paquets: Set<String>
         // Copie défensive : l'ensemble rendu par getStringSet ne doit jamais
         // être modifié en place, c'est celui que garde le cache interne.
@@ -67,7 +98,8 @@ class Reglages(contexte: Context) {
             ?: Plateformes.PAR_DEFAUT.keys.toSet()
         set(v) = p.edit().putStringSet("paquets", v.toSet()).apply()
 
-    fun ecoute(paquet: String): Boolean = paquet in paquets
+    /** En mode automatique, aucune application n'est écartée d'avance. */
+    fun ecoute(paquet: String): Boolean = ecouteToutesApps || paquet in paquets
 
     fun ajouterPaquet(paquet: String) {
         if (paquet.isNotBlank()) paquets = paquets + paquet.trim()

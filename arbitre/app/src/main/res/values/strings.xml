@@ -3,12 +3,25 @@
     <string name="nom_app">Arbitre</string>
     <string name="sous_titre">Le verdict d\'une course avant que le compte à rebours ne s\'épuise.</string>
 
-    <string name="titre_permissions">Les deux permissions indispensables</string>
+    <string name="titre_permissions">Les trois permissions indispensables</string>
     <string name="permission_notif">Accès aux notifications — pour voir l\'offre de course dès son affichage.</string>
     <string name="permission_superposition">Superposition d\'écran — pour poser le verdict par-dessus l\'application chauffeur.</string>
-    <string name="permission_ecran">Lecture de l\'écran — indispensable : quand l\'application chauffeur est au premier plan, Uber affiche l\'offre sans envoyer aucune notification. Seules les applications cochées plus bas sont lues, et rien ne quitte le téléphone.</string>
+    <string name="permission_ecran">Lecture de l\'écran — indispensable : quand l\'application chauffeur est au premier plan, Uber affiche l\'offre sans envoyer aucune notification. Rien ne quitte le téléphone.</string>
     <string name="description_accessibilite">Lit la carte d\'offre affichée par les applications chauffeur cochées, pour en calculer la rentabilité. Aucune donnée ne quitte le téléphone.</string>
     <string name="filtre_ecrans">Écarter les écrans qui ne sont pas des offres</string>
+    <string name="toutes_apps">Écouter toutes les applications</string>
+    <string name="aide_toutes_apps">Recommandé. Les noms de paquets des applications chauffeur changent selon les versions et les pays : une liste qui se trompe ne donne pas d\'erreur, elle donne du silence. En mode automatique, c\'est le contenu qui décide — un montant, une distance, une durée. Décocher pour n\'écouter que les applications cochées plus bas : moins d\'écrans parcourus, donc moins de batterie.</string>
+    <string name="bouton_flottant">Pastille d\'analyse manuelle</string>
+    <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran ; un appui analyse l\'écran tel qu\'il est. C\'est le chemin qui ne dépend d\'aucune détection : si une offre passe inaperçue, il répond quand même. Glisse-la où elle ne gêne pas.</string>
+    <string name="titre_diagnostic">État réel des services</string>
+    <string name="service_lie">lié et à l\'écoute</string>
+    <string name="service_non_lie">autorisé mais non lié — décoche puis recoche la permission, ou redémarre le téléphone</string>
+    <string name="service_absent">permission non accordée</string>
+    <string name="lecture_ecran_requise">Accorde d\'abord la lecture de l\'écran (accessibilité).</string>
+    <string name="rien_a_lire">Aucun montant ni distance sur cet écran.</string>
+    <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
+    <string name="titre_vues">Notifications vues, avant tout filtrage</string>
+    <string name="aide_vues">Si cette liste est vide alors qu\'une offre est arrivée, la notification n\'atteint pas l\'application. Si elle contient l\'offre, c\'est la lecture qui a échoué — et le texte est là pour la corriger.</string>
     <string name="titre_ecarts">Écrans écartés (ils portaient un montant sans être reconnus comme offre)</string>
     <string name="accorde">accordée</string>
     <string name="a_accorder">à accorder</string>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pastille d'analyse manuelle. Volontairement petite et translucide : elle
+    reste à l'écran en permanence et ne doit jamais gêner la lecture de
+    l'application chauffeur.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="6dp">
+
+    <TextView
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:background="@drawable/fond_pastille"
+        android:elevation="6dp"
+        android:gravity="center"
+        android:text="€/h"
+        android:textColor="@color/bulle_texte"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</FrameLayout>

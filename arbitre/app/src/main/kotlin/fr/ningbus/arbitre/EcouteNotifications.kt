@@ -22,7 +22,15 @@ import android.util.Log
 class EcouteNotifications : NotificationListenerService() {
 
     override fun onListenerConnected() {
+        lie = true
         Log.i(TAG, "écoute des notifications active")
+    }
+
+    override fun onListenerDisconnected() {
+        // Android délie parfois le service sans prévenir l'utilisateur, qui
+        // voit alors une permission « accordée » et rien qui fonctionne.
+        // L'écran d'accueil montre cet état-là séparément.
+        lie = false
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -51,12 +59,19 @@ class EcouteNotifications : NotificationListenerService() {
         if (texte.isBlank()) return
 
         val paquet = sbn.packageName
+        if (paquet == packageName) return // nos propres notifications de repli
+
+        // Tracé avant tout filtrage : c'est ce qui permet de distinguer
+        // « la notification n'est jamais arrivée » de « elle est arrivée mais
+        // n'a pas été retenue », et de lire le nom de paquet exact.
+        val ressemble = Arbitrage.ressembleAUneCourse(texte)
+        if (ressemble) Journal.signalerVue(this, paquet, texte)
+
         if (!reglages.ecoute(paquet)) {
-            if (reglages.modeDecouverte && Arbitrage.ressembleAUneCourse(texte)) {
-                Journal.signalerInconnu(this, paquet)
-            }
+            if (reglages.modeDecouverte && ressemble) Journal.signalerInconnu(this, paquet)
             return
         }
+        if (!ressemble) return
 
         // postTime est l'horodatage d'affichage par le système : la
         // différence mesure bien le délai vu par le chauffeur.
@@ -89,7 +104,16 @@ class EcouteNotifications : NotificationListenerService() {
             .joinToString("\n")
     }
 
-    private companion object {
-        const val TAG = "Arbitre"
+    companion object {
+        private const val TAG = "Arbitre"
+
+        /**
+         * Vrai quand le système a réellement lié le service. Une permission
+         * accordée ne suffit pas : Android délie parfois l'écoute, et rien
+         * dans les réglages système ne le montre.
+         */
+        @Volatile
+        var lie: Boolean = false
+            private set
     }
 }

@@ -78,7 +78,22 @@ class ActivitePrincipale : AppCompatActivity() {
             peuplerApplications()
         }
 
-        interrupteur(R.id.actif, reglages.actif) { reglages.actif = it }
+        interrupteur(R.id.actif, reglages.actif) {
+            reglages.actif = it
+            BoutonFlottant.synchroniser(this)
+        }
+        interrupteur(R.id.toutes_apps, reglages.ecouteToutesApps) {
+            reglages.ecouteToutesApps = it
+            LectureEcran.rafraichirFiltre()
+            peuplerApplications()
+        }
+        interrupteur(R.id.bouton_flottant, reglages.boutonFlottant) {
+            reglages.boutonFlottant = it
+            BoutonFlottant.synchroniser(this)
+            if (it && !Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, R.string.superposition_requise, Toast.LENGTH_LONG).show()
+            }
+        }
         interrupteur(R.id.vibration, reglages.vibration) { reglages.vibration = it }
         interrupteur(R.id.decouverte, reglages.modeDecouverte) { reglages.modeDecouverte = it }
         interrupteur(R.id.filtre_ecrans, reglages.filtrerEcrans) { reglages.filtrerEcrans = it }
@@ -111,6 +126,37 @@ class ActivitePrincipale : AppCompatActivity() {
         etat(R.id.etat_notif, R.id.bouton_notif, accesNotifications())
         etat(R.id.etat_superposition, R.id.bouton_superposition, Settings.canDrawOverlays(this))
         etat(R.id.etat_ecran, R.id.bouton_ecran, lectureEcranActive())
+        findViewById<TextView>(R.id.diagnostic).text = diagnostic()
+        BoutonFlottant.synchroniser(this)
+    }
+
+    /**
+     * Ce que les réglages système ne disent pas : un service peut être
+     * autorisé sans être lié. C'est le cas le plus déroutant — tout paraît en
+     * ordre et rien ne se produit — donc il mérite d'être affiché tel quel.
+     */
+    private fun diagnostic(): String {
+        val reglages = Reglages(this)
+        val lignes = listOf(
+            "Lecture d'écran : " + when {
+                !lectureEcranActive() -> getString(R.string.service_absent)
+                LectureEcran.lie -> getString(R.string.service_lie)
+                else -> getString(R.string.service_non_lie)
+            },
+            "Notifications : " + when {
+                !accesNotifications() -> getString(R.string.service_absent)
+                EcouteNotifications.lie -> getString(R.string.service_lie)
+                else -> getString(R.string.service_non_lie)
+            },
+            "Pastille : " + if (BoutonFlottant.visible) "affichée" else "masquée",
+            "Écoute : " + if (reglages.ecouteToutesApps) {
+                "toutes les applications"
+            } else {
+                "${reglages.paquets.size} application(s) cochée(s)"
+            },
+            "Notifications repérées : ${Journal.notificationsVues(this).size}",
+        )
+        return lignes.joinToString("\n")
     }
 
     /**
