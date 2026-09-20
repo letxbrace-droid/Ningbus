@@ -201,10 +201,19 @@ class BancEssaiTest {
      * `dumpsys accessibility` distingue trois états — liés, en cours de
      * liaison, activés — et seul le premier signifie que les événements
      * partent vraiment.
+     *
+     * La ligne des services liés ne porte pas le nom du composant mais le
+     * **libellé** de l'application : « Bound services:{Service[label=Arbitre,
+     * feedbackType[FEEDBACK_GENERIC], …]} ». Chercher le nom de paquet y
+     * revenait à déclarer en panne un service parfaitement vivant — le banc
+     * a échoué un tour entier là-dessus. On accepte donc les deux formes,
+     * les versions d'Android n'écrivant pas ce vidage de la même façon.
      */
     private fun serviceLie(): Boolean =
         shell("dumpsys accessibility").lineSequence().any {
-            it.contains("Bound services") && it.contains(ARBITRE)
+            val ligne = it.trim()
+            ligne.startsWith("Bound services:") &&
+                (ligne.contains(ARBITRE) || ligne.contains("label=$LIBELLE"))
         }
 
     private fun attendreLiaison(limiteMs: Long): Boolean {
@@ -329,6 +338,9 @@ class BancEssaiTest {
     private companion object {
         const val ARBITRE = "fr.ningbus.arbitre"
         const val SIMULATEUR = "fr.ningbus.simulateur"
+
+        /** `android:label` du service, seul nom que porte le vidage système. */
+        const val LIBELLE = "Arbitre"
         const val SERVICE = "$ARBITRE/$ARBITRE.LectureEcran"
 
         /** Cinq secondes promises, vingt-cinq accordées avant de conclure. */
