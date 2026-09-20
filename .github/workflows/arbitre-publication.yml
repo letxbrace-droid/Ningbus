@@ -89,13 +89,26 @@ jobs:
              - **accès aux notifications** — pour les offres reçues
                application en arrière-plan ou écran verrouillé ;
              - **superposition d'écran** — pour dessiner la bulle.
-          4. Cocher son application chauffeur, régler son barème, puis
-             **« Essayer avec une course fictive »** pour placer la bulle.
+          4. Régler son barème, puis **« Essayer avec une course fictive »**
+             pour placer la bulle.
 
-          Les deux premières permissions sont larges par nature. Ce qui les
-          borne : la lecture d'écran n'est branchée que sur les applications
-          cochées, et **rien ne sort du téléphone** — aucun compte, aucun
-          serveur, et aucune permission réseau dans le manifeste.
+          Rien à cocher : par défaut l'application écoute toutes les
+          applications et décide sur le contenu — un montant, une distance,
+          une durée. Les noms de paquets des applications chauffeur changent
+          trop souvent pour qu'une liste soit fiable.
+
+          Une **pastille « €/h »** reste à l'écran : un appui analyse l'écran
+          tel qu'il est. C'est le chemin qui ne dépend d'aucune détection — si
+          une offre passe inaperçue, il répond quand même. Glisse-la où elle
+          ne gêne pas le bouton d'acceptation.
+
+          L'écran d'accueil montre l'**état réel des services** : Android peut
+          délier un service tout en le laissant « autorisé » dans ses
+          réglages, et c'est la panne la plus déroutante.
+
+          Ces permissions sont larges par nature. Ce qui les borne : **rien ne
+          sort du téléphone** — aucun compte, aucun serveur, et aucune
+          permission réseau dans le manifeste.
 
           ## À savoir
 
