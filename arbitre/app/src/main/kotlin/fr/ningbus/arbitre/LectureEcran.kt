@@ -302,7 +302,7 @@ class LectureEcran : AccessibilityService() {
         force: Boolean,
         fenetreNouvelle: Boolean,
     ): Boolean {
-        if (!Ocr.disponible || !reglages.ocrSecours) return false
+        if (!Ocr.disponible || !reglages.ocrSecours) return refuser("désactivé ou indisponible")
         if (issue == Issue.RENDU) return false
 
         // Jamais pendant qu'une bulle est affichée. Une capture ne connaît
@@ -310,13 +310,20 @@ class LectureEcran : AccessibilityService() {
         // l'analyseur retrouverait un montant, une approche et une distance —
         // les siens. Le banc l'a pris sur le fait, en arbitrant deux fois la
         // même course dont la seconde lecture était la bulle de la première.
-        if (Bulle.visible) return false
+        if (Bulle.visible) return refuser("une bulle est déjà affichée")
 
         // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
         // de secours, il n'a pas à être économe.
         if (force) return true
 
-        if (!reglages.ecoute(nom)) return false
+        // Une fenêtre qui n'expose aucun nœud n'expose pas non plus son nom
+        // de paquet. S'en tenir au seul nom déduit du dernier parcours
+        // reviendrait à refuser la reconnaissance de texte précisément dans
+        // le cas qu'elle existe pour traiter : on accepte donc aussi les
+        // paquets relevés au passage précédent.
+        val connu = reglages.ecoute(nom) || paquetsLus.any { reglages.ecoute(it) }
+        if (!connu) return refuser("paquet inconnu ($nom, vus : $paquetsLus)")
+
         return when (issue) {
             // La carte était reconnue mais illisible : la moitié manquante
             // est peut-être dessinée plutôt qu'écrite.
@@ -327,17 +334,36 @@ class LectureEcran : AccessibilityService() {
             // Canvas, ou composée sans sémantique. On ne s'y risque qu'à
             // l'apparition d'une fenêtre — une session de navigation entière
             // déclencherait sinon des captures en boucle.
-            Issue.RIEN_A_LIRE -> fenetreNouvelle
-            Issue.PAS_UNE_OFFRE -> fenetreNouvelle && texte.length < TEXTE_MAIGRE
-            else -> false
+            Issue.RIEN_A_LIRE ->
+                fenetreNouvelle || refuser("écran vide, mais pas de fenêtre nouvelle")
+            Issue.PAS_UNE_OFFRE ->
+                (fenetreNouvelle && texte.length < TEXTE_MAIGRE) ||
+                    refuser("texte sans offre (${texte.length} car., fenêtre=$fenetreNouvelle)")
+            else -> refuser("issue $issue")
         }
+    }
+
+    /**
+     * Note pourquoi la reconnaissance de texte n'a pas été tentée, et rend
+     * `false`.
+     *
+     * Ces lignes sont le seul moyen de comprendre un silence après coup : un
+     * chemin de secours qui ne part pas et n'en dit rien est indiscernable
+     * d'un chemin de secours en panne. Le banc d'essai a déjà coûté un tour
+     * entier faute de cette trace.
+     */
+    private fun refuser(motif: String): Boolean {
+        Log.i(TAG, "pas de reconnaissance de texte : $motif")
+        return false
     }
 
     private fun tenterOcr(nom: String, texteArbre: String, instantEvenement: Long, force: Boolean) {
         if (!Ocr.creneauLibre()) {
+            refuser("créneau de capture déjà pris")
             rapporter(Issue.RIEN_A_LIRE, nom, texteArbre, force)
             return
         }
+        Log.i(TAG, "capture d'écran pour $nom (arbre : ${texteArbre.length} car.)")
 
         // La pastille s'efface le temps de la capture : elle affiche le
         // dernier « 31 €/h », et l'analyseur retenant le montant le plus
@@ -362,6 +388,7 @@ class LectureEcran : AccessibilityService() {
                 if (issue == Issue.RENDU) {
                     Log.i(TAG, "offre lue par reconnaissance de texte")
                 } else {
+                    Log.i(TAG, "texte reconnu (${reconnu.length} car.) mais sans suite : $issue")
                     rapporter(issue, nom, fusion, force)
                 }
             } catch (e: Exception) {
