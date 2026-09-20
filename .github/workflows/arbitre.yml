@@ -94,6 +94,17 @@ jobs:
       - name: Rendre le wrapper exécutable
         run: chmod +x gradlew
 
+      # Arbitre est *installé*, le simulateur est *instrumenté*. L'inverse —
+      # instrumenter :app — a coûté plusieurs tours : sous `am instrument`,
+      # le système inscrit le service d'accessibilité parmi les services
+      # activés mais ne le lie jamais (« Bound services:{} »), aucun
+      # événement n'est délivré, et le journal reste vide sans que rien ne
+      # soit cassé dans l'application.
+      #
+      # Les relevés sont pris ici, dans la session de l'émulateur : une fois
+      # l'action terminée, la machine virtuelle n'existe plus et `adb` n'a
+      # plus personne à qui parler. On neutralise donc l'arrêt sur erreur le
+      # temps de tout recueillir, puis on rend le code de sortie de Gradle.
       - name: Jouer le parcours complet sur émulateur
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -103,8 +114,24 @@ jobs:
           disable-animations: true
           working-directory: arbitre
           script: |
-            ./gradlew :simulateur:installDebug
-            ./gradlew :app:connectedDebugAndroidTest
+            set +e
+            ./gradlew :app:installDebug :simulateur:installDebug
+            pose=$?
+            ./gradlew :simulateur:connectedDebugAndroidTest
+            essais=$?
+            echo "::group::dumpsys accessibility"
+            adb shell dumpsys accessibility
+            echo "::endgroup::"
+            echo "::group::journal d'Arbitre"
+            adb shell run-as fr.ningbus.arbitre \
+              cat /data/data/fr.ningbus.arbitre/shared_prefs/journal.xml
+            echo "::endgroup::"
+            echo "::group::logcat"
+            adb logcat -d -v time -s Arbitre:V AccessibilityManagerService:V \
+              AndroidRuntime:E ActivityManager:E
+            echo "::endgroup::"
+            if [ $pose -ne 0 ]; then exit $pose; fi
+            exit $essais
 
       # Étape distincte, et exécutée quoi qu'il arrive : le shell de l'action
       # sort dès l'échec de Gradle, si bien qu'un vidage placé à sa suite ne
@@ -115,7 +142,7 @@ jobs:
       - name: Résultats détaillés du banc d'essai
         if: always()
         run: |
-          find app/build/outputs/androidTest-results -name '*.xml' \
+          find simulateur/build/outputs/androidTest-results -name '*.xml' \
             -exec cat {} \; || echo "aucun résultat"
 
       - name: Publier le rapport du banc d'essai
@@ -123,5 +150,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rapport-banc-essai
-          path: arbitre/app/build/reports/androidTests
+          path: arbitre/simulateur/build/reports/androidTests
           if-no-files-found: ignore

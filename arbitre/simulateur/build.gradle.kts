@@ -19,6 +19,14 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Le banc d'essai est instrumenté ici, et non dans :app. Sous
+        // `am instrument`, le système inscrit le service d'accessibilité
+        // d'Arbitre parmi les services activés mais ne le lie jamais : aucun
+        // événement n'est délivré, et l'application paraît en panne alors
+        // qu'elle ne l'est pas. Piloter depuis le simulateur laisse Arbitre
+        // tourner exactement comme sur le téléphone du chauffeur.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -31,9 +39,17 @@ android {
     }
 
     sourceSets["main"].java.srcDirs("src/main/kotlin")
+    sourceSets["androidTest"].java.srcDirs("src/androidTest/kotlin")
 }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
+
+    // Le banc d'essai : Arbitre face à une vraie carte d'offre sur un vrai
+    // Android. Les pannes rencontrées vivaient toutes dans la plomberie, que
+    // seuls des essais instrumentés peuvent voir.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
 }

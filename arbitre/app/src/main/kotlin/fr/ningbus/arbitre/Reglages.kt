@@ -2,6 +2,7 @@ package fr.ningbus.arbitre
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import fr.ningbus.arbitre.moteur.Bareme
 import fr.ningbus.arbitre.moteur.Plateformes
 
@@ -119,9 +120,25 @@ class Reglages(contexte: Context) {
     var paquets: Set<String>
         // Copie défensive : l'ensemble rendu par getStringSet ne doit jamais
         // être modifié en place, c'est celui que garde le cache interne.
-        get() = p.getStringSet("paquets", null)?.toSet()
-            ?: Plateformes.PAR_DEFAUT.keys.toSet()
+        get() = p.getStringSet("paquets", null)?.toSet() ?: paquetsDOrigine()
         set(v) = p.edit().putStringSet("paquets", v.toSet()).apply()
+
+    /**
+     * La liste d'origine, augmentée du simulateur **sur émulateur seulement**.
+     *
+     * Le banc d'essai doit éprouver la configuration réellement livrée. Chaque
+     * fois qu'un essai a commencé par régler l'application à sa convenance, il
+     * a fini par valider un chemin que personne n'emprunte — et la panne
+     * suivante est venue de l'écart entre les deux. La fausse application
+     * chauffeur est donc écoutée comme une vraie, sans qu'aucun autre réglage
+     * ne bouge.
+     *
+     * Sur un téléphone, [surEmulateur] est faux : la liste est exactement
+     * celle d'avant, au paquet près.
+     */
+    private fun paquetsDOrigine(): Set<String> =
+        if (surEmulateur) Plateformes.PAR_DEFAUT.keys + SIMULATEUR
+        else Plateformes.PAR_DEFAUT.keys.toSet()
 
     /** En mode automatique, aucune application n'est écartée d'avance. */
     fun ecoute(paquet: String): Boolean = ecouteToutesApps || paquet in paquets
@@ -171,5 +188,23 @@ class Reglages(contexte: Context) {
         private const val FICHIER = "arbitre"
         private const val SCHEMA = "schema"
         private const val SCHEMA_COURANT = 2
+
+        /** La fausse application chauffeur du banc d'essai. */
+        private const val SIMULATEUR = "fr.ningbus.simulateur"
+
+        /**
+         * Vrai sur un émulateur Android, faux sur un téléphone.
+         *
+         * Les images d'émulateur se reconnaissent à leur matériel simulé —
+         * goldfish pour l'ancien, ranchu pour l'actuel — et à leur empreinte
+         * générique. Aucun appareil du commerce ne présente ces valeurs.
+         */
+        private val surEmulateur: Boolean by lazy {
+            Build.HARDWARE.contains("goldfish") ||
+                Build.HARDWARE.contains("ranchu") ||
+                Build.FINGERPRINT.startsWith("generic") ||
+                Build.FINGERPRINT.contains("emulator", ignoreCase = true) ||
+                Build.PRODUCT.startsWith("sdk")
+        }
     }
 }

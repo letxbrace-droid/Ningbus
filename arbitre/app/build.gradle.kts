@@ -15,7 +15,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Clé de débogage figée dans le dépôt, et non celle que chaque machine
@@ -51,7 +50,6 @@ android {
     }
 
     sourceSets["main"].java.srcDirs("src/main/kotlin")
-    sourceSets["androidTest"].java.srcDirs("src/androidTest/kotlin")
 }
 
 dependencies {
@@ -60,10 +58,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 
-    // Le banc d'essai : Arbitre face à une vraie carte d'offre sur un vrai
-    // Android. Les pannes rencontrées vivaient toutes dans la plomberie, que
-    // seuls des essais instrumentés peuvent voir.
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation("androidx.test:rules:1.6.1")
+    // Le banc d'essai vit dans :simulateur, et non ici. Instrumenter :app
+    // revenait à faire tourner Arbitre sous `am instrument`, où le système
+    // n'a jamais lié son service d'accessibilité.
 }
