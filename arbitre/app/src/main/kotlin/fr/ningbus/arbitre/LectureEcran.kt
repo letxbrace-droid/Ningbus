@@ -49,6 +49,9 @@ class LectureEcran : AccessibilityService() {
      */
     private var derniereEmpreinte = 0
 
+    /** Captures déjà dépensées sur cet écran-là. */
+    private var capturesSurEcran = 0
+
     /** Paquets effectivement lus au dernier parcours, pour le diagnostic. */
     private var paquetLu: String? = null
     private var paquetsLus: List<String> = emptyList()
@@ -331,7 +334,9 @@ class LectureEcran : AccessibilityService() {
         // C'est ce qui remplace la longueur du texte comme garde-fou — voir
         // plus bas pourquoi celle-ci était une mauvaise idée.
         val empreinte = (nom + texte).hashCode()
-        if (empreinte == derniereEmpreinte) return refuser("écran déjà capturé")
+        if (empreinte == derniereEmpreinte && capturesSurEcran >= CAPTURES_PAR_ECRAN) {
+            return refuser("écran déjà capturé $capturesSurEcran fois")
+        }
 
         return when (issue) {
             // La carte était reconnue mais illisible : la moitié manquante
@@ -385,7 +390,9 @@ class LectureEcran : AccessibilityService() {
             return
         }
         Log.i(TAG, "capture d'écran pour $nom (arbre : ${texteArbre.length} car.)")
-        derniereEmpreinte = (nom + texteArbre).hashCode()
+        val empreinte = (nom + texteArbre).hashCode()
+        if (empreinte == derniereEmpreinte) capturesSurEcran++ else capturesSurEcran = 1
+        derniereEmpreinte = empreinte
 
         // Nos deux fenêtres s'effacent le temps de la capture.
         //
@@ -422,7 +429,14 @@ class LectureEcran : AccessibilityService() {
                 if (issue == Issue.RENDU) {
                     Log.i(TAG, "offre lue par reconnaissance de texte")
                 } else {
-                    Log.i(TAG, "texte reconnu (${reconnu.length} car.) mais sans suite : $issue")
+                    // L'extrait est décisif quand rien ne sort d'une
+                    // capture pourtant réussie : il dit si l'OCR a vu la
+                    // carte, ou seulement ce qu'il y avait autour.
+                    Log.i(
+                        TAG,
+                        "texte reconnu (${reconnu.length} car.) mais sans suite : $issue\n" +
+                            reconnu.take(400).replace('\n', '|'),
+                    )
                     rapporter(issue, nom, fusion, force)
                 }
             } catch (e: Exception) {
@@ -609,7 +623,20 @@ class LectureEcran : AccessibilityService() {
          * demandée dans la foulée d'un changement de transparence montrerait
          * encore la trame précédente, pastille comprise.
          */
-        private const val DELAI_ECLIPSE_MS = 40L
+        private const val DELAI_ECLIPSE_MS = 120L
+
+        /**
+         * Captures autorisées sur un même écran.
+         *
+         * Une seule ne suffit pas, et c'est le banc qui l'a montré : une
+         * carte peinte apparaît une trame ou deux après l'événement qui
+         * l'annonce, si bien que la première capture peut la manquer. Or
+         * l'empreinte porte sur le texte de l'arbre — lequel, par définition,
+         * ne change pas quand une carte peinte s'affiche. Une seule tentative
+         * fermait donc définitivement la porte sur un simple décalage de
+         * quelques millisecondes.
+         */
+        private const val CAPTURES_PAR_ECRAN = 3
 
         /** Textes du bouton qui accepte la course, selon les plateformes. */
         private val MARQUEURS = listOf(

@@ -39,12 +39,38 @@ class CarteDessinee(contexte: Context, private val lignes: List<String>) : View(
     private val fond = Paint().apply { color = Color.WHITE }
 
     private val marge = 16f * densite
-    private val interligne = 26f * densite
+    private val interligneNaturel = 26f * densite
+
+    /**
+     * Facteur de réduction quand la carte ne tient pas dans l'écran.
+     *
+     * L'émulateur du banc a une dalle de 320 × 640 pixels, et une carte
+     * d'offre compte une douzaine de lignes. Sans cette mise à l'échelle, le
+     * bas de la carte déborde — et comme elle est ancrée en bas, c'est le
+     * **haut** qui est rogné : le montant, précisément, puisqu'il est en
+     * deuxième ligne. La reconnaissance de texte lisait alors tout sauf ce
+     * qui compte.
+     */
+    private var echelle = 1f
+
+    private val interligne: Float get() = interligneNaturel * echelle
 
     override fun onMeasure(largeurMesuree: Int, hauteurMesuree: Int) {
         val largeur = MeasureSpec.getSize(largeurMesuree)
+        val disponible = MeasureSpec.getSize(hauteurMesuree).takeIf { it > 0 }
+            ?: resources.displayMetrics.heightPixels
+
+        echelle = 1f
+        val naturelle = marge * 2 + interligneNaturel * (lignes.size + 1)
+        if (naturelle > disponible) {
+            echelle = ((disponible - marge * 2) / (interligneNaturel * (lignes.size + 1)))
+                .coerceIn(0.45f, 1f)
+        }
+        encre.textSize = 15f * densite * echelle
+        encreTitre.textSize = 30f * densite * echelle
+
         val hauteur = (marge * 2 + interligne * (lignes.size + 1)).toInt()
-        setMeasuredDimension(largeur, hauteur)
+        setMeasuredDimension(largeur, minOf(hauteur, disponible))
     }
 
     override fun onDraw(toile: Canvas) {
