@@ -189,99 +189,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:text="@string/arbitrage_actif"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/toutes_apps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/toutes_apps"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_toutes_apps"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/bouton_flottant"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/bouton_flottant"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_bouton_flottant"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/vibration"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/vibration_active"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/prudence"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/prudence_active"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/filtre_ecrans"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/filtre_ecrans"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/decouverte"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/decouverte_active"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/ocr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/ocr_secours"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_ocr"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/veille"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/veille"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_veille"
-            android:textSize="12sp" />
+            android:textSize="17sp" />
 
         <!-- ================= Simulateur ================= -->
 
@@ -338,15 +246,11 @@
                 android:orientation="vertical" />
         </LinearLayout>
 
-        <!-- ================= Barème ================= -->
+        <!-- ================= 🎯 Rentabilité ================= -->
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/titre_bareme"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            style="@style/Rubrique"
+            android:text="@string/titre_rentabilite" />
 
         <TextView
             android:layout_width="match_parent"
@@ -356,11 +260,45 @@
             android:textSize="13sp" />
 
         <LinearLayout
-            android:id="@+id/conteneur_champs"
+            android:id="@+id/conteneur_rentabilite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:orientation="vertical" />
+
+        <!-- ================= 🚗 Course ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_course" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.75"
+            android:text="@string/aide_course"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/conteneur_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="vertical" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/prudence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/prudence_active"
+            android:textSize="16sp" />
+
+        <!-- ================= 🎨 Affichage ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_affichage" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -386,6 +324,111 @@
                 android:autofillHints=""
                 android:importantForAutofill="no" />
         </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/compact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/mode_compact"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_mode_compact"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/bouton_flottant"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/bouton_flottant"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_bouton_flottant"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/vibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/vibration_active"
+            android:textSize="16sp" />
+
+        <!-- ================= 🔧 Diagnostic ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_diagnostic_section" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ocr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/ocr_secours"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_ocr"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/veille"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/veille"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_veille"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/filtre_ecrans"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/filtre_ecrans"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/decouverte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/decouverte_active"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toutes_apps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/toutes_apps"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="@string/aide_toutes_apps"
+            android:textSize="12sp" />
 
         <!-- ================= Applications ================= -->
 

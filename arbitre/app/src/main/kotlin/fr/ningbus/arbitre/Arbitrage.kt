@@ -66,6 +66,14 @@ object Arbitrage {
         source: Source,
         latenceMs: Long,
         force: Boolean = false,
+        /**
+         * Ce que le détecteur a pensé de l'écran, sur cent.
+         *
+         * Affiché tel quel, sans la mécanique qui l'a produit : le chauffeur
+         * n'a pas à lire un laboratoire, mais un score bas sous un verdict
+         * lui dit que l'écran était douteux avant même d'être calculé.
+         */
+        scoreOffre: Int? = null,
     ): Boolean {
         // Sans montant il n'y a pas d'offre : une carte de navigation ou un
         // écran d'attente ne doit pas déclencher de bulle.
@@ -87,9 +95,9 @@ object Arbitrage {
         val reglages = Reglages(contexte)
         val verdict = Arbitre.arbitrer(course, reglages.bareme)
 
-        Journal.ajouter(contexte, verdict, paquet, latenceMs, source)
+        Journal.ajouter(contexte, verdict, paquet, latenceMs, source, scoreOffre)
         if (reglages.vibration) Haptique.signaler(contexte, verdict.decision)
-        Bulle.afficher(contexte, verdict, latenceMs, source, reglages)
+        Bulle.afficher(contexte, verdict, latenceMs, source, reglages, scoreOffre)
         return true
     }
 

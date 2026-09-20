@@ -279,7 +279,7 @@ class LectureEcran : AccessibilityService() {
         attente = null
 
         val latence = (SystemClock.uptimeMillis() - debut).coerceAtLeast(0L)
-        val rendu = Arbitrage.rendre(this, nom, course, source, latence, force)
+        val rendu = Arbitrage.rendre(this, nom, course, source, latence, force, jugement.score)
         return if (rendu) Issue.RENDU else Issue.SANS_SUITE
     }
 

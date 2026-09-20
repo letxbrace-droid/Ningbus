@@ -49,6 +49,13 @@
     <string name="ouvrir_reglages">Ouvrir</string>
 
     <string name="titre_bareme">Ton barème</string>
+    <string name="titre_rentabilite">🎯 Rentabilité</string>
+    <string name="titre_course">🚗 Course</string>
+    <string name="titre_affichage">🎨 Affichage</string>
+    <string name="titre_diagnostic_section">🔧 Diagnostic</string>
+    <string name="aide_course">Ce que la course te coûte en plus du trajet payé : le temps mort, les kilomètres à vide, et ce que tu refuses d\'avance.</string>
+    <string name="mode_compact">Ouvrir la bulle réduite</string>
+    <string name="aide_mode_compact">Réduite, elle ne montre que le verdict et l\'euro/heure — de quoi décider en un regard. Un appui la développe, un autre la replie, et le choix est retenu.</string>
     <string name="aide_bareme">Ces chiffres sont l\'arbitrage. Un prix ne dit rien tant qu\'on ne sait pas ce qu\'il te reste une fois les kilomètres à vide payés.</string>
     <string name="titre_apps">Applications écoutées</string>
     <string name="aide_apps">Coche les applications chauffeur installées. Les noms de paquets changent selon les versions : celles que l\'app repère toute seule apparaissent en dessous.</string>

@@ -201,7 +201,13 @@ class ActiviteJournal : AppCompatActivity() {
         // la première ne mène nulle part, la seconde dit quoi corriger.
         if (ligne.lectures.isNotEmpty()) {
             bloc.addView(TextView(this).apply {
-                text = "confiance ${ligne.confiance} %\n${ligne.lectures}"
+                text = buildString {
+                    append("confiance ").append(ligne.confiance).append(" %")
+                    if (ligne.scoreOffre > 0) {
+                        append(" · offre ").append(ligne.scoreOffre).append("/100")
+                    }
+                    append('\n').append(ligne.lectures)
+                }
                 textSize = 12f
                 alpha = 0.8f
                 setPadding(0, dp(6), 0, 0)

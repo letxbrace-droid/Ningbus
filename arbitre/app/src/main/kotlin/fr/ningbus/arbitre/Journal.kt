@@ -32,6 +32,8 @@ data class Ligne(
     val confiance: Int = 0,
     /** Le détail champ par champ : ce qui a été lu, estimé, ou manquait. */
     val lectures: String = "",
+    /** Ce que le détecteur a pensé de l'écran, sur cent. */
+    val scoreOffre: Int = 0,
 )
 
 /**
@@ -54,6 +56,7 @@ object Journal {
         paquet: String,
         latenceMs: Long,
         source: Source,
+        scoreOffre: Int? = null,
     ) {
         val o = JSONObject().apply {
             put("t", System.currentTimeMillis())
@@ -66,6 +69,7 @@ object Journal {
             put("lat", latenceMs)
             put("source", source.libelle)
             put("conf", verdict.confiance.pourcent)
+            scoreOffre?.let { put("score", it) }
             put("lect", verdict.confiance.lectures.joinToString("\n") { it.toString() })
         }
         val prefs = contexte.applicationContext
@@ -99,6 +103,7 @@ object Journal {
                 source = o.optString("source", "?"),
                 confiance = o.optInt("conf"),
                 lectures = o.optString("lect"),
+                scoreOffre = o.optInt("score"),
             )
         }
     }

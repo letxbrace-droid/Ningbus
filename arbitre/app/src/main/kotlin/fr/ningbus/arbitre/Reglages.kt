@@ -133,6 +133,16 @@ class Reglages(contexte: Context) {
         get() = p.getBoolean("veille", true)
         set(v) = p.edit().putBoolean("veille", v).apply()
 
+    /**
+     * La bulle s'ouvre réduite : décision et euro/heure, rien d'autre.
+     *
+     * Retenu d'un appui à l'autre. Celui qui replie la bulle une fois la
+     * replie pour de bon, sans avoir à y repenser à chaque offre.
+     */
+    var modeCompact: Boolean
+        get() = p.getBoolean("modeCompact", false)
+        set(v) = p.edit().putBoolean("modeCompact", v).apply()
+
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
     var boutonFlottant: Boolean
         get() = p.getBoolean("boutonFlottant", true)

@@ -47,6 +47,28 @@ data class Verdict(
     val kmAVide: Double? = null,
     /** Minutes mobilisées sans être payées. */
     val minutesAVide: Double? = null,
+
+    // --- Les trois kilométrages, séparés -----------------------------------
+    //
+    // Les additionner en un seul total fait disparaître ce qui explique le
+    // verdict. « 28,1 km » ne dit rien ; « 16,4 de course, 1,6 d'approche,
+    // 5,7 de retour à vide » dit tout, et dans cet ordre.
+    /** Distance payée, lue ou reconstituée. */
+    val kmCourse: Double? = null,
+    /** Distance à vide avant la prise en charge. */
+    val kmApproche: Double? = null,
+    /** Distance à vide supposée après la dépose. */
+    val kmRetour: Double? = null,
+
+    /**
+     * La contrainte qui pèse le plus sur ce verdict, en quelques mots.
+     *
+     * Purement destinée à l'affichage : elle ne change aucune décision, elle
+     * nomme celle qui vient d'être prise. « LAISSE — 14 €/h » laisse le
+     * chauffeur deviner ; « LAISSE — approche de 9,8 km avant la prise en
+     * charge » lui dit s'il doit s'étonner ou non.
+     */
+    val motif: String? = null,
 )
 
 /**
@@ -237,7 +259,53 @@ object Arbitre {
             confiance = confiance,
             kmAVide = kmApproche + kmRetour,
             minutesAVide = minutesMortes,
+            kmCourse = kmTrajet,
+            kmApproche = kmApproche,
+            kmRetour = kmRetour,
+            motif = motif(veto, course, kmTrajet, kmApproche, kmRetour, partMorte, confiance),
         )
+    }
+
+    /**
+     * Ce qui explique le verdict, en une ligne, du plus décisif au plus
+     * accessoire.
+     *
+     * L'ordre n'est pas esthétique : un veto est la seule raison qui compte
+     * quand il existe, et il ne sert à rien de parler de retour à vide à
+     * quelqu'un dont la course est refusée pour le prix. En dessous, on
+     * nomme la contrainte dominante — celle qui, si elle disparaissait,
+     * changerait le plus le résultat.
+     */
+    private fun motif(
+        veto: String?,
+        course: Course,
+        kmTrajet: Double,
+        kmApproche: Double,
+        kmRetour: Double,
+        partMorte: Double?,
+        confiance: Confiance,
+    ): String? = when {
+        veto != null -> veto.replaceFirstChar { it.uppercase() }
+
+        !confiance.fiable -> "Données incomplètes — vérifie l'offre toi-même"
+
+        // Rouler plus à vide que chargé est le cas que le prix seul cache le
+        // mieux : la course paraît correcte, et le kilométrage la mange.
+        kmApproche > kmTrajet ->
+            "Approche plus longue que la course — ${fmt1(kmApproche)} km à vide"
+
+        kmApproche > 0 && kmApproche > kmTrajet * 0.5 ->
+            "Approche de ${fmt1(kmApproche)} km avant la prise en charge"
+
+        partMorte != null && partMorte > 0.5 ->
+            "Plus de la moitié du temps n'est pas payée"
+
+        kmRetour > kmTrajet * 0.5 ->
+            "Retour à vide important — ${fmt1(kmRetour)} km supposés"
+
+        course.minutesTrajet == null -> "Durée de course estimée, non annoncée"
+
+        else -> null
     }
 
     /** Raccourci : du texte brut au verdict, en un appel. */

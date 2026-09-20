@@ -107,6 +107,7 @@ class ActivitePrincipale : AppCompatActivity() {
             reglages.bareme = reglages.bareme.copy(prudenceTrafic = it)
         }
         interrupteur(R.id.ocr, reglages.ocrSecours) { reglages.ocrSecours = it }
+        interrupteur(R.id.compact, reglages.modeCompact) { reglages.modeCompact = it }
         interrupteur(R.id.veille, reglages.veille) {
             reglages.veille = it
             ServiceVeille.synchroniser(this)
@@ -377,12 +378,23 @@ class ActivitePrincipale : AppCompatActivity() {
 
     // --- Barème -------------------------------------------------------------
 
+    /**
+     * Où ranger un paramètre du barème.
+     *
+     * La distinction n'est pas décorative : on ne règle pas son objectif
+     * horaire dans le même état d'esprit qu'on décide du temps d'attente
+     * toléré sur place. Le premier se pense une fois, les seconds se
+     * retouchent après une mauvaise soirée.
+     */
+    private enum class Rubrique { RENTABILITE, COURSE }
+
     /** Un paramètre du barème, tel qu'il apparaît à l'écran. */
     private class Champ(
         val titre: String,
         val aide: String,
         /** Coefficient d'affichage : 100 pour montrer une fraction en pourcents. */
         val facteur: Double,
+        val rubrique: Rubrique,
         val lire: (Bareme) -> Double,
         val ecrire: (Bareme, Double) -> Bareme,
     )
@@ -391,47 +403,47 @@ class ActivitePrincipale : AppCompatActivity() {
         Champ(
             "Objectif, en € nets par heure",
             "Ce que tu veux qu'il te reste par heure de travail, carburant et usure déduits. C'est l'étalon de tout le reste.",
-            1.0, { it.objectifHeure }, { b, v -> b.copy(objectifHeure = v) },
+            1.0, Rubrique.RENTABILITE, { it.objectifHeure }, { b, v -> b.copy(objectifHeure = v) },
         ),
         Champ(
             "Coût de roulage, en € par km",
             "Carburant ou électricité, pneus, entretien, amortissement. Environ 0,22 en thermique, 0,10 en électrique rechargé à la maison.",
-            1.0, { it.coutKm }, { b, v -> b.copy(coutKm = v) },
+            1.0, Rubrique.RENTABILITE, { it.coutKm }, { b, v -> b.copy(coutKm = v) },
         ),
         Champ(
             "Commission prélevée, en %",
             "À laisser à 0 si l'offre annonce déjà ta part et non le prix client — c'est le cas d'Uber, qui écrit « Montant net de frais ».",
-            100.0, { it.commission }, { b, v -> b.copy(commission = v.coerceIn(0.0, 0.9)) },
+            100.0, Rubrique.RENTABILITE, { it.commission }, { b, v -> b.copy(commission = v.coerceIn(0.0, 0.9)) },
         ),
         Champ(
             "Retour à vide, en % du trajet",
             "La part du trajet qu'il faudra refaire à vide pour se repositionner. 0 si tu enchaînes toujours sur place, 100 si tu reviens systématiquement à ton point de départ. C'est ce qui distingue une course rentable d'une course qui t'exile.",
-            100.0, { it.partRetour }, { b, v -> b.copy(partRetour = v.coerceIn(0.0, 2.0)) },
+            100.0, Rubrique.COURSE, { it.partRetour }, { b, v -> b.copy(partRetour = v.coerceIn(0.0, 2.0)) },
         ),
         Champ(
             "Attente au ramassage, en min",
             "Le temps mort entre l'arrivée sur place et le départ réel.",
-            1.0, { it.minutesAttente }, { b, v -> b.copy(minutesAttente = v) },
+            1.0, Rubrique.COURSE, { it.minutesAttente }, { b, v -> b.copy(minutesAttente = v) },
         ),
         Champ(
             "Approche maximale, en min",
             "Au-delà, la course est refusée quel que soit le prix : trop de temps non payé.",
-            1.0, { it.approcheMaxMinutes }, { b, v -> b.copy(approcheMaxMinutes = v) },
+            1.0, Rubrique.COURSE, { it.approcheMaxMinutes }, { b, v -> b.copy(approcheMaxMinutes = v) },
         ),
         Champ(
             "Prix plancher, en €",
             "En dessous, la course est refusée : l'usure mange la recette.",
-            1.0, { it.prixPlancher }, { b, v -> b.copy(prixPlancher = v) },
+            1.0, Rubrique.RENTABILITE, { it.prixPlancher }, { b, v -> b.copy(prixPlancher = v) },
         ),
         Champ(
             "Zone « limite », en ± %",
             "Largeur de la bande orange autour de ton objectif.",
-            100.0, { it.marge }, { b, v -> b.copy(marge = v.coerceIn(0.0, 0.5)) },
+            100.0, Rubrique.RENTABILITE, { it.marge }, { b, v -> b.copy(marge = v.coerceIn(0.0, 0.5)) },
         ),
         Champ(
             "Vitesse supposée, en km/h",
             "Sert seulement à compléter une donnée absente de la notification.",
-            1.0, { it.vitesseParDefaut }, { b, v -> b.copy(vitesseParDefaut = v.coerceAtLeast(5.0)) },
+            1.0, Rubrique.COURSE, { it.vitesseParDefaut }, { b, v -> b.copy(vitesseParDefaut = v.coerceAtLeast(5.0)) },
         ),
     )
 
@@ -439,8 +451,12 @@ class ActivitePrincipale : AppCompatActivity() {
     private lateinit var champSecondes: EditText
 
     private fun construireChamps() {
-        val conteneur = findViewById<LinearLayout>(R.id.conteneur_champs)
+        val conteneurs = mapOf(
+            Rubrique.RENTABILITE to findViewById<LinearLayout>(R.id.conteneur_rentabilite),
+            Rubrique.COURSE to findViewById<LinearLayout>(R.id.conteneur_course),
+        )
         for (d in descripteurs) {
+            val conteneur = conteneurs.getValue(d.rubrique)
             val ligne = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL

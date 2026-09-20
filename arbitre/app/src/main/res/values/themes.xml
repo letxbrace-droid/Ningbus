@@ -23,4 +23,14 @@
         <item name="android:navigationBarColor" tools:targetApi="21">@color/nuit</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
+
+    <!-- Les titres de rubrique des réglages : assez d'air au-dessus pour que
+         l'œil sache qu'il change de sujet sans avoir à lire. -->
+    <style name="Rubrique">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
