@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nom_app">Fausse course</string>
+    <string name="titre">Simulateur d\'offre</string>
+    <string name="aide">Rejoue de vraies cartes d\'offre pour vérifier qu\'Arbitre les lit. « En flottant » est le cas qui compte : l\'offre s\'affiche par-dessus l\'écran d\'accueil, comme le fait l\'application chauffeur, et le focus reste au-dessous.</string>
+    <string name="en_flottant">En fenêtre flottante</string>
+    <string name="en_plein_ecran">En plein écran</string>
+    <string name="fermer_offre">Fermer l\'offre flottante</string>
+    <string name="superposition_requise">Autorise la superposition d\'écran pour cette application.</string>
+</resources>
