@@ -10,7 +10,7 @@
     <string name="description_accessibilite">Lit la carte d\'offre affichée par les applications chauffeur cochées, pour en calculer la rentabilité. Aucune donnée ne quitte le téléphone.</string>
     <string name="filtre_ecrans">Écarter les écrans qui ne sont pas des offres</string>
     <string name="toutes_apps">Écouter toutes les applications</string>
-    <string name="aide_toutes_apps">À n\'activer que si ton application chauffeur est absente de la liste plus bas. Tout écouter transforme l\'application en machine à faux positifs : n\'importe quel texte portant un prix et deux distances devient une offre — une page web, une conversation, l\'écran d\'accueil. Le mode découverte donne le nom exact d\'une application manquante, qu\'il suffit ensuite de cocher.</string>
+    <string name="aide_toutes_apps">À n\'activer que le temps de trouver le nom d\'une application chauffeur absente de la liste plus bas, puis à éteindre. Sur une vraie journée avec ce mode allumé, 55 verdicts sur 80 portaient sur autre chose qu\'une course : l\'écran d\'accueil, une boîte mail, une conversation. Hors des applications cochées, Arbitre exige désormais une certitude — un bouton d\'acceptation — et ne capture jamais l\'écran en image. Le mode découverte donne le nom exact d\'une application manquante, qu\'il suffit ensuite de cocher.</string>
     <string name="pastille_repos">€/h</string>
     <string name="bouton_flottant">Pastille d\'analyse manuelle</string>
     <string name="aide_bouton_flottant">Une pastille « €/h » reste à l\'écran. Un appui analyse l\'écran tel qu\'il est — le chemin qui ne dépend d\'aucune détection. Un appui long capture le texte brut de l\'écran dans le journal, pour comprendre pourquoi une offre n\'a pas été lue. Glisse-la où elle ne gêne pas.</string>
@@ -38,6 +38,7 @@
     <string name="lecture_ecran_requise">Accorde d\'abord la lecture de l\'écran (accessibilité).</string>
     <string name="rien_a_lire">Aucun montant ni distance sur cet écran.</string>
     <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
+    <string name="plusieurs_offres">Plusieurs courses sur cet écran : leurs chiffres se mélangeraient. Ouvre-en une seule.</string>
     <string name="titre_vues">Notifications vues, avant tout filtrage</string>
     <string name="aide_vues">Si cette liste est vide alors qu\'une offre est arrivée, la notification n\'atteint pas l\'application. Si elle contient l\'offre, c\'est la lecture qui a échoué — et le texte est là pour la corriger.</string>
     <string name="ecran_capture">Écran capturé : %1$s, %2$d caractères. Ouvre le journal et copie-le.</string>

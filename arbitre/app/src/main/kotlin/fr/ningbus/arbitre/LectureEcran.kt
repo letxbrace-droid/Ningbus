@@ -11,6 +11,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import fr.ningbus.arbitre.moteur.Course
 import fr.ningbus.arbitre.moteur.Detecteur
+import fr.ningbus.arbitre.moteur.Nature
 import fr.ningbus.arbitre.moteur.completer
 
 /**
@@ -160,6 +161,15 @@ class LectureEcran : AccessibilityService() {
         /** Une offre possible, écartée par le filtre d'écrans. */
         ECARTE,
 
+        /**
+         * Plusieurs courses sur le même écran — une liste, pas une carte.
+         *
+         * Distincte de [ECARTE] parce qu'elle ne se contourne pas : même une
+         * analyse demandée à la main ne peut que mélanger le prix de l'une
+         * avec la distance de l'autre. Mieux vaut le dire que le calculer.
+         */
+        PLUSIEURS_OFFRES,
+
         /** Une offre reconnue, mais dont il manque de quoi conclure. */
         INCOMPLET,
 
@@ -190,8 +200,12 @@ class LectureEcran : AccessibilityService() {
         //  - événement d'une application nommée : les siennes, sans quoi on
         //    arbitrerait le texte d'une autre sous son nom ;
         //  - événement sans nom de paquet : toutes les applications écoutées.
+        //
+        // Dans tous les cas, jamais nous-mêmes : la bulle porte un prix et
+        // des kilomètres, et une analyse à la main déclenchée pendant qu'elle
+        // est à l'écran la relirait comme une seconde offre.
         val critere: (String) -> Boolean = when {
-            force -> { _ -> true }
+            force -> { p -> p != packageName }
             paquet != null -> { p -> p == paquet }
             else -> { p -> reglages.ecoute(p) }
         }
@@ -243,7 +257,30 @@ class LectureEcran : AccessibilityService() {
         // tort sans qu'on puisse voir ce qui avait emporté la décision.
         val jugement = Detecteur.juger(texte, course)
 
-        if (!force && enCours == null && reglages.filtrerEcrans && !jugement.arbitrable) {
+        // Un écran de liste ne se force pas. Sur « Demandes de courses
+        // planifiées », les chiffres de deux courses se suivent dans le même
+        // texte : l'analyse la plus insistante ne peut qu'en mélanger deux.
+        if (jugement.nature == Nature.PLUSIEURS_OFFRES) {
+            Journal.signalerEcranIgnore(
+                this,
+                nom,
+                "${jugement.resume} · ${jugement.indices.joinToString(" ")}\n\n$texte",
+            )
+            return Issue.PLUSIEURS_OFFRES
+        }
+
+        // Hors des applications nommées, on exige la certitude et non la
+        // probabilité. « Écouter toutes les applications » est un mode de
+        // dépannage — le temps de trouver le nom d'une application chauffeur
+        // absente de la liste — et non un mode de travail : sans liste, il ne
+        // reste que le contenu pour juger, donc il en faut davantage.
+        val assezSur = if (reglages.estApplicationChauffeur(nom)) {
+            jugement.arbitrable
+        } else {
+            jugement.nature == Nature.OFFRE_CERTAINE
+        }
+
+        if (!force && enCours == null && reglages.filtrerEcrans && !assezSur) {
             // Écran portant un montant mais écarté : on note le calcul qui l'a
             // écarté, pas seulement son texte. C'est la différence entre
             // « pourquoi cette course est-elle passée ? » et « je vois ».
@@ -294,7 +331,11 @@ class LectureEcran : AccessibilityService() {
         if (!force || issue == Issue.RENDU) return
         if (texte.isNotEmpty()) Journal.signalerCapture(this, nom, texte)
         signaler(
-            if (issue == Issue.SANS_SUITE) R.string.montant_introuvable else R.string.rien_a_lire
+            when (issue) {
+                Issue.PLUSIEURS_OFFRES -> R.string.plusieurs_offres
+                Issue.SANS_SUITE -> R.string.montant_introuvable
+                else -> R.string.rien_a_lire
+            }
         )
     }
 
@@ -319,6 +360,10 @@ class LectureEcran : AccessibilityService() {
         if (!Ocr.disponible || !reglages.ocrSecours) return refuser("désactivé ou indisponible")
         if (issue == Issue.RENDU) return false
 
+        // Relire une liste en pixels donnerait la même liste : le problème
+        // n'est pas ce qu'on lit, c'est qu'il y en a plusieurs.
+        if (issue == Issue.PLUSIEURS_OFFRES) return refuser("plusieurs offres à l'écran")
+
         // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
         // de secours, il n'a pas à être économe.
         if (force) return true
@@ -328,8 +373,14 @@ class LectureEcran : AccessibilityService() {
         // reviendrait à refuser la reconnaissance de texte précisément dans
         // le cas qu'elle existe pour traiter : on accepte donc aussi les
         // paquets relevés au passage précédent.
-        val connu = reglages.ecoute(nom) || paquetsLus.any { reglages.ecoute(it) }
-        if (!connu) return refuser("paquet inconnu ($nom, vus : $paquetsLus)")
+        // Nommément une application chauffeur, et non « écoutée » : capturer
+        // l'écran coûte plus qu'un parcours de nœuds, et ne se justifie que
+        // là où une carte d'offre peut être dessinée. Le journal du 21/09
+        // comptait neuf captures, toutes sur l'écran d'accueil ou la barre
+        // d'état, aucune dans Uber ni Bolt.
+        val connu = reglages.estApplicationChauffeur(nom) ||
+            paquetsLus.any { reglages.estApplicationChauffeur(it) }
+        if (!connu) return refuser("hors application chauffeur ($nom, vus : $paquetsLus)")
 
         // Une empreinte par écran : un écran figé ne coûte qu'une capture.
         // C'est ce qui remplace la longueur du texte comme garde-fou — voir
@@ -496,9 +547,10 @@ class LectureEcran : AccessibilityService() {
      * quand aucun mot ne désigne l'approche.
      *
      * **L'arbre passe devant dès qu'il ressemble à une offre**, et c'est une
-     * course de Grigny qui l'a imposé. L'image y annonçait une approche de
-     * 1,6 km comme « 1. 6 km » — une décimale coupée en deux — et l'analyseur
-     * en retenait 6,0 km, soit quatre fois trop. L'arbre, lui, rend le texte
+     * course de Grigny qui l'a imposé. L'image y rendait une approche de
+     * 1,6 km en « l.6 km » — le chiffre un pris pour la lettre L — et le
+     * motif de distance, qui ne cherche que des chiffres, n'en retenait que
+     * le 6, soit quatre fois trop. L'arbre, lui, rend le texte
      * exact par construction : quand il a quelque chose à dire, c'est lui
      * qu'il faut croire. L'image ne complète alors que ce que lui seul a vu.
      *

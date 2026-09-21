@@ -309,8 +309,8 @@ object Bulle {
         // --- Niveau 5 : d'où vient ce qu'on vient de lire -------------------
         //
         // La source n'est pas un détail d'ingénieur. Une approche de 1,6 km
-        // lue « 6,0 km » vient d'une décimale coupée par la reconnaissance
-        // d'image ; l'arbre d'accessibilité, lui, ne coupe rien. Savoir par
+        // lue « 6,0 km » vient de « 1.6 » reconnu « l.6 » par l'image ;
+        // l'arbre d'accessibilité, lui, ne confond aucune lettre. Savoir par
         // quel chemin un chiffre est arrivé, c'est savoir s'il faut s'en
         // méfier.
         val confiance = verdict.confiance

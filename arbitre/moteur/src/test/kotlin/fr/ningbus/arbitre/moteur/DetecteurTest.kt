@@ -67,17 +67,38 @@ class DetecteurTest {
     }
 
     /**
-     * Le cas limite qui justifie le score plutôt qu'une règle binaire : une
-     * offre dont le bouton n'a pas encore été dessiné reste reconnaissable à
-     * ses deux distances et à son montant.
+     * Ce que la journée du 21/09 a corrigé, et c'est l'inverse de ce qui était
+     * écrit ici.
+     *
+     * L'essai précédent exigeait qu'une carte privée de son bouton reste
+     * arbitrable : deux distances et un montant, cela paraissait suffire. Le
+     * terrain a répondu par 55 verdicts sur 80 rendus hors d'une application
+     * chauffeur — l'écran d'accueil, la barre de notifications, une boîte
+     * mail, une conversation — tous à 60 points, tous par ce chemin-là.
+     *
+     * Le prix de la correction est connu et assumé : une carte d'offre lue
+     * avant que son bouton ne soit dessiné n'est plus arbitrée toute seule.
+     * Elle l'est à la lecture suivante, qui vient quelques centièmes plus
+     * tard, ou d'un appui sur la pastille. Une offre retardée se rattrape ;
+     * une bulle sur l'écran d'accueil use la confiance qu'on met dans l'outil.
      */
     @Test
-    fun `une offre sans bouton d'acceptation reste probable`() {
+    fun `des chiffres sans marque d'offre ne suffisent plus`() {
         val jugement = juger(ulis.substringBefore("Mise en relation"))
-        assertTrue(
+        assertFalse(
             jugement.arbitrable,
             "score ${jugement.score} — ${jugement.indices}",
         )
+        assertEquals(Nature.AMBIGU, jugement.nature)
+    }
+
+    /** Un compte à rebours vaut le bouton : il n'existe que sur une offre. */
+    @Test
+    fun `un compte a rebours suffit a marquer une offre`() {
+        val jugement = juger(
+            ulis.substringBefore("Mise en relation") + "\n12 s restantes"
+        )
+        assertTrue(jugement.arbitrable, "score ${jugement.score}")
     }
 
     /**
@@ -88,5 +109,45 @@ class DetecteurTest {
     fun `un montant seul ne fait pas une offre`() {
         val jugement = juger("Votre commande de 24,90 € a été expédiée")
         assertFalse(jugement.arbitrable)
+    }
+
+    /**
+     * Relevé du 21/09, écran « Demandes de courses planifiées » de Bolt.
+     *
+     * Deux courses empilées, et l'analyseur en faisait une seule : le prix de
+     * la seconde avec la distance de la première. Quatorze verdicts de la
+     * journée sont sortis de cet écran, tous faux, tous annoncés à 83 % de
+     * confiance.
+     */
+    @Test
+    fun `une liste de courses planifiees n'est pas arbitree`() {
+        val liste = """
+            Demandes de courses planifiées
+            Demandes
+            Accepté
+            mar., 22 septembre
+            20,79 € • 22 sept., 02:20–02:25
+            Bolt
+            18.1km
+            Près de Rue Michel-Ange, 16e Arrondissement, Paris 75016, France
+            26,08 € • 22 sept., 03:55–04:00
+            Comfort
+            25.6km
+            Près de Rue Pelleport, 20e Arrondissement, Paris 75020, France
+            Voir toutes les demandes
+        """.trimIndent()
+        val jugement = juger(liste)
+        assertEquals(Nature.PLUSIEURS_OFFRES, jugement.nature)
+        assertFalse(jugement.arbitrable)
+        assertTrue(
+            jugement.indices.any { it.contains("empilées") },
+            "le journal doit dire pourquoi : ${jugement.indices}",
+        )
+    }
+
+    /** Un bonus de prise en charge n'est pas une seconde course. */
+    @Test
+    fun `un bonus inclus ne fait pas deux offres`() {
+        assertEquals(1, Analyseur.compterOffres(ulis))
     }
 }

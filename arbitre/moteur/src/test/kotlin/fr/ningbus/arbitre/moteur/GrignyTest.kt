@@ -14,11 +14,17 @@ import kotlin.test.assertEquals
  *
  * L'essai a d'abord servi à départager deux coupables possibles. Sur le texte
  * propre, l'analyseur rend 1,6 km : il était donc innocent, et c'est le texte
- * qui lui parvenait déjà abîmé. Une décimale coupée en deux, signature d'une
- * reconnaissance sur image — l'arbre d'accessibilité, lui, rend le texte
- * exact.
+ * qui lui parvenait déjà abîmé.
  *
- * Il reste ici comme garde-fou, avec les deux formes d'abîmage observées.
+ * **La cause exacte n'est venue qu'avec le journal du 21/09**, qui conserve la
+ * capture brute. La reconnaissance avait rendu `5 min (à l.6 km)` : le chiffre
+ * **1** était devenu la lettre **l**, et le motif de distance, qui ne cherche
+ * que des chiffres, n'avait vu que le `6`. Ce n'était donc pas une décimale
+ * coupée, et la couture posée pour elle ne pouvait rien y faire — l'essai
+ * ci-dessous, sur le texte réellement relevé, l'établit.
+ *
+ * Tout reste ici comme garde-fou : les deux coupures possibles, la confusion
+ * de lettres, et le texte intact qui ne doit pas bouger.
  */
 class GrignyTest {
 
@@ -57,6 +63,34 @@ class GrignyTest {
     fun `une decimale dont le point a disparu est recousue`() {
         val abime = recoudreNombres(carte.replace("1.6 km", "1 6 km"))
         assertEquals(1.6, Analyseur.analyser(abime, "Uber").kmApproche)
+    }
+
+    /**
+     * Le texte exactement tel que le journal du 21/09 l'a conservé — le seul
+     * qui décrive vraiment la panne.
+     */
+    @Test
+    fun `un chiffre pris pour une lettre est redresse`() {
+        val abime = recoudreNombres(carte.replace("1.6 km", "l.6 km"))
+        val c = Analyseur.analyser(abime, "Uber")
+        assertEquals(1.6, c.kmApproche, "c'est le 6,0 km affiché à Grigny")
+        assertEquals(16.4, c.kmTrajet)
+    }
+
+    /** Les autres sosies relevés : le O du zéro, la barre du un. */
+    @Test
+    fun `les autres sosies de chiffres sont redresses`() {
+        assertEquals("Course de 10.5 km", recoudreNombres("Course de 1O.5 km"))
+        assertEquals("12 min", recoudreNombres("l2 min"))
+    }
+
+    /**
+     * Le garde-fou du redressement : une lettre isolée n'est pas un chiffre.
+     * Sans vrai chiffre dans le jeton, on ne fabrique rien.
+     */
+    @Test
+    fun `une lettre seule ne devient pas un chiffre`() {
+        assertEquals("allée O km 12", recoudreNombres("allée O km 12"))
     }
 
     /**

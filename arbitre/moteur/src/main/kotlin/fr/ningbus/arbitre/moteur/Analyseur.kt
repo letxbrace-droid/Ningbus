@@ -50,6 +50,27 @@ object Analyseur {
         "jusqu'a", "trip", "à bord", "a bord", "course de", "durée de la course",
     )
 
+    /**
+     * Ce qui, autour d'un nombre, dit qu'il ne décrit pas la course.
+     *
+     * Le journal d'une vraie journée l'a imposé. La carte d'une course
+     * planifiée Bolt porte, sous le trajet, « Temps d'attente supplémentaire —
+     * 5 min gratuites incluses dans le tarif, 0,78 €/min après 5 min ». Ces
+     * « 5 min » sont un barème d'attente ; l'analyseur les lisait comme la
+     * durée d'approche, et la confiance montait à 100 % **parce que** le champ
+     * était rempli. Une donnée fausse et complète vaut moins qu'une donnée
+     * manquante : celle-ci se voit, l'autre non.
+     *
+     * Même raison pour les montants : un péage, un pourboire, un bonus de
+     * prise en charge ou un tarif à la minute sont des euros qui ne sont pas
+     * le prix de la course.
+     */
+    private val MOTS_PARASITES = listOf(
+        "gratuit", "inclus", "attente", "supplément", "supplement",
+        "annulation", "péage", "peage", "pourboire", "bonus", "prime",
+        "promo", "après", "apres",
+    )
+
     /** Fenêtre de contexte, en caractères, autour d'un nombre. */
     private const val FENETRE = 35
 
@@ -77,8 +98,14 @@ object Analyseur {
         val remarques = mutableListOf<String>()
 
         val prix = montant(t, remarques)
-        val durees = durees(t).map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
-        val distances = distances(t).map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
+        val durees = durees(t)
+            .filterNot { parasite(t, it.second, it.third) }
+            .map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
+            .let { dedoublonner(it, "durée", remarques) }
+        val distances = distances(t)
+            .filterNot { parasite(t, it.second, it.third) }
+            .map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
+            .let { dedoublonner(it, "distance", remarques) }
 
         // Première passe : les rôles posés par les mots-clés se transmettent
         // entre voisines immédiates.
@@ -129,13 +156,33 @@ object Analyseur {
      * bonus comme « inclus » dans le total.
      */
     private fun montant(t: String, remarques: MutableList<String>): Double? {
-        val valeurs = RE_MONTANT.findAll(t)
-            .mapNotNull { m -> (m.groupValues[1].ifEmpty { m.groupValues[2] }).let(::nombre) }
-            .toList()
+        val valeurs = montants(t)
         if (valeurs.isEmpty()) return null
         if (valeurs.size > 1) remarques += "plusieurs montants lus, le plus élevé retenu"
         return valeurs.max()
     }
+
+    /** Les sommes qui peuvent être le prix d'une course, péages et bonus ôtés. */
+    private fun montants(t: String): List<Double> = RE_MONTANT.findAll(t)
+        .filterNot { parasite(t, it.range.first, it.range.last) }
+        .mapNotNull { m -> (m.groupValues[1].ifEmpty { m.groupValues[2] }).let(::nombre) }
+        .toList()
+
+    /**
+     * Combien d'offres distinctes ce texte semble porter.
+     *
+     * Un écran de liste — « Demandes de courses planifiées » chez Bolt — empile
+     * plusieurs courses, chacune avec son prix et sa distance. L'analyseur, qui
+     * ne voit qu'un texte, retenait alors le prix de l'une et la distance de
+     * l'autre : le journal du 21/09 montre quatorze verdicts bâtis sur des
+     * chiffres appartenant à deux courses différentes, et rendus avec 83 % de
+     * confiance.
+     *
+     * Le décompte est structurel et n'a besoin d'aucun libellé de plateforme :
+     * une carte d'offre annonce **un** prix. Deux sommes qui ne sont ni un
+     * péage, ni un bonus, ni un tarif à la minute, ce sont deux courses.
+     */
+    fun compterOffres(texte: String): Int = montants(normaliser(texte)).size
 
     private fun durees(t: String): List<Triple<Double, Int, Int>> {
         val jetons = mutableListOf<Triple<Double, Int, Int>>()
@@ -250,6 +297,87 @@ object Analyseur {
         approche?.role = Role.APPROCHE
         trajet?.role = Role.TRAJET
         return approche?.valeur to trajet?.valeur
+    }
+
+    /**
+     * Ce nombre décrit-il autre chose que la course ?
+     *
+     * La question se règle sur le **mot immédiatement voisin**, et non sur une
+     * fenêtre de contexte. « 46,7 € • 11,7 € péage » : le mot qui suit la
+     * seconde somme est « péage », celui qui suit la première est un chiffre —
+     * une fenêtre large aurait condamné les deux. « 13.6km • 21 min » suivi,
+     * à la ligne, de « Temps d'attente supplémentaire » : le mot qui suit est
+     * « temps », et la durée de la course est sauve.
+     *
+     * Une barre oblique collée au montant suffit à elle seule : « 0,78 €/min »
+     * est un tarif, jamais un prix de course.
+     */
+    private fun parasite(t: String, debut: Int, fin: Int): Boolean {
+        if (fin + 1 < t.length && t[fin + 1] == '/') return true
+        val apres = motApres(t, fin)
+        val avant = motAvant(t, debut)
+        return MOTS_PARASITES.any { mot ->
+            apres?.startsWith(mot) == true || avant?.startsWith(mot) == true
+        }
+    }
+
+    /**
+     * Le premier mot après le nombre, s'il n'y a pas d'autre nombre avant lui.
+     *
+     * Un chiffre rencontré en chemin arrête la recherche : ce qui suit ne
+     * qualifie plus notre nombre, mais le sien.
+     */
+    private fun motApres(t: String, fin: Int): String? {
+        var i = fin + 1
+        while (i < t.length && !t[i].isLetter()) {
+            if (t[i].isDigit()) return null
+            i++
+        }
+        val debutMot = i
+        while (i < t.length && t[i].isLetter()) i++
+        return if (i > debutMot) t.substring(debutMot, i) else null
+    }
+
+    /** Le dernier mot avant le nombre, même règle en sens inverse. */
+    private fun motAvant(t: String, debut: Int): String? {
+        var i = debut - 1
+        while (i >= 0 && !t[i].isLetter()) {
+            if (t[i].isDigit()) return null
+            i--
+        }
+        val finMot = i
+        while (i >= 0 && t[i].isLetter()) i--
+        return if (finMot > i) t.substring(i + 1, finMot + 1) else null
+    }
+
+    /**
+     * Un même nombre écrit deux fois reste un seul nombre.
+     *
+     * La carte d'une course planifiée Bolt affiche « 13.6km », puis plus bas
+     * « 13.6km • 21 min ». L'analyseur y voyait deux distances, et comme
+     * toutes les plateformes annoncent l'approche avant le trajet, il faisait
+     * de la première une approche de 13,6 km — treize kilomètres à vide
+     * purement inventés, sur une carte qui n'annonce aucune approche. Le
+     * verdict qui en sortait était faux et se présentait avec 100 % de
+     * confiance, puisque tous les champs étaient remplis.
+     *
+     * On garde la dernière occurrence : c'est celle qui porte le plus souvent
+     * la durée collée à elle, dont le rôle se transmettra ensuite.
+     */
+    private fun dedoublonner(
+        nombres: List<Nombre>,
+        quoi: String,
+        remarques: MutableList<String>,
+    ): List<Nombre> {
+        if (nombres.size < 2) return nombres
+        val garde = nombres.filterIndexed { i, n ->
+            n.role != Role.INCONNU ||
+                nombres.drop(i + 1).none { it.role == Role.INCONNU && it.valeur == n.valeur }
+        }
+        if (garde.size < nombres.size) {
+            remarques += "$quoi répétée sur l'écran, comptée une seule fois"
+        }
+        return garde
     }
 
     /** Rôle d'un nombre d'après les mots qui l'entourent. */

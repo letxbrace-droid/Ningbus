@@ -18,10 +18,11 @@ enum class Source(val libelle: String) {
      * Reconnaissance de texte sur une capture.
      *
      * Distinguée de [ECRAN] à dessein, et le terrain a montré pourquoi en une
-     * seule course : une approche de 1,6 km lue « 6,0 km », parce qu'une
-     * décimale avait été coupée en deux. L'arbre rend le texte exact, l'image
-     * rend une hypothèse — deux choses qu'un journal ne doit pas confondre
-     * quand il s'agit de comprendre un chiffre faux.
+     * seule course : une approche de 1,6 km lue « 6,0 km », parce que la
+     * reconnaissance avait rendu « 1.6 » en « l.6 » — le chiffre un devenu la
+     * lettre L. L'arbre rend le texte exact, l'image rend une hypothèse —
+     * deux choses qu'un journal ne doit pas confondre quand il s'agit de
+     * comprendre un chiffre faux.
      */
     IMAGE("image"),
 

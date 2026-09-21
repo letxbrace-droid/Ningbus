@@ -160,6 +160,38 @@ part au journal, donc relisible :
 pas une offre (5) · +20 montant +15 distance de course -30 vocabulaire de navigation
 ```
 
+**Le score ne suffit pas, et une journée de terrain l'a démontré.** Sur les 80
+verdicts du journal du 21 septembre, 55 portaient sur des écrans qui n'avaient
+jamais rien eu d'une course : l'écran d'accueil, la barre de notifications, une
+boîte mail, une conversation. Tous atteignaient 60 points — un montant (20),
+deux nombres suivis de « km » (15 + 15), une durée (10) — c'est-à-dire
+au-dessus du seuil.
+
+Le compte était juste ; c'est la conclusion qui ne l'était pas. **Des chiffres
+ne prouvent rien** : n'importe quel texte en contient. Une offre porte une
+marque qui n'appartient qu'à elle — le bouton qui l'accepte, ou le compte à
+rebours qui l'emporte. Sans cette marque, l'écran ne dépasse plus « ambigu »,
+quel que soit son score.
+
+Le prix est connu et assumé : une carte lue avant que son bouton ne soit
+dessiné n'est plus arbitrée toute seule. Elle l'est à la lecture suivante,
+quelques centièmes plus tard, ou d'un appui sur la pastille. Une offre retardée
+se rattrape ; une bulle sur l'écran d'accueil use la confiance qu'on met dans
+l'outil.
+
+### Une liste de courses n'est pas une course
+
+Bolt affiche, sous « Demandes de courses planifiées », plusieurs courses
+empilées, chacune avec son prix et sa distance. L'analyseur, qui ne voit qu'un
+texte, retenait le prix de l'une et la distance de l'autre : quatorze verdicts
+de la même journée ont été bâtis sur des chiffres appartenant à deux courses
+différentes, et annoncés à 83 % de confiance.
+
+Le décompte est structurel, et n'a besoin d'aucun libellé de plateforme : **une
+carte d'offre annonce un prix.** Deux sommes qui ne sont ni un péage, ni un
+bonus, ni un tarif à la minute, ce sont deux courses — et l'écran n'est pas
+arbitré du tout, plutôt que de l'être de travers.
+
 ### Ce que vaut la lecture, séparément de ce qu'elle dit
 
 Deux questions se confondaient en une seule : « cette course est-elle
@@ -185,6 +217,28 @@ confiance 93 %
 s'ajoute aux conditions d'origine du feu vert au lieu de les remplacer, et un
 test l'exige explicitement : une mesure de fiabilité qui autoriserait un vert
 refusé jusque-là ferait l'inverse de ce qu'on attend d'elle.
+
+**Et elle ne vaut que ce que valent les champs qu'elle compte.** Les verdicts
+les plus faux du journal du 21 septembre étaient aussi les seuls à 100 %,
+parce que la confiance mesurait la *complétude* de la lecture et non sa
+*justesse* : un champ rempli par erreur la faisait monter, là où un champ
+laissé vide l'aurait fait descendre. Deux corrections, toutes deux relevées
+sur des cartes Bolt réelles :
+
+- **un même nombre écrit deux fois reste un seul nombre.** La carte affichait
+  `13.6km`, puis plus bas `13.6km • 21 min` ; l'analyseur faisait de la
+  première occurrence une approche de 13,6 km, sur une carte qui n'annonce
+  aucune approche. Treize kilomètres à vide inventés, et facturés au verdict ;
+- **un nombre qualifié par son voisin immédiat ne décrit pas la course.**
+  « 5 min gratuites incluses dans le tarif » est un barème d'attente, pas une
+  durée d'approche ; « 11,7 € péage » n'est pas un prix. La question se règle
+  sur le mot immédiatement voisin, et non sur une fenêtre de contexte : dans
+  « 46,7 € • 11,7 € péage », une fenêtre large aurait condamné les deux
+  sommes.
+
+Une donnée manquante se voit ; une donnée inventée, non. C'est pourquoi la
+correction consiste à *retirer* des champs, quitte à faire tomber la confiance
+et le verdict avec elle.
 
 ### Quand Android détache le service
 
@@ -483,6 +537,22 @@ retient les applications non cochées qui envoient une notification contenant un
 montant et une distance : elles apparaissent sous la liste, prêtes à cocher.
 Aucune permission supplémentaire n'est nécessaire — en particulier pas
 `QUERY_ALL_PACKAGES`.
+
+**« Écouter toutes les applications » est un mode de dépannage, pas un mode de
+travail.** Le journal du 21 septembre a été relevé avec ce mode allumé : sur 80
+verdicts, 55 portaient sur l'écran d'accueil, la barre d'état, une boîte mail
+ou une conversation — et les neuf captures d'écran prises ce jour-là l'ont
+toutes été hors d'une application chauffeur, aucune dans Uber ni Bolt.
+
+Le mode reste disponible, mais il ne donne plus les mêmes droits que la liste :
+
+- l'interface du système, le lanceur, le clavier et Arbitre lui-même sont
+  écartés en toutes circonstances — un faux positif y est certain ;
+- hors des applications cochées, un écran doit être **certain** et non
+  seulement probable pour être arbitré ;
+- la capture d'écran et la reconnaissance d'image ne se déclenchent que dans
+  une application cochée. Une capture de l'écran d'accueil, même analysée sur
+  le téléphone et jamais conservée, n'a aucune raison d'être prise.
 
 ---
 

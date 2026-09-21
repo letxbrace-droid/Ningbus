@@ -179,8 +179,36 @@ class Reglages(contexte: Context) {
         if (surEmulateur) Plateformes.PAR_DEFAUT.keys + SIMULATEUR
         else Plateformes.PAR_DEFAUT.keys.toSet()
 
-    /** En mode automatique, aucune application n'est écartée d'avance. */
-    fun ecoute(paquet: String): Boolean = ecouteToutesApps || paquet in paquets
+    /**
+     * Cette application peut-elle porter une offre ?
+     *
+     * Le mode « toutes les applications » n'excuse pas tout. Le journal du
+     * 21/09 a été rendu avec ce mode allumé : sur 80 verdicts, 55 portaient
+     * sur l'écran d'accueil, la barre d'état, le clavier, une boîte mail ou
+     * une conversation. Aucune de ces applications n'est, ni ne sera jamais,
+     * une application chauffeur — et l'application se lisait elle-même en
+     * prime, un verdict en engendrant un autre.
+     *
+     * L'exclusion est structurelle, pas une liste de noms à tenir à jour :
+     * l'interface du système, le lanceur, le clavier, et nous-mêmes.
+     */
+    fun ecoute(paquet: String): Boolean {
+        if (estSysteme(paquet)) return false
+        return ecouteToutesApps || paquet in paquets
+    }
+
+    /**
+     * Une application chauffeur nommément désignée.
+     *
+     * Distinct de [ecoute], qui dit seulement « on peut regarder ». Ce que
+     * cela autorise en plus — capturer l'écran et le passer en reconnaissance
+     * d'image — ne se fait pas sur une application quelconque : une capture de
+     * l'écran d'accueil, même analysée sur le téléphone et jamais conservée,
+     * n'a aucune raison d'être prise. Le journal en comptait neuf, toutes hors
+     * d'une application chauffeur, et aucune à l'intérieur.
+     */
+    fun estApplicationChauffeur(paquet: String): Boolean =
+        !estSysteme(paquet) && paquet in paquets
 
     fun ajouterPaquet(paquet: String) {
         if (paquet.isNotBlank()) paquets = paquets + paquet.trim()
@@ -230,6 +258,25 @@ class Reglages(contexte: Context) {
 
         /** La fausse application chauffeur du banc d'essai. */
         private const val SIMULATEUR = "fr.ningbus.simulateur"
+
+        /**
+         * Ce qui n'est jamais une application chauffeur, quel que soit le
+         * réglage.
+         *
+         * Volontairement court : un lanceur, une interface système, un
+         * clavier, et l'application elle-même. Tout le reste passe par la
+         * liste que l'utilisateur tient — la fonction de cette exclusion
+         * n'est pas de filtrer le monde, mais d'empêcher les quatre cas où
+         * un faux positif est certain.
+         */
+        private fun estSysteme(paquet: String): Boolean =
+            paquet == "android" ||
+                paquet == "fr.ningbus.arbitre" ||
+                paquet.startsWith("com.android.systemui") ||
+                paquet.startsWith("com.android.settings") ||
+                paquet.contains(".launcher") ||
+                paquet.contains("inputmethod") ||
+                paquet.contains("honeyboard")
 
         /**
          * Vrai sur un émulateur Android, faux sur un téléphone.
