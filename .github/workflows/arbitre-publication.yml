@@ -97,10 +97,11 @@ jobs:
           chauffeur manque, le **mode découverte** donne son nom exact dès
           qu'elle envoie quelque chose, et il suffit alors de la cocher.
 
-          « Écouter toutes les applications » existe pour ce cas, mais reste
-          éteint : tout écouter transforme l'application en machine à faux
-          positifs — n'importe quel texte portant un prix et deux distances
-          devient une offre, page web ou écran d'accueil compris.
+          « Écouter toutes les applications » existe pour ce cas, et doit être
+          éteint ensuite. Sur une vraie journée avec ce mode allumé, 55
+          verdicts sur 80 portaient sur autre chose qu'une course — l'écran
+          d'accueil, une boîte mail, une conversation. Cette version le rend
+          beaucoup moins nuisible, mais elle ne le rend pas utile.
 
           Une **pastille « €/h »** reste à l'écran : un appui analyse l'écran
           tel qu'il est. C'est le chemin qui ne dépend d'aucune détection — si
@@ -115,58 +116,83 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
-          ## Ce que cette version ajoute
+          ## Ce que cette version corrige
+
+          Celle-ci ne vient pas d'une idée mais d'un relevé : **80 verdicts
+          d'une vraie journée**, exportés depuis le journal. Ils ont démenti
+          trois choses que la version précédente tenait pour acquises.
+
+          **Des chiffres ne prouvent rien.** Cinquante-cinq de ces 80 verdicts
+          ne portaient sur aucune course : l'écran d'accueil, la barre d'état,
+          une boîte mail, une conversation. Tous marquaient 60 points — un
+          montant, deux nombres suivis de « km », une durée — au-dessus du
+          seuil qui déclenchait l'arbitrage. Une offre, elle, porte une marque
+          qui n'appartient qu'à elle : le bouton qui l'accepte, ou le compte à
+          rebours qui l'emporte. Sans cette marque, un écran ne dépasse plus
+          « ambigu », quel que soit son score. Le prix est assumé : une carte
+          lue avant que son bouton ne soit dessiné n'est plus arbitrée du
+          premier coup — elle l'est à la lecture suivante, quelques centièmes
+          plus tard, ou d'un appui sur la pastille.
+
+          **Une liste de courses n'est pas une course.** Sous « Demandes de
+          courses planifiées », Bolt empile plusieurs offres. Quatorze
+          verdicts de la journée mélangeaient le prix de l'une et la distance
+          de l'autre — et s'annonçaient à 83 % de confiance. Deux sommes qui
+          ne sont ni un péage, ni un bonus, ni un tarif à la minute, ce sont
+          deux courses : l'écran n'est plus arbitré du tout, et le journal dit
+          pourquoi.
+
+          **La confiance mesurait la complétude, pas la justesse.** Les
+          verdicts les plus faux de la journée étaient les seuls à 100 %,
+          parce qu'un champ rempli par erreur la faisait monter là où un champ
+          vide l'aurait fait descendre. Deux causes, relevées sur de vraies
+          cartes Bolt : « 13.6km » écrit deux fois devenait treize kilomètres
+          d'approche sur une carte qui n'en annonce aucune, et les « 5 min
+          gratuites incluses dans le tarif » devenaient une durée d'approche.
+          Un nombre est désormais jugé sur son voisin immédiat — « 11,7 €
+          péage » n'est pas un prix — et un même nombre écrit deux fois reste
+          un seul nombre. Une donnée manquante se voit ; une donnée inventée,
+          non.
+
+          **Grigny : la cause était ailleurs.** La capture brute conservée par
+          le journal montre « 5 min (à l.6 km) » — le chiffre un rendu par la
+          lettre L. Ce n'était pas une décimale coupée, et la couture posée
+          pour elle ne pouvait rien y faire. Les sosies de chiffres sont
+          maintenant redressés devant une unité.
+
+          **« Écouter toutes les applications » ne donne plus les mêmes droits
+          que la liste.** L'interface du système, le lanceur, le clavier et
+          Arbitre lui-même sont écartés en toutes circonstances ; hors des
+          applications cochées, un écran doit être certain et non seulement
+          probable ; et la capture d'écran ne se déclenche que dans une
+          application cochée — les neuf captures de la journée avaient toutes
+          été prises ailleurs. Le mode reste là pour trouver le nom d'une
+          application chauffeur manquante, et à éteindre ensuite.
+
+          ## Ce que les versions récentes avaient apporté
 
           **La bulle se lit par étages** : la décision, puis l'argent, puis les
-          contraintes, puis l'explication, puis le diagnostic. Tu dois pouvoir
-          t'arrêter au premier. Un appui la réduit au verdict et à
-          l'euro/heure, un appui long ouvre le journal, un glissement la
-          déplace.
-
-          **Les trois kilométrages ne sont plus additionnés** : course,
-          approche, retour à vide, chacun sur sa ligne. C'est ce qui distingue
-          une course rentable d'une course qui t'exile — et ce qui rend
-          criant un chiffre aberrant.
-
-          **Le verdict dit pourquoi.** « LAISSE — 14 €/h » laissait deviner ;
-          « LAISSE — approche plus longue que la course » permet de s'étonner,
-          ou non, en connaissance de cause.
-
-          **La source de lecture est affichée** — écran ou image. Une première
-          course lue sur la route a donné une approche de 1,6 km comme 6,0 km,
-          parce qu'une décimale avait été coupée en deux par la reconnaissance
-          d'image. Le texte reconnu est désormais recousu avant analyse, et
-          l'arbre d'accessibilité, qui ne coupe rien, passe devant l'image dès
-          qu'il a quelque chose à dire.
-
-          **Les réglages se rangent en quatre rubriques** : rentabilité,
-          course, affichage, diagnostic.
+          contraintes, puis l'explication, puis le diagnostic. Un appui la
+          réduit au verdict et à l'euro/heure, un appui long ouvre le journal,
+          un glissement la déplace. **Les trois kilométrages ne sont pas
+          additionnés** — course, approche, retour à vide, chacun sur sa
+          ligne. **Le verdict dit pourquoi**, et **la source de lecture est
+          affichée** : écran ou image.
 
           **Lecture en image.** Les applications chauffeur passent à des cartes
           dessinées plutôt qu'écrites, où le texte n'existe pas en tant que
-          tel : le service voyait un écran vide là où le chauffeur voit une
-          offre. Une capture est désormais analysée sur le téléphone même, en
-          second rideau seulement. Le modèle est embarqué dans l'application —
-          aucun réseau, et l'image ne sort pas d'ici.
-
-          **Confiance.** Chaque verdict dit aussi ce que vaut la lecture qui
-          l'a produit, et ce qui manquait. Un LAISSE sur données complètes et
-          un LAISSE calculé sur une approche inventée se ressemblent à l'écran
-          et ne se valent pas. Une donnée manquante n'obtient toujours jamais
-          de feu vert.
-
-          **Motif des écrans écartés.** Un écran qui portait un prix sans être
-          arbitré dit maintenant pourquoi, chiffres à l'appui — de quoi
-          corriger si une vraie course passe à travers.
+          tel. Une capture est analysée sur le téléphone même, en second
+          rideau seulement. Le modèle est embarqué dans l'application — aucun
+          réseau, et l'image ne sort pas d'ici.
 
           **Veille.** Certaines surcouches constructeur arrêtent le processus,
           et le service de lecture part avec lui. Une notification permanente
           et discrète maintient l'application en vie, et prévient si la lecture
           d'écran se détache malgré tout.
 
-          **Km à vide**, séparés des kilomètres payés. **Interface de nuit**,
-          noir pur et verdicts en néon. **Tableau de santé** à six voyants, et
-          un **simulateur à curseurs** qui recalcule le verdict sous le doigt.
+          **Interface de nuit**, noir pur et verdicts en néon. **Tableau de
+          santé** à six voyants, et un **simulateur à curseurs** qui recalcule
+          le verdict sous le doigt.
 
           ## À savoir
 
