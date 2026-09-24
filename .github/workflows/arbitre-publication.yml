@@ -116,11 +116,53 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
-          ## Ce que cette version corrige
+          ## Ce que cette version ajoute
 
-          Celle-ci ne vient pas d'une idée mais d'un relevé : **80 verdicts
+          **Le comparateur de courses planifiées.** La version précédente
+          refusait les écrans de liste, et elle avait raison : les chiffres de
+          deux courses s'y suivent dans le même texte, et les mélanger
+          produisait des verdicts faux annoncés avec assurance. Refuser ne
+          suffisait pas — c'est sur cet écran que se joue une matinée.
+
+          Dix-neuf offres relevées un matin tenaient toutes entre 10:30 et
+          11:00. Une seule serait faite, et l'écart entre le meilleur et le
+          pire choix allait de 0,80 à 3,06 €/km.
+
+          Le comparateur découpe la liste au lieu de la mélanger, et classe.
+          **Sur le budget d'approche, pas sur le prix** : combien de
+          kilomètres à vide la course supporte avant de passer sous ton
+          objectif horaire. C'est le seul chiffre que la liste ne montre pas,
+          et le seul qui dépende d'où tu es. Une course planifiée est tarifée
+          comme si ta voiture était déjà devant la porte — sur ce relevé,
+          aucune des dix-neuf ne supportait dix kilomètres d'approche, et
+          trois ne tenaient pas même client devant la porte.
+
+          Trois avertissements se posent sur les cartes, chacun tiré d'un
+          piège mesuré :
+
+          - **le péage.** Une course s'affichait 53,43 € — le premier chiffre
+            que la main attrape. 13,60 € de péage sortent de ta poche, et elle
+            retombe à la médiane exacte de sa propre liste ;
+          - **le prix plancher.** Cinq courses portaient le prix *exactement*
+            identique de 19,00 €, pour des trajets de 6,2 à 20,6 km. Même
+            argent, trois fois le travail. Devant deux courses au même prix,
+            prends toujours la plus courte ;
+          - **la médiane**, qui situe une course dans sa propre liste plutôt
+            que contre un seuil inventé.
+
+          **Comment s'en servir** : ouvre la liste des courses planifiées dans
+          ton application chauffeur et fais-la défiler normalement. Les offres
+          s'ajoutent toutes seules, en silence et sans bulle — l'écran ne
+          montre que deux cartes à la fois, il faut donc les accumuler. Puis
+          **un appui sur la pastille** ouvre le classement de tout ce que tu
+          as vu. Le bouton « Courses planifiées » de l'écran d'accueil le
+          rouvre à froid.
+
+          ## Ce que la version précédente avait corrigé
+
+          Elle ne venait pas d'une idée mais d'un relevé : **80 verdicts
           d'une vraie journée**, exportés depuis le journal. Ils ont démenti
-          trois choses que la version précédente tenait pour acquises.
+          trois choses qui étaient jusque-là tenues pour acquises.
 
           **Des chiffres ne prouvent rien.** Cinquante-cinq de ces 80 verdicts
           ne portaient sur aucune course : l'écran d'accueil, la barre d'état,
@@ -139,8 +181,8 @@ jobs:
           verdicts de la journée mélangeaient le prix de l'une et la distance
           de l'autre — et s'annonçaient à 83 % de confiance. Deux sommes qui
           ne sont ni un péage, ni un bonus, ni un tarif à la minute, ce sont
-          deux courses : l'écran n'est plus arbitré du tout, et le journal dit
-          pourquoi.
+          deux courses : l'écran n'est plus arbitré du tout. C'est ce refus
+          que le comparateur ci-dessus complète.
 
           **La confiance mesurait la complétude, pas la justesse.** Les
           verdicts les plus faux de la journée étaient les seuls à 100 %,
