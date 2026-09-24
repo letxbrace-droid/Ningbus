@@ -489,6 +489,13 @@
             android:text="@string/tester" />
 
         <Button
+            android:id="@+id/bouton_planifiees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/titre_planifiees" />
+
+        <Button
             android:id="@+id/bouton_journal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

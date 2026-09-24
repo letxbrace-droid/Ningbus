@@ -192,6 +192,63 @@ carte d'offre annonce un prix.** Deux sommes qui ne sont ni un péage, ni un
 bonus, ni un tarif à la minute, ce sont deux courses — et l'écran n'est pas
 arbitré du tout, plutôt que de l'être de travers.
 
+### Le comparateur : une liste ne s'arbitre pas, elle se classe
+
+Refuser était juste et ne suffisait pas. C'est sur cet écran que se joue une
+matinée : les dix-neuf offres relevées le 24 septembre tenaient toutes entre
+10:30 et 11:00 — **une seule serait faite** — et l'écart entre le meilleur et
+le pire choix allait de 0,80 à 3,06 €/km.
+
+Le comparateur découpe la liste au lieu de la mélanger. Chaque offre court de
+son en-tête « prix • créneau » au suivant, ce qui laisse tomber la carte, les
+libellés de jour et les boutons sans avoir à les nommer.
+
+Il classe ensuite sur le **budget d'approche** et non sur l'euro par
+kilomètre : combien de kilomètres à vide la course supporte avant de passer
+sous l'objectif horaire. C'est le seul chiffre que la liste ne montre pas, et
+le seul qui dépende d'où le chauffeur se trouve. Les deux ne se confondent
+pas — sur ce relevé, une course à 3,06 €/km et une à 1,13 €/km toléraient le
+même trajet d'approche, parce que la seconde était quatre fois plus longue et
+passait son coût fixe sur plus de kilomètres payés.
+
+```
+ 1.  19,00 €   6,2 km  3,06 €/km  approche max 9,8 km  PLANCHER  Paris → Paris
+ 2.  22,80 €  12,3 km  1,85 €/km  approche max 9,6 km            Argenteuil → Rueil
+ 3.  32,50 €  28,7 km  1,13 €/km  approche max 9,4 km            Paris → Orly
+ …
+ 5.  39,83 €  40,1 km  0,99 €/km  approche max 7,9 km            Orly → Courbevoie
+ …
+17.  19,00 €  20,2 km  0,94 €/km  ne tient pas       PLANCHER  Noisy → Bagnolet
+```
+
+Trois avertissements se posent sur les cartes, et chacun vient d'un piège
+mesuré sur ce relevé :
+
+- **le péage.** La cinquième ligne s'affiche 53,43 € dans l'application — le
+  premier chiffre que la main attrape. 13,60 € de péage sortent de la poche du
+  chauffeur, et la course retombe à la médiane exacte de sa propre liste ;
+- **le prix plancher.** Cinq courses y portaient le prix *exactement*
+  identique de 19,00 €, pour des trajets de 6,2 à 20,6 km. Même argent, trois
+  fois le travail. La plus courte mène le classement, la plus longue ne tient
+  pas ;
+- **la médiane**, qui situe une course dans sa propre liste plutôt que contre
+  un seuil inventé.
+
+**L'accumulation est ce qui rend l'outil utilisable.** L'arbre d'accessibilité
+ne rend que ce qui est dessiné, soit deux offres à la fois. Les écrans de liste
+traversés déposent donc leurs offres en silence, sans bulle : le chauffeur fait
+défiler sa liste comme d'habitude, puis un appui sur la pastille ouvre le
+classement de tout ce qu'il a vu. Une offre relevée deux fois ne compte qu'une,
+et une comparaison oubliée depuis une demi-heure repart de zéro — les créneaux
+d'une session précédente sont déjà passés.
+
+Le relevé complet des dix-neuf courses est un essai permanent du moteur. Il a
+déjà servi deux fois : il a démasqué une discontinuité dans le calcul du budget
+d'approche — aux paliers de vitesse, treize kilomètres prenaient moins de temps
+que neuf — et il a corrigé une généralisation de trop, « l'aéroport paie mal ».
+Elles sont cinq à y aller, quatre sous la médiane, et la cinquième est
+troisième du classement.
+
 ### Ce que vaut la lecture, séparément de ce qu'elle dit
 
 Deux questions se confondaient en une seule : « cette course est-elle

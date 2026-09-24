@@ -55,6 +55,19 @@
             android:parentActivityName=".ActivitePrincipale" />
 
         <!--
+            Le comparateur de courses planifiées. Ouvert depuis la pastille,
+            donc depuis le service, alors qu'une autre application est au
+            premier plan : c'est la permission de superposition — indispensable
+            par ailleurs pour la bulle — qui autorise ce démarrage.
+        -->
+        <activity
+            android:name=".ActivitePlanifiees"
+            android:exported="false"
+            android:label="@string/titre_planifiees"
+            android:launchMode="singleTop"
+            android:parentActivityName=".ActivitePrincipale" />
+
+        <!--
             Le service est lié par le système dès que l'accès aux
             notifications est accordé. Il reste vivant tant que l'accès
             n'est pas retiré : rien à démarrer, rien à maintenir en tâche

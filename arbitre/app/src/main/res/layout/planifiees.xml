@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/titre_planifiees"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/resume_planifiees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="14sp" />
+
+        <!-- L'avertissement du péage : il ne s'affiche que s'il y en a un,
+             parce qu'un avertissement permanent ne s'avertit plus. -->
+        <TextView
+            android:id="@+id/alerte_peage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:alpha="0.7"
+            android:text="@string/aide_planifiees"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bouton_nouvelle_comparaison"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nouvelle_comparaison" />
+
+            <Button
+                android:id="@+id/bouton_copier_planifiees"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/copier_journal" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/conteneur_planifiees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

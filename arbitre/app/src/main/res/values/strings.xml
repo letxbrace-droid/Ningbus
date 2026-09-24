@@ -39,6 +39,18 @@
     <string name="rien_a_lire">Aucun montant ni distance sur cet écran.</string>
     <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
     <string name="plusieurs_offres">Plusieurs courses sur cet écran : leurs chiffres se mélangeraient. Ouvre-en une seule.</string>
+
+    <string name="titre_planifiees">Courses planifiées</string>
+    <string name="aide_planifiees">Classées par ce qu\'elles supportent d\'approche, et non par leur prix : une course planifiée est tarifée comme si tu étais déjà devant la porte. Fais défiler la liste dans ton application chauffeur, les offres s\'ajoutent toutes seules ; un appui sur la pastille ouvre le classement de tout ce que tu as vu.</string>
+    <string name="nouvelle_comparaison">Nouvelle comparaison</string>
+    <string name="planifiees_vide">Aucune course planifiée relevée.</string>
+    <string name="planifiees_vide_resume">Ouvre la liste des courses planifiées dans ton application chauffeur, fais-la défiler, puis appuie sur la pastille.</string>
+    <string name="budget_approche">approche max %1$s km</string>
+    <string name="budget_nul">ne tient pas, même client devant la porte</string>
+    <string name="note_peage">%1$s € annoncés, %2$s € de péage à ta charge</string>
+    <string name="note_plancher">%1$s € est un prix plancher ici — à ce prix, prends la plus courte</string>
+    <string name="note_sous_mediane">sous la médiane de cette liste (%1$s €/km)</string>
+    <string name="alerte_peage">%1$s € de péage sont compris dans les prix affichés. Ils sortent de ta poche : les montants ci-dessous en sont déduits.</string>
     <string name="titre_vues">Notifications vues, avant tout filtrage</string>
     <string name="aide_vues">Si cette liste est vide alors qu\'une offre est arrivée, la notification n\'atteint pas l\'application. Si elle contient l\'offre, c\'est la lecture qui a échoué — et le texte est là pour la corriger.</string>
     <string name="ecran_capture">Écran capturé : %1$s, %2$d caractères. Ouvre le journal et copie-le.</string>

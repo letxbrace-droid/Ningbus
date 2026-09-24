@@ -2,6 +2,7 @@ package fr.ningbus.arbitre
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -170,6 +171,14 @@ class LectureEcran : AccessibilityService() {
          */
         PLUSIEURS_OFFRES,
 
+        /**
+         * La liste a été classée plutôt qu'arbitrée.
+         *
+         * Le comparateur est ouvert et montre tout : il n'y a plus rien à
+         * dire par-dessus, ni bulle, ni message.
+         */
+        COMPARE,
+
         /** Une offre reconnue, mais dont il manque de quoi conclure. */
         INCOMPLET,
 
@@ -257,15 +266,25 @@ class LectureEcran : AccessibilityService() {
         // tort sans qu'on puisse voir ce qui avait emporté la décision.
         val jugement = Detecteur.juger(texte, course)
 
-        // Un écran de liste ne se force pas. Sur « Demandes de courses
-        // planifiées », les chiffres de deux courses se suivent dans le même
-        // texte : l'analyse la plus insistante ne peut qu'en mélanger deux.
+        // Un écran de liste ne s'arbitre pas, même forcé : sur « Demandes de
+        // courses planifiées », les chiffres de deux courses se suivent dans
+        // le même texte, et l'analyse la plus insistante ne peut qu'en
+        // mélanger deux.
+        //
+        // Il se compare, en revanche, et c'est là que se joue une matinée.
+        // Les offres se déposent au passage, sans bulle : l'arbre ne rend que
+        // ce qui est dessiné — deux cartes à la fois — quand la liste en
+        // compte vingt. Le chauffeur fait défiler comme d'habitude, puis un
+        // appui sur la pastille ouvre le classement de tout ce qu'il a vu.
         if (jugement.nature == Nature.PLUSIEURS_OFFRES) {
+            val nouvelles = Comparateur.relever(this, texte)
             Journal.signalerEcranIgnore(
                 this,
                 nom,
-                "${jugement.resume} · ${jugement.indices.joinToString(" ")}\n\n$texte",
+                "${jugement.resume} · ${jugement.indices.joinToString(" ")} " +
+                    "· $nouvelles course(s) planifiée(s) relevée(s)\n\n$texte",
             )
+            if (force && ouvrirComparateur()) return Issue.COMPARE
             return Issue.PLUSIEURS_OFFRES
         }
 
@@ -328,7 +347,7 @@ class LectureEcran : AccessibilityService() {
      * à signaler des écrans qui ne sont pas des offres.
      */
     private fun rapporter(issue: Issue, nom: String, texte: String, force: Boolean) {
-        if (!force || issue == Issue.RENDU) return
+        if (!force || issue == Issue.RENDU || issue == Issue.COMPARE) return
         if (texte.isNotEmpty()) Journal.signalerCapture(this, nom, texte)
         signaler(
             when (issue) {
@@ -363,6 +382,7 @@ class LectureEcran : AccessibilityService() {
         // Relire une liste en pixels donnerait la même liste : le problème
         // n'est pas ce qu'on lit, c'est qu'il y en a plusieurs.
         if (issue == Issue.PLUSIEURS_OFFRES) return refuser("plusieurs offres à l'écran")
+        if (issue == Issue.COMPARE) return false
 
         // Demandée à la main, l'analyse doit tout essayer : c'est le chemin
         // de secours, il n'a pas à être économe.
@@ -696,6 +716,31 @@ class LectureEcran : AccessibilityService() {
     private fun marqueur(texte: String): Boolean {
         val minuscules = texte.lowercase()
         return MARQUEURS.any { minuscules.contains(it) }
+    }
+
+    /**
+     * Ouvre le classement des courses planifiées relevées.
+     *
+     * Démarrer une activité depuis un service, alors qu'une autre application
+     * est au premier plan, est refusé par Android depuis la version 10 — sauf
+     * pour une application qui détient la superposition d'écran, ce qui est le
+     * cas ici par construction : sans elle, il n'y aurait pas de bulle du tout.
+     * On ne s'appuie pas dessus les yeux fermés pour autant, et un échec
+     * retombe sur le message ordinaire plutôt que de laisser l'appui sans
+     * réponse.
+     *
+     * @return vrai si l'écran s'est ouvert.
+     */
+    private fun ouvrirComparateur(): Boolean = try {
+        startActivity(
+            Intent(this, ActivitePlanifiees::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        )
+        true
+    } catch (e: Exception) {
+        Log.w(TAG, "comparateur non ouvert : ${e.message}")
+        false
     }
 
     private fun signaler(message: Int) {

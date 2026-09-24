@@ -67,6 +67,9 @@ class ActivitePrincipale : AppCompatActivity() {
             ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         findViewById<Button>(R.id.bouton_test).setOnClickListener { essai() }
+        findViewById<Button>(R.id.bouton_planifiees).setOnClickListener {
+            startActivity(Intent(this, ActivitePlanifiees::class.java))
+        }
         findViewById<Button>(R.id.bouton_journal).setOnClickListener {
             startActivity(Intent(this, ActiviteJournal::class.java))
         }
