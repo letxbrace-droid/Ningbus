@@ -847,22 +847,31 @@ class ActivitePrincipale : AppCompatActivity() {
     /**
      * Les trois chiffres de la session.
      *
-     * Le taux de prise est le plus instructif des trois, et c'est celui qu'on
-     * ne calcule jamais de tête : un chauffeur qui refuse neuf offres sur dix
-     * ne le sait pas, il sait seulement qu'il attend.
+     * Le deuxième est le plus instructif, et c'est celui qu'on ne calcule
+     * jamais de tête : un chauffeur devant qui neuf offres sur dix ne valent
+     * pas le déplacement ne le sait pas, il sait seulement qu'il attend.
+     *
+     * Il s'est d'abord appelé « prises », et c'était faux. Il compte les
+     * verdicts PRENDS — ce que le moteur a **conseillé** — et l'application
+     * ignore ce que le chauffeur a réellement accepté : l'offre disparaît de
+     * l'écran dans les deux cas. Pire, le mot suggérait un taux d'acceptation,
+     * donc un jugement sur le chauffeur, là où le chiffre juge les offres
+     * reçues. Savoir ce qui a été pris demanderait de reconnaître l'écran de
+     * navigation qui suit l'acceptation ; tant que ce n'est pas fait, le
+     * libellé dit ce que le compteur compte.
      */
     private fun peuplerStats(lignes: List<Ligne>) {
         val conteneur = findViewById<LinearLayout>(R.id.conteneur_stats)
         conteneur.removeAllViews()
 
-        val prises = lignes.count { it.decision == Decision.PRENDS.name }
-        val part = if (lignes.isEmpty()) 0 else prises * 100 / lignes.size
+        val conseillees = lignes.count { it.decision == Decision.PRENDS.name }
+        val part = if (lignes.isEmpty()) 0 else conseillees * 100 / lignes.size
         val euroKm = lignes.mapNotNull { it.euroKm }
         val moyen = if (euroKm.isEmpty()) null else euroKm.average()
 
         val cases = listOf(
             "${lignes.size}" to getString(R.string.stat_analysees),
-            "$prises" to "${getString(R.string.stat_prises)} ($part %)",
+            "$conseillees" to "${getString(R.string.stat_prises)} ($part %)",
             fmt2(moyen) to getString(R.string.stat_euro_km),
         )
         for ((index, c) in cases.withIndex()) {

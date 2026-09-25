@@ -114,10 +114,13 @@
     <string name="pourquoi">Pourquoi ?</string>
 
     <string name="stat_analysees">analysées</string>
-    <string name="stat_prises">prises</string>
+    <!-- « à prendre », et non « prises » : le compteur dénombre les verdicts
+         PRENDS, c'est-à-dire ce que le moteur a conseillé. L'application ne
+         sait pas ce que le chauffeur a réellement accepté. -->
+    <string name="stat_prises">à prendre</string>
     <string name="stat_euro_km">€/km moyen</string>
     <string name="filtre_toutes">Toutes</string>
-    <string name="filtre_prises">Prises</string>
+    <string name="filtre_prises">À prendre</string>
     <string name="filtre_refusees">Refusées</string>
 
     <string name="titre_bareme">Ton barème</string>
