@@ -116,7 +116,43 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
-          ## Ce que cette version ajoute
+          ## Ce que cette version corrige
+
+          Deux défauts trouvés par **une seule course réelle** — Brétigny-sur-Orge
+          vers Sainte-Geneviève-des-Bois, 9,80 € pour 1,4 km d'approche et
+          8,2 km de trajet, lue en direct sur Bolt.
+
+          La lecture était parfaite : quatre champs sur quatre, 100 % de
+          confiance, et 9,80 ÷ 9,6 = 1,02 €/km au centime près. Le verdict
+          aussi : 18,7 €/h contre 25 visés. Mais la bulle ne disait ni l'un ni
+          l'autre.
+
+          **Le verdict était muet.** Le moteur alerte dès 45 % de temps non
+          payé, et son motif attendait 50 % : deux seuils pour la même idée,
+          et cette course à 47 % tombait entre les deux. Le refus le plus
+          fréquent de tous — une course trop courte pour ce qu'elle mobilise —
+          arrivait sans explication. Tu lis maintenant « 47 % du temps
+          mobilisé n'est pas payé », et quand aucune contrainte particulière
+          ne ressort, l'écart est nommé en clair : « 19 €/h pour 25 visés — le
+          prix ne couvre pas le temps ».
+
+          **La bulle réduite avait perdu l'euro/heure.** En passant
+          l'euro/kilomètre devant, la version précédente l'avait fait
+          disparaître du mode compact : tu voyais « 1,02 €/km · LAISSE » et
+          rien qui l'explique — or 1,02 €/km a l'air correct. Elle porte
+          maintenant les deux lignes, objectif compris. Le mode réduit doit
+          rester décidable, sans quoi il ne sert à rien.
+
+          Cette course est devenue un essai permanent du moteur, et c'est le
+          contre-exemple qui vaut la peine d'être retenu : **1,02 €/km est
+          au-dessus de la médiane d'un relevé de dix-neuf courses planifiées,
+          et la course paie dix-neuf euros de l'heure.** Le refus ne vient pas
+          de la distance mais du temps — douze minutes de trajet contre
+          presque autant d'approche, d'attente et de retour à vide. C'est
+          exactement ce que l'euro par kilomètre ne peut pas voir, et la
+          raison pour laquelle il ne décide pas seul.
+
+          ## Ce que la version précédente avait ajouté
 
           **L'application se range en quatre onglets** — accueil, courses,
           simulateur, réglages — au lieu d'un écran unique qui défilait sur
@@ -176,9 +212,9 @@ jobs:
           distinguent mieux entre elles : au volant, distinguer le verdict
           compte plus que le voir de loin.
 
-          ## Ce que la version précédente avait ajouté
+          ## Et celle d'avant : le comparateur
 
-          **Le comparateur de courses planifiées.** La version d'avant
+          **Le comparateur de courses planifiées.** La version qui l'a précédé
           refusait les écrans de liste, et elle avait raison : les chiffres de
           deux courses s'y suivent dans le même texte, et les mélanger
           produisait des verdicts faux annoncés avec assurance. Refuser ne
