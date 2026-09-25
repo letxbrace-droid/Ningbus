@@ -274,8 +274,18 @@ object Bulle {
         // invraisemblable — c'est le motif qui prend la place plutôt que du
         // vide. Un « — INCOMPLET » sans un mot d'explication est le pire des
         // affichages : il coûte un regard et ne rend rien.
+        //
+        // Et quand l'approche n'a pas été lue, le budget passe devant
+        // l'objectif. C'est lui qui décide : « 39 €/h pour 25 visés » sous un
+        // LIMITE est incompréhensible tant qu'on ne sait pas que les 39 €/h
+        // supposent le client devant la porte.
+        val budget = verdict.budgetApprocheKm
         racine.findViewById<TextView>(R.id.pilule_heure).text = verdict.euroHeure?.let {
-            "${fmt0(it)} €/h pour ${fmt0(bareme.objectifHeure)} visés"
+            if (budget != null && budget > 0.05) {
+                "${fmt0(it)} €/h · ok si approche < ${fmt1(budget)} km"
+            } else {
+                "${fmt0(it)} €/h pour ${fmt0(bareme.objectifHeure)} visés"
+            }
         } ?: verdict.motif.orEmpty()
         racine.findViewById<TextView>(R.id.pilule_verdict).apply {
             text = verdict.decision.libelle

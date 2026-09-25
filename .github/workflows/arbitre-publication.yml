@@ -116,6 +116,26 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
+          ## Ce que cette version ajoute
+
+          **Le budget d'approche, sur les offres en direct.** Quand l'offre
+          n'annonce pas d'approche — le cas le plus fréquent chez Uber — le
+          verdict était calculé comme si le client attendait devant la porte,
+          et se contentait de prévenir qu'il était « optimiste ». Un
+          avertissement ne se transforme pas en décision. La bulle donne
+          désormais le chiffre qui tranche : **« rentable jusqu'à 1,7 km
+          d'approche »**. Le chauffeur a la carte sous les yeux et sait où est
+          le client ; un seul kilométrage lui suffit.
+
+          Une course relevée à Breuillet le dit mieux qu'un raisonnement :
+          9,00 € pour 3,10 km en 7 min 42, soit 2,90 € du kilomètre — le genre
+          de course qu'on accepte sans réfléchir. Elle paie **39 €/h** si le
+          client est devant la porte et **20 €/h** s'il est à trois kilomètres.
+          Le prix, la distance, la durée et l'euro/kilomètre sont identiques
+          dans les deux cas. À cinq kilomètres d'approche elle affiche encore
+          1,11 €/km — au-dessus du seuil que tout le monde utilise — et paie
+          17 €/h.
+
           ## Ce que cette version corrige
 
           **Un prix impossible ne passe plus au vert.** Une carte relevée le

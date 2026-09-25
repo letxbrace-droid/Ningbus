@@ -71,6 +71,19 @@ data class Verdict(
      * qui connaît son secteur, trancher.
      */
     val euroHeureRetourPlein: Double? = null,
+
+    /**
+     * Combien de kilomètres d'approche la course supporte avant de tomber sous
+     * l'objectif — calculé seulement quand l'offre n'annonce pas d'approche.
+     *
+     * C'est alors le seul chiffre qui décide, et le seul que l'écran ne donne
+     * pas. Une course de Breuillet, 9,00 € pour 3,10 km en 7 min 42, paie
+     * 39 €/h si le client est devant la porte et 20 €/h à trois kilomètres de
+     * là : le prix, la distance et l'euro/kilomètre sont les mêmes dans les
+     * deux cas. Dire « rentable jusqu'à 1,7 km d'approche » vaut mieux que
+     * rendre un verdict optimiste et prévenir qu'il l'est.
+     */
+    val budgetApprocheKm: Double? = null,
     val alertes: List<String> = emptyList(),
     /** Une ligne, lisible d'un coup d'œil au volant. */
     val resume: String = "",
@@ -298,6 +311,16 @@ object Arbitre {
             (recette - kmTotalPlein * bareme.coutKm) / (minutesTotalPlein / 60.0)
         } else null
 
+        // --- Jusqu'où l'approche peut aller ---------------------------------
+        //
+        // Uniquement quand l'offre n'en annonce aucune. C'est le cas où le
+        // verdict est le plus fragile — il est calculé comme si le client
+        // était devant la porte — et c'est aussi celui où un chiffre unique
+        // rend la décision au chauffeur, qui a la carte sous les yeux.
+        val budgetApprocheKm = if (approcheInconnue) {
+            budget(kmTrajet, minutesTrajetAj, vitesseRetour, recette, bareme)
+        } else null
+
         // --- Signaux --------------------------------------------------------
         if (traficTrajet == Trafic.BOUCHONS && bareme.prudenceTrafic) {
             alertes += "bouchons (${fmt0(vitesseTrajet)} km/h) — durée majorée de " +
@@ -383,6 +406,7 @@ object Arbitre {
             vitesseTrajet = vitesseTrajet,
             ratio = ratio,
             euroHeureRetourPlein = euroHeureRetourPlein,
+            budgetApprocheKm = budgetApprocheKm,
             alertes = alertes.distinct(),
             resume = resume,
             confiance = confiance,
@@ -393,10 +417,52 @@ object Arbitre {
             kmRetour = kmRetour,
             motif = motif(
                 veto, course, kmTrajet, kmApproche, kmRetour, partMorte, confiance,
-                euroHeure, bareme,
+                euroHeure, bareme, budgetApprocheKm,
             ),
         )
     }
+
+    /**
+     * Combien de kilomètres d'approche cette course supporte.
+     *
+     * Le calcul est refait ici plutôt que réutilisé depuis [arbitrer], pour
+     * une raison simple : appeler [arbitrer] dans une recherche par
+     * dichotomie qui est elle-même appelée par [arbitrer] ne se termine pas.
+     *
+     * La seule différence avec le calcul réel est que l'approche hypothétique
+     * n'est pas majorée par la prudence du trafic. C'est assumé : on ne mesure
+     * le trafic que sur une approche annoncée, et il n'y en a précisément pas.
+     */
+    private fun budget(
+        kmTrajet: Double,
+        minutesTrajetAj: Double,
+        vitesseRetour: Double,
+        recette: Double,
+        bareme: Bareme,
+    ): Double {
+        val kmRetour = kmTrajet * bareme.partRetour
+        val minutesRetour = if (vitesseRetour > 0) kmRetour / vitesseRetour * 60.0 else 0.0
+
+        fun euroHeure(kmApproche: Double): Double {
+            val minutes = Planifiees.minutesApproche(kmApproche) +
+                bareme.minutesAttente + minutesTrajetAj + minutesRetour
+            if (minutes <= 0.0) return 0.0
+            val kmTotal = kmApproche + kmTrajet + kmRetour
+            return (recette - kmTotal * bareme.coutKm) / (minutes / 60.0)
+        }
+
+        if (euroHeure(0.0) < bareme.objectifHeure) return 0.0
+        var bas = 0.0
+        var haut = PLAFOND_APPROCHE
+        repeat(40) {
+            val milieu = (bas + haut) / 2.0
+            if (euroHeure(milieu) >= bareme.objectifHeure) bas = milieu else haut = milieu
+        }
+        return bas
+    }
+
+    /** Au-delà, l'approche n'est plus une approche mais un déménagement. */
+    private const val PLAFOND_APPROCHE = 150.0
 
     /**
      * Ce montant peut-il être le prix de cette course ?
@@ -449,10 +515,30 @@ object Arbitre {
         confiance: Confiance,
         euroHeure: Double?,
         bareme: Bareme,
+        budgetApprocheKm: Double?,
     ): String? = when {
         veto != null -> veto.replaceFirstChar { it.uppercase() }
 
         !confiance.fiable -> "Données incomplètes — vérifie l'offre toi-même"
+
+        // L'approche non annoncée, qui est le cas le plus fréquent chez Uber.
+        //
+        // Le verdict est alors calculé comme si le client attendait devant la
+        // porte, et il le dit — mais « verdict optimiste » ne se transforme pas
+        // en décision. Le budget, si : le chauffeur a la carte sous les yeux,
+        // il sait où est le client, et un seul kilométrage tranche.
+        //
+        // Une course de Breuillet l'a montré mieux qu'un raisonnement :
+        // 9,00 € pour 3,10 km en 7 min 42, soit 2,90 €/km — un chiffre qui
+        // fait dire oui à tout le monde. Elle paie 39 €/h porte à porte, et
+        // 20 €/h si le client est à trois kilomètres. Le prix, la distance et
+        // l'euro/kilomètre sont identiques dans les deux cas ; seul le budget
+        // les sépare.
+        budgetApprocheKm != null -> if (budgetApprocheKm <= 0.05) {
+            "Approche non lue — déjà sous l'objectif même client devant la porte"
+        } else {
+            "Approche non lue — rentable jusqu'à ${fmt1(budgetApprocheKm)} km d'approche"
+        }
 
         // Rouler plus à vide que chargé est le cas que le prix seul cache le
         // mieux : la course paraît correcte, et le kilométrage la mange.
