@@ -269,9 +269,14 @@ object Bulle {
         // L'euro/heure sous l'euro/kilomètre : sans lui, un LAISSE à
         // 1,02 €/km ne s'explique pas, et un verdict qu'on ne comprend pas
         // finit par ne plus être suivi.
+        //
+        // Et quand il n'y a pas d'euro/heure — lecture incomplète, montant
+        // invraisemblable — c'est le motif qui prend la place plutôt que du
+        // vide. Un « — INCOMPLET » sans un mot d'explication est le pire des
+        // affichages : il coûte un regard et ne rend rien.
         racine.findViewById<TextView>(R.id.pilule_heure).text = verdict.euroHeure?.let {
             "${fmt0(it)} €/h pour ${fmt0(bareme.objectifHeure)} visés"
-        } ?: ""
+        } ?: verdict.motif.orEmpty()
         racine.findViewById<TextView>(R.id.pilule_verdict).apply {
             text = verdict.decision.libelle
             setTextColor(teinte)
@@ -383,6 +388,30 @@ object Bulle {
                 "↩ retour à vide ${fmt1(it)} km (supposé)"
             },
             doux,
+        )
+
+        // --- La zone morte : le seul chiffre que le moteur ne sait pas juger --
+        //
+        // Le barème suppose un repositionnement moyen — 35 % du trajet. C'est
+        // juste sur une journée entière et faux sur une course en particulier :
+        // une dépose au fond d'un secteur qui ne redemande rien coûte le retour
+        // complet. Une course relevée le 25/09 le dit mieux qu'un raisonnement :
+        // 26 €/h au barème moyen, 15 €/h s'il faut rentrer à vide sur 47 km.
+        //
+        // La ligne ne s'affiche que quand elle contredit le verdict. Autrement
+        // elle n'apprend rien, et une bulle qui parle pour ne rien dire finit
+        // par ne plus être lue du tout.
+        val seuilBas = bareme.objectifHeure * (1.0 - bareme.marge)
+        val heure = verdict.euroHeure
+        val heurePlein = verdict.euroHeureRetourPlein
+        val contredit = bareme.partRetour < 1.0 &&
+            heure != null && heure >= seuilBas &&
+            heurePlein != null && heurePlein < seuilBas
+        ligne(
+            racine,
+            R.id.retour_plein,
+            if (!contredit) null else "↩ si la zone ne te redonne rien : ${fmt0(heurePlein)} €/h",
+            ContextCompat.getColor(ctx, R.color.ambre),
         )
 
         ligne(

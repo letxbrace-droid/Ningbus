@@ -71,14 +71,21 @@ data class Confiance(
         /**
          * @param trajetEstime la durée ou la distance du trajet a été
          *   reconstituée par le moteur plutôt que lue.
+         * @param prixDouteux un montant a bien été lu, mais il ne peut pas
+         *   être le prix de cette course. Il compte alors pour rien : un champ
+         *   rempli de travers vaut moins qu'un champ vide, puisqu'il se
+         *   présente avec l'assurance de celui qui est lu. C'est le défaut que
+         *   cette classe existe pour corriger, et il serait absurde qu'elle le
+         *   reproduise sur le champ qui pèse à lui seul quarante pour cent.
          */
         fun de(
             course: Course,
             kmTrajetEstime: Boolean = false,
             minutesTrajetEstime: Boolean = false,
+            prixDouteux: Boolean = false,
         ): Confiance {
             val lectures = listOf(
-                ligne("prix", course.prix?.let { "${fmt2(it)} €" }, false),
+                ligne("prix", course.prix?.takeIf { !prixDouteux }?.let { "${fmt2(it)} €" }, false),
                 ligne(
                     "distance de la course",
                     course.kmTrajet?.let { "${fmt1(it)} km" }

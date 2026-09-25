@@ -53,6 +53,24 @@ data class Verdict(
     val vitesseTrajet: Double? = null,
     /** euroHeure rapporté à l'objectif : 1,0 = pile l'objectif. */
     val ratio: Double? = null,
+
+    /**
+     * Ce que la course rapporterait s'il fallait rentrer à vide sur toute la
+     * distance, au lieu de la fraction habituelle.
+     *
+     * Le barème suppose un repositionnement moyen — 35 % du trajet par défaut.
+     * C'est juste sur une journée entière et faux sur une course en
+     * particulier : une dépose au cœur d'une zone qui ne redemande rien coûte
+     * le retour **complet**, et c'est très exactement la course que le chiffre
+     * moyen fait accepter à tort. Une dépose à 47 km qui paie 38 €/h en
+     * moyenne n'en paie plus que 22 si personne ne rappelle là-bas.
+     *
+     * Le moteur ne sait pas quelles zones sont mortes — aucune donnée de
+     * demande ne lui parvient. Il ne décide donc rien avec ce chiffre : il le
+     * pose à côté du verdict quand il le contredit, et laisse le chauffeur,
+     * qui connaît son secteur, trancher.
+     */
+    val euroHeureRetourPlein: Double? = null,
     val alertes: List<String> = emptyList(),
     /** Une ligne, lisible d'un coup d'œil au volant. */
     val resume: String = "",
@@ -106,6 +124,28 @@ object Arbitre {
 
     /** Au-delà, la part de temps non payé mérite d'être signalée. */
     private const val SEUIL_TEMPS_MORT = 0.45
+
+    /**
+     * Le prix au-delà duquel une offre courte n'est plus une offre.
+     *
+     * Aucune course urbaine ne dépasse ce montant, majorations comprises. Ce
+     * n'est pas un réglage du chauffeur mais un garde-fou de lecture : il ne
+     * juge pas la rentabilité, il constate qu'un chiffre ne peut pas être un
+     * prix.
+     */
+    private const val PRIX_PLAFOND = 80.0
+
+    /**
+     * Et pour les courses longues, un plafond au kilomètre.
+     *
+     * Un Paris–Deauville à 250 € existe ; six euros du kilomètre payé, non.
+     * Combiner les deux laisse passer toute course réelle, courte comme
+     * longue, et n'arrête que ce qui n'est pas un prix.
+     */
+    private const val PRIX_PLAFOND_EURO_KM = 6.0
+
+    /** En dessous, une somme ne peut pas être le prix d'une course non plus. */
+    private const val PRIX_MINIMAL = 5.0
 
     fun arbitrer(course: Course, bareme: Bareme = Bareme()): Verdict {
         val alertes = mutableListOf<String>()
@@ -163,11 +203,37 @@ object Arbitre {
             )
         }
         val estime = course.kmTrajet == null || course.minutesTrajet == null
+
+        // --- Le prix est-il seulement un prix ? -----------------------------
+        //
+        // Cette question arrive ici, et non plus tard, parce qu'un montant
+        // aberrant contamine tout ce qui vient après : il passe les vetos, il
+        // pulvérise l'objectif horaire, et il ressort en PRENDS vert avec
+        // 100 % de confiance — puisque tous les champs sont remplis. Le
+        // terrain l'a montré sans appel : 4 768,00 € pour 47,7 km, soit
+        // 90,47 €/km et 3 815 €/h, sous un feu vert.
+        //
+        // Le remède n'est pas de deviner le bon prix — on ne le connaît pas —
+        // mais de refuser de trancher. Un verdict qui dit « je n'ai pas su
+        // lire » vaut infiniment mieux qu'un verdict qui dit « prends ».
+        val douteux = prixDouteux(prix, kmTrajet)
         val confiance = Confiance.de(
             course,
             kmTrajetEstime = course.kmTrajet == null,
             minutesTrajetEstime = course.minutesTrajet == null,
+            prixDouteux = douteux != null,
         )
+        if (douteux != null) {
+            return Verdict(
+                decision = Decision.INCOMPLET,
+                course = course,
+                alertes = alertes + "montant invraisemblable : $douteux",
+                resume = "Prix invraisemblable — lis l'offre toi-même",
+                confiance = confiance,
+                kmCourse = kmTrajet,
+                motif = "Montant lu : $douteux",
+            )
+        }
 
         // --- Trafic : déduit de la vitesse implicite ------------------------
         val vitesseTrajet = vitesse(kmTrajet, minutesTrajet)
@@ -217,6 +283,20 @@ object Arbitre {
         val euroKmRoule = if (kmRoules > 0) recette / kmRoules else null
         val partMorte = if (minutesTotal > 0) minutesMortes / minutesTotal else null
         val ratio = euroHeure?.let { it / bareme.objectifHeure }
+
+        // --- La même course, mais sans rien au retour -----------------------
+        //
+        // Le barème suppose un repositionnement moyen. Sur une dépose en zone
+        // qui ne redemande rien, le retour se fait entier et à vide : on
+        // refait le calcul avec cette hypothèse-là, sans toucher au verdict.
+        // C'est le chauffeur qui sait si la zone est morte, pas le moteur.
+        val kmTotalPlein = kmApproche + kmTrajet * 2.0
+        val minutesRetourPlein = if (vitesseRetour > 0) kmTrajet / vitesseRetour * 60.0 else 0.0
+        val minutesTotalPlein =
+            minutesApprocheAj + bareme.minutesAttente + minutesTrajetAj + minutesRetourPlein
+        val euroHeureRetourPlein = if (minutesTotalPlein > 0) {
+            (recette - kmTotalPlein * bareme.coutKm) / (minutesTotalPlein / 60.0)
+        } else null
 
         // --- Signaux --------------------------------------------------------
         if (traficTrajet == Trafic.BOUCHONS && bareme.prudenceTrafic) {
@@ -302,6 +382,7 @@ object Arbitre {
             trafic = traficTrajet,
             vitesseTrajet = vitesseTrajet,
             ratio = ratio,
+            euroHeureRetourPlein = euroHeureRetourPlein,
             alertes = alertes.distinct(),
             resume = resume,
             confiance = confiance,
@@ -315,6 +396,37 @@ object Arbitre {
                 euroHeure, bareme,
             ),
         )
+    }
+
+    /**
+     * Ce montant peut-il être le prix de cette course ?
+     *
+     * Deux plafonds valent mieux qu'un : l'un absolu, pour les courses
+     * courtes, l'autre au kilomètre, pour les longues. Une course de 3 km ne
+     * paie pas 80 € ; une course de 200 km ne paie pas 6 € du kilomètre. Entre
+     * les deux, tout ce qui existe passe.
+     *
+     * Quand le montant est refusé, on propose la lecture la plus probable
+     * **sans jamais l'appliquer** : un séparateur décimal perdu multiplie le
+     * prix par dix ou par cent, et c'est de très loin la panne la plus
+     * fréquente — « 47,68 € » devenu « 4768 € ». Le dire aide à comprendre
+     * l'écran ; le corriger d'office ferait décider le moteur sur une
+     * hypothèse, ce qui est exactement ce qu'on lui reproche ici.
+     *
+     * @return la description du montant refusé, ou null s'il est plausible
+     */
+    internal fun prixDouteux(prix: Double, kmTrajet: Double): String? {
+        val plafond = maxOf(PRIX_PLAFOND, kmTrajet * PRIX_PLAFOND_EURO_KM)
+        if (prix <= plafond) return null
+        // La plus petite correction d'abord : « 476,80 » est bien plus souvent
+        // un « 47,68 » amputé d'une virgule qu'un « 4,77 » amputé de deux.
+        // Et le candidat doit rester une course : en dessous de cinq euros,
+        // aucune plateforme n'envoie quoi que ce soit.
+        val probable = listOf(10.0, 100.0)
+            .map { prix / it }
+            .firstOrNull { it in PRIX_MINIMAL..plafond }
+        return "${fmt2(prix)} € pour ${fmt1(kmTrajet)} km" +
+            (probable?.let { " — sans doute ${fmt2(it)} €" } ?: "")
     }
 
     /**

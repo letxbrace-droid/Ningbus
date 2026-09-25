@@ -247,6 +247,23 @@
                     android:textColor="@color/bulle_texte_doux"
                     android:textSize="14sp" />
 
+                <!--
+                    L'avertissement de zone morte.
+
+                    Il n'apparaît que lorsqu'il contredit le verdict : une
+                    dépose loin, dans un secteur qui ne redemande rien, se paie
+                    le retour complet à vide. Le moteur ne sait pas quelles
+                    zones sont mortes ; le chauffeur, si. On lui donne le
+                    chiffre, pas la décision.
+                -->
+                <TextView
+                    android:id="@+id/retour_plein"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/trafic"
                     android:layout_width="match_parent"

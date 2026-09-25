@@ -116,7 +116,42 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
-          ## Ce que cette version ajoute
+          ## Ce que cette version corrige
+
+          **Un prix impossible ne passe plus au vert.** Une carte relevée le
+          25/09 a été arbitrée sur un montant de **4 768,00 €** pour 47,7 km,
+          soit 90,47 €/km et 3 815 €/h — et rendue en PRENDS, avec 100 % de
+          confiance et 90/100 au score d'offre. Tous les autres chiffres
+          étaient justes au centime près ; un seul ne l'était pas, et il
+          suffisait à recommander une course qu'il fallait refuser.
+
+          C'est la faille déjà rencontrée à Grigny : la confiance mesurait si
+          les champs étaient **remplis**, jamais s'ils étaient **vrais**, et un
+          montant aberrant est un champ rempli. Le moteur vérifie désormais
+          qu'une somme peut être un prix — deux plafonds, l'un absolu pour les
+          courses courtes, l'autre au kilomètre pour les longues, de sorte
+          qu'un Paris–Deauville à 250 € passe et qu'un 80 € sur 3 km non.
+          Quand le montant est refusé, le verdict devient INCOMPLET et nomme ce
+          qu'il a lu, en proposant la lecture probable — « 4768,00 € pour
+          47,7 km — sans doute 47,68 € », le séparateur décimal perdu étant de
+          loin la panne la plus fréquente. **Proposée, jamais appliquée** :
+          corriger d'office ferait décider le moteur sur une hypothèse, ce
+          qu'on lui reproche précisément ici.
+
+          **L'avertissement de zone morte.** Le barème suppose un
+          repositionnement moyen de 35 % du trajet. C'est juste sur une
+          journée entière et faux sur une course en particulier : une dépose au
+          fond d'un secteur qui ne redemande rien coûte le retour **complet** à
+          vide. Sur la course du 25/09, l'écart est de 26 €/h à 15 €/h — de
+          part et d'autre de l'objectif. La bulle affiche maintenant ce second
+          chiffre, mais seulement quand il contredit le verdict. Le moteur ne
+          sait pas quelles zones sont mortes ; il donne le chiffre, et laisse
+          trancher celui qui connaît son secteur.
+
+          Enfin, la bulle réduite n'affiche plus « — INCOMPLET » sans un mot :
+          à défaut d'euro/heure, c'est le motif qui prend la place.
+
+          ## Ce que la version précédente ajoutait
 
           **Un cockpit, et non plus un tableau.** L'accueil porte un en-tête
           avec sa marque, son numéro de version et un point d'état. La carte
@@ -152,7 +187,7 @@ jobs:
           **flotte** au lieu d'être collée en bas, où elle se confondait avec
           le trait de navigation du système.
 
-          ## Ce que cette version corrige
+          ## Ce que la version précédente corrigeait
 
           **Le numéro de version affiché était faux.** L'écran d'accueil
           annonçait « v1.0 » depuis le début des 2.x : le numéro était figé
