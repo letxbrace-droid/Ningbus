@@ -47,13 +47,37 @@
                 android:layout_marginEnd="12dp"
                 android:background="@drawable/fond_puce" />
 
-            <TextView
-                android:id="@+id/pilule_euro"
+            <!--
+                Les deux chiffres, et non un seul.
+
+                La bulle réduite n'a d'abord montré que l'euro/heure, puis que
+                l'euro/kilomètre — et une carte relevée à Brétigny a montré
+                que ni l'un ni l'autre ne suffit : « 1,02 €/km · LAISSE » est
+                incompréhensible, parce que 1,02 €/km a l'air correct et que
+                la course paie pourtant 19 €/h. Le mode réduit doit rester
+                décidable ; s'il faut développer pour comprendre, il ne sert
+                plus à rien.
+            -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/pilule_euro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/pilule_heure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/bulle_texte_doux"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/pilule_verdict"

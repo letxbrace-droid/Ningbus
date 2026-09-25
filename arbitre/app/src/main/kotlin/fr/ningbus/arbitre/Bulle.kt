@@ -211,6 +211,12 @@ object Bulle {
             text = verdict.euroKmRoule?.let { "${fmt2(it)} €/km" } ?: "—"
             setTextColor(teinte)
         }
+        // L'euro/heure sous l'euro/kilomètre : sans lui, un LAISSE à
+        // 1,02 €/km ne s'explique pas, et un verdict qu'on ne comprend pas
+        // finit par ne plus être suivi.
+        racine.findViewById<TextView>(R.id.pilule_heure).text = verdict.euroHeure?.let {
+            "${fmt0(it)} €/h pour ${fmt0(bareme.objectifHeure)} visés"
+        } ?: ""
         racine.findViewById<TextView>(R.id.pilule_verdict).apply {
             text = verdict.decision.libelle
             setTextColor(teinte)

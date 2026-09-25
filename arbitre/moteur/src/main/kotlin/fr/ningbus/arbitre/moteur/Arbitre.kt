@@ -310,7 +310,10 @@ object Arbitre {
             kmCourse = kmTrajet,
             kmApproche = kmApproche,
             kmRetour = kmRetour,
-            motif = motif(veto, course, kmTrajet, kmApproche, kmRetour, partMorte, confiance),
+            motif = motif(
+                veto, course, kmTrajet, kmApproche, kmRetour, partMorte, confiance,
+                euroHeure, bareme,
+            ),
         )
     }
 
@@ -332,6 +335,8 @@ object Arbitre {
         kmRetour: Double,
         partMorte: Double?,
         confiance: Confiance,
+        euroHeure: Double?,
+        bareme: Bareme,
     ): String? = when {
         veto != null -> veto.replaceFirstChar { it.uppercase() }
 
@@ -345,13 +350,27 @@ object Arbitre {
         kmApproche > 0 && kmApproche > kmTrajet * 0.5 ->
             "Approche de ${fmt1(kmApproche)} km avant la prise en charge"
 
-        partMorte != null && partMorte > 0.5 ->
-            "Plus de la moitié du temps n'est pas payée"
+        // Le même seuil que l'alerte plus haut, et non un second à 50 %.
+        // Une carte relevée à Brétigny l'a imposé : 47 % de temps non payé
+        // déclenchait l'alerte et ne produisait aucun motif, si bien que le
+        // verdict le plus fréquent de tous — un LAISSE sur une course trop
+        // courte — arrivait muet. Un LAISSE sans motif à 1,02 €/km est
+        // exactement celui qu'on croit injuste.
+        partMorte != null && partMorte > SEUIL_TEMPS_MORT ->
+            "${fmt0(partMorte * 100)} % du temps mobilisé n'est pas payé"
 
         kmRetour > kmTrajet * 0.5 ->
             "Retour à vide important — ${fmt1(kmRetour)} km supposés"
 
         course.minutesTrajet == null -> "Durée de course estimée, non annoncée"
+
+        // Le dernier recours, et il ne doit jamais manquer : quand aucune
+        // contrainte particulière ne ressort, c'est que le prix ne couvre
+        // simplement pas le temps. Le dire vaut mieux que se taire — un
+        // verdict qui n'explique rien finit par ne plus être cru.
+        euroHeure != null && euroHeure < bareme.objectifHeure ->
+            "${fmt0(euroHeure)} €/h pour ${fmt0(bareme.objectifHeure)} visés — " +
+                "le prix ne couvre pas le temps"
 
         else -> null
     }
