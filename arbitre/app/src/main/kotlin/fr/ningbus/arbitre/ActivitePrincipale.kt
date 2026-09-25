@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import fr.ningbus.arbitre.moteur.Arbitre
 import fr.ningbus.arbitre.moteur.Bareme
+import fr.ningbus.arbitre.moteur.Calibrage
 import fr.ningbus.arbitre.moteur.Course
 import fr.ningbus.arbitre.moteur.Decision
 import fr.ningbus.arbitre.moteur.Plateformes
@@ -132,6 +133,10 @@ class ActivitePrincipale : AppCompatActivity() {
         interrupteur(R.id.decouverte, reglages.modeDecouverte) { reglages.modeDecouverte = it }
         interrupteur(R.id.filtre_ecrans, reglages.filtrerEcrans) { reglages.filtrerEcrans = it }
         interrupteur(R.id.details_couts, reglages.detailsCouts) { reglages.detailsCouts = it }
+        interrupteur(R.id.correction_mesuree, reglages.correctionMesuree) {
+            reglages.correctionMesuree = it
+        }
+        peuplerEtatCorrection()
         interrupteur(R.id.prudence, reglages.bareme.prudenceTrafic) {
             reglages.bareme = reglages.bareme.copy(prudenceTrafic = it)
             rafraichirSimulateur()
@@ -842,6 +847,25 @@ class ActivitePrincipale : AppCompatActivity() {
             return
         }
         for (ligne in retenues) conteneur.addView(ligneHistorique(ligne))
+    }
+
+    /**
+     * L'état de la calibration, sous son interrupteur.
+     *
+     * Un réglage qui ne fait rien doit dire qu'il ne fait rien. Tant que cinq
+     * couples n'ont pas été rapprochés, le coefficient n'existe pas et le
+     * barème est exactement celui d'avant : l'écrire évite la seule chose pire
+     * qu'une option inutile, une option qu'on croit active.
+     */
+    private fun peuplerEtatCorrection() {
+        val vue = findViewById<TextView>(R.id.etat_correction) ?: return
+        val mesures = Mesures.toutes(this)
+        vue.text = when {
+            mesures.isEmpty() -> getString(R.string.aide_correction_mesuree)
+            else -> Mesures.resume(this)
+                ?: "${mesures.size} courses rapprochées sur " +
+                "${Calibrage.MESURES_MINIMALES} — rien n'est corrigé pour l'instant"
+        }
     }
 
     /**

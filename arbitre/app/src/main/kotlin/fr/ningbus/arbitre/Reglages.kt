@@ -15,8 +15,10 @@ import fr.ningbus.arbitre.moteur.Plateformes
  */
 class Reglages(contexte: Context) {
 
+    private val app: Context = contexte.applicationContext
+
     private val p: SharedPreferences =
-        contexte.applicationContext.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
+        app.getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
 
     init {
         migrer()
@@ -173,6 +175,33 @@ class Reglages(contexte: Context) {
     var detailsCouts: Boolean
         get() = p.getBoolean("detailsCouts", true)
         set(v) = p.edit().putBoolean("detailsCouts", v).apply()
+
+    /**
+     * Corriger les durées annoncées par ce qu'on a mesuré sur les courses
+     * faites.
+     *
+     * Allumé d'origine, et sans effet tant que le carnet ne contient pas assez
+     * de couples : le coefficient reste nul, et c'est la prudence de trafic
+     * qui décide, exactement comme avant. Personne ne voit donc son barème
+     * changer à l'installation.
+     */
+    var correctionMesuree: Boolean
+        get() = p.getBoolean("correctionMesuree", true)
+        set(v) = p.edit().putBoolean("correctionMesuree", v).apply()
+
+    /**
+     * Le barème, corrigé de ce que cette plateforme-là annonce de travers.
+     *
+     * Séparé de [bareme] pour que le simulateur et les réglages continuent de
+     * montrer le barème tel que le chauffeur l'a réglé, sans une correction
+     * invisible qui rendrait ses curseurs incompréhensibles. Seul l'arbitrage
+     * d'une vraie offre passe par ici.
+     */
+    fun baremePour(plateforme: String?): Bareme {
+        if (!correctionMesuree) return bareme
+        val facteur = Mesures.facteur(app, plateforme) ?: return bareme
+        return bareme.copy(facteurDureeMesure = facteur)
+    }
 
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
     var boutonFlottant: Boolean

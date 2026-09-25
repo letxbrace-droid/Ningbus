@@ -251,7 +251,18 @@ object Arbitre {
         // --- Trafic : déduit de la vitesse implicite ------------------------
         val vitesseTrajet = vitesse(kmTrajet, minutesTrajet)
         val traficTrajet = trafic(vitesseTrajet)
-        val coefTrajet = if (bareme.prudenceTrafic) prudence(traficTrajet) else 1.0
+
+        // Le coefficient mesuré passe devant le coefficient supposé, et le
+        // remplace au lieu de s'y ajouter : les deux répondent à la même
+        // question — de combien la durée annoncée se trompe-t-elle — et les
+        // empiler majorerait deux fois.
+        //
+        // C'est ce qui répare le cas le plus courant, invisible pour la
+        // prudence de trafic : une longue course annoncée 45 min qui en prend
+        // 52, sur des axes où la vitesse implicite dépasse 45 km/h et où le
+        // coefficient supposé vaut donc exactement 1,0.
+        val coefTrajet = bareme.facteurDureeMesure
+            ?: if (bareme.prudenceTrafic) prudence(traficTrajet) else 1.0
 
         // --- Approche : à vide, donc entièrement à notre charge -------------
         val approcheInconnue = course.minutesApproche == null && course.kmApproche == null
@@ -322,7 +333,15 @@ object Arbitre {
         } else null
 
         // --- Signaux --------------------------------------------------------
-        if (traficTrajet == Trafic.BOUCHONS && bareme.prudenceTrafic) {
+        bareme.facteurDureeMesure?.let { f ->
+            if (f > 1.02 || f < 0.98) {
+                alertes += "durée corrigée de ${fmt0((f - 1) * 100)} % " +
+                    "(mesuré sur tes courses)"
+            }
+        }
+        if (traficTrajet == Trafic.BOUCHONS && bareme.prudenceTrafic &&
+            bareme.facteurDureeMesure == null
+        ) {
             alertes += "bouchons (${fmt0(vitesseTrajet)} km/h) — durée majorée de " +
                 "${fmt0((coefTrajet - 1) * 100)} %"
         }

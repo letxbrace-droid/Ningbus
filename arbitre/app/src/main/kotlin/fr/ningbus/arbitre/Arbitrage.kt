@@ -105,7 +105,7 @@ object Arbitrage {
         }
 
         val reglages = Reglages(contexte)
-        val verdict = Arbitre.arbitrer(course, reglages.bareme)
+        val verdict = Arbitre.arbitrer(course, reglages.baremePour(course.plateforme))
 
         Journal.ajouter(contexte, verdict, paquet, latenceMs, source, scoreOffre)
         if (reglages.vibration) Haptique.signaler(contexte, verdict.decision)

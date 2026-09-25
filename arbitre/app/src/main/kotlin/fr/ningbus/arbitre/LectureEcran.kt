@@ -12,8 +12,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import fr.ningbus.arbitre.moteur.Course
 import fr.ningbus.arbitre.moteur.Detecteur
+import fr.ningbus.arbitre.moteur.Details
 import fr.ningbus.arbitre.moteur.Nature
 import fr.ningbus.arbitre.moteur.completer
+import fr.ningbus.arbitre.moteur.fmt0
 
 /**
  * Lecture de la carte d'offre affichée par l'application chauffeur.
@@ -179,6 +181,15 @@ class LectureEcran : AccessibilityService() {
          */
         COMPARE,
 
+        /**
+         * L'écran de bilan d'une course déjà faite, pas une offre.
+         *
+         * Il n'y a rien à arbitrer — la course est terminée — mais il y avait
+         * quelque chose à apprendre : la durée réellement passée, confrontée à
+         * celle qui avait été annoncée.
+         */
+        BILAN,
+
         /** Une offre reconnue, mais dont il manque de quoi conclure. */
         INCOMPLET,
 
@@ -263,6 +274,29 @@ class LectureEcran : AccessibilityService() {
         source: Source = Source.ECRAN,
     ): Issue {
         if (texte.isEmpty()) return Issue.RIEN_A_LIRE
+
+        // L'écran de bilan d'une course déjà faite. Il porte un prix, une
+        // distance et une durée — donc tout ce qu'il faut pour être pris pour
+        // une offre — et il ne propose rien. Il passe donc en premier, avant
+        // que le reste de la chaîne ne s'en empare.
+        //
+        // Il n'est pas écarté pour autant : il porte le seul chiffre que la
+        // carte d'offre ne peut pas donner, la durée réellement passée. Les
+        // plateformes sous-estiment les trajets, et c'est ici que ça se
+        // mesure — sur leurs propres chiffres, sans GPS et sans réseau.
+        if (Details.estEcran(texte)) {
+            Details.lire(texte)?.let { realise ->
+                Mesures.inscrire(this, realise)?.let { mesure ->
+                    Journal.signalerEcranIgnore(
+                        this,
+                        nom,
+                        "bilan de course : ${fmt0(mesure.minutesAnnoncees)} min annoncées, " +
+                            "${fmt0(mesure.minutesReelles)} min réelles",
+                    )
+                }
+            }
+            return Issue.BILAN
+        }
 
         // Une lecture qui en complète une autre n'a pas à reporter de montant :
         // c'est précisément la partie qui manquait la fois d'avant.
@@ -364,6 +398,7 @@ class LectureEcran : AccessibilityService() {
             when (issue) {
                 Issue.PLUSIEURS_OFFRES -> R.string.plusieurs_offres
                 Issue.SANS_SUITE -> R.string.montant_introuvable
+                Issue.BILAN -> R.string.ecran_bilan
                 else -> R.string.rien_a_lire
             }
         )

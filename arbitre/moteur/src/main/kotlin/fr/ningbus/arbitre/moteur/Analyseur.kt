@@ -162,6 +162,15 @@ object Analyseur {
         return valeurs.max()
     }
 
+    /**
+     * Les sommes d'un texte déjà normalisé, péages et bonus ôtés.
+     *
+     * Exposée pour la lecture des écrans de bilan, qui ont besoin du même
+     * filtrage — un pourboire et un péage n'y sont pas le prix de la course
+     * non plus — sans repasser par l'analyse complète d'une offre.
+     */
+    fun montantsLisibles(texteNormalise: String): List<Double> = montants(texteNormalise)
+
     /** Les sommes qui peuvent être le prix d'une course, péages et bonus ôtés. */
     private fun montants(t: String): List<Double> = RE_MONTANT.findAll(t)
         .filterNot { parasite(t, it.range.first, it.range.last) }

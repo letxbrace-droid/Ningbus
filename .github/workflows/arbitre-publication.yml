@@ -118,6 +118,56 @@ jobs:
 
           ## Ce que cette version ajoute
 
+          **L'appli mesure de combien les plateformes se trompent.** Tu le
+          savais déjà — les durées annoncées sont optimistes, et un chauffeur
+          qui accepte sur cette base travaille plus longtemps qu'il ne l'a
+          décidé. Le moteur majorait bien les durées en circulation chargée,
+          mais avec un coefficient **supposé**, et qui vaut exactement 1,0
+          au-dessus de 45 km/h : le cas le plus courant — une longue course
+          annoncée 45 min qui en prend 52 sur des axes dégagés — lui échappait
+          entièrement.
+
+          Les deux chiffres existaient pourtant déjà sur le téléphone. La carte
+          d'offre annonce une durée ; l'écran **« Détails de la course »**
+          constate celle qui a été passée. L'appli les rapproche sur le prix,
+          qui ne bouge pas entre les deux, et en tire un coefficient
+          **mesuré** — propre à ce chauffeur, à son secteur et à ses heures.
+          Aucun réseau, aucun GPS, aucune permission nouvelle : ce sont les
+          chiffres de la plateforme, retournés contre ses propres estimations.
+
+          Trois précautions, une par façon de se tromper. **La médiane et non
+          la moyenne**, pour qu'une course interrompue ne déplace rien. **Cinq
+          rapprochements minimum** avant de conclure quoi que ce soit — trois
+          courses ne décrivent pas une plateforme. Et **des bornes** : si la
+          mesure sort de l'intervalle 0,75–1,75, c'est l'appariement qui est
+          faux, pas la plateforme qui ment d'un facteur trois. Le coefficient
+          **remplace** la majoration supposée au lieu de s'y ajouter : les deux
+          répondent à la même question, les empiler compterait deux fois.
+
+          Les réglages affichent l'état en clair — « 3 courses rapprochées sur
+          5 — rien n'est corrigé pour l'instant », puis « Uber sous-estime tes
+          trajets de 18 % (12 courses) ». Un réglage qui ne fait rien doit dire
+          qu'il ne fait rien.
+
+          Une limite assumée : la correction ne porte que sur le trajet payé,
+          jamais sur l'approche. Les plateformes ne facturent pas l'approche,
+          donc elles ne l'archivent pas — il n'existe aucune durée réelle
+          d'approche à confronter à l'annonce. La carte d'offre est le seul
+          instant où ce chiffre existe, et le journal d'Arbitre le seul endroit
+          où il survit.
+
+          ## Ce que cette version corrige
+
+          **Le compteur « prises » ne comptait pas les courses prises.** Il
+          affichait « 1 prise (4 %) » alors qu'il dénombre les verdicts
+          PRENDS, c'est-à-dire ce que le moteur a **conseillé** : l'application
+          ne sait pas ce qui a été accepté, l'offre disparaît de l'écran dans
+          les deux cas. Le mot suggérait un taux d'acceptation, donc un
+          jugement sur le chauffeur, là où le chiffre juge les offres reçues.
+          Il dit maintenant **« à prendre »**.
+
+          ## Ce que la version précédente ajoutait
+
           **Le budget d'approche, sur les offres en direct.** Quand l'offre
           n'annonce pas d'approche — le cas le plus fréquent chez Uber — le
           verdict était calculé comme si le client attendait devant la porte,
@@ -136,7 +186,7 @@ jobs:
           1,11 €/km — au-dessus du seuil que tout le monde utilise — et paie
           17 €/h.
 
-          ## Ce que cette version corrige
+          ## Ce que la version précédente corrigeait
 
           **Un prix impossible ne passe plus au vert.** Une carte relevée le
           25/09 a été arbitrée sur un montant de **4 768,00 €** pour 47,7 km,
@@ -171,7 +221,7 @@ jobs:
           Enfin, la bulle réduite n'affiche plus « — INCOMPLET » sans un mot :
           à défaut d'euro/heure, c'est le motif qui prend la place.
 
-          ## Ce que la version précédente ajoutait
+          ## Et avant cela : le cockpit
 
           **Un cockpit, et non plus un tableau.** L'accueil porte un en-tête
           avec sa marque, son numéro de version et un point d'état. La carte
@@ -207,7 +257,7 @@ jobs:
           **flotte** au lieu d'être collée en bas, où elle se confondait avec
           le trait de navigation du système.
 
-          ## Ce que la version précédente corrigeait
+          ## Ce que les versions d'avant corrigeaient
 
           **Le numéro de version affiché était faux.** L'écran d'accueil
           annonçait « v1.0 » depuis le début des 2.x : le numéro était figé

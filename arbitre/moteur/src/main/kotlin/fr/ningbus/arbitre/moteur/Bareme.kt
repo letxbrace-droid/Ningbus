@@ -85,6 +85,23 @@ data class Bareme(
     /** Majorer les durées annoncées quand la circulation est déjà chargée. */
     val prudenceTrafic: Boolean = true,
 
+    /**
+     * Coefficient **mesuré** sur les courses déjà faites. Null = pas encore de
+     * quoi le dire, et c'est alors [prudenceTrafic] qui décide.
+     *
+     * Quand il existe, il remplace le coefficient supposé au lieu de s'y
+     * ajouter : les deux répondent à la même question — de combien la durée
+     * annoncée se trompe-t-elle — et les empiler compterait deux fois la même
+     * majoration. Une mesure vaut mieux qu'une supposition ; elle ne s'ajoute
+     * pas à elle.
+     *
+     * Il ne porte que sur le trajet payé, jamais sur l'approche. C'est le seul
+     * endroit où la comparaison est possible : les plateformes ne facturant
+     * pas l'approche, elles ne l'archivent pas, et il n'existe donc aucune
+     * durée réelle d'approche à confronter à l'annonce.
+     */
+    val facteurDureeMesure: Double? = null,
+
     /** Vitesse retenue pour estimer une donnée manquante, en km/h. */
     val vitesseParDefaut: Double = 22.0,
 ) {

@@ -218,6 +218,19 @@
                 android:text="@string/aide_details_couts" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/correction_mesuree"
+                style="@style/Interrupteur"
+                android:text="@string/reglage_correction_mesuree" />
+
+            <!-- L'état de la calibration se pose ici à l'exécution : tant
+                 qu'elle n'a rien mesuré, l'interrupteur ne fait rien, et il
+                 faut que ça se voie. -->
+            <TextView
+                android:id="@+id/etat_correction"
+                style="@style/Aide"
+                android:text="@string/aide_correction_mesuree" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/bouton_flottant"
                 style="@style/Interrupteur"
                 android:text="@string/bouton_flottant" />

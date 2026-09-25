@@ -39,6 +39,9 @@
     <string name="rien_a_lire">Aucun montant ni distance sur cet écran.</string>
     <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
     <string name="plusieurs_offres">Plusieurs courses sur cet écran : leurs chiffres se mélangeraient. Ouvre-en une seule.</string>
+    <string name="ecran_bilan">Course déjà faite : rien à arbitrer. Sa durée réelle est notée pour corriger les estimations.</string>
+    <string name="reglage_correction_mesuree">Corriger les durées annoncées</string>
+    <string name="aide_correction_mesuree">Compare la durée annoncée sur la carte d\'offre à celle constatée sur l\'écran de bilan, une fois la course faite. Sans effet tant que cinq courses n\'ont pas été rapprochées.</string>
 
     <string name="titre_planifiees">Courses planifiées</string>
     <string name="aide_planifiees">Classées par ce qu\'elles supportent d\'approche, et non par leur prix : une course planifiée est tarifée comme si tu étais déjà devant la porte. Fais défiler la liste dans ton application chauffeur, les offres s\'ajoutent toutes seules ; un appui sur la pastille ouvre le classement de tout ce que tu as vu.</string>

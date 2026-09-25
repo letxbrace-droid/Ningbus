@@ -50,6 +50,15 @@ data class Ligne(
     /** Approche + course : ce qu'il a fallu rouler pour cette offre. */
     val kmRoules: Double? = null,
     val minutes: Double? = null,
+    /**
+     * La durée du trajet **annoncée** par la plateforme, telle quelle.
+     *
+     * Distincte de [minutes], qui est le temps mobilisé calculé par le moteur.
+     * Conservée pour une seule raison : c'est la moitié annoncée du couple que
+     * la calibration compare, l'autre moitié venant de l'écran de bilan une
+     * fois la course faite. Sans elle, il n'y a rien à confronter.
+     */
+    val minutesTrajet: Double? = null,
     val cout: Double? = null,
     val revenuNet: Double? = null,
     /** La contrainte dominante, telle que le moteur l'a nommée. */
@@ -97,6 +106,7 @@ object Journal {
             verdict.kmCourse?.let { put("kmc", it) }
             verdict.kmApproche?.let { put("kma", it) }
             verdict.minutesTotal?.let { put("min", it) }
+            verdict.course.minutesTrajet?.let { put("mint", it) }
             verdict.revenuNet?.let { put("net", it) }
             verdict.motif?.let { put("motif", it) }
             val cout = listOfNotNull(
@@ -142,6 +152,7 @@ object Journal {
                 kmApproche = o.reel("kma"),
                 kmRoules = o.reel("kmc")?.let { c -> c + (o.reel("kma") ?: 0.0) },
                 minutes = o.reel("min"),
+                minutesTrajet = o.reel("mint"),
                 cout = o.reel("cout"),
                 revenuNet = o.reel("net"),
                 motif = o.optString("motif"),
