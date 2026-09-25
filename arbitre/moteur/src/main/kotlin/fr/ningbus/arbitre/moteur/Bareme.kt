@@ -12,11 +12,30 @@ data class Bareme(
     val objectifHeure: Double = 25.0,
 
     /**
-     * Coût de roulage par kilomètre : carburant ou électricité, pneus,
-     * entretien, amortissement du véhicule. ~0,22 €/km en thermique,
-     * ~0,10 €/km en électrique rechargé à domicile.
+     * Carburant ou électricité, au kilomètre.
+     *
+     * Le seul des trois postes qu'un chauffeur connaisse au centime : c'est le
+     * ticket de la station divisé par les kilomètres du plein.
      */
-    val coutKm: Double = 0.22,
+    val coutCarburant: Double = 0.13,
+
+    /**
+     * Usure et entretien, au kilomètre : pneus, freins, révisions, embrayage.
+     *
+     * Invisible au quotidien et parfaitement réel. Un jeu de pneus tous les
+     * 40 000 km, c'est déjà deux centimes du kilomètre.
+     */
+    val coutUsure: Double = 0.05,
+
+    /**
+     * Coûts fixes ramenés au kilomètre : assurance, licence, amortissement.
+     *
+     * Ils tombent que la voiture roule ou non, et c'est pourquoi les ramener
+     * au kilomètre est un choix et non une évidence : plus on roule, moins ils
+     * pèsent par kilomètre. La valeur d'origine est volontairement basse — un
+     * chauffeur qui veut les compter au prorata réel les relève lui-même.
+     */
+    val coutFixes: Double = 0.04,
 
     /**
      * Part prélevée par la plateforme, si le montant de la notification est
@@ -41,6 +60,25 @@ data class Bareme(
     /** En dessous, l'usure mange la recette : veto. */
     val prixPlancher: Double = 6.0,
 
+    /**
+     * Plancher d'euro par kilomètre roulé. **Zéro = désactivé.**
+     *
+     * Un veto, et rien d'autre : il peut refuser une course, jamais en
+     * autoriser une. C'est ce qui permet de l'ajouter sans qu'aucun verdict
+     * déjà rendu ne se desserre — d'où la valeur d'origine à zéro, qui laisse
+     * l'objectif horaire décider seul tant que le chauffeur n'a pas choisi son
+     * plancher.
+     *
+     * Il complète l'euro/heure plutôt qu'il ne le remplace, et les deux ne
+     * disent pas la même chose. L'euro/heure dépend d'une durée, parfois
+     * estimée ; l'euro/kilomètre est immédiat et ne suppose rien. Mais il
+     * défavorise mécaniquement les courses longues, qui étalent leur temps
+     * mort sur plus de kilomètres payés : sur un relevé réel, un plancher à
+     * 1,70 € refusait quinze courses sur dix-neuf, dont la troisième du
+     * classement — 32,50 € et 43 €/h client devant la porte.
+     */
+    val plancherEuroKm: Double = 0.0,
+
     /** Largeur de la zone « LIMITE » autour de l'objectif (0,15 = ±15 %). */
     val marge: Double = 0.15,
 
@@ -49,4 +87,15 @@ data class Bareme(
 
     /** Vitesse retenue pour estimer une donnée manquante, en km/h. */
     val vitesseParDefaut: Double = 22.0,
-)
+) {
+    /**
+     * Le coût de roulage total, au kilomètre.
+     *
+     * Décomposé en trois postes plutôt que réglé d'un seul chiffre, parce
+     * qu'un chauffeur sait ce que lui coûte son carburant et n'a aucune idée
+     * de ce que lui coûtent ses pneus. Voir le détail, c'est pouvoir corriger
+     * la ligne qu'on connaît sans toucher aux deux autres — et découvrir, le
+     * cas échéant, que l'entretien pèse autant que le gazole.
+     */
+    val coutKm: Double get() = coutCarburant + coutUsure + coutFixes
+}

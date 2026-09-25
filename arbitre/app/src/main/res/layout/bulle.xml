@@ -116,8 +116,19 @@
                     android:baselineAligned="true"
                     android:orientation="horizontal">
 
+                    <!--
+                        L'euro par kilomètre passe devant l'euro par heure, et
+                        ce n'est pas un choix de mise en page.
+
+                        Le second suppose une durée, souvent estimée par le
+                        moteur quand la plateforme ne l'annonce pas ; le
+                        premier ne suppose rien. Devant une offre qui laisse
+                        douze secondes, le chiffre qui ne dépend d'aucune
+                        hypothèse mérite la grande taille — et c'est celui que
+                        tout le métier compare d'une plateforme à l'autre.
+                    -->
                     <TextView
-                        android:id="@+id/euro_heure"
+                        android:id="@+id/euro_km"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -125,7 +136,7 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/euro_km"
+                        android:id="@+id/euro_heure"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/bulle_texte_doux"
@@ -178,6 +189,16 @@
                     android:layout_marginTop="8dp"
                     android:textColor="@color/bulle_texte"
                     android:textSize="16sp" />
+
+                <!-- Le coût de roulage, poste par poste. Un total de 3,30 €
+                     se croit ou ne se croit pas ; trois lignes se vérifient. -->
+                <TextView
+                    android:id="@+id/couts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/bulle_texte_doux"
+                    android:textSize="13sp" />
 
                 <!-- Niveau 4 : les trois kilométrages, jamais additionnés. -->
                 <TextView

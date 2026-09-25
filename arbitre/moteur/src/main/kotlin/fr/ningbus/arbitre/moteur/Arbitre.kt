@@ -21,6 +21,28 @@ data class Verdict(
     val euroHeure: Double? = null,
     /** Revenu net par kilomètre parcouru, approche et retour à vide compris. */
     val euroKm: Double? = null,
+
+    /**
+     * L'euro par kilomètre tel qu'un chauffeur le calcule : le prix annoncé
+     * divisé par les kilomètres qu'il faut vraiment faire — approche comprise,
+     * retour à vide exclu, puisque le retour n'appartient à aucune course en
+     * particulier.
+     *
+     * Distinct de [euroKm], qui est net de tous les coûts et porte aussi le
+     * retour. Sur la même course, l'un dit 2,06 et l'autre 0,36 : les deux
+     * sont justes, et les confondre ferait régler un plancher sur un chiffre
+     * pour le comparer à l'autre.
+     */
+    val euroKmRoule: Double? = null,
+
+    // --- Le coût de roulage, poste par poste --------------------------------
+    //
+    // Un total de 3,30 € se croit ou ne se croit pas. « Carburant 1,30,
+    // usure 1,10, fixes 0,90 » se vérifie, et se corrige là où il est faux.
+    val coutCarburant: Double? = null,
+    val coutUsure: Double? = null,
+    val coutFixes: Double? = null,
+
     /** Ce qui reste en poche, coût de roulage déduit. */
     val revenuNet: Double? = null,
     val minutesTotal: Double? = null,
@@ -181,6 +203,18 @@ object Arbitre {
 
         val euroHeure = if (minutesTotal > 0) revenuNet / (minutesTotal / 60.0) else null
         val euroKm = if (kmTotal > 0) revenuNet / kmTotal else null
+
+        // L'euro par kilomètre tel qu'un chauffeur le calcule : le prix annoncé
+        // divisé par les kilomètres qu'il faut vraiment faire pour cette
+        // course — approche comprise, retour à vide exclu, puisque le retour
+        // n'appartient à aucune course en particulier.
+        //
+        // Distinct de [euroKm] ci-dessus, qui est net de tous les coûts et
+        // porte aussi le retour : sur la même course, l'un dit 2,06 et l'autre
+        // 0,36. Les deux sont justes, et les confondre ferait régler un
+        // plancher sur un chiffre et le comparer à l'autre.
+        val kmRoules = kmApproche + kmTrajet
+        val euroKmRoule = if (kmRoules > 0) recette / kmRoules else null
         val partMorte = if (minutesTotal > 0) minutesMortes / minutesTotal else null
         val ratio = euroHeure?.let { it / bareme.objectifHeure }
 
@@ -207,6 +241,16 @@ object Arbitre {
                 "approche de ${fmt0(course.minutesApproche)} min, au-dessus de ta limite"
             revenuNet <= 0 ->
                 "le roulage coûte plus que la course ne rapporte"
+
+            // Le plancher d'euro/kilomètre, s'il est armé. Il n'intervient
+            // qu'ici, parmi les vetos : il refuse, il n'autorise jamais. Une
+            // course qui le franchit doit encore convaincre l'objectif
+            // horaire, exactement comme avant qu'il n'existe.
+            bareme.plancherEuroKm > 0.0 && euroKmRoule != null &&
+                euroKmRoule < bareme.plancherEuroKm ->
+                "${fmt2(euroKmRoule)} €/km, sous ton plancher de " +
+                    "${fmt2(bareme.plancherEuroKm)} €"
+
             else -> null
         }
 
@@ -247,6 +291,10 @@ object Arbitre {
             course = course,
             euroHeure = euroHeure,
             euroKm = euroKm,
+            euroKmRoule = euroKmRoule,
+            coutCarburant = kmTotal * bareme.coutCarburant,
+            coutUsure = kmTotal * bareme.coutUsure,
+            coutFixes = kmTotal * bareme.coutFixes,
             revenuNet = revenuNet,
             minutesTotal = minutesTotal,
             kmTotal = kmTotal,

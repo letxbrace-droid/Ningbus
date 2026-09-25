@@ -1,32 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-        Les trois couleurs du verdict, en néon.
+        La palette de la maquette 2.0.
 
-        Elles servent deux situations opposées : le plein soleil derrière un
-        pare-brise, et la conduite de nuit où l'œil est adapté au noir. D'où
-        une saturation forte et une luminance élevée — sur fond noir pur, le
-        rapport de contraste dépasse 10:1 pour les trois.
+        Elle remplace les néons de la version précédente — #00E676, #FFAB00,
+        #FF1744 sur noir absolu — et le changement mérite d'être justifié,
+        parce que ces néons avaient été choisis pour une raison précise : le
+        plein soleil derrière un pare-brise, et la conduite de nuit où l'œil
+        est adapté au noir.
+
+        Les nouvelles teintes restent au-dessus de 6:1 sur la surface la plus
+        claire, ce qui les garde lisibles dans les deux cas ; elles sont
+        simplement moins criardes, et surtout elles se distinguent mieux entre
+        elles qu'un vert et un ambre poussés tous les deux à saturation
+        maximale. Au volant, distinguer le verdict compte plus que le voir de
+        loin — on ne lit pas cette bulle à deux mètres.
     -->
-    <color name="vert">#FF00E676</color>
-    <color name="ambre">#FFFFAB00</color>
-    <color name="rouge">#FFFF1744</color>
-    <color name="gris">#FF8A94A6</color>
+
+    <!-- Accent : boutons, onglet actif, valeurs mises en avant. -->
+    <color name="primaire">#FF00B4FF</color>
+
+    <!-- Les trois couleurs du verdict. -->
+    <color name="vert">#FF22C55E</color>
+    <color name="ambre">#FFF59E0B</color>
+    <color name="rouge">#FFEF4444</color>
+    <color name="gris">#FF94A3B8</color>
 
     <!--
-        Noir pur, et non gris foncé : sur une dalle AMOLED, un pixel noir est
-        un pixel éteint. La bulle ne coûte alors presque rien en batterie, et
-        ne fait pas halo la nuit.
+        Fond quasi noir plutôt que noir absolu.
+
+        Sur dalle AMOLED, #06080D allume les pixels très faiblement au lieu de
+        les éteindre — le coût en batterie est négligeable, et le gain est un
+        fond qui ne « creuse » pas sous les cartes : à noir absolu, la bordure
+        d'une surface sombre devient la seule chose visible, et l'écran se lit
+        comme une grille de traits.
     -->
-    <color name="nuit">#FF000000</color>
-    <color name="nuit_carte">#FF0D0D0D</color>
-    <color name="nuit_relief">#FF16181C</color>
+    <color name="nuit">#FF06080D</color>
+    <!-- Surface des cartes. -->
+    <color name="nuit_carte">#FF111827</color>
+    <!-- Surface élevée : champs de saisie, puces, onglet actif. -->
+    <color name="nuit_relief">#FF1B2433</color>
 
     <!-- La bulle garde ses propres couleurs : elle se pose par-dessus
          n'importe quelle application et ne peut hériter d'aucun thème. -->
-    <color name="bulle_fond">#F00D0D0D</color>
-    <color name="bulle_texte">#FFFFFFFF</color>
-    <color name="bulle_texte_doux">#FFC7CED6</color>
+    <color name="bulle_fond">#F2111827</color>
+    <color name="bulle_texte">#FFF8FAFC</color>
+    <color name="bulle_texte_doux">#FF94A3B8</color>
 
-    <color name="fond_icone">#FF0D0D0D</color>
+    <color name="fond_icone">#FF111827</color>
 </resources>

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import fr.ningbus.arbitre.moteur.Decision
 import fr.ningbus.arbitre.moteur.fmt0
+import fr.ningbus.arbitre.moteur.fmt2
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -178,8 +179,15 @@ class ActiviteJournal : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })
         entete.addView(TextView(this).apply {
-            text = ligne.euroHeure?.let { "${fmt0(it)} €/h" } ?: "—"
-            textSize = 16f
+            // Les deux, et dans cet ordre : l'euro par kilomètre ne suppose
+            // aucune durée, l'euro par heure repose sur une durée parfois
+            // estimée. Le journal se relit à froid, il a la place pour dire
+            // les deux.
+            text = listOfNotNull(
+                ligne.euroKm?.let { "${fmt2(it)} €/km" },
+                ligne.euroHeure?.let { "${fmt0(it)} €/h" },
+            ).joinToString(" · ").ifEmpty { "—" }
+            textSize = 15f
         })
         bloc.addView(entete)
 

@@ -17,7 +17,6 @@ import android.view.WindowManager
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import fr.ningbus.arbitre.moteur.Bareme
 import fr.ningbus.arbitre.moteur.Decision
 import fr.ningbus.arbitre.moteur.Trafic
 import fr.ningbus.arbitre.moteur.Verdict
@@ -123,7 +122,7 @@ object Bulle {
 
         val habille = ContextThemeWrapper(contexte, R.style.Theme_Arbitre)
         val racine = LayoutInflater.from(habille).inflate(R.layout.bulle, null)
-        remplir(racine, verdict, latenceMs, source, reglages.bareme, scoreOffre)
+        remplir(racine, verdict, latenceMs, source, reglages, scoreOffre)
         reduire(racine, reglages.modeCompact)
 
         val wm = contexte.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -148,7 +147,7 @@ object Bulle {
         // La carte s'efface, la pilule de la pastille reste. C'est ce qui
         // permet de laisser la bulle courte sans rien perdre : douze secondes
         // suffisent à décider, une minute à se souvenir de ce qu'on a laissé.
-        BoutonFlottant.montrerVerdict(contexte, verdict.euroHeure, verdict.decision)
+        BoutonFlottant.montrerVerdict(contexte, verdict.euroKmRoule, verdict.decision)
 
         principal.removeCallbacks(fermeture)
         principal.postDelayed(fermeture, reglages.secondesAffichage * 1000L)
@@ -184,9 +183,10 @@ object Bulle {
         verdict: Verdict,
         latenceMs: Long,
         source: Source,
-        bareme: Bareme,
+        reglages: Reglages,
         scoreOffre: Int?,
     ) {
+        val bareme = reglages.bareme
         val ctx = racine.context
         val teinte = couleur(ctx, verdict.decision)
         val doux = ContextCompat.getColor(ctx, R.color.bulle_texte_doux)
@@ -208,7 +208,7 @@ object Bulle {
         racine.findViewById<View>(R.id.pilule_point).backgroundTintList =
             ColorStateList.valueOf(teinte)
         racine.findViewById<TextView>(R.id.pilule_euro).apply {
-            text = verdict.euroHeure?.let { "${fmt0(it)} €/h" } ?: "—"
+            text = verdict.euroKmRoule?.let { "${fmt2(it)} €/km" } ?: "—"
             setTextColor(teinte)
         }
         racine.findViewById<TextView>(R.id.pilule_verdict).apply {
@@ -239,12 +239,18 @@ object Bulle {
         }
 
         // --- Niveau 2 : l'argent -------------------------------------------
-        racine.findViewById<TextView>(R.id.euro_heure).apply {
-            text = verdict.euroHeure?.let { "${fmt0(it)} €/h" } ?: "—"
+        //
+        // L'euro par kilomètre en grand, l'euro par heure à côté. Le premier
+        // ne suppose aucune durée ; le second repose sur une durée que le
+        // moteur estime lui-même quand la plateforme ne l'annonce pas. Devant
+        // une offre qui laisse douze secondes, le chiffre qui ne suppose rien
+        // mérite la grande taille.
+        racine.findViewById<TextView>(R.id.euro_km).apply {
+            text = verdict.euroKmRoule?.let { "${fmt2(it)} €/km" } ?: "—"
             setTextColor(teinte)
         }
-        racine.findViewById<TextView>(R.id.euro_km).text =
-            verdict.euroKm?.let { "${fmt2(it)} €/km" } ?: ""
+        racine.findViewById<TextView>(R.id.euro_heure).text =
+            verdict.euroHeure?.let { "${fmt0(it)} €/h" } ?: ""
 
         // La jauge place l'objectif à mi-course : à moitié pleine, la course
         // rapporte exactement ce qui est visé.
@@ -266,6 +272,27 @@ object Bulle {
                     (verdict.revenuNet?.let { net -> " · ${fmt2(net)} € net" } ?: "")
             },
             ContextCompat.getColor(ctx, R.color.bulle_texte),
+        )
+
+        // --- Le coût de roulage, poste par poste ---------------------------
+        //
+        // Un total de 3,30 € se croit ou ne se croit pas. « Carburant 1,30 ·
+        // usure 1,10 · fixes 0,90 » se vérifie, et se corrige là où il est
+        // faux : c'est la seule façon de découvrir que l'entretien pèse
+        // autant que le gazole.
+        ligne(
+            racine,
+            R.id.couts,
+            if (!reglages.detailsCouts) null else {
+                val postes = listOfNotNull(
+                    verdict.coutCarburant, verdict.coutUsure, verdict.coutFixes,
+                )
+                if (postes.size < 3) null else {
+                    "carburant ${fmt2(postes[0])} € · usure ${fmt2(postes[1])} €" +
+                        " · fixes ${fmt2(postes[2])} €"
+                }
+            },
+            doux,
         )
 
         // --- Niveau 4 : les trois kilométrages, jamais additionnés ----------

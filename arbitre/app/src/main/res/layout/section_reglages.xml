@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Réglages, en quatre groupes : moteur d'arbitrage, détection, interface,
+    diagnostic système.
+
+    L'ordre suit la fréquence décroissante avec laquelle on y revient. Le
+    barème se pense une fois et se retouche après une mauvaise soirée ; la
+    détection ne se touche qu'en cas de panne ; le diagnostic ne se règle pas
+    du tout, il se lit.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/espace_s"
+        android:paddingTop="@dimen/espace_s"
+        android:paddingEnd="@dimen/espace_s"
+        android:paddingBottom="@dimen/espace_m">
+
+        <TextView
+            style="@style/Texte.H1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/titre_reglages" />
+
+        <!-- ================= 🎯 Moteur d'arbitrage ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_rentabilite" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_bareme" />
+
+        <LinearLayout
+            android:id="@+id/conteneur_rentabilite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_course" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_course" />
+
+        <LinearLayout
+            android:id="@+id/conteneur_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:orientation="vertical" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/prudence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/prudence_active"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/bouton_defaut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/reinitialiser" />
+
+        <!-- ================= 🔍 Détection ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_detection" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/actif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/arbitrage_actif"
+            android:textSize="15sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/filtre_ecrans"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/filtre_ecrans"
+            android:textSize="15sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ocr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/ocr_secours"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_ocr" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/veille"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/veille"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_veille" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/decouverte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/decouverte_active"
+            android:textSize="15sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/toutes_apps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/toutes_apps"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_toutes_apps" />
+
+        <!-- Applications écoutées -->
+
+        <TextView
+            style="@style/Texte.H3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/titre_apps" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_apps" />
+
+        <LinearLayout
+            android:id="@+id/conteneur_apps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/champ_paquet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autofillHints=""
+                android:hint="@string/indice_paquet"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/bouton_ajouter_paquet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ajouter" />
+        </LinearLayout>
+
+        <!-- ================= 🎨 Interface ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_affichage" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Texte.T1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/duree_bulle" />
+
+            <EditText
+                android:id="@+id/champ_secondes"
+                android:layout_width="96dp"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:gravity="end"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/compact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/mode_compact"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_mode_compact" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/details_couts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/details_couts"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_details_couts" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/bouton_flottant"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/bouton_flottant"
+            android:textSize="15sp" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_bouton_flottant" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/vibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/vibration_active"
+            android:textSize="15sp" />
+
+        <!-- ================= 🔧 Diagnostic système ================= -->
+
+        <TextView
+            style="@style/Rubrique"
+            android:text="@string/titre_diagnostic" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/aide_diagnostic" />
+
+        <!-- Une ligne par organe : une puce, un nom, un état. Les listes de
+             texte se lisent mal d'un coup d'œil ; une puce rouge, non. -->
+        <LinearLayout
+            android:id="@+id/conteneur_sante"
+            style="@style/Carte"
+            android:padding="@dimen/espace_xs" />
+
+        <TextView
+            android:id="@+id/diagnostic"
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs" />
+
+        <!-- Les trois permissions, et rien qui les remplace. -->
+
+        <TextView
+            style="@style/Texte.H3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/titre_permissions" />
+
+        <LinearLayout
+            style="@style/Carte">
+
+            <TextView
+                style="@style/Texte.T1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/permission_ecran" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/espace_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/etat_ecran"
+                    style="@style/Texte.H3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/bouton_ecran"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ouvrir_reglages" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Carte">
+
+            <TextView
+                style="@style/Texte.T1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/permission_superposition" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/espace_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/etat_superposition"
+                    style="@style/Texte.H3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/bouton_superposition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ouvrir_reglages" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Carte">
+
+            <TextView
+                style="@style/Texte.T1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/permission_notif" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/espace_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/etat_notif"
+                    style="@style/Texte.H3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/bouton_notif"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ouvrir_reglages" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

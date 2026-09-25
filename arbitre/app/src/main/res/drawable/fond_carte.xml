@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Carte de contenu sur fond noir : un gris à peine levé, cerné d'un trait
-     discret. Assez pour séparer deux blocs, trop peu pour éclairer l'habitacle. -->
+<!-- La surface de la maquette : #111827 sur fond #06080D, cernée d'un trait
+     à peine visible. Assez pour séparer deux blocs, trop peu pour éclairer
+     l'habitacle de nuit. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="@color/nuit_carte" />
-    <corners android:radius="14dp" />
+    <corners android:radius="@dimen/rayon_carte" />
     <stroke
         android:width="1dp"
-        android:color="#26FFFFFF" />
+        android:color="#1FFFFFFF" />
 </shape>

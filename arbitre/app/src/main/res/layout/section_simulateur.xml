@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Simulateur : une course fictive qu'on déforme au doigt.
+
+    Il a changé de nature avec la maquette, et c'est un progrès. Il réglait le
+    barème et montrait l'effet sur une course figée ; il fait désormais
+    l'inverse — le barème reste ce qu'il est, et c'est la **course** qui se
+    déforme. On ne cherche plus « quel réglage me convient » mais « à partir
+    de quel prix cette course-là devient bonne », qui est la question qu'on se
+    pose vraiment au volant.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/espace_s"
+        android:paddingTop="@dimen/espace_s"
+        android:paddingEnd="@dimen/espace_s"
+        android:paddingBottom="@dimen/espace_m">
+
+        <TextView
+            style="@style/Texte.H1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/titre_simulateur" />
+
+        <TextView
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/aide_simulateur" />
+
+        <!-- Les quatre curseurs, construits en Kotlin. -->
+        <LinearLayout
+            android:id="@+id/conteneur_curseurs"
+            style="@style/Carte"
+            android:layout_marginTop="@dimen/espace_s" />
+
+        <!-- ============ Le résultat ============ -->
+
+        <LinearLayout
+            android:id="@+id/carte_resultat"
+            style="@style/Carte"
+            android:layout_marginTop="@dimen/espace_xs" />
+
+        <Button
+            android:id="@+id/bouton_voir_bulle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/voir_bulle" />
+    </LinearLayout>
+</ScrollView>

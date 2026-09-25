@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Grille de 8, comme la maquette.
+
+    Ce n'est pas une coquetterie de designer : une seule série d'espacements
+    supprime la question « 10 ou 12 dp ici ? », qui se repose à chaque écran
+    et à laquelle on répond chaque fois un peu différemment. C'est ce qui
+    faisait qu'un écran construit en XML et un écran construit en Kotlin ne
+    se ressemblaient jamais tout à fait.
+-->
+<resources>
+    <dimen name="espace_xs">8dp</dimen>
+    <dimen name="espace_s">16dp</dimen>
+    <dimen name="espace_m">24dp</dimen>
+    <dimen name="espace_l">32dp</dimen>
+    <dimen name="espace_xl">48dp</dimen>
+
+    <!-- Rayon des surfaces : un seul, pour que rien ne jure. -->
+    <dimen name="rayon_carte">16dp</dimen>
+    <dimen name="rayon_chip">999dp</dimen>
+
+    <!-- Hauteur de la barre d'onglets, pouce compris. -->
+    <dimen name="hauteur_onglets">64dp</dimen>
+</resources>

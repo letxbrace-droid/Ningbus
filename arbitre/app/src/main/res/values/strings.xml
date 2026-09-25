@@ -61,6 +61,46 @@
     <string name="a_accorder">à accorder</string>
     <string name="ouvrir_reglages">Ouvrir</string>
 
+    <!-- Les quatre onglets. Un mot chacun : sous la barre, il n'y a pas la
+         place d'en mettre deux, et un mot qu'on ne peut pas abréger est un
+         mot mal choisi. -->
+    <string name="onglet_accueil">Accueil</string>
+    <string name="onglet_courses">Courses</string>
+    <string name="onglet_simulateur">Simulateur</string>
+    <string name="onglet_reglages">Réglages</string>
+
+    <string name="titre_reglages">Réglages</string>
+    <string name="titre_courses">Courses</string>
+    <string name="titre_detection">🔍 Détection</string>
+    <string name="derniere_course">Dernière course analysée</string>
+    <string name="journal_complet">Journal complet et texte brut</string>
+    <string name="arbitre_actif">Arbitre actif</string>
+    <string name="arbitre_actif_detail">Analyse en temps réel des offres reçues.</string>
+    <string name="arbitre_en_panne">Arbitre ne voit rien</string>
+    <string name="arbitre_eteint">Arbitrage en pause</string>
+    <string name="arbitre_eteint_detail">Rallume-le dans Réglages → Détection.</string>
+    <string name="chip_accessibilite">Écran</string>
+    <string name="chip_image">Image</string>
+    <string name="chip_detection">Détection</string>
+    <string name="details_couts">Afficher le détail des coûts</string>
+    <string name="aide_details_couts">Carburant, usure et coûts fixes, ligne par ligne sous le verdict. Un total de 3,30 € se croit ou ne se croit pas ; trois lignes se vérifient.</string>
+
+    <!-- Les quatre curseurs du simulateur : c'est la course qu'on déforme,
+         pas le barème. -->
+    <string name="curseur_prix">Prix de la course</string>
+    <string name="curseur_approche">Distance d\'approche</string>
+    <string name="curseur_distance">Distance de la course</string>
+    <string name="curseur_duree">Durée estimée</string>
+    <string name="resultat_simulation">Résultat de la simulation</string>
+    <string name="pourquoi">Pourquoi ?</string>
+
+    <string name="stat_analysees">analysées</string>
+    <string name="stat_prises">prises</string>
+    <string name="stat_euro_km">€/km moyen</string>
+    <string name="filtre_toutes">Toutes</string>
+    <string name="filtre_prises">Prises</string>
+    <string name="filtre_refusees">Refusées</string>
+
     <string name="titre_bareme">Ton barème</string>
     <string name="titre_rentabilite">🎯 Rentabilité</string>
     <string name="titre_course">🚗 Course</string>

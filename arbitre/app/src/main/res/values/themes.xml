@@ -4,16 +4,16 @@
     téléphone ».
 
     L'application se consulte au volant, souvent de nuit, et presque toujours
-    juste avant ou juste après une bulle qui est noire elle aussi. Basculer en
+    juste avant ou juste après une bulle qui est sombre elle aussi. Basculer en
     blanc au petit matin ferait pire que ne rien faire : l'œil met plusieurs
     secondes à se réadapter, et ces secondes-là sont celles du compte à
     rebours.
 -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Arbitre" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/vert</item>
+        <item name="colorPrimary">@color/primaire</item>
         <item name="colorOnPrimary">@color/nuit</item>
-        <item name="colorSecondary">@color/vert</item>
+        <item name="colorSecondary">@color/primaire</item>
         <item name="android:colorBackground">@color/nuit</item>
         <item name="colorSurface">@color/nuit_carte</item>
         <item name="colorSurfaceVariant">@color/nuit_relief</item>
@@ -24,13 +24,62 @@
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
 
+    <!--
+        L'échelle typographique de la maquette : cinq niveaux, pas six.
+
+        Chaque niveau a un emploi et un seul. H1 pour le titre d'un écran, H2
+        pour un titre de section, H3 pour une valeur qui doit se lire sans
+        être cherchée, T1 pour le texte courant, T2 pour ce qui n'est lu qu'en
+        cas de doute. Un sixième niveau se serait glissé entre deux autres, et
+        personne n'aurait plus su lequel choisir.
+    -->
+    <!-- La base : les cinq niveaux en héritent par leur nom pointé, ce qui
+         évite de répéter la couleur d'encre cinq fois. -->
+    <style name="Texte">
+        <item name="android:textColor">@color/bulle_texte</item>
+    </style>
+
+    <style name="Texte.H1">
+        <item name="android:textSize">28sp</item>
+        <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Texte.H2">
+        <item name="android:textSize">20sp</item>
+        <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Texte.H3">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Texte.T1">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Texte.T2">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/bulle_texte_doux</item>
+    </style>
+
     <!-- Les titres de rubrique des réglages : assez d'air au-dessus pour que
          l'œil sache qu'il change de sujet sans avoir à lire. -->
-    <style name="Rubrique">
+    <style name="Rubrique" parent="Texte.H2">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">28dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginTop">@dimen/espace_m</item>
+    </style>
+
+    <!-- Une carte : la surface sur laquelle vit tout contenu. -->
+    <style name="Carte">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/fond_carte</item>
+        <item name="android:padding">@dimen/espace_s</item>
+        <item name="android:layout_marginTop">@dimen/espace_xs</item>
     </style>
 </resources>

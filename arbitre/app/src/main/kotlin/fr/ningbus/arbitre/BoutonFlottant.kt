@@ -15,7 +15,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import fr.ningbus.arbitre.moteur.Decision
-import fr.ningbus.arbitre.moteur.fmt0
+import fr.ningbus.arbitre.moteur.fmt2
 import kotlin.math.abs
 
 /**
@@ -104,13 +104,18 @@ object BoutonFlottant {
      *
      * Elle redevient « €/h » au bout d'une minute : c'est un bouton avant
      * d'être un afficheur, et son libellé doit finir par le redire.
+     *
+     * L'euro par kilomètre plutôt que l'euro par heure, comme partout
+     * ailleurs depuis la 2.2 : il ne suppose aucune durée, là où l'euro/heure
+     * repose sur une durée que le moteur estime lui-même quand la plateforme
+     * ne l'annonce pas.
      */
-    fun montrerVerdict(contexte: Context, euroHeure: Double?, decision: Decision) {
+    fun montrerVerdict(contexte: Context, euroKm: Double?, decision: Decision) {
         val app = contexte.applicationContext
         principal.post {
             val pastille = vue?.findViewById<TextView>(R.id.pastille) ?: return@post
             val teinte = ContextCompat.getColor(app, teinteDe(decision))
-            pastille.text = euroHeure?.let { "${fmt0(it)} €/h" } ?: decision.libelle
+            pastille.text = euroKm?.let { "${fmt2(it)} €/km" } ?: decision.libelle
             pastille.background = fond(app, teinte)
             pastille.setTextColor(teinte)
 

@@ -33,14 +33,34 @@ class Reglages(contexte: Context) {
      * lui-même par ailleurs.
      */
     private fun migrer() {
-        if (p.getInt(SCHEMA, 0) >= SCHEMA_COURANT) return
-        p.edit()
-            .putInt(SCHEMA, SCHEMA_COURANT)
+        val schema = p.getInt(SCHEMA, 0)
+        if (schema >= SCHEMA_COURANT) return
+        val edition = p.edit().putInt(SCHEMA, SCHEMA_COURANT)
+
+        if (schema < 2) {
             // Écouter toutes les applications faisait surgir des bulles sur
             // l'écran d'accueil et les pages web. La liste d'origine s'étant
             // révélée exacte, ce mode redevient l'exception.
-            .putBoolean("toutesApps", false)
-            .apply()
+            edition.putBoolean("toutesApps", false)
+        }
+
+        if (schema < 3) {
+            // Le coût de roulage se règle désormais en trois postes. Celui
+            // qui avait choisi 0,18 €/km doit retrouver 0,18 €/km : on répartit
+            // sa valeur dans les proportions d'origine — carburant 59 %, usure
+            // 23 %, fixes 18 % — au lieu de lui imposer les trois valeurs par
+            // défaut. Un réglage qu'on a pris la peine de changer ne se perd
+            // pas dans une mise à jour.
+            val ancien = p.getFloat("coutKm", 0.22f).toDouble()
+            val modele = Bareme()
+            val total = modele.coutKm
+            edition
+                .putFloat("coutCarburant", (ancien * modele.coutCarburant / total).toFloat())
+                .putFloat("coutUsure", (ancien * modele.coutUsure / total).toFloat())
+                .putFloat("coutFixes", (ancien * modele.coutFixes / total).toFloat())
+        }
+
+        edition.apply()
     }
 
     // --- Fonctionnement ----------------------------------------------------
@@ -143,6 +163,17 @@ class Reglages(contexte: Context) {
         get() = p.getBoolean("modeCompact", false)
         set(v) = p.edit().putBoolean("modeCompact", v).apply()
 
+    /**
+     * Le coût de roulage, détaillé sous le verdict.
+     *
+     * Un total de 3,30 € se croit ou ne se croit pas ; « carburant 1,30, usure
+     * 1,10, fixes 0,90 » se vérifie, et se corrige là où il est faux. Coûte
+     * trois lignes de bulle, donc débrayable.
+     */
+    var detailsCouts: Boolean
+        get() = p.getBoolean("detailsCouts", true)
+        set(v) = p.edit().putBoolean("detailsCouts", v).apply()
+
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */
     var boutonFlottant: Boolean
         get() = p.getBoolean("boutonFlottant", true)
@@ -223,7 +254,10 @@ class Reglages(contexte: Context) {
     var bareme: Bareme
         get() = Bareme(
             objectifHeure = lire("objectifHeure", 25.0),
-            coutKm = lire("coutKm", 0.22),
+            coutCarburant = lire("coutCarburant", 0.13),
+            coutUsure = lire("coutUsure", 0.05),
+            coutFixes = lire("coutFixes", 0.04),
+            plancherEuroKm = lire("plancherEuroKm", 0.0),
             commission = lire("commission", 0.0),
             minutesAttente = lire("minutesAttente", 2.0),
             partRetour = lire("partRetour", 0.35),
@@ -236,7 +270,10 @@ class Reglages(contexte: Context) {
         set(b) {
             p.edit()
                 .putFloat("objectifHeure", b.objectifHeure.toFloat())
-                .putFloat("coutKm", b.coutKm.toFloat())
+                .putFloat("coutCarburant", b.coutCarburant.toFloat())
+                .putFloat("coutUsure", b.coutUsure.toFloat())
+                .putFloat("coutFixes", b.coutFixes.toFloat())
+                .putFloat("plancherEuroKm", b.plancherEuroKm.toFloat())
                 .putFloat("commission", b.commission.toFloat())
                 .putFloat("minutesAttente", b.minutesAttente.toFloat())
                 .putFloat("partRetour", b.partRetour.toFloat())
@@ -254,7 +291,7 @@ class Reglages(contexte: Context) {
     companion object {
         private const val FICHIER = "arbitre"
         private const val SCHEMA = "schema"
-        private const val SCHEMA_COURANT = 2
+        private const val SCHEMA_COURANT = 3
 
         /** La fausse application chauffeur du banc d'essai. */
         private const val SIMULATEUR = "fr.ningbus.simulateur"

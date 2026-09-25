@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Accueil : le cockpit.
+
+    Il répond à deux questions et à deux seulement — « est-ce que ça
+    marche ? » et « qu'a-t-il dit de la dernière course ? ». Tout ce qui se
+    règle est ailleurs : un écran d'accueil sur lequel on règle quelque chose
+    n'est plus un écran d'accueil, c'est le début des réglages.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/espace_s"
+        android:paddingTop="@dimen/espace_s"
+        android:paddingEnd="@dimen/espace_s"
+        android:paddingBottom="@dimen/espace_m">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Texte.H1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nom_app" />
+
+            <TextView
+                android:id="@+id/version_app"
+                style="@style/Texte.T2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- ============ L'état, en une carte ============ -->
+
+        <LinearLayout
+            style="@style/Carte"
+            android:layout_marginTop="@dimen/espace_s">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/voyant_etat"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="@dimen/espace_xs"
+                    android:background="@drawable/fond_puce" />
+
+                <TextView
+                    android:id="@+id/titre_etat"
+                    style="@style/Texte.H3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/detail_etat"
+                style="@style/Texte.T2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Les trois voyants : accessibilité, image, détection. Ils se
+             touchent, et chacun ouvre ce qu'il faut pour le rallumer. -->
+        <LinearLayout
+            android:id="@+id/conteneur_chips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:orientation="horizontal" />
+
+        <!-- ============ La dernière course ============ -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_m"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Texte.H2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/derniere_course" />
+
+            <TextView
+                android:id="@+id/age_derniere"
+                style="@style/Texte.T2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/carte_derniere"
+            style="@style/Carte" />
+
+        <TextView
+            android:id="@+id/aucune_course"
+            style="@style/Texte.T2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/journal_vide_resume"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/bouton_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/tester" />
+    </LinearLayout>
+</ScrollView>

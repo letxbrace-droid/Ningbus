@@ -34,6 +34,26 @@ data class Ligne(
     val lectures: String = "",
     /** Ce que le détecteur a pensé de l'écran, sur cent. */
     val scoreOffre: Int = 0,
+
+    // --- De quoi repeindre la course sans la recalculer ---------------------
+    //
+    // Le cockpit et l'historique montrent l'un la dernière course, l'autre
+    // toutes les précédentes, et les deux ont besoin des mêmes chiffres. Les
+    // recalculer depuis le texte brut donnerait un résultat différent dès que
+    // le barème change entre-temps — un historique qui se réécrit tout seul
+    // ne serait plus un historique.
+    val prix: Double? = null,
+    /** Prix ÷ kilomètres réellement roulés, approche comprise. */
+    val euroKm: Double? = null,
+    val kmCourse: Double? = null,
+    val kmApproche: Double? = null,
+    /** Approche + course : ce qu'il a fallu rouler pour cette offre. */
+    val kmRoules: Double? = null,
+    val minutes: Double? = null,
+    val cout: Double? = null,
+    val revenuNet: Double? = null,
+    /** La contrainte dominante, telle que le moteur l'a nommée. */
+    val motif: String = "",
 )
 
 /**
@@ -71,6 +91,18 @@ object Journal {
             put("conf", verdict.confiance.pourcent)
             scoreOffre?.let { put("score", it) }
             put("lect", verdict.confiance.lectures.joinToString("\n") { it.toString() })
+
+            verdict.course.prix?.let { put("prix", it) }
+            verdict.euroKmRoule?.let { put("ekm", it) }
+            verdict.kmCourse?.let { put("kmc", it) }
+            verdict.kmApproche?.let { put("kma", it) }
+            verdict.minutesTotal?.let { put("min", it) }
+            verdict.revenuNet?.let { put("net", it) }
+            verdict.motif?.let { put("motif", it) }
+            val cout = listOfNotNull(
+                verdict.coutCarburant, verdict.coutUsure, verdict.coutFixes,
+            )
+            if (cout.size == 3) put("cout", cout.sum())
         }
         val prefs = contexte.applicationContext
             .getSharedPreferences(FICHIER, Context.MODE_PRIVATE)
@@ -104,9 +136,22 @@ object Journal {
                 confiance = o.optInt("conf"),
                 lectures = o.optString("lect"),
                 scoreOffre = o.optInt("score"),
+                prix = o.reel("prix"),
+                euroKm = o.reel("ekm"),
+                kmCourse = o.reel("kmc"),
+                kmApproche = o.reel("kma"),
+                kmRoules = o.reel("kmc")?.let { c -> c + (o.reel("kma") ?: 0.0) },
+                minutes = o.reel("min"),
+                cout = o.reel("cout"),
+                revenuNet = o.reel("net"),
+                motif = o.optString("motif"),
             )
         }
     }
+
+    /** Un réel absent doit rester absent : `optDouble` rendrait 0,0. */
+    private fun JSONObject.reel(cle: String): Double? =
+        if (has(cle) && !isNull(cle)) optDouble(cle) else null
 
     fun vider(contexte: Context) {
         dejaNotes.clear()

@@ -1,513 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    La coque : un conteneur de sections, et une barre d'onglets.
+
+    L'écran unique qui défilait sur trois mètres avait un défaut qu'aucun
+    soin de mise en page ne corrigeait : pour voir l'état des services, il
+    fallait passer devant le barème ; pour régler le barème, il fallait passer
+    devant le simulateur. Quatre destinations qui ne se ressemblent pas
+    méritent quatre adresses.
+
+    Les sections sont incluses et non chargées à la demande : elles tiennent
+    en mémoire sans effort, et basculer d'un onglet à l'autre doit être
+    instantané — c'est la moitié de ce qui fait qu'une application paraît
+    soignée.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="@color/nuit"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/conteneur_sections"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/nom_app"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/sous_titre"
-            android:textSize="14sp" />
-
-        <!-- ================= Permissions ================= -->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/titre_permissions"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/fond_carte"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/permission_notif"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/etat_notif"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/bouton_notif"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ouvrir_reglages" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/fond_carte"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/permission_superposition"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/etat_superposition"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/bouton_superposition"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ouvrir_reglages" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/fond_carte"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/permission_ecran"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/etat_ecran"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/bouton_ecran"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ouvrir_reglages" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ================= État de santé ================= -->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/titre_diagnostic"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/aide_diagnostic"
-            android:textSize="13sp" />
-
-        <!-- Une ligne par organe : une puce, un nom, un état. Les listes de
-             texte se lisent mal d'un coup d'œil ; une puce rouge, non. -->
-        <LinearLayout
-            android:id="@+id/conteneur_sante"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/fond_carte"
-            android:orientation="vertical"
-            android:padding="6dp" />
-
-        <TextView
-            android:id="@+id/diagnostic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:alpha="0.75"
-            android:textSize="12sp" />
-
-        <!-- ================= Interrupteurs ================= -->
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/actif"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="@string/arbitrage_actif"
-            android:textSize="17sp" />
-
-        <!-- ================= Simulateur ================= -->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/titre_simulateur"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/aide_simulateur"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/fond_carte"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <TextView
-                android:id="@+id/course_essai"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.8"
-                android:textSize="13sp" />
-
-            <!-- Le verdict, recalculé à chaque mouvement du doigt. -->
-            <TextView
-                android:id="@+id/apercu_verdict"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="26sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/apercu_detail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="13sp" />
-
-            <LinearLayout
-                android:id="@+id/conteneur_curseurs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical" />
-        </LinearLayout>
-
-        <!-- ================= 🎯 Rentabilité ================= -->
-
-        <TextView
-            style="@style/Rubrique"
-            android:text="@string/titre_rentabilite" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/aide_bareme"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:id="@+id/conteneur_rentabilite"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="vertical" />
-
-        <!-- ================= 🚗 Course ================= -->
-
-        <TextView
-            style="@style/Rubrique"
-            android:text="@string/titre_course" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/aide_course"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:id="@+id/conteneur_course"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="vertical" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/prudence"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/prudence_active"
-            android:textSize="16sp" />
-
-        <!-- ================= 🎨 Affichage ================= -->
-
-        <TextView
-            style="@style/Rubrique"
-            android:text="@string/titre_affichage" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/duree_bulle"
-                android:textSize="15sp" />
-
-            <EditText
-                android:id="@+id/champ_secondes"
-                android:layout_width="96dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:inputType="number"
-                android:textSize="17sp"
-                android:autofillHints=""
-                android:importantForAutofill="no" />
-        </LinearLayout>
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/compact"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/mode_compact"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_mode_compact"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/bouton_flottant"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/bouton_flottant"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_bouton_flottant"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/vibration"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/vibration_active"
-            android:textSize="16sp" />
-
-        <!-- ================= 🔧 Diagnostic ================= -->
-
-        <TextView
-            style="@style/Rubrique"
-            android:text="@string/titre_diagnostic_section" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/ocr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/ocr_secours"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_ocr"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/veille"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/veille"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_veille"
-            android:textSize="12sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/filtre_ecrans"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/filtre_ecrans"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/decouverte"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/decouverte_active"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/toutes_apps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/toutes_apps"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.7"
-            android:text="@string/aide_toutes_apps"
-            android:textSize="12sp" />
-
-        <!-- ================= Applications ================= -->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/titre_apps"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.75"
-            android:text="@string/aide_apps"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:id="@+id/conteneur_apps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/champ_paquet"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/indice_paquet"
-                android:inputType="textNoSuggestions"
-                android:textSize="14sp"
-                android:autofillHints=""
-                android:importantForAutofill="no" />
-
-            <Button
-                android:id="@+id/bouton_ajouter_paquet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ajouter" />
-        </LinearLayout>
-
-        <!-- ================= Actions ================= -->
-
-        <Button
-            android:id="@+id/bouton_test"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/tester" />
-
-        <Button
-            android:id="@+id/bouton_planifiees"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/titre_planifiees" />
-
-        <Button
-            android:id="@+id/bouton_journal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/titre_journal" />
-
-        <Button
-            android:id="@+id/bouton_defaut"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:text="@string/reinitialiser" />
-    </LinearLayout>
-</ScrollView>
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <include
+            android:id="@+id/section_accueil"
+            layout="@layout/section_accueil" />
+
+        <include
+            android:id="@+id/section_courses"
+            layout="@layout/section_courses" />
+
+        <include
+            android:id="@+id/section_simulateur"
+            layout="@layout/section_simulateur" />
+
+        <include
+            android:id="@+id/section_reglages"
+            layout="@layout/section_reglages" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1FFFFFFF" />
+
+    <!-- Les quatre onglets sont construits en Kotlin : même code pour les
+         quatre, et l'état actif se pose d'une boucle plutôt que de quatre
+         blocs XML qu'il faudrait tenir en accord. -->
+    <LinearLayout
+        android:id="@+id/barre_onglets"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hauteur_onglets"
+        android:background="@color/nuit_carte"
+        android:orientation="horizontal" />
+</LinearLayout>

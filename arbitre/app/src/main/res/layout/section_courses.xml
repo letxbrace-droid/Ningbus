@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Courses : ce qui a été vu, et ce qu'on peut comparer.
+
+    Les deux cohabitent parce qu'ils répondent à la même question posée dans
+    deux temps différents — « qu'est-ce que je prends ? » avant, « qu'est-ce
+    que j'ai pris ? » après. Le comparateur de courses planifiées et le
+    journal des verdicts sont les deux faces de la même page.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/espace_s"
+        android:paddingTop="@dimen/espace_s"
+        android:paddingEnd="@dimen/espace_s"
+        android:paddingBottom="@dimen/espace_m">
+
+        <TextView
+            style="@style/Texte.H1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/titre_courses" />
+
+        <!-- ============ Les trois chiffres de la session ============ -->
+
+        <LinearLayout
+            android:id="@+id/conteneur_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:orientation="horizontal" />
+
+        <!-- ============ Filtres ============ -->
+
+        <LinearLayout
+            android:id="@+id/conteneur_filtres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:orientation="horizontal" />
+
+        <!-- ============ La liste ============ -->
+
+        <LinearLayout
+            android:id="@+id/conteneur_historique"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/bouton_planifiees"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_s"
+            android:text="@string/titre_planifiees" />
+
+        <Button
+            android:id="@+id/bouton_journal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/espace_xs"
+            android:text="@string/journal_complet" />
+    </LinearLayout>
+</ScrollView>

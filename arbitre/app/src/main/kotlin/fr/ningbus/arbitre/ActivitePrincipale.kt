@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -29,28 +31,42 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import fr.ningbus.arbitre.moteur.Arbitre
 import fr.ningbus.arbitre.moteur.Bareme
+import fr.ningbus.arbitre.moteur.Course
 import fr.ningbus.arbitre.moteur.Decision
 import fr.ningbus.arbitre.moteur.Plateformes
+import fr.ningbus.arbitre.moteur.Verdict
 import fr.ningbus.arbitre.moteur.fmt0
+import fr.ningbus.arbitre.moteur.fmt1
 import fr.ningbus.arbitre.moteur.fmt2
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
- * L'écran de réglages : les trois permissions à accorder, le barème du
- * chauffeur, les applications écoutées.
+ * L'application, en quatre destinations.
  *
- * Les champs numériques sont engendrés à partir d'une liste de descripteurs
- * plutôt que décrits un à un en XML : ajouter un paramètre au barème ne
- * demande alors qu'une ligne ici.
+ * Elle n'en avait qu'une : un écran unique qui défilait sur trois mètres, où
+ * il fallait passer devant le barème pour voir l'état des services et devant
+ * le simulateur pour régler le barème. Quatre sujets qui ne se ressemblent pas
+ * méritent quatre adresses — et le cockpit, en particulier, méritait de ne
+ * porter que ce qu'on regarde entre deux courses.
+ *
+ * Les champs numériques restent engendrés à partir d'une liste de
+ * descripteurs plutôt que décrits un à un en XML : ajouter un paramètre au
+ * barème ne demande alors qu'une ligne ici.
  */
 class ActivitePrincipale : AppCompatActivity() {
 
     private lateinit var reglages: Reglages
     private val champs = mutableListOf<Pair<Champ, EditText>>()
+    private val heure = SimpleDateFormat("HH:mm", Locale.FRANCE)
 
     override fun onCreate(etat: Bundle?) {
         super.onCreate(etat)
         setContentView(R.layout.principale)
         reglages = Reglages(this)
+
+        construireOnglets()
 
         findViewById<Button>(R.id.bouton_notif).setOnClickListener {
             ouvrir(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
@@ -67,6 +83,7 @@ class ActivitePrincipale : AppCompatActivity() {
             ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         findViewById<Button>(R.id.bouton_test).setOnClickListener { essai() }
+        findViewById<Button>(R.id.bouton_voir_bulle).setOnClickListener { essai() }
         findViewById<Button>(R.id.bouton_planifiees).setOnClickListener {
             startActivity(Intent(this, ActivitePlanifiees::class.java))
         }
@@ -76,6 +93,7 @@ class ActivitePrincipale : AppCompatActivity() {
         findViewById<Button>(R.id.bouton_defaut).setOnClickListener {
             reglages.bareme = Bareme()
             peuplerChamps()
+            rafraichirSimulateur()
             Toast.makeText(this, R.string.bareme_reinitialise, Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.bouton_ajouter_paquet).setOnClickListener {
@@ -90,6 +108,7 @@ class ActivitePrincipale : AppCompatActivity() {
         interrupteur(R.id.actif, reglages.actif) {
             reglages.actif = it
             BoutonFlottant.synchroniser(this)
+            peuplerCockpit()
         }
         interrupteur(R.id.toutes_apps, reglages.ecouteToutesApps) {
             reglages.ecouteToutesApps = it
@@ -106,8 +125,10 @@ class ActivitePrincipale : AppCompatActivity() {
         interrupteur(R.id.vibration, reglages.vibration) { reglages.vibration = it }
         interrupteur(R.id.decouverte, reglages.modeDecouverte) { reglages.modeDecouverte = it }
         interrupteur(R.id.filtre_ecrans, reglages.filtrerEcrans) { reglages.filtrerEcrans = it }
+        interrupteur(R.id.details_couts, reglages.detailsCouts) { reglages.detailsCouts = it }
         interrupteur(R.id.prudence, reglages.bareme.prudenceTrafic) {
             reglages.bareme = reglages.bareme.copy(prudenceTrafic = it)
+            rafraichirSimulateur()
         }
         interrupteur(R.id.ocr, reglages.ocrSecours) { reglages.ocrSecours = it }
         interrupteur(R.id.compact, reglages.modeCompact) { reglages.modeCompact = it }
@@ -121,6 +142,8 @@ class ActivitePrincipale : AppCompatActivity() {
         demanderNotifications()
         ServiceVeille.creerCanaux(this)
         ServiceVeille.synchroniser(this)
+
+        findViewById<TextView>(R.id.version_app).text = versionLisible()
     }
 
     override fun onResume() {
@@ -128,7 +151,9 @@ class ActivitePrincipale : AppCompatActivity() {
         etatPermissions()
         peuplerChamps()
         peuplerApplications()
-        rafraichirApercu()
+        peuplerCockpit()
+        peuplerHistorique()
+        rafraichirSimulateur()
     }
 
     override fun onPause() {
@@ -136,7 +161,490 @@ class ActivitePrincipale : AppCompatActivity() {
         enregistrerChamps()
     }
 
-    // --- Permissions --------------------------------------------------------
+    // --- Les quatre onglets --------------------------------------------------
+
+    private enum class Onglet(val titre: Int, val icone: Int, val section: Int) {
+        ACCUEIL(R.string.onglet_accueil, R.drawable.ic_accueil, R.id.section_accueil),
+        COURSES(R.string.onglet_courses, R.drawable.ic_courses, R.id.section_courses),
+        SIMULATEUR(R.string.onglet_simulateur, R.drawable.ic_simulateur, R.id.section_simulateur),
+        REGLAGES(R.string.onglet_reglages, R.drawable.ic_reglages, R.id.section_reglages),
+    }
+
+    private val ongletsPeints = mutableListOf<Pair<Onglet, View>>()
+    private var ongletCourant = Onglet.ACCUEIL
+
+    private fun construireOnglets() {
+        val barre = findViewById<LinearLayout>(R.id.barre_onglets)
+        for (onglet in Onglet.entries) {
+            val vue = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                isClickable = true
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.MATCH_PARENT, 1f,
+                )
+                setOnClickListener { afficher(onglet) }
+            }
+            vue.addView(
+                ImageView(this).apply {
+                    setImageResource(onglet.icone)
+                    layoutParams = LinearLayout.LayoutParams(dp(22), dp(22))
+                }
+            )
+            vue.addView(
+                TextView(this).apply {
+                    text = getString(onglet.titre)
+                    textSize = 11f
+                    setPadding(0, dp(3), 0, 0)
+                }
+            )
+            barre.addView(vue)
+            ongletsPeints += onglet to vue
+        }
+        afficher(Onglet.ACCUEIL)
+    }
+
+    /**
+     * Bascule d'onglet.
+     *
+     * Les sections sont toutes présentes et seule leur visibilité change :
+     * une bascule doit être instantanée, et reconstruire une section à chaque
+     * appui ferait perdre la position de défilement — le genre de détail
+     * qu'on ne remarque que lorsqu'il manque.
+     */
+    private fun afficher(onglet: Onglet) {
+        ongletCourant = onglet
+        for (autre in Onglet.entries) {
+            findViewById<View>(autre.section).visibility =
+                if (autre == onglet) View.VISIBLE else View.GONE
+        }
+        val actif = ContextCompat.getColor(this, R.color.primaire)
+        val dormant = ContextCompat.getColor(this, R.color.gris)
+        for ((cible, vue) in ongletsPeints) {
+            val teinte = if (cible == onglet) actif else dormant
+            (vue as LinearLayout).let { colonne ->
+                (colonne.getChildAt(0) as ImageView).imageTintList = ColorStateList.valueOf(teinte)
+                (colonne.getChildAt(1) as TextView).setTextColor(teinte)
+            }
+        }
+    }
+
+    // --- Accueil : le cockpit ------------------------------------------------
+
+    /**
+     * Ce qu'on regarde entre deux courses, et rien d'autre.
+     *
+     * Deux questions : est-ce que ça marche, et qu'a-t-il dit de la dernière
+     * offre. Tout ce qui se règle vit dans l'onglet Réglages — un écran
+     * d'accueil sur lequel on règle quelque chose n'est plus un accueil, c'est
+     * le début des réglages.
+     */
+    private fun peuplerCockpit() {
+        // « Autorisé mais non lié » compte comme une panne, et c'est le cœur
+        // du cockpit : Android affiche le service comme coché alors qu'il ne
+        // reçoit plus rien, et aucune offre n'arrive sans que rien ne le dise.
+        val enPanne = !lectureEcranActive() || !LectureEcran.lie
+        val teinte = when {
+            !reglages.actif -> R.color.gris
+            enPanne -> R.color.rouge
+            else -> R.color.vert
+        }
+        val couleur = ContextCompat.getColor(this, teinte)
+
+        findViewById<View>(R.id.voyant_etat).apply {
+            background = ContextCompat.getDrawable(context, R.drawable.fond_puce)
+            backgroundTintList = ColorStateList.valueOf(couleur)
+        }
+        findViewById<TextView>(R.id.titre_etat).apply {
+            text = getString(
+                when {
+                    !reglages.actif -> R.string.arbitre_eteint
+                    enPanne -> R.string.arbitre_en_panne
+                    else -> R.string.arbitre_actif
+                }
+            )
+            setTextColor(couleur)
+        }
+        findViewById<TextView>(R.id.detail_etat).text = when {
+            !reglages.actif -> getString(R.string.arbitre_eteint_detail)
+            enPanne -> getString(R.string.service_non_lie)
+            else -> getString(R.string.arbitre_actif_detail)
+        }
+
+        peuplerChips()
+        peuplerDerniereCourse()
+    }
+
+    /** Les trois voyants qui décident si une offre sera vue, ou non. */
+    private fun peuplerChips() {
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_chips)
+        conteneur.removeAllViews()
+
+        val chips = listOf(
+            Triple(
+                getString(R.string.chip_accessibilite),
+                lectureEcranActive() && LectureEcran.lie,
+                { ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+            ),
+            Triple(
+                getString(R.string.chip_image),
+                Ocr.disponible && reglages.ocrSecours,
+                { afficher(Onglet.REGLAGES) },
+            ),
+            Triple(
+                getString(R.string.chip_detection),
+                reglages.actif && reglages.filtrerEcrans,
+                { afficher(Onglet.REGLAGES) },
+            ),
+        )
+        for ((index, chip) in chips.withIndex()) {
+            val (nom, bon, action) = chip
+            conteneur.addView(
+                chip(nom, if (bon) R.color.vert else R.color.ambre, action).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                    ).apply { if (index > 0) marginStart = dp(8) }
+                }
+            )
+        }
+    }
+
+    private fun chip(texte: String, couleur: Int, action: (() -> Unit)? = null): TextView =
+        TextView(this).apply {
+            text = texte
+            textSize = 12f
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompat.getColor(this@ActivitePrincipale, couleur))
+            setBackgroundResource(R.drawable.fond_chip)
+            setPadding(dp(10), dp(8), dp(10), dp(8))
+            action?.let {
+                isClickable = true
+                setOnClickListener { _ -> it() }
+            }
+        }
+
+    /**
+     * La dernière course, telle qu'elle a été jugée — et non recalculée.
+     *
+     * Recalculer depuis le texte brut donnerait un chiffre différent dès que
+     * le barème a changé entre-temps, et un historique qui se réécrit tout
+     * seul n'est plus un historique.
+     */
+    private fun peuplerDerniereCourse() {
+        val carte = findViewById<LinearLayout>(R.id.carte_derniere)
+        val vide = findViewById<TextView>(R.id.aucune_course)
+        carte.removeAllViews()
+
+        val ligne = Journal.lignes(this).firstOrNull()
+        if (ligne == null) {
+            carte.visibility = View.GONE
+            vide.visibility = View.VISIBLE
+            findViewById<TextView>(R.id.age_derniere).text = ""
+            return
+        }
+        carte.visibility = View.VISIBLE
+        vide.visibility = View.GONE
+        findViewById<TextView>(R.id.age_derniere).text = age(ligne.horodatage)
+
+        val couleur = ContextCompat.getColor(this, teinteDe(ligne.decision))
+
+        // Étage 1 : l'euro par kilomètre, puis l'euro/heure. Dans cet ordre
+        // parce que le premier ne suppose aucune durée, et que c'est celui
+        // qu'un chauffeur compare d'une plateforme à l'autre.
+        carte.addView(
+            TextView(this).apply {
+                text = "${fmt2(ligne.euroKm)} €/km"
+                textSize = 34f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(couleur)
+            }
+        )
+        carte.addView(
+            TextView(this).apply {
+                text = "${fmt0(ligne.euroHeure)} €/h  ·  ${ligne.decision}"
+                textSize = 15f
+                setTextColor(couleur)
+                alpha = 0.9f
+            }
+        )
+
+        // Étage 2 : les chiffres de l'offre, tels qu'elle les annonçait.
+        carte.addView(
+            troisColonnes(
+                "${fmt2(ligne.prix)} €" to "prix",
+                "${fmt1(ligne.kmRoules)} km" to "roulés",
+                "${fmt0(ligne.minutes)} min" to "mobilisées",
+            )
+        )
+
+        // Étage 3 : les kilomètres séparés — c'est là que se voit l'exil.
+        carte.addView(
+            troisColonnes(
+                "${fmt1(ligne.kmApproche)} km" to "approche",
+                "${fmt1(ligne.kmCourse)} km" to "client à bord",
+                "${ligne.confiance} %" to "confiance",
+            )
+        )
+
+        if (ligne.motif.isNotEmpty()) {
+            carte.addView(
+                TextView(this).apply {
+                    text = ligne.motif
+                    textSize = 13f
+                    setTextColor(couleur)
+                    setPadding(0, dp(8), 0, 0)
+                }
+            )
+        }
+
+        if (reglages.detailsCouts && ligne.cout != null) {
+            carte.addView(
+                troisColonnes(
+                    "${fmt2(ligne.cout)} €" to "coût estimé",
+                    "${fmt2(ligne.revenuNet)} €" to "gain net",
+                    "${ligne.scoreOffre}/100" to "score d'offre",
+                )
+            )
+        }
+    }
+
+    /** Trois valeurs et leurs légendes, la brique de base du cockpit. */
+    private fun troisColonnes(vararg colonnes: Pair<String, String>): View {
+        val ligne = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(12), 0, 0)
+        }
+        for ((valeur, legende) in colonnes) {
+            val colonne = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                )
+            }
+            colonne.addView(
+                TextView(this).apply {
+                    text = valeur
+                    textSize = 16f
+                    setTypeface(typeface, Typeface.BOLD)
+                }
+            )
+            colonne.addView(
+                TextView(this).apply {
+                    text = legende
+                    textSize = 11f
+                    alpha = 0.65f
+                }
+            )
+            ligne.addView(colonne)
+        }
+        return ligne
+    }
+
+    private fun teinteDe(decision: String): Int = when (decision) {
+        Decision.PRENDS.name -> R.color.vert
+        Decision.LIMITE.name -> R.color.ambre
+        Decision.LAISSE.name -> R.color.rouge
+        else -> R.color.gris
+    }
+
+    /** « il y a 5 s », « il y a 12 min », « 08:47 » au-delà de l'heure. */
+    private fun age(horodatage: Long): String {
+        val secondes = (System.currentTimeMillis() - horodatage) / 1000
+        return when {
+            secondes < 60 -> "il y a ${secondes} s"
+            secondes < 3600 -> "il y a ${secondes / 60} min"
+            else -> heure.format(Date(horodatage))
+        }
+    }
+
+    // --- Courses : ce qui a été vu -------------------------------------------
+
+    private enum class Filtre { TOUTES, PRISES, REFUSEES }
+
+    private var filtre = Filtre.TOUTES
+
+    private fun peuplerHistorique() {
+        val lignes = Journal.lignes(this)
+        peuplerStats(lignes)
+        peuplerFiltres(lignes)
+
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_historique)
+        conteneur.removeAllViews()
+
+        val retenues = lignes.filter {
+            when (filtre) {
+                Filtre.TOUTES -> true
+                Filtre.PRISES -> it.decision == Decision.PRENDS.name
+                Filtre.REFUSEES -> it.decision == Decision.LAISSE.name
+            }
+        }
+        if (retenues.isEmpty()) {
+            conteneur.addView(
+                TextView(this).apply {
+                    text = getString(R.string.journal_vide)
+                    textSize = 13f
+                    alpha = 0.7f
+                    setPadding(0, dp(16), 0, 0)
+                }
+            )
+            return
+        }
+        for (ligne in retenues) conteneur.addView(ligneHistorique(ligne))
+    }
+
+    /**
+     * Les trois chiffres de la session.
+     *
+     * Le taux de prise est le plus instructif des trois, et c'est celui qu'on
+     * ne calcule jamais de tête : un chauffeur qui refuse neuf offres sur dix
+     * ne le sait pas, il sait seulement qu'il attend.
+     */
+    private fun peuplerStats(lignes: List<Ligne>) {
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_stats)
+        conteneur.removeAllViews()
+
+        val prises = lignes.count { it.decision == Decision.PRENDS.name }
+        val part = if (lignes.isEmpty()) 0 else prises * 100 / lignes.size
+        val euroKm = lignes.mapNotNull { it.euroKm }
+        val moyen = if (euroKm.isEmpty()) null else euroKm.average()
+
+        val cases = listOf(
+            "${lignes.size}" to getString(R.string.stat_analysees),
+            "$prises" to "${getString(R.string.stat_prises)} ($part %)",
+            fmt2(moyen) to getString(R.string.stat_euro_km),
+        )
+        for ((index, c) in cases.withIndex()) {
+            val bloc = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundResource(R.drawable.fond_carte)
+                setPadding(dp(8), dp(12), dp(8), dp(12))
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { if (index > 0) marginStart = dp(8) }
+            }
+            bloc.addView(
+                TextView(this).apply {
+                    text = c.first
+                    textSize = 22f
+                    setTypeface(typeface, Typeface.BOLD)
+                    setTextColor(
+                        ContextCompat.getColor(
+                            this@ActivitePrincipale,
+                            if (index == 1) R.color.vert else R.color.primaire,
+                        )
+                    )
+                }
+            )
+            bloc.addView(
+                TextView(this).apply {
+                    text = c.second
+                    textSize = 11f
+                    gravity = Gravity.CENTER
+                    alpha = 0.7f
+                }
+            )
+            conteneur.addView(bloc)
+        }
+    }
+
+    private fun peuplerFiltres(lignes: List<Ligne>) {
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_filtres)
+        conteneur.removeAllViews()
+
+        val comptes = mapOf(
+            Filtre.TOUTES to lignes.size,
+            Filtre.PRISES to lignes.count { it.decision == Decision.PRENDS.name },
+            Filtre.REFUSEES to lignes.count { it.decision == Decision.LAISSE.name },
+        )
+        val noms = mapOf(
+            Filtre.TOUTES to R.string.filtre_toutes,
+            Filtre.PRISES to R.string.filtre_prises,
+            Filtre.REFUSEES to R.string.filtre_refusees,
+        )
+        for ((index, f) in Filtre.entries.withIndex()) {
+            val vue = chip(
+                "${getString(noms.getValue(f))} (${comptes[f]})",
+                if (f == filtre) R.color.primaire else R.color.gris,
+            ) {
+                filtre = f
+                peuplerHistorique()
+            }
+            vue.layoutParams = LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+            ).apply { if (index > 0) marginStart = dp(8) }
+            conteneur.addView(vue)
+        }
+    }
+
+    private fun ligneHistorique(ligne: Ligne): View {
+        val couleur = ContextCompat.getColor(this, teinteDe(ligne.decision))
+        val bloc = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundResource(R.drawable.fond_carte)
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ).apply { topMargin = dp(8) }
+        }
+        bloc.addView(
+            TextView(this).apply {
+                text = heure.format(Date(ligne.horodatage))
+                textSize = 12f
+                alpha = 0.6f
+                setPadding(0, 0, dp(12), 0)
+            }
+        )
+        val milieu = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+            )
+        }
+        milieu.addView(
+            TextView(this).apply {
+                text = "${fmt2(ligne.prix)} €"
+                textSize = 17f
+                setTypeface(typeface, Typeface.BOLD)
+            }
+        )
+        milieu.addView(
+            TextView(this).apply {
+                text = "${fmt1(ligne.kmRoules)} km · ${fmt0(ligne.minutes)} min · ${ligne.plateforme}"
+                textSize = 11f
+                alpha = 0.65f
+            }
+        )
+        bloc.addView(milieu)
+
+        val droite = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+        }
+        droite.addView(
+            TextView(this).apply {
+                text = "${fmt2(ligne.euroKm)} €/km"
+                textSize = 15f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(couleur)
+                gravity = Gravity.END
+            }
+        )
+        droite.addView(
+            TextView(this).apply {
+                text = ligne.decision
+                textSize = 11f
+                setTextColor(couleur)
+                gravity = Gravity.END
+            }
+        )
+        bloc.addView(droite)
+        return bloc
+    }
+
+    // --- Permissions ---------------------------------------------------------
 
     private fun accesNotifications(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
@@ -150,7 +658,7 @@ class ActivitePrincipale : AppCompatActivity() {
         BoutonFlottant.synchroniser(this)
     }
 
-    // --- Tableau de santé ---------------------------------------------------
+    // --- Tableau de santé ----------------------------------------------------
 
     /** Un organe et son état, tels qu'ils s'affichent dans le tableau. */
     private class Organe(
@@ -278,14 +786,14 @@ class ActivitePrincipale : AppCompatActivity() {
         ligne.addView(
             TextView(this).apply {
                 text = organe.nom
-                textSize = 15f
+                textSize = 14f
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
         )
         ligne.addView(
             TextView(this).apply {
                 text = organe.etat
-                textSize = 13f
+                textSize = 12f
                 setTextColor(teinte)
                 gravity = Gravity.END
             }
@@ -379,7 +887,13 @@ class ActivitePrincipale : AppCompatActivity() {
         }
     }
 
-    // --- Barème -------------------------------------------------------------
+    private fun versionLisible(): String = try {
+        packageManager.getPackageInfo(packageName, 0).versionName?.let { "v$it" }.orEmpty()
+    } catch (e: Exception) {
+        ""
+    }
+
+    // --- Barème --------------------------------------------------------------
 
     /**
      * Où ranger un paramètre du barème.
@@ -409,14 +923,43 @@ class ActivitePrincipale : AppCompatActivity() {
             1.0, Rubrique.RENTABILITE, { it.objectifHeure }, { b, v -> b.copy(objectifHeure = v) },
         ),
         Champ(
-            "Coût de roulage, en € par km",
-            "Carburant ou électricité, pneus, entretien, amortissement. Environ 0,22 en thermique, 0,10 en électrique rechargé à la maison.",
-            1.0, Rubrique.RENTABILITE, { it.coutKm }, { b, v -> b.copy(coutKm = v) },
+            "Plancher, en € par km roulé",
+            "Un veto, et rien d'autre : il refuse une course, il n'en autorise jamais. Laisse 0 pour le désactiver. Attention, il défavorise mécaniquement les courses longues, qui étalent leur temps mort sur plus de kilomètres payés.",
+            1.0, Rubrique.RENTABILITE,
+            { it.plancherEuroKm }, { b, v -> b.copy(plancherEuroKm = v.coerceIn(0.0, 5.0)) },
+        ),
+        Champ(
+            "Carburant, en € par km",
+            "Le ticket de la station divisé par les kilomètres du plein. Le seul des trois postes qu'on connaisse au centime.",
+            1.0, Rubrique.RENTABILITE,
+            { it.coutCarburant }, { b, v -> b.copy(coutCarburant = v.coerceAtLeast(0.0)) },
+        ),
+        Champ(
+            "Usure et entretien, en € par km",
+            "Pneus, freins, révisions, embrayage. Invisible au quotidien et parfaitement réel : un jeu de pneus tous les 40 000 km, c'est déjà deux centimes du kilomètre.",
+            1.0, Rubrique.RENTABILITE,
+            { it.coutUsure }, { b, v -> b.copy(coutUsure = v.coerceAtLeast(0.0)) },
+        ),
+        Champ(
+            "Coûts fixes, en € par km",
+            "Assurance, licence, amortissement, ramenés au kilomètre. Ils tombent que la voiture roule ou non : plus tu roules, moins ils pèsent par kilomètre.",
+            1.0, Rubrique.RENTABILITE,
+            { it.coutFixes }, { b, v -> b.copy(coutFixes = v.coerceAtLeast(0.0)) },
         ),
         Champ(
             "Commission prélevée, en %",
             "À laisser à 0 si l'offre annonce déjà ta part et non le prix client — c'est le cas d'Uber, qui écrit « Montant net de frais ».",
             100.0, Rubrique.RENTABILITE, { it.commission }, { b, v -> b.copy(commission = v.coerceIn(0.0, 0.9)) },
+        ),
+        Champ(
+            "Prix plancher, en €",
+            "En dessous, la course est refusée : l'usure mange la recette.",
+            1.0, Rubrique.RENTABILITE, { it.prixPlancher }, { b, v -> b.copy(prixPlancher = v) },
+        ),
+        Champ(
+            "Zone « limite », en ± %",
+            "Largeur de la bande orange autour de ton objectif.",
+            100.0, Rubrique.RENTABILITE, { it.marge }, { b, v -> b.copy(marge = v.coerceIn(0.0, 0.5)) },
         ),
         Champ(
             "Retour à vide, en % du trajet",
@@ -432,16 +975,6 @@ class ActivitePrincipale : AppCompatActivity() {
             "Approche maximale, en min",
             "Au-delà, la course est refusée quel que soit le prix : trop de temps non payé.",
             1.0, Rubrique.COURSE, { it.approcheMaxMinutes }, { b, v -> b.copy(approcheMaxMinutes = v) },
-        ),
-        Champ(
-            "Prix plancher, en €",
-            "En dessous, la course est refusée : l'usure mange la recette.",
-            1.0, Rubrique.RENTABILITE, { it.prixPlancher }, { b, v -> b.copy(prixPlancher = v) },
-        ),
-        Champ(
-            "Zone « limite », en ± %",
-            "Largeur de la bande orange autour de ton objectif.",
-            100.0, Rubrique.RENTABILITE, { it.marge }, { b, v -> b.copy(marge = v.coerceIn(0.0, 0.5)) },
         ),
         Champ(
             "Vitesse supposée, en km/h",
@@ -467,7 +1000,7 @@ class ActivitePrincipale : AppCompatActivity() {
             }
             val libelle = TextView(this).apply {
                 text = d.titre
-                textSize = 15f
+                textSize = 14f
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
             val saisie = EditText(this).apply {
@@ -482,7 +1015,7 @@ class ActivitePrincipale : AppCompatActivity() {
             val aide = TextView(this).apply {
                 text = d.aide
                 textSize = 12f
-                alpha = 0.7f
+                alpha = 0.65f
                 setPadding(0, dp(2), dp(96), dp(6))
             }
 
@@ -520,48 +1053,69 @@ class ActivitePrincipale : AppCompatActivity() {
         return if (s.contains(',') && s.endsWith("0")) s.dropLast(1) else s
     }
 
-    // --- Simulateur ---------------------------------------------------------
+    // --- Simulateur ----------------------------------------------------------
 
     /**
-     * Un curseur du simulateur : un réglage, une plage, une unité.
+     * Un curseur du simulateur : ce qui se déforme, et entre quelles bornes.
      *
-     * Les mêmes valeurs se saisissent au chiffre près plus bas. Le curseur
-     * n'est pas un doublon pour autant : saisir « 0,18 » à la place de
-     * « 0,22 » ne dit rien tant qu'on n'a pas vu ce que cela change. Le
-     * verdict se recalcule sous le doigt, et c'est toute la différence entre
-     * régler un barème et le comprendre.
+     * Le simulateur a changé de nature avec la maquette, et c'est un progrès.
+     * Il déformait le **barème** sur une course figée ; il déforme désormais
+     * la **course** sur un barème figé. On ne cherche plus « quel réglage me
+     * convient » mais « à partir de quel prix cette course-là devient
+     * bonne », qui est la question qu'on se pose vraiment au volant.
      */
     private class Curseur(
-        val titre: String,
+        val titre: Int,
         val minimum: Double,
         val maximum: Double,
         val unite: String,
         val decimales: Int,
-        val lire: (Bareme) -> Double,
-        val ecrire: (Bareme, Double) -> Bareme,
+        val lire: (Simulation) -> Double,
+        val ecrire: (Simulation, Double) -> Simulation,
     )
+
+    /** La course fictive qu'on déforme. Les valeurs d'origine sont celles de la maquette. */
+    private data class Simulation(
+        val prix: Double = 15.0,
+        val kmApproche: Double = 2.0,
+        val kmTrajet: Double = 6.0,
+        val minutesTrajet: Double = 18.0,
+    ) {
+        fun versCourse(bareme: Bareme): Course = Course(
+            plateforme = "Simulation",
+            prix = prix,
+            kmApproche = kmApproche,
+            minutesApproche = kmApproche / bareme.vitesseParDefaut * 60.0,
+            kmTrajet = kmTrajet,
+            minutesTrajet = minutesTrajet,
+        )
+    }
+
+    private var simulation = Simulation()
 
     private val curseurs = listOf(
         Curseur(
-            "Objectif", 10.0, 60.0, "€/h", 0,
-            { it.objectifHeure }, { b, v -> b.copy(objectifHeure = v) },
+            R.string.curseur_prix, 5.0, 50.0, "€", 2,
+            { it.prix }, { s, v -> s.copy(prix = v) },
         ),
         Curseur(
-            "Coût de roulage", 0.0, 0.60, "€/km", 2,
-            { it.coutKm }, { b, v -> b.copy(coutKm = v) },
+            R.string.curseur_approche, 0.0, 10.0, "km", 1,
+            { it.kmApproche }, { s, v -> s.copy(kmApproche = v) },
         ),
         Curseur(
-            "Retour à vide", 0.0, 100.0, "% du trajet", 0,
-            { it.partRetour * 100.0 }, { b, v -> b.copy(partRetour = v / 100.0) },
+            R.string.curseur_distance, 0.5, 50.0, "km", 1,
+            { it.kmTrajet }, { s, v -> s.copy(kmTrajet = v) },
+        ),
+        Curseur(
+            R.string.curseur_duree, 1.0, 120.0, "min", 0,
+            { it.minutesTrajet }, { s, v -> s.copy(minutesTrajet = v) },
         ),
     )
 
     private val etiquettes = mutableListOf<Pair<Curseur, TextView>>()
 
     private fun construireCurseurs() {
-        findViewById<TextView>(R.id.course_essai).text = COURSE_ESSAI.replace('\n', ' ')
         val conteneur = findViewById<LinearLayout>(R.id.conteneur_curseurs)
-
         for (c in curseurs) {
             val etiquette = TextView(this).apply {
                 textSize = 13f
@@ -569,13 +1123,12 @@ class ActivitePrincipale : AppCompatActivity() {
             }
             val glissiere = SeekBar(this).apply {
                 max = PAS_CURSEUR
-                progress = versPas(c, c.lire(reglages.bareme))
+                progress = versPas(c, c.lire(simulation))
                 setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(barre: SeekBar, valeur: Int, duUtilisateur: Boolean) {
                         if (!duUtilisateur) return
-                        reglages.bareme = c.ecrire(reglages.bareme, depuisPas(c, valeur))
-                        rafraichirApercu()
-                        peuplerChamps()
+                        simulation = c.ecrire(simulation, depuisPas(c, valeur))
+                        rafraichirSimulateur()
                     }
 
                     override fun onStartTrackingTouch(barre: SeekBar) = Unit
@@ -602,15 +1155,18 @@ class ActivitePrincipale : AppCompatActivity() {
      * d'aperçu : un simulateur qui ne simule pas exactement induit en erreur
      * plus sûrement qu'il ne renseigne.
      */
-    private fun rafraichirApercu() {
+    private fun rafraichirSimulateur() {
         val bareme = reglages.bareme
         for ((c, etiquette) in etiquettes) {
-            val valeur = c.lire(bareme)
-            etiquette.text = "${c.titre} : ${arrondi(valeur, c.decimales)} ${c.unite}"
+            val valeur = c.lire(simulation)
+            etiquette.text = "${getString(c.titre)} : ${arrondi(valeur, c.decimales)} ${c.unite}"
         }
 
-        val verdict = Arbitre.arbitrer(COURSE_ESSAI, "Essai", bareme)
-        val teinte = ContextCompat.getColor(
+        val verdict = Arbitre.arbitrer(simulation.versCourse(bareme), bareme)
+        val carte = findViewById<LinearLayout>(R.id.carte_resultat)
+        carte.removeAllViews()
+
+        val couleur = ContextCompat.getColor(
             this,
             when (verdict.decision) {
                 Decision.PRENDS -> R.color.vert
@@ -620,24 +1176,112 @@ class ActivitePrincipale : AppCompatActivity() {
             },
         )
 
-        findViewById<TextView>(R.id.apercu_verdict).apply {
-            text = buildString {
-                append(verdict.decision.libelle)
-                verdict.euroHeure?.let { append("  ·  ").append(fmt0(it)).append(" €/h") }
+        carte.addView(
+            TextView(this).apply {
+                text = getString(R.string.resultat_simulation)
+                textSize = 12f
+                alpha = 0.65f
             }
-            setTextColor(teinte)
-        }
-        findViewById<TextView>(R.id.apercu_detail).apply {
-            text = verdict.resume
-            setTextColor(teinte)
-            alpha = 0.85f
+        )
+        carte.addView(
+            TextView(this).apply {
+                text = "${fmt2(verdict.euroKmRoule)} €/km"
+                textSize = 32f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(couleur)
+            }
+        )
+        carte.addView(
+            TextView(this).apply {
+                text = "${fmt0(verdict.euroHeure)} €/h  ·  ${verdict.decision.libelle}"
+                textSize = 16f
+                setTextColor(couleur)
+            }
+        )
+        carte.addView(
+            troisColonnes(
+                "${fmt2(coutTotal(verdict))} €" to "coûts estimés",
+                "${fmt2(verdict.revenuNet)} €" to "gain net",
+                "${fmt0(verdict.minutesTotal)} min" to "temps total",
+            )
+        )
+        carte.addView(
+            TextView(this).apply {
+                text = getString(R.string.pourquoi)
+                textSize = 12f
+                alpha = 0.65f
+                setPadding(0, dp(14), 0, dp(4))
+            }
+        )
+        carte.addView(raisons(verdict, bareme))
+        verdict.motif?.let { motif ->
+            carte.addView(
+                TextView(this).apply {
+                    text = motif
+                    textSize = 13f
+                    setTextColor(couleur)
+                    setPadding(0, dp(8), 0, 0)
+                }
+            )
         }
     }
 
-    private fun arrondi(valeur: Double, decimales: Int): String =
-        if (decimales == 0) fmt0(valeur) else fmt2(valeur)
+    private fun coutTotal(verdict: Verdict): Double? {
+        val postes = listOfNotNull(verdict.coutCarburant, verdict.coutUsure, verdict.coutFixes)
+        return if (postes.size == 3) postes.sum() else null
+    }
 
-    // --- Applications écoutées ----------------------------------------------
+    /**
+     * Les trois raisons, en pilules.
+     *
+     * Chacune se lit contre un seuil que le chauffeur a lui-même réglé —
+     * l'objectif horaire, le plancher d'euro/kilomètre, la part de temps mort
+     * au-delà de laquelle le moteur alerte déjà. Aucun seuil n'est inventé
+     * pour la circonstance : une pilule qui jugerait selon un chiffre venu de
+     * nulle part serait pire que pas de pilule du tout.
+     */
+    private fun raisons(verdict: Verdict, bareme: Bareme): View {
+        val ligne = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+
+        val euroHeure = verdict.euroHeure
+        val euroKm = verdict.euroKmRoule
+        val part = verdict.partMorte
+
+        val pilules = listOf(
+            Triple(
+                "${fmt0(euroHeure)} €/h",
+                euroHeure != null && euroHeure >= bareme.objectifHeure,
+                euroHeure != null,
+            ),
+            Triple(
+                "${fmt2(euroKm)} €/km",
+                euroKm != null && (bareme.plancherEuroKm <= 0.0 || euroKm >= bareme.plancherEuroKm),
+                euroKm != null,
+            ),
+            Triple(
+                "${fmt0((part ?: 0.0) * 100)} % non payé",
+                part != null && part <= 0.45,
+                part != null,
+            ),
+        )
+        for ((index, p) in pilules.withIndex()) {
+            val (texte, bon, connu) = p
+            val vue = chip(texte, if (!connu) R.color.gris else if (bon) R.color.vert else R.color.ambre)
+            vue.layoutParams = LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+            ).apply { if (index > 0) marginStart = dp(8) }
+            ligne.addView(vue)
+        }
+        return ligne
+    }
+
+    private fun arrondi(valeur: Double, decimales: Int): String = when (decimales) {
+        0 -> fmt0(valeur)
+        1 -> fmt1(valeur)
+        else -> fmt2(valeur)
+    }
+
+    // --- Applications écoutées -----------------------------------------------
 
     private fun peuplerApplications() {
         val conteneur = findViewById<LinearLayout>(R.id.conteneur_apps)
@@ -655,7 +1299,7 @@ class ActivitePrincipale : AppCompatActivity() {
         conteneur.addView(TextView(this).apply {
             text = getString(R.string.apps_reperees)
             textSize = 13f
-            alpha = 0.75f
+            alpha = 0.7f
             setPadding(0, dp(12), 0, dp(2))
         })
         for (paquet in decouverts.sorted()) {
@@ -684,11 +1328,11 @@ class ActivitePrincipale : AppCompatActivity() {
         }
     }
 
-    // --- Divers -------------------------------------------------------------
+    // --- Divers --------------------------------------------------------------
 
     /**
-     * Affiche une course fictive : sert à placer la bulle où on veut et à
-     * vérifier son réglage sans attendre une vraie offre.
+     * Pose la bulle sur la course du simulateur : le meilleur moyen de la
+     * placer où on veut, et de vérifier son réglage sans attendre une offre.
      */
     private fun essai() {
         if (!Settings.canDrawOverlays(this)) {
@@ -696,7 +1340,8 @@ class ActivitePrincipale : AppCompatActivity() {
             return
         }
         enregistrerChamps()
-        val verdict = Arbitre.arbitrer(COURSE_ESSAI, "Essai", reglages.bareme)
+        val bareme = reglages.bareme
+        val verdict = Arbitre.arbitrer(simulation.versCourse(bareme), bareme)
         Bulle.afficher(this, verdict, 180L, Source.ESSAI, reglages)
     }
 
@@ -718,13 +1363,6 @@ class ActivitePrincipale : AppCompatActivity() {
     private fun dp(valeur: Int): Int = (valeur * resources.displayMetrics.density).toInt()
 
     private companion object {
-        /**
-         * La course du simulateur et du bouton d'essai — la même, pour que
-         * l'aperçu chiffré et la bulle posée à l'écran disent la même chose.
-         */
-        const val COURSE_ESSAI =
-            "UberX · 18,40 €\n5 min (2,1 km) de vous\n21 min (9,4 km) de trajet"
-
         /** Finesse des curseurs : assez pour le centime, pas plus. */
         const val PAS_CURSEUR = 200
     }
