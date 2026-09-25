@@ -69,6 +69,25 @@
     <string name="onglet_simulateur">Simulateur</string>
     <string name="onglet_reglages">Réglages</string>
 
+    <string name="baseline">Ton copilote de rentabilité</string>
+    <string name="en_ligne">En ligne</string>
+    <string name="hors_ligne">Détaché</string>
+    <string name="atout_rapide">Analyse rapide</string>
+    <string name="atout_rapide_detail">en temps réel</string>
+    <string name="atout_prive">100 % privé</string>
+    <string name="atout_prive_detail">rien ne sort du téléphone</string>
+    <string name="atout_revenus">Optimise</string>
+    <string name="atout_revenus_detail">tes revenus</string>
+    <string name="legende_prix">prix</string>
+    <string name="legende_roules">km roulés</string>
+    <string name="legende_mobilisees">mobilisées</string>
+    <string name="legende_approche">approche</string>
+    <string name="legende_bord">client à bord</string>
+    <string name="legende_confiance">confiance</string>
+    <string name="legende_cout">coût estimé</string>
+    <string name="legende_gain">gain net</string>
+    <string name="legende_score">score d\'offre</string>
+
     <string name="titre_reglages">Réglages</string>
     <string name="titre_courses">Courses</string>
     <string name="titre_detection">🔍 Détection</string>

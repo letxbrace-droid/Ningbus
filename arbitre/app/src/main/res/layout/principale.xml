@@ -42,18 +42,25 @@
             layout="@layout/section_reglages" />
     </FrameLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#1FFFFFFF" />
+    <!--
+        Une barre posée sur le fond plutôt que collée au bord.
 
-    <!-- Les quatre onglets sont construits en Kotlin : même code pour les
-         quatre, et l'état actif se pose d'une boucle plutôt que de quatre
-         blocs XML qu'il faudrait tenir en accord. -->
+        Elle flotte : marges de chaque côté, coins arrondis, et le fond de
+        l'écran qui reparaît autour. Sur une dalle sans bordure, une barre
+        collée en bas se confond avec le trait de navigation du système et
+        avec tout ce qui vient d'Android — il faut qu'on voie qu'elle
+        appartient à l'application.
+
+        Les quatre onglets sont construits en Kotlin : même code pour les
+        quatre, et l'état actif se pose d'une boucle plutôt que de quatre blocs
+        XML qu'il faudrait tenir en accord.
+    -->
     <LinearLayout
         android:id="@+id/barre_onglets"
         android:layout_width="match_parent"
         android:layout_height="@dimen/hauteur_onglets"
-        android:background="@color/nuit_carte"
+        android:layout_marginStart="@dimen/espace_xs"
+        android:layout_marginEnd="@dimen/espace_xs"
+        android:layout_marginBottom="@dimen/espace_xs"
         android:orientation="horizontal" />
 </LinearLayout>

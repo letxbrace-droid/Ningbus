@@ -46,8 +46,19 @@ object Arbitrage {
 
     private const val FENETRE_DOUBLON_MS = 45_000L
 
-    private var derniereSignature: String? = null
-    private var dernierInstant = 0L
+    /**
+     * Combien de courses récentes on retient pour les reconnaître.
+     *
+     * Une seule ne suffisait pas, et le terrain l'a montré sans ambiguïté :
+     * une même offre Bolt s'est inscrite **cinq fois** dans le journal, en
+     * alternant « Bolt » et « Uber ». Le bouton flottant d'Uber était posé
+     * par-dessus la carte, si bien que la fenêtre changeait de nom d'une
+     * lecture à l'autre — et une mémoire d'une seule signature ne dédoublonne
+     * jamais une alternance A, B, A, B.
+     */
+    private const val COURSES_RETENUES = 16
+
+    private val recentes = LinkedHashMap<String, Long>()
 
     /** Extraction seule, sans effet de bord : sert aussi à décider si on affiche. */
     fun lire(paquet: String, texte: String): Course =
@@ -82,16 +93,16 @@ object Arbitrage {
 
         // Une analyse demandée à la main n'est jamais un doublon : si le
         // chauffeur appuie deux fois, il attend deux réponses.
-        val signature = signature(paquet, course)
+        val signature = signature(course)
         val maintenant = SystemClock.elapsedRealtime()
-        if (!force &&
-            signature == derniereSignature &&
-            maintenant - dernierInstant < FENETRE_DOUBLON_MS
-        ) {
-            return false
+        if (!force) {
+            recentes.entries.removeAll { maintenant - it.value >= FENETRE_DOUBLON_MS }
+            if (recentes.containsKey(signature)) return false
         }
-        derniereSignature = signature
-        dernierInstant = maintenant
+        recentes[signature] = maintenant
+        while (recentes.size > COURSES_RETENUES) {
+            recentes.remove(recentes.keys.first())
+        }
 
         val reglages = Reglages(contexte)
         val verdict = Arbitre.arbitrer(course, reglages.bareme)
@@ -108,9 +119,18 @@ object Arbitrage {
      * Une offre se réaffiche en continu tant que le compte à rebours tourne,
      * et la carte à l'écran change à chaque seconde qui s'écoule. Ce sont donc
      * les chiffres qui identifient la course, jamais le libellé.
+     *
+     * **Et surtout pas le nom du paquet.** Il y figurait, et c'est ce qui a
+     * laissé passer cinq fois la même course de Brétigny : lue tantôt sous
+     * « Bolt », tantôt sous « Uber » selon la fenêtre qui avait le dessus, elle
+     * portait deux signatures pour un seul prix, une seule distance et une
+     * seule durée. Deux applications qui annoncent exactement les mêmes
+     * chiffres à la même minute, c'est la même carte vue deux fois — et si
+     * jamais c'étaient deux offres, en montrer une suffit, puisqu'elles se
+     * valent au centime près.
      */
-    private fun signature(paquet: String, c: Course): String = listOf(
-        paquet, c.prix, c.kmTrajet, c.minutesTrajet, c.kmApproche, c.minutesApproche,
+    private fun signature(c: Course): String = listOf(
+        c.prix, c.kmTrajet, c.minutesTrajet, c.kmApproche, c.minutesApproche,
     ).joinToString("|")
 
     /** Un montant et une distance ou une durée : c'est peut-être une course. */

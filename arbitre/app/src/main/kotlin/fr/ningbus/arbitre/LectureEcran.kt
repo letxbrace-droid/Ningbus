@@ -219,7 +219,18 @@ class LectureEcran : AccessibilityService() {
             else -> { p -> reglages.ecoute(p) }
         }
         val texte = texteEcran(critere)
-        val nom = paquet ?: paquetLu ?: "écran"
+        // À quelle application attribuer ce qu'on vient de lire.
+        //
+        // `paquetLu` est le paquet de la *première* fenêtre parcourue, et ce
+        // n'est pas forcément celle qui porte l'offre : une carte Bolt posée
+        // par-dessus l'écran d'accueil s'est retrouvée dans le journal sous le
+        // nom « Launcher ». Quand plusieurs fenêtres se superposent, on
+        // attribue la lecture à l'application chauffeur qu'on y trouve — et
+        // c'est aussi elle qui décidera des droits accordés plus bas.
+        val nom = paquet
+            ?: paquetsLus.firstOrNull { reglages.estApplicationChauffeur(it) }
+            ?: paquetLu
+            ?: "écran"
 
         val issue = conclure(reglages, nom, texte, instantEvenement, force)
         if (issue == Issue.RENDU) return true

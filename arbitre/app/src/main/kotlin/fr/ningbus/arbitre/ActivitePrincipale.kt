@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -86,7 +85,10 @@ class ActivitePrincipale : AppCompatActivity() {
         findViewById<Button>(R.id.bouton_ecran).setOnClickListener {
             ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
-        findViewById<Button>(R.id.bouton_test).setOnClickListener { essai() }
+        findViewById<View>(R.id.bouton_test).apply {
+            isClickable = true
+            setOnClickListener { essai() }
+        }
         findViewById<Button>(R.id.bouton_voir_bulle).setOnClickListener { essai() }
         findViewById<Button>(R.id.bouton_planifiees).setOnClickListener {
             startActivity(Intent(this, ActivitePlanifiees::class.java))
@@ -180,6 +182,14 @@ class ActivitePrincipale : AppCompatActivity() {
 
     private fun construireOnglets() {
         val barre = findViewById<LinearLayout>(R.id.barre_onglets)
+        // La barre flotte au-dessus du fond : sur une dalle sans bordure,
+        // une barre collée en bas se confond avec le trait de navigation du
+        // système, et cesse d'appartenir à l'application.
+        barre.background = Peinture.carte(
+            this,
+            ContextCompat.getColor(this, R.color.primaire),
+            intensite = 0.04f,
+        )
         for (onglet in Onglet.entries) {
             val vue = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
@@ -269,28 +279,6 @@ class ActivitePrincipale : AppCompatActivity() {
 
     private var dejaAffiche = false
 
-    /**
-     * Une surface teintée de la couleur du verdict.
-     *
-     * Mélangée à la surface plutôt que posée par-dessus en transparence : le
-     * résultat est opaque, donc exact, et ne dépend pas de ce qu'il y a
-     * derrière. Douze pour cent suffisent — au-delà, la carte devient un
-     * aplat de couleur et le chiffre qu'elle porte cesse de ressortir.
-     */
-    private fun fondVerdict(couleur: Int): GradientDrawable = GradientDrawable().apply {
-        val densite = resources.displayMetrics.density
-        shape = GradientDrawable.RECTANGLE
-        cornerRadius = 16f * densite
-        setColor(
-            ColorUtils.blendARGB(
-                ContextCompat.getColor(this@ActivitePrincipale, R.color.nuit_carte),
-                couleur,
-                0.12f,
-            )
-        )
-        setStroke((1.5f * densite).toInt(), ColorUtils.setAlphaComponent(couleur, 120))
-    }
-
     /** L'ondulation du système, pour tout ce qui réagit au doigt. */
     private fun ondulation(vue: View) {
         val attributs = obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
@@ -320,82 +308,137 @@ class ActivitePrincipale : AppCompatActivity() {
         }
         val couleur = ContextCompat.getColor(this, teinte)
 
-        findViewById<View>(R.id.voyant_etat).apply {
-            background = ContextCompat.getDrawable(context, R.drawable.fond_puce)
-            backgroundTintList = ColorStateList.valueOf(couleur)
-        }
-        findViewById<TextView>(R.id.titre_etat).apply {
-            text = getString(
-                when {
-                    !reglages.actif -> R.string.arbitre_eteint
-                    enPanne -> R.string.arbitre_en_panne
-                    else -> R.string.arbitre_actif
-                }
-            )
-            setTextColor(couleur)
-        }
-        findViewById<TextView>(R.id.detail_etat).text = when {
-            !reglages.actif -> getString(R.string.arbitre_eteint_detail)
-            enPanne -> getString(R.string.service_non_lie)
-            else -> getString(R.string.arbitre_actif_detail)
-        }
-
-        peuplerChips()
+        peuplerEtiquetteLigne(couleur, !reglages.actif || enPanne)
+        peuplerCarteEtat(couleur, enPanne)
         peuplerDerniereCourse()
+        peuplerAtouts()
+    }
+
+    /** Le point « En ligne » de l'en-tête : l'état, avant même de lire. */
+    private fun peuplerEtiquetteLigne(couleur: Int, ennui: Boolean) {
+        findViewById<ImageView>(R.id.marque).imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primaire))
+        findViewById<ImageView>(R.id.icone_derniere).imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primaire))
+
+        findViewById<TextView>(R.id.etiquette_ligne).apply {
+            text = getString(if (ennui) R.string.hors_ligne else R.string.en_ligne)
+            setTextColor(couleur)
+            val puce = ContextCompat.getDrawable(context, R.drawable.fond_puce)?.mutate()
+            puce?.setTint(couleur)
+            puce?.setBounds(0, 0, dp(8), dp(8))
+            setCompoundDrawables(puce, null, null, null)
+        }
+    }
+
+    /**
+     * La carte d'état, avec son halo.
+     *
+     * Elle est la première chose qu'on regarde en ouvrant l'application, et
+     * souvent la seule : le halo permet de conclure sans lire un mot, ce qui
+     * est exactement ce qu'on demande à un voyant.
+     */
+    private fun peuplerCarteEtat(couleur: Int, enPanne: Boolean) {
+        val carte = findViewById<LinearLayout>(R.id.carte_etat)
+        carte.removeAllViews()
+        carte.background = Peinture.lueur(this, couleur, intensite = 0.08f)
+
+        val entete = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        entete.addView(
+            View(this).apply {
+                background = ContextCompat.getDrawable(context, R.drawable.fond_puce)
+                backgroundTintList = ColorStateList.valueOf(couleur)
+                layoutParams = LinearLayout.LayoutParams(dp(14), dp(14)).apply {
+                    marginEnd = dp(10)
+                }
+            }
+        )
+        entete.addView(
+            TextView(this).apply {
+                text = getString(
+                    when {
+                        !reglages.actif -> R.string.arbitre_eteint
+                        enPanne -> R.string.arbitre_en_panne
+                        else -> R.string.arbitre_actif
+                    }
+                ).uppercase()
+                textSize = 19f
+                letterSpacing = 0.02f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(couleur)
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            }
+        )
+        carte.addView(entete)
+
+        carte.addView(
+            TextView(this).apply {
+                text = when {
+                    !reglages.actif -> getString(R.string.arbitre_eteint_detail)
+                    enPanne -> getString(R.string.service_non_lie)
+                    else -> getString(R.string.arbitre_actif_detail)
+                }
+                textSize = 13f
+                alpha = 0.8f
+                setPadding(0, dp(4), 0, 0)
+            }
+        )
+        carte.addView(voyants())
     }
 
     /** Les trois voyants qui décident si une offre sera vue, ou non. */
-    private fun peuplerChips() {
-        val conteneur = findViewById<LinearLayout>(R.id.conteneur_chips)
-        conteneur.removeAllViews()
-
-        val chips = listOf(
-            Triple(
-                getString(R.string.chip_accessibilite),
-                lectureEcranActive() && LectureEcran.lie,
-                { ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
-            ),
-            Triple(
-                getString(R.string.chip_image),
-                Ocr.disponible && reglages.ocrSecours,
-                { afficher(Onglet.REGLAGES) },
-            ),
-            Triple(
-                getString(R.string.chip_detection),
-                reglages.actif && reglages.filtrerEcrans,
-                { afficher(Onglet.REGLAGES) },
-            ),
+    private fun voyants(): View {
+        val ligne = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(12), 0, 0)
+        }
+        val voyants = listOf(
+            Triple(R.string.chip_accessibilite, R.drawable.ic_ecran, lectureEcranActive() && LectureEcran.lie)
+                to { ouvrir(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+            Triple(R.string.chip_image, R.drawable.ic_image, Ocr.disponible && reglages.ocrSecours)
+                to { afficher(Onglet.REGLAGES) },
+            Triple(R.string.chip_detection, R.drawable.ic_cible, reglages.actif && reglages.filtrerEcrans)
+                to { afficher(Onglet.REGLAGES) },
         )
-        for ((index, chip) in chips.withIndex()) {
-            val (nom, bon, action) = chip
-            conteneur.addView(
-                chip(nom, if (bon) R.color.vert else R.color.ambre, action).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
-                    ).apply { if (index > 0) marginStart = dp(8) }
+        for ((index, entree) in voyants.withIndex()) {
+            val (description, action) = entree
+            val (libelle, icone, bon) = description
+            val teinte = ContextCompat.getColor(this, if (bon) R.color.vert else R.color.ambre)
+
+            val pilule = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+                setBackgroundResource(R.drawable.fond_chip_cliquable)
+                setPadding(dp(8), dp(9), dp(8), dp(9))
+                isClickable = true
+                setOnClickListener { action() }
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { if (index > 0) marginStart = dp(8) }
+            }
+            pilule.addView(
+                ImageView(this).apply {
+                    setImageResource(icone)
+                    imageTintList = ColorStateList.valueOf(teinte)
+                    layoutParams = LinearLayout.LayoutParams(dp(15), dp(15)).apply {
+                        marginEnd = dp(6)
+                    }
                 }
             )
-        }
-    }
-
-    private fun chip(texte: String, couleur: Int, action: (() -> Unit)? = null): TextView =
-        TextView(this).apply {
-            text = texte
-            textSize = 12f
-            gravity = Gravity.CENTER
-            setTextColor(ContextCompat.getColor(this@ActivitePrincipale, couleur))
-            // Une pilule qui réagit le montre en ondulant ; une pilule qui
-            // informe reste inerte. Sans cette différence, on appuie deux fois
-            // avant de comprendre qu'il ne se passera rien.
-            setBackgroundResource(
-                if (action == null) R.drawable.fond_chip else R.drawable.fond_chip_cliquable
+            pilule.addView(
+                TextView(this).apply {
+                    text = getString(libelle)
+                    textSize = 12f
+                    setTextColor(teinte)
+                }
             )
-            setPadding(dp(10), dp(8), dp(10), dp(8))
-            action?.let {
-                isClickable = true
-                setOnClickListener { _ -> it() }
-            }
+            ligne.addView(pilule)
         }
+        return ligne
+    }
 
     /**
      * La dernière course, telle qu'elle a été jugée — et non recalculée.
@@ -422,109 +465,270 @@ class ActivitePrincipale : AppCompatActivity() {
 
         val couleur = ContextCompat.getColor(this, teinteDe(ligne.decision))
 
-        // La carte prend la couleur du verdict. C'est ce qui manquait le plus :
-        // un cockpit où seul le chiffre était coloré se lisait comme un
-        // tableau, et il faut qu'il se lise comme un feu.
-        carte.background = fondVerdict(couleur)
+        // La carte rayonne de la couleur de son verdict. C'est ce qui manquait
+        // le plus : un cockpit où seul le chiffre était coloré se lisait comme
+        // un tableau, et il faut qu'il se lise comme un feu.
+        carte.background = Peinture.lueur(this, couleur)
         carte.alpha = 0f
         carte.animate().alpha(1f).setDuration(DUREE_ONGLET).start()
 
-        // Étage 1 : l'euro par kilomètre, puis l'euro/heure. Dans cet ordre
-        // parce que le premier ne suppose aucune durée, et que c'est celui
-        // qu'un chauffeur compare d'une plateforme à l'autre.
-        carte.addView(
+        // Étage 1 : l'euro par kilomètre, le verdict, puis l'euro/heure. Dans
+        // cet ordre parce que le premier ne suppose aucune durée, et que c'est
+        // celui qu'un chauffeur compare d'une plateforme à l'autre.
+        val entete = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        entete.addView(
             TextView(this).apply {
                 text = "${fmt2(ligne.euroKm)} €/km"
                 textSize = 34f
                 setTypeface(typeface, Typeface.BOLD)
                 setTextColor(couleur)
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             }
         )
+        entete.addView(pastilleVerdict(ligne.decision, couleur))
+        carte.addView(entete)
+
         carte.addView(
             TextView(this).apply {
-                text = "${fmt0(ligne.euroHeure)} €/h  ·  ${ligne.decision}"
-                textSize = 15f
+                text = "${fmt0(ligne.euroHeure)} €/h"
+                textSize = 16f
                 setTextColor(couleur)
-                alpha = 0.9f
+                alpha = 0.85f
             }
         )
 
+        carte.addView(separateur(couleur))
+
         // Étage 2 : les chiffres de l'offre, tels qu'elle les annonçait.
         carte.addView(
-            troisColonnes(
-                "${fmt2(ligne.prix)} €" to "prix",
-                "${fmt1(ligne.kmRoules)} km" to "roulés",
-                "${fmt0(ligne.minutes)} min" to "mobilisées",
+            grille(
+                Tuile(R.drawable.ic_euro, "${fmt2(ligne.prix)} €", getString(R.string.legende_prix)),
+                Tuile(R.drawable.ic_route, "${fmt1(ligne.kmRoules)} km", getString(R.string.legende_roules)),
+                Tuile(R.drawable.ic_horloge, "${fmt0(ligne.minutes)} min", getString(R.string.legende_mobilisees)),
             )
         )
 
         // Étage 3 : les kilomètres séparés — c'est là que se voit l'exil.
         carte.addView(
-            troisColonnes(
-                "${fmt1(ligne.kmApproche)} km" to "approche",
-                "${fmt1(ligne.kmCourse)} km" to "client à bord",
-                "${ligne.confiance} %" to "confiance",
+            grille(
+                Tuile(R.drawable.ic_approche, "${fmt1(ligne.kmApproche)} km", getString(R.string.legende_approche)),
+                Tuile(R.drawable.ic_client, "${fmt1(ligne.kmCourse)} km", getString(R.string.legende_bord)),
+                Tuile(null, "${ligne.confiance} %", getString(R.string.legende_confiance), ligne.confiance),
             )
         )
 
-        if (ligne.motif.isNotEmpty()) {
-            carte.addView(
-                TextView(this).apply {
-                    text = ligne.motif
-                    textSize = 13f
-                    setTextColor(couleur)
-                    setPadding(0, dp(8), 0, 0)
-                }
-            )
-        }
+        if (ligne.motif.isNotEmpty()) carte.addView(bandeau(ligne.motif, couleur))
 
         if (reglages.detailsCouts && ligne.cout != null) {
             carte.addView(
-                troisColonnes(
-                    "${fmt2(ligne.cout)} €" to "coût estimé",
-                    "${fmt2(ligne.revenuNet)} €" to "gain net",
-                    "${ligne.scoreOffre}/100" to "score d'offre",
+                grille(
+                    Tuile(R.drawable.ic_carburant, "${fmt2(ligne.cout)} €", getString(R.string.legende_cout)),
+                    Tuile(R.drawable.ic_gain, "${fmt2(ligne.revenuNet)} €", getString(R.string.legende_gain)),
+                    Tuile(R.drawable.ic_etoile, "${ligne.scoreOffre}/100", getString(R.string.legende_score)),
                 )
             )
         }
     }
 
-    /**
-     * Trois colonnes dont on garde la main sur les valeurs.
-     *
-     * Pour tout ce qui se rafraîchit souvent — le simulateur au doigt — il
-     * faut pouvoir écrire dans les vues plutôt que de les recréer.
-     */
-    private class Trio(val vue: View, val valeurs: List<TextView>)
+    /** Le verdict en pilule, avec son signe : ✓ pour prendre, ✕ pour laisser. */
+    private fun pastilleVerdict(decision: String, couleur: Int): View {
+        val pilule = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = Peinture.bandeau(this@ActivitePrincipale, couleur)
+            setPadding(dp(10), dp(6), dp(12), dp(6))
+        }
+        pilule.addView(
+            ImageView(this).apply {
+                setImageResource(
+                    when (decision) {
+                        Decision.PRENDS.name -> R.drawable.ic_coche
+                        Decision.LAISSE.name -> R.drawable.ic_croix
+                        else -> R.drawable.ic_alerte
+                    }
+                )
+                imageTintList = ColorStateList.valueOf(couleur)
+                layoutParams = LinearLayout.LayoutParams(dp(16), dp(16)).apply { marginEnd = dp(6) }
+            }
+        )
+        pilule.addView(
+            TextView(this).apply {
+                text = decision
+                textSize = 13f
+                letterSpacing = 0.05f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(couleur)
+            }
+        )
+        return pilule
+    }
 
-    private fun trio(legendes: List<String>): Trio {
+    private fun separateur(couleur: Int): View = View(this).apply {
+        setBackgroundColor(ColorUtils.setAlphaComponent(couleur, 60))
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(1),
+        ).apply {
+            topMargin = dp(14)
+            bottomMargin = dp(2)
+        }
+    }
+
+    private fun bandeau(texte: String, couleur: Int): View = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        background = Peinture.bandeau(this@ActivitePrincipale, couleur)
+        setPadding(dp(10), dp(9), dp(10), dp(9))
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        ).apply { topMargin = dp(12) }
+
+        addView(
+            ImageView(this@ActivitePrincipale).apply {
+                setImageResource(R.drawable.ic_info)
+                imageTintList = ColorStateList.valueOf(couleur)
+                layoutParams = LinearLayout.LayoutParams(dp(16), dp(16)).apply { marginEnd = dp(8) }
+            }
+        )
+        addView(
+            TextView(this@ActivitePrincipale).apply {
+                text = texte
+                textSize = 13f
+                setTextColor(couleur)
+            }
+        )
+    }
+
+    /**
+     * Une valeur du cockpit : une icône, un chiffre, une légende.
+     *
+     * L'icône n'est pas un ornement. Dans une grille de neuf chiffres, l'œil
+     * retrouve « le carburant » à sa tuile bien avant d'avoir lu la légende —
+     * et c'est cette relecture-là qu'on fait au feu rouge.
+     *
+     * @param confiance non nul : la tuile devient un anneau de progression.
+     */
+    private class Tuile(
+        val icone: Int?,
+        val valeur: String,
+        val legende: String,
+        val confiance: Int? = null,
+    )
+
+    private fun grille(vararg tuiles: Tuile): View {
         val ligne = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(0, dp(12), 0, 0)
+            setPadding(0, dp(14), 0, 0)
         }
-        val valeurs = legendes.map { legende ->
+        val accent = ContextCompat.getColor(this, R.color.primaire)
+        for (t in tuiles) {
             val colonne = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
                 )
             }
-            val valeur = TextView(this).apply {
-                textSize = 16f
-                setTypeface(typeface, Typeface.BOLD)
+            if (t.confiance != null) {
+                val vert = ContextCompat.getColor(this, R.color.vert)
+                colonne.addView(
+                    Anneau(this).apply {
+                        pourcent = t.confiance
+                        couleur = if (t.confiance >= 75) vert else
+                            ContextCompat.getColor(this@ActivitePrincipale, R.color.ambre)
+                        layoutParams = LinearLayout.LayoutParams(dp(30), dp(30)).apply {
+                            marginEnd = dp(8)
+                        }
+                    }
+                )
+            } else if (t.icone != null) {
+                colonne.addView(
+                    ImageView(this).apply {
+                        setImageResource(t.icone)
+                        imageTintList = ColorStateList.valueOf(accent)
+                        background = Peinture.tuile(this@ActivitePrincipale, accent)
+                        setPadding(dp(6), dp(6), dp(6), dp(6))
+                        layoutParams = LinearLayout.LayoutParams(dp(30), dp(30)).apply {
+                            marginEnd = dp(8)
+                        }
+                    }
+                )
             }
-            colonne.addView(valeur)
-            colonne.addView(
+            val textes = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            textes.addView(
                 TextView(this).apply {
-                    text = legende
-                    textSize = 11f
+                    text = t.valeur
+                    textSize = 15f
+                    setTypeface(typeface, Typeface.BOLD)
+                }
+            )
+            textes.addView(
+                TextView(this).apply {
+                    text = t.legende
+                    textSize = 10f
                     alpha = 0.65f
                 }
             )
+            colonne.addView(textes)
             ligne.addView(colonne)
-            valeur
         }
-        return Trio(ligne, valeurs)
+        return ligne
+    }
+
+    /** Ce que l'application promet, en trois pilules. */
+    private fun peuplerAtouts() {
+        val conteneur = findViewById<LinearLayout>(R.id.conteneur_atouts)
+        conteneur.removeAllViews()
+
+        findViewById<View>(R.id.bouton_test).background = Peinture.degrade(
+            this,
+            ContextCompat.getColor(this, R.color.primaire),
+            ContextCompat.getColor(this, R.color.bleu_clair),
+        )
+
+        val atouts = listOf(
+            Triple(R.drawable.ic_graphique, R.string.atout_rapide, R.string.atout_rapide_detail),
+            Triple(R.drawable.ic_bouclier, R.string.atout_prive, R.string.atout_prive_detail),
+            Triple(R.drawable.ic_eclair, R.string.atout_revenus, R.string.atout_revenus_detail),
+        )
+        val accent = ContextCompat.getColor(this, R.color.primaire)
+        for ((index, atout) in atouts.withIndex()) {
+            val (icone, titre, detail) = atout
+            val bloc = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundResource(R.drawable.fond_carte)
+                setPadding(dp(10), dp(12), dp(10), dp(12))
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { if (index > 0) marginStart = dp(8) }
+            }
+            bloc.addView(
+                ImageView(this).apply {
+                    setImageResource(icone)
+                    imageTintList = ColorStateList.valueOf(accent)
+                    layoutParams = LinearLayout.LayoutParams(dp(18), dp(18))
+                }
+            )
+            bloc.addView(
+                TextView(this).apply {
+                    text = getString(titre)
+                    textSize = 12f
+                    setTypeface(typeface, Typeface.BOLD)
+                    setPadding(0, dp(6), 0, 0)
+                }
+            )
+            bloc.addView(
+                TextView(this).apply {
+                    text = getString(detail)
+                    textSize = 10f
+                    alpha = 0.6f
+                }
+            )
+            conteneur.addView(bloc)
+        }
     }
 
     /** Trois valeurs et leurs légendes, la brique de base du cockpit. */
@@ -704,7 +908,7 @@ class ActivitePrincipale : AppCompatActivity() {
             // Le verdict teinte la ligne entière, et non le seul chiffre de
             // droite : une liste de vingt courses se parcourt à la couleur,
             // pas à la lecture.
-            background = fondVerdict(couleur)
+            background = Peinture.carte(this@ActivitePrincipale, couleur)
             setPadding(dp(12), dp(10), dp(12), dp(10))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1358,7 +1562,7 @@ class ActivitePrincipale : AppCompatActivity() {
             },
         )
 
-        findViewById<LinearLayout>(R.id.carte_resultat).background = fondVerdict(couleur)
+        findViewById<LinearLayout>(R.id.carte_resultat).background = Peinture.carte(this@ActivitePrincipale, couleur)
 
         resultatEuroKm.text = "${fmt2(verdict.euroKmRoule)} €/km"
         resultatEuroKm.setTextColor(couleur)

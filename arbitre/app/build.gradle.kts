@@ -1,3 +1,7 @@
+// Le numéro de version, lu là où il est déjà maintenu : un seul chiffre à
+// changer pour publier, et l'application qui l'affiche vraiment.
+val versionArbitre = rootProject.file("VERSION").readText().trim()
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -13,8 +17,18 @@ android {
         // les autres applications, existe depuis Android 8.
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        // Le numéro affiché dans l'application vient du fichier VERSION, et
+        // non d'une constante qu'on oublie de changer : l'écran d'accueil a
+        // affiché « v1.0 » pendant toute la série des 2.x, ce qui rendait
+        // impossible de savoir, sur une capture, quelle version avait produit
+        // le défaut qu'on regardait.
+        //
+        // Le code de version en dérive par le même calcul, pour qu'Android
+        // accepte chaque mise à jour par-dessus la précédente : 2.4 -> 204.
+        versionName = versionArbitre
+        versionCode = versionArbitre.split(".").let {
+            (it.getOrNull(0)?.toIntOrNull() ?: 0) * 100 + (it.getOrNull(1)?.toIntOrNull() ?: 0)
+        }
     }
 
     // Clé de débogage figée dans le dépôt, et non celle que chaque machine

@@ -19,6 +19,9 @@
 
     <!-- Accent : boutons, onglet actif, valeurs mises en avant. -->
     <color name="primaire">#FF00B4FF</color>
+    <!-- L'autre bout du dégradé de l'action principale. Un dégradé sur un
+         seul bouton par écran : deux, et il n'y a plus d'action principale. -->
+    <color name="bleu_clair">#FF5ED0FF</color>
 
     <!-- Les trois couleurs du verdict. -->
     <color name="vert">#FF22C55E</color>
