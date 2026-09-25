@@ -118,7 +118,67 @@ jobs:
 
           ## Ce que cette version ajoute
 
-          **Le comparateur de courses planifiées.** La version précédente
+          **L'application se range en quatre onglets** — accueil, courses,
+          simulateur, réglages — au lieu d'un écran unique qui défilait sur
+          trois mètres, où il fallait passer devant le barème pour voir
+          l'état des services et devant le simulateur pour régler le barème.
+
+          L'**accueil** ne porte que ce qu'on regarde entre deux courses :
+          est-ce que ça marche, et qu'a-t-il dit de la dernière offre. Son
+          voyant distingue trois situations, et la troisième est celle qui
+          compte : éteint, actif, et **autorisé mais non lié** — la panne où
+          Android affiche le service comme coché alors qu'il ne reçoit plus
+          rien, et où aucune offre n'arrive sans que quoi que ce soit ne le
+          signale.
+
+          Les **courses** réunissent l'historique des verdicts, trois
+          compteurs de session — dont le taux de prise, qu'on ne calcule
+          jamais de tête — et le comparateur de courses planifiées.
+
+          Le **simulateur** a changé de nature. Il déformait le barème sur une
+          course figée ; il déforme désormais la course sur un barème figé.
+          Quatre curseurs — prix, approche, distance, durée — et le verdict se
+          recalcule sous le doigt. On ne cherche plus « quel réglage me
+          convient » mais « à partir de quel prix cette course-là devient
+          bonne », qui est la question qu'on se pose vraiment au volant.
+
+          **L'euro par kilomètre passe devant l'euro par heure**, dans la
+          bulle, sur la pastille et dans le cockpit. Le second suppose une
+          durée, que le moteur estime lui-même quand la plateforme ne
+          l'annonce pas ; le premier ne suppose rien. Devant une offre qui
+          laisse douze secondes, le chiffre qui ne repose sur aucune hypothèse
+          mérite la grande taille.
+
+          **Il ne décide pas pour autant.** Un plancher d'euro par kilomètre
+          peut s'armer dans les réglages : c'est un veto et rien d'autre, il
+          refuse une course et n'en autorise jamais une. Il reste à zéro —
+          donc éteint — tant que tu ne l'as pas réglé, de sorte qu'aucun
+          verdict ne bouge à l'installation de cette version.
+
+          Le laisser éteint est d'ailleurs défendable, et c'est mesuré : sur
+          le relevé de dix-neuf courses planifiées, un plancher à 1,70 €/km en
+          refusait quinze, dont la troisième du classement — 32,50 € pour
+          28,7 km, soit 43 €/h client devant la porte. Une course longue
+          affiche mécaniquement un euro/kilomètre plus bas à rentabilité
+          égale, parce qu'elle étale son temps mort sur plus de kilomètres
+          payés.
+
+          **Le coût de roulage se décompose** en carburant, usure et coûts
+          fixes, réglables séparément et affichés ligne par ligne sous le
+          verdict. Un total de 3,30 € se croit ou ne se croit pas ; trois
+          lignes se vérifient, et se corrigent là où elles sont fausses. La
+          somme d'origine reste 0,22 €/km, et si tu avais changé ce réglage,
+          ta valeur est répartie dans les mêmes proportions plutôt que
+          remplacée.
+
+          **Nouvelle palette**, typographie en cinq niveaux, grille de 8. Les
+          néons poussés à saturation laissent la place à des teintes qui se
+          distinguent mieux entre elles : au volant, distinguer le verdict
+          compte plus que le voir de loin.
+
+          ## Ce que la version précédente avait ajouté
+
+          **Le comparateur de courses planifiées.** La version d'avant
           refusait les écrans de liste, et elle avait raison : les chiffres de
           deux courses s'y suivent dans le même texte, et les mélanger
           produisait des verdicts faux annoncés avec assurance. Refuser ne
@@ -158,9 +218,9 @@ jobs:
           as vu. Le bouton « Courses planifiées » de l'écran d'accueil le
           rouvre à froid.
 
-          ## Ce que la version précédente avait corrigé
+          ## Ce que les versions d'avant avaient corrigé
 
-          Elle ne venait pas d'une idée mais d'un relevé : **80 verdicts
+          Elles ne venaient pas d'une idée mais d'un relevé : **80 verdicts
           d'une vraie journée**, exportés depuis le journal. Ils ont démenti
           trois choses qui étaient jusque-là tenues pour acquises.
 
