@@ -51,16 +51,16 @@
         avec tout ce qui vient d'Android — il faut qu'on voie qu'elle
         appartient à l'application.
 
-        Les quatre onglets sont construits en Kotlin : même code pour les
-        quatre, et l'état actif se pose d'une boucle plutôt que de quatre blocs
-        XML qu'il faudrait tenir en accord.
+        Une seule vue, et non quatre cases côte à côte. L'indicateur qui
+        voyage d'un onglet à l'autre n'appartient à aucun des deux : il ne
+        peut donc vivre que sur une surface qui les contient tous. Voir
+        BarreOnglets.
     -->
-    <LinearLayout
+    <fr.ningbus.arbitre.BarreOnglets
         android:id="@+id/barre_onglets"
         android:layout_width="match_parent"
         android:layout_height="@dimen/hauteur_onglets"
         android:layout_marginStart="@dimen/espace_xs"
         android:layout_marginEnd="@dimen/espace_xs"
-        android:layout_marginBottom="@dimen/espace_xs"
-        android:orientation="horizontal" />
+        android:layout_marginBottom="@dimen/espace_xs" />
 </LinearLayout>

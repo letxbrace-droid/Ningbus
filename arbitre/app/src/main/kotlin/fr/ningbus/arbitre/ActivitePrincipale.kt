@@ -17,7 +17,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -182,45 +181,26 @@ class ActivitePrincipale : AppCompatActivity() {
         REGLAGES(R.string.onglet_reglages, R.drawable.ic_reglages, R.id.section_reglages),
     }
 
-    private val ongletsPeints = mutableListOf<Pair<Onglet, View>>()
     private var ongletCourant = Onglet.ACCUEIL
 
+    /**
+     * La barre d'onglets se contente désormais de recevoir ses quatre
+     * éléments : tout le dessin, le ressort et l'onde vivent dans
+     * [BarreOnglets]. L'activité ne sait plus que deux choses — quels onglets
+     * existent, et lequel est actif.
+     */
     private fun construireOnglets() {
-        val barre = findViewById<LinearLayout>(R.id.barre_onglets)
-        // La barre flotte au-dessus du fond : sur une dalle sans bordure,
-        // une barre collée en bas se confond avec le trait de navigation du
-        // système, et cesse d'appartenir à l'application.
-        barre.background = Peinture.carte(
-            this,
-            ContextCompat.getColor(this, R.color.primaire),
-            intensite = 0.04f,
-        )
-        for (onglet in Onglet.entries) {
-            val vue = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                isClickable = true
-                layoutParams = LinearLayout.LayoutParams(
-                    0, ViewGroup.LayoutParams.MATCH_PARENT, 1f,
-                )
-                setOnClickListener { afficher(onglet) }
-            }
-            vue.addView(
-                ImageView(this).apply {
-                    setImageResource(onglet.icone)
-                    layoutParams = LinearLayout.LayoutParams(dp(22), dp(22))
-                }
+        val barre = findViewById<BarreOnglets>(R.id.barre_onglets)
+        val elements = Onglet.entries.map { onglet ->
+            BarreOnglets.Element(
+                // Une copie par onglet : une icône partagée partagerait aussi
+                // sa teinte, et les quatre prendraient la couleur de la
+                // dernière peinte.
+                icone = ContextCompat.getDrawable(this, onglet.icone)!!.mutate(),
+                titre = getString(onglet.titre),
             )
-            vue.addView(
-                TextView(this).apply {
-                    text = getString(onglet.titre)
-                    textSize = 11f
-                    setPadding(0, dp(3), 0, 0)
-                }
-            )
-            barre.addView(vue)
-            ongletsPeints += onglet to vue
         }
+        barre.poser(elements) { index -> afficher(Onglet.entries[index]) }
         afficher(Onglet.ACCUEIL)
     }
 
@@ -260,26 +240,11 @@ class ActivitePrincipale : AppCompatActivity() {
                 .start()
         }
 
-        val actif = ContextCompat.getColor(this, R.color.primaire)
-        val dormant = ContextCompat.getColor(this, R.color.gris)
-        for ((cible, vue) in ongletsPeints) {
-            val choisi = cible == onglet
-            val teinte = if (choisi) actif else dormant
-            val colonne = vue as LinearLayout
-            val icone = colonne.getChildAt(0) as ImageView
-            icone.imageTintList = ColorStateList.valueOf(teinte)
-            (colonne.getChildAt(1) as TextView).setTextColor(teinte)
-
-            // L'icône de l'onglet choisi enfle très légèrement. C'est le
-            // retour tactile qui manque à une barre plate : on voit ce qu'on
-            // vient de toucher avant même d'avoir lu le libellé.
-            icone.animate()
-                .scaleX(if (choisi) 1.15f else 1f)
-                .scaleY(if (choisi) 1.15f else 1f)
-                .setDuration(DUREE_ONGLET)
-                .setInterpolator(OvershootInterpolator(1.6f))
-                .start()
-        }
+        // La barre se charge du reste : indicateur, teintes, libellés. Le
+        // premier affichage ne s'anime pas — une barre qui se met en place au
+        // démarrage donne l'impression d'un écran qui n'a pas fini de charger.
+        findViewById<BarreOnglets>(R.id.barre_onglets)
+            .choisir(Onglet.entries.indexOf(onglet), anime = !premier)
     }
 
     private var dejaAffiche = false

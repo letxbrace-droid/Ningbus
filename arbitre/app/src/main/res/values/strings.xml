@@ -40,6 +40,7 @@
     <string name="montant_introuvable">Écran lu, mais aucun montant exploitable. Il est enregistré dans le journal.</string>
     <string name="plusieurs_offres">Plusieurs courses sur cet écran : leurs chiffres se mélangeraient. Ouvre-en une seule.</string>
     <string name="ecran_bilan">Course déjà faite : rien à arbitrer. Sa durée réelle est notée pour corriger les estimations.</string>
+    <string name="onglet_actif">Onglets — %1$s sélectionné</string>
     <string name="reglage_correction_mesuree">Corriger les durées annoncées</string>
     <string name="aide_correction_mesuree">Compare la durée annoncée sur la carte d\'offre à celle constatée sur l\'écran de bilan, une fois la course faite. Sans effet tant que cinq courses n\'ont pas été rapprochées.</string>
 

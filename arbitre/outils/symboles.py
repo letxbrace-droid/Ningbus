@@ -49,6 +49,17 @@ arbitrer analyser juger comparer decouper lire dp fmt0 fmt1 fmt2 versCourse
 append longArrayOf minOf has isNull optDouble optInt optLong optString optJSONObject length
 startForeground stopSelf setShowBadge createNotificationChannel notify cancelAll
 setOnSeekBarChangeListener application constructor it tenable getOrElse
+
+# Membres hérités de View et consorts : ils sont définis par le cadre Android,
+# jamais dans le fichier qui les appelle. L'outil ne lit qu'un fichier à la
+# fois et ne peut pas les voir — les signaler noierait les vrais oublis, qui
+# sont la seule chose qu'il existe pour attraper.
+performHapticFeedback postInvalidateOnAnimation setWillNotDraw invalidate
+performClick postOnAnimation onSizeChanged onDraw onTouchEvent onMeasure
+setMeasuredDimension drawRoundRect drawCircle drawText clipRect save restore
+inset setBounds setTint setAlphaComponent blendARGB coerceIn coerceAtMost
+coerceAtLeast hypot abs min max obtainStyledAttributes recycle getDrawable
+mutate
 """.split())
 
 problemes = []

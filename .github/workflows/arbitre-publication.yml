@@ -118,6 +118,41 @@ jobs:
 
           ## Ce que cette version ajoute
 
+          **Une barre d'onglets dessinée, et non plus assemblée.** Quatre
+          cases côte à côte donnaient une barre correcte et sans caractère :
+          on ne peut animer que ce que le système expose — une échelle, une
+          teinte, une opacité — et jamais le passage d'un onglet à l'autre,
+          qui est pourtant le seul moment où cette barre existe vraiment. Un
+          indicateur qui voyage n'appartient à aucun des deux onglets qu'il
+          relie : il ne peut vivre que sur une surface qui les contient tous.
+
+          Ce qui se joue maintenant, du plus visible au plus subtil :
+
+          - **un indicateur qui voyage** au lieu de clignoter d'une case à
+            l'autre. C'est lui qui dit « tu viens de là, tu vas là », et une
+            interface qui le dit paraît rapide même quand elle ne l'est pas ;
+          - **un ressort, pas une courbe.** Un interpolateur joue une durée
+            fixe et repart de zéro si on le relance ; un ressort conserve la
+            vitesse qu'il avait. Trois appuis rapides donnent un mouvement
+            continu au lieu de trois saccades ;
+          - **l'étirement.** L'indicateur s'allonge dans le sens du
+            déplacement, à proportion de sa vitesse, et reprend sa forme en
+            arrivant. C'est le vieux principe du dessin animé, et c'est ce qui
+            sépare une animation d'un déplacement ;
+          - **les libellés sous le seul onglet actif**, en fondu lié à la
+            position de l'indicateur, l'icône remontant pour leur faire place.
+            Trois mots en moins à lire ;
+          - **une onde partie du point touché**, et un retour haptique.
+
+          Chaque onglet est traité selon sa **distance** à l'indicateur, et non
+          selon un booléen actif/inactif : les deux se répondent pendant le
+          trajet au lieu de basculer d'un coup à mi-chemin.
+
+          Rien de tout cela n'ajoute un kilo-octet ni une dépendance. C'est du
+          Kotlin et un `Canvas` — la question n'a jamais été le langage.
+
+          ## Ce que la version précédente ajoutait
+
           **L'appli mesure de combien les plateformes se trompent.** Tu le
           savais déjà — les durées annoncées sont optimistes, et un chauffeur
           qui accepte sur cette base travaille plus longtemps qu'il ne l'a
@@ -156,7 +191,7 @@ jobs:
           instant où ce chiffre existe, et le journal d'Arbitre le seul endroit
           où il survit.
 
-          ## Ce que cette version corrige
+          ## Ce que la version précédente corrigeait
 
           **Le compteur « prises » ne comptait pas les courses prises.** Il
           affichait « 1 prise (4 %) » alors qu'il dénombre les verdicts
@@ -166,7 +201,7 @@ jobs:
           jugement sur le chauffeur, là où le chiffre juge les offres reçues.
           Il dit maintenant **« à prendre »**.
 
-          ## Ce que la version précédente ajoutait
+          ## Et avant : le budget d'approche
 
           **Le budget d'approche, sur les offres en direct.** Quand l'offre
           n'annonce pas d'approche — le cas le plus fréquent chez Uber — le
@@ -186,7 +221,7 @@ jobs:
           1,11 €/km — au-dessus du seuil que tout le monde utilise — et paie
           17 €/h.
 
-          ## Ce que la version précédente corrigeait
+          ## Et avant : le garde-fou des prix
 
           **Un prix impossible ne passe plus au vert.** Une carte relevée le
           25/09 a été arbitrée sur un montant de **4 768,00 €** pour 47,7 km,
