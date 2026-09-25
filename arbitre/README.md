@@ -9,7 +9,7 @@ un mot :
 ┌──────────────────────────────────────────────┐
 │  LAISSE                          ⚡ 594 ms   │  1. la décision
 ├──────────────────────────────────────────────┤
-│  20 €/h                          0,36 €/km   │  2. l'argent
+│  0,73 €/km                           20 €/h  │  2. l'argent
 │  ━━━━━━━━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━      │
 │            objectif 25 €/h                   │
 │                                              │
@@ -17,6 +17,8 @@ un mot :
 │    charge                                    │
 │                                              │
 │  28,1 km · 30 min mobilisées · 10,24 € net   │  3. les contraintes
+│  carburant 3,65 € · usure 1,40 € ·           │     le coût, poste par poste
+│  fixes 1,12 €                                │
 │                                              │
 │  course 16,4 km · durée estimée              │  4. l'explication
 │  approche 6,0 km · 5 min                     │
@@ -28,11 +30,21 @@ un mot :
 └──────────────────────────────────────────────┘
 ```
 
+**L'euro par kilomètre passe devant l'euro par heure**, et ce n'est pas un
+choix de mise en page. Le second suppose une durée, que le moteur estime
+lui-même quand la plateforme ne l'annonce pas ; le premier ne suppose rien.
+Devant une offre qui laisse douze secondes, le chiffre qui ne repose sur
+aucune hypothèse mérite la grande taille — et c'est celui que tout le métier
+compare d'une plateforme à l'autre.
+
+Il ne décide pas pour autant : voir
+[« Deux euros par kilomètre, et un seul plancher »](#deux-euros-par-kilomètre-et-un-seul-plancher).
+
 **Cinq étages, et le chauffeur doit pouvoir s'arrêter au premier.** Tout ce qui
 suit le deuxième est là pour justifier après coup, jamais pour décider.
 
 Trois gestes, aucun qui demande de viser au volant : un appui la réduit à ses
-deux premiers étages — `🔴 20 €/h — LAISSE` — et le choix est retenu d'une
+deux premiers étages — `🔴 0,73 €/km — LAISSE` — et le choix est retenu d'une
 offre à l'autre ; un glissement vertical la déplace et retient sa place ; un
 appui long ouvre le journal.
 
@@ -45,6 +57,67 @@ ne rapporte.
 « 16,4 de course, 6,0 d'approche, 5,7 de retour à vide » dit tout — et rend
 criante une approche lue quatre fois trop grande, ce qui est exactement
 arrivé sur la course reproduite ci-dessus.
+
+---
+
+## L'application, en quatre destinations
+
+Elle n'en avait qu'une : un écran qui défilait sur trois mètres, où il fallait
+passer devant le barème pour voir l'état des services, et devant le simulateur
+pour régler le barème.
+
+| Onglet | Ce qu'on y fait |
+|---|---|
+| **Accueil** | Est-ce que ça marche, et qu'a-t-il dit de la dernière offre. Rien ne s'y règle : un écran d'accueil sur lequel on règle quelque chose n'est plus un accueil. |
+| **Courses** | L'historique des verdicts, trois compteurs de session, et le comparateur de courses planifiées. La même question posée avant et après. |
+| **Simulateur** | Quatre curseurs qui déforment une course fictive — prix, approche, distance, durée — et le verdict recalculé sous le doigt. |
+| **Réglages** | Le barème, la détection, l'interface, le diagnostic système. |
+
+Le **voyant d'état** de l'accueil distingue trois situations, et la troisième
+est celle qui compte : *éteint*, *actif*, et **autorisé mais non lié** — la
+panne où Android affiche le service comme coché alors qu'il ne reçoit plus
+rien, et où aucune offre n'arrive sans que quoi que ce soit ne le signale.
+
+Le **simulateur a changé de nature**, et c'est un progrès. Il déformait le
+barème sur une course figée ; il déforme désormais la course sur un barème
+figé. On ne cherche plus « quel réglage me convient » mais « à partir de quel
+prix cette course-là devient bonne », qui est la question qu'on se pose
+vraiment au volant.
+
+### Deux euros par kilomètre, et un seul plancher
+
+Ils ne se confondent pas, et l'écart est spectaculaire — sur la course de
+Grigny, l'un dit **2,06** et l'autre **0,36** :
+
+| | Calcul | À quoi il sert |
+|---|---|---|
+| **€/km** | prix ÷ (approche + course) | Ce qui s'affiche. Immédiat, ne suppose aucune durée, comparable d'une plateforme à l'autre. |
+| **€/km net** | (prix − coûts) ÷ tous les km, retour compris | Ce qui reste vraiment. Affiché dans le journal, à côté du premier. |
+
+Un **plancher d'euro par kilomètre** peut s'armer dans les réglages. C'est un
+veto et rien d'autre : il refuse une course, il n'en autorise jamais une. Il
+reste à zéro — donc éteint — tant qu'il n'est pas réglé, de sorte qu'aucun
+verdict ne bouge à la mise à jour.
+
+**Il ne remplace pas l'objectif horaire, et il ne le peut pas.** Un plancher à
+1,70 €/km, mesuré sur un relevé de dix-neuf courses planifiées, en refusait
+quinze — dont la troisième du classement : 32,50 € pour 28,7 km, soit 43 €/h
+client devant la porte. C'est mécanique, et non accidentel : une course longue
+affiche un euro/kilomètre plus bas à rentabilité égale, parce qu'elle étale son
+temps mort sur plus de kilomètres payés.
+
+### Le coût de roulage, poste par poste
+
+Un total de 3,30 € se croit ou ne se croit pas ; « carburant 1,30, usure 1,10,
+coûts fixes 0,90 » se vérifie, et se corrige là où il est faux. Les trois se
+règlent séparément parce qu'un chauffeur sait ce que lui coûte son carburant —
+c'est le ticket de la station divisé par les kilomètres du plein — et n'a
+aucune idée de ce que lui coûtent ses pneus.
+
+La somme d'origine reste **0,22 €/km**, et la migration répartit une valeur
+déjà réglée dans les mêmes proportions plutôt que d'imposer les trois valeurs
+par défaut : un réglage qu'on a pris la peine de changer ne se perd pas dans
+une mise à jour.
 
 ---
 
