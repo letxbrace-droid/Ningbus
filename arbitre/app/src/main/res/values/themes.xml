@@ -73,6 +73,34 @@
         <item name="android:layout_marginTop">@dimen/espace_m</item>
     </style>
 
+    <!--
+        L'interrupteur, en Material 3.
+
+        Le modèle d'AppCompat — un petit rail et une pastille — se lit mal au
+        volant et se confond d'un état à l'autre. Celui-ci a une piste pleine,
+        un pouce qui grossit quand il s'allume, et une animation qui dit dans
+        quel sens on vient de le pousser. Il coûte trois listes de couleurs, et
+        c'est la différence entre « je crois que c'est activé » et « c'est
+        activé ».
+    -->
+    <style name="Interrupteur" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/bulle_texte</item>
+        <item name="thumbTint">@color/interrupteur_pouce</item>
+        <item name="trackTint">@color/interrupteur_piste</item>
+        <item name="trackDecorationTint">@color/interrupteur_contour</item>
+    </style>
+
+    <!-- Le texte d'aide qui suit un réglage : présent, jamais bavard. -->
+    <style name="Aide" parent="Texte.T2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">@dimen/espace_xs</item>
+    </style>
+
     <!-- Une carte : la surface sur laquelle vit tout contenu. -->
     <style name="Carte">
         <item name="android:layout_width">match_parent</item>

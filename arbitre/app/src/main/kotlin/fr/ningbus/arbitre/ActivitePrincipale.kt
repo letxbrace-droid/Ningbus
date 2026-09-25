@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,8 @@ import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -29,6 +32,7 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import fr.ningbus.arbitre.moteur.Arbitre
 import fr.ningbus.arbitre.moteur.Bareme
 import fr.ningbus.arbitre.moteur.Course
@@ -139,6 +143,7 @@ class ActivitePrincipale : AppCompatActivity() {
 
         construireChamps()
         construireCurseurs()
+        construireResultat()
         demanderNotifications()
         ServiceVeille.creerCanaux(this)
         ServiceVeille.synchroniser(this)
@@ -208,25 +213,89 @@ class ActivitePrincipale : AppCompatActivity() {
      * Bascule d'onglet.
      *
      * Les sections sont toutes présentes et seule leur visibilité change :
-     * une bascule doit être instantanée, et reconstruire une section à chaque
-     * appui ferait perdre la position de défilement — le genre de détail
-     * qu'on ne remarque que lorsqu'il manque.
+     * reconstruire une section à chaque appui ferait perdre la position de
+     * défilement — le genre de détail qu'on ne remarque que lorsqu'il manque.
+     *
+     * Le fondu et les quelques pixels de remontée ne sont pas de la
+     * décoration : sans eux, l'écran change d'un coup et l'œil ne sait pas
+     * s'il a changé d'onglet ou si l'application a sauté. Deux cents
+     * millisecondes suffisent à le dire, et restent sous le seuil où
+     * l'attente devient perceptible.
      */
     private fun afficher(onglet: Onglet) {
+        val premier = ongletCourant == onglet && !dejaAffiche
+        dejaAffiche = true
         ongletCourant = onglet
+
         for (autre in Onglet.entries) {
-            findViewById<View>(autre.section).visibility =
-                if (autre == onglet) View.VISIBLE else View.GONE
+            val vue = findViewById<View>(autre.section)
+            if (autre != onglet) {
+                vue.visibility = View.GONE
+                continue
+            }
+            if (vue.visibility == View.VISIBLE && !premier) continue
+            vue.alpha = 0f
+            vue.translationY = dp(12).toFloat()
+            vue.visibility = View.VISIBLE
+            vue.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(DUREE_ONGLET)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
         }
+
         val actif = ContextCompat.getColor(this, R.color.primaire)
         val dormant = ContextCompat.getColor(this, R.color.gris)
         for ((cible, vue) in ongletsPeints) {
-            val teinte = if (cible == onglet) actif else dormant
-            (vue as LinearLayout).let { colonne ->
-                (colonne.getChildAt(0) as ImageView).imageTintList = ColorStateList.valueOf(teinte)
-                (colonne.getChildAt(1) as TextView).setTextColor(teinte)
-            }
+            val choisi = cible == onglet
+            val teinte = if (choisi) actif else dormant
+            val colonne = vue as LinearLayout
+            val icone = colonne.getChildAt(0) as ImageView
+            icone.imageTintList = ColorStateList.valueOf(teinte)
+            (colonne.getChildAt(1) as TextView).setTextColor(teinte)
+
+            // L'icône de l'onglet choisi enfle très légèrement. C'est le
+            // retour tactile qui manque à une barre plate : on voit ce qu'on
+            // vient de toucher avant même d'avoir lu le libellé.
+            icone.animate()
+                .scaleX(if (choisi) 1.15f else 1f)
+                .scaleY(if (choisi) 1.15f else 1f)
+                .setDuration(DUREE_ONGLET)
+                .setInterpolator(OvershootInterpolator(1.6f))
+                .start()
         }
+    }
+
+    private var dejaAffiche = false
+
+    /**
+     * Une surface teintée de la couleur du verdict.
+     *
+     * Mélangée à la surface plutôt que posée par-dessus en transparence : le
+     * résultat est opaque, donc exact, et ne dépend pas de ce qu'il y a
+     * derrière. Douze pour cent suffisent — au-delà, la carte devient un
+     * aplat de couleur et le chiffre qu'elle porte cesse de ressortir.
+     */
+    private fun fondVerdict(couleur: Int): GradientDrawable = GradientDrawable().apply {
+        val densite = resources.displayMetrics.density
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 16f * densite
+        setColor(
+            ColorUtils.blendARGB(
+                ContextCompat.getColor(this@ActivitePrincipale, R.color.nuit_carte),
+                couleur,
+                0.12f,
+            )
+        )
+        setStroke((1.5f * densite).toInt(), ColorUtils.setAlphaComponent(couleur, 120))
+    }
+
+    /** L'ondulation du système, pour tout ce qui réagit au doigt. */
+    private fun ondulation(vue: View) {
+        val attributs = obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
+        vue.background = attributs.getDrawable(0)
+        attributs.recycle()
     }
 
     // --- Accueil : le cockpit ------------------------------------------------
@@ -315,7 +384,12 @@ class ActivitePrincipale : AppCompatActivity() {
             textSize = 12f
             gravity = Gravity.CENTER
             setTextColor(ContextCompat.getColor(this@ActivitePrincipale, couleur))
-            setBackgroundResource(R.drawable.fond_chip)
+            // Une pilule qui réagit le montre en ondulant ; une pilule qui
+            // informe reste inerte. Sans cette différence, on appuie deux fois
+            // avant de comprendre qu'il ne se passera rien.
+            setBackgroundResource(
+                if (action == null) R.drawable.fond_chip else R.drawable.fond_chip_cliquable
+            )
             setPadding(dp(10), dp(8), dp(10), dp(8))
             action?.let {
                 isClickable = true
@@ -347,6 +421,13 @@ class ActivitePrincipale : AppCompatActivity() {
         findViewById<TextView>(R.id.age_derniere).text = age(ligne.horodatage)
 
         val couleur = ContextCompat.getColor(this, teinteDe(ligne.decision))
+
+        // La carte prend la couleur du verdict. C'est ce qui manquait le plus :
+        // un cockpit où seul le chiffre était coloré se lisait comme un
+        // tableau, et il faut qu'il se lise comme un feu.
+        carte.background = fondVerdict(couleur)
+        carte.alpha = 0f
+        carte.animate().alpha(1f).setDuration(DUREE_ONGLET).start()
 
         // Étage 1 : l'euro par kilomètre, puis l'euro/heure. Dans cet ordre
         // parce que le premier ne suppose aucune durée, et que c'est celui
@@ -406,6 +487,44 @@ class ActivitePrincipale : AppCompatActivity() {
                 )
             )
         }
+    }
+
+    /**
+     * Trois colonnes dont on garde la main sur les valeurs.
+     *
+     * Pour tout ce qui se rafraîchit souvent — le simulateur au doigt — il
+     * faut pouvoir écrire dans les vues plutôt que de les recréer.
+     */
+    private class Trio(val vue: View, val valeurs: List<TextView>)
+
+    private fun trio(legendes: List<String>): Trio {
+        val ligne = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(12), 0, 0)
+        }
+        val valeurs = legendes.map { legende ->
+            val colonne = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                )
+            }
+            val valeur = TextView(this).apply {
+                textSize = 16f
+                setTypeface(typeface, Typeface.BOLD)
+            }
+            colonne.addView(valeur)
+            colonne.addView(
+                TextView(this).apply {
+                    text = legende
+                    textSize = 11f
+                    alpha = 0.65f
+                }
+            )
+            ligne.addView(colonne)
+            valeur
+        }
+        return Trio(ligne, valeurs)
     }
 
     /** Trois valeurs et leurs légendes, la brique de base du cockpit. */
@@ -582,7 +701,10 @@ class ActivitePrincipale : AppCompatActivity() {
         val bloc = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setBackgroundResource(R.drawable.fond_carte)
+            // Le verdict teinte la ligne entière, et non le seul chiffre de
+            // droite : une liste de vingt courses se parcourt à la couleur,
+            // pas à la lecture.
+            background = fondVerdict(couleur)
             setPadding(dp(12), dp(10), dp(12), dp(10))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -771,6 +893,7 @@ class ActivitePrincipale : AppCompatActivity() {
             setPadding(dp(8), dp(9), dp(8), dp(9))
             organe.action?.let { action ->
                 isClickable = true
+                ondulation(this)
                 setOnClickListener { action() }
             }
         }
@@ -1148,6 +1271,68 @@ class ActivitePrincipale : AppCompatActivity() {
     private fun depuisPas(c: Curseur, pas: Int): Double =
         c.minimum + (c.maximum - c.minimum) * pas / PAS_CURSEUR
 
+    // Les vues du résultat, construites une seule fois.
+    //
+    // Elles l'étaient à chaque mouvement du doigt : une dizaine de vues
+    // détruites et recréées par pixel de curseur, ce qui donnait exactement
+    // la sensation poisseuse qu'un simulateur ne doit pas avoir. Elles ne
+    // changent plus que de texte et de couleur.
+    private lateinit var resultatEuroKm: TextView
+    private lateinit var resultatHeure: TextView
+    private lateinit var resultatMotif: TextView
+    private lateinit var resultatChiffres: List<TextView>
+    private lateinit var resultatRaisons: List<TextView>
+
+    private fun construireResultat() {
+        val carte = findViewById<LinearLayout>(R.id.carte_resultat)
+
+        carte.addView(
+            TextView(this).apply {
+                text = getString(R.string.resultat_simulation)
+                textSize = 12f
+                alpha = 0.65f
+            }
+        )
+        resultatEuroKm = TextView(this).apply {
+            textSize = 32f
+            setTypeface(typeface, Typeface.BOLD)
+        }
+        carte.addView(resultatEuroKm)
+
+        resultatHeure = TextView(this).apply { textSize = 16f }
+        carte.addView(resultatHeure)
+
+        val chiffres = trio(listOf("coûts estimés", "gain net", "temps total"))
+        resultatChiffres = chiffres.valeurs
+        carte.addView(chiffres.vue)
+
+        carte.addView(
+            TextView(this).apply {
+                text = getString(R.string.pourquoi)
+                textSize = 12f
+                alpha = 0.65f
+                setPadding(0, dp(14), 0, dp(4))
+            }
+        )
+
+        val raisons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        resultatRaisons = (0 until 3).map { index ->
+            chip("", R.color.gris).also { pilule ->
+                pilule.layoutParams = LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+                ).apply { if (index > 0) marginStart = dp(8) }
+                raisons.addView(pilule)
+            }
+        }
+        carte.addView(raisons)
+
+        resultatMotif = TextView(this).apply {
+            textSize = 13f
+            setPadding(0, dp(8), 0, 0)
+        }
+        carte.addView(resultatMotif)
+    }
+
     /**
      * Recalcule le verdict de la course fictive et l'affiche.
      *
@@ -1163,9 +1348,6 @@ class ActivitePrincipale : AppCompatActivity() {
         }
 
         val verdict = Arbitre.arbitrer(simulation.versCourse(bareme), bareme)
-        val carte = findViewById<LinearLayout>(R.id.carte_resultat)
-        carte.removeAllViews()
-
         val couleur = ContextCompat.getColor(
             this,
             when (verdict.decision) {
@@ -1176,54 +1358,22 @@ class ActivitePrincipale : AppCompatActivity() {
             },
         )
 
-        carte.addView(
-            TextView(this).apply {
-                text = getString(R.string.resultat_simulation)
-                textSize = 12f
-                alpha = 0.65f
-            }
-        )
-        carte.addView(
-            TextView(this).apply {
-                text = "${fmt2(verdict.euroKmRoule)} €/km"
-                textSize = 32f
-                setTypeface(typeface, Typeface.BOLD)
-                setTextColor(couleur)
-            }
-        )
-        carte.addView(
-            TextView(this).apply {
-                text = "${fmt0(verdict.euroHeure)} €/h  ·  ${verdict.decision.libelle}"
-                textSize = 16f
-                setTextColor(couleur)
-            }
-        )
-        carte.addView(
-            troisColonnes(
-                "${fmt2(coutTotal(verdict))} €" to "coûts estimés",
-                "${fmt2(verdict.revenuNet)} €" to "gain net",
-                "${fmt0(verdict.minutesTotal)} min" to "temps total",
-            )
-        )
-        carte.addView(
-            TextView(this).apply {
-                text = getString(R.string.pourquoi)
-                textSize = 12f
-                alpha = 0.65f
-                setPadding(0, dp(14), 0, dp(4))
-            }
-        )
-        carte.addView(raisons(verdict, bareme))
-        verdict.motif?.let { motif ->
-            carte.addView(
-                TextView(this).apply {
-                    text = motif
-                    textSize = 13f
-                    setTextColor(couleur)
-                    setPadding(0, dp(8), 0, 0)
-                }
-            )
-        }
+        findViewById<LinearLayout>(R.id.carte_resultat).background = fondVerdict(couleur)
+
+        resultatEuroKm.text = "${fmt2(verdict.euroKmRoule)} €/km"
+        resultatEuroKm.setTextColor(couleur)
+        resultatHeure.text = "${fmt0(verdict.euroHeure)} €/h  ·  ${verdict.decision.libelle}"
+        resultatHeure.setTextColor(couleur)
+
+        resultatChiffres[0].text = "${fmt2(coutTotal(verdict))} €"
+        resultatChiffres[1].text = "${fmt2(verdict.revenuNet)} €"
+        resultatChiffres[2].text = "${fmt0(verdict.minutesTotal)} min"
+
+        peindreRaisons(verdict, bareme)
+
+        resultatMotif.text = verdict.motif.orEmpty()
+        resultatMotif.setTextColor(couleur)
+        resultatMotif.visibility = if (verdict.motif == null) View.GONE else View.VISIBLE
     }
 
     private fun coutTotal(verdict: Verdict): Double? {
@@ -1240,9 +1390,7 @@ class ActivitePrincipale : AppCompatActivity() {
      * pour la circonstance : une pilule qui jugerait selon un chiffre venu de
      * nulle part serait pire que pas de pilule du tout.
      */
-    private fun raisons(verdict: Verdict, bareme: Bareme): View {
-        val ligne = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-
+    private fun peindreRaisons(verdict: Verdict, bareme: Bareme) {
         val euroHeure = verdict.euroHeure
         val euroKm = verdict.euroKmRoule
         val part = verdict.partMorte
@@ -1260,19 +1408,20 @@ class ActivitePrincipale : AppCompatActivity() {
             ),
             Triple(
                 "${fmt0((part ?: 0.0) * 100)} % non payé",
-                part != null && part <= 0.45,
+                part != null && part <= SEUIL_TEMPS_MORT,
                 part != null,
             ),
         )
-        for ((index, p) in pilules.withIndex()) {
+        for ((pilule, p) in resultatRaisons.zip(pilules)) {
             val (texte, bon, connu) = p
-            val vue = chip(texte, if (!connu) R.color.gris else if (bon) R.color.vert else R.color.ambre)
-            vue.layoutParams = LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
-            ).apply { if (index > 0) marginStart = dp(8) }
-            ligne.addView(vue)
+            pilule.text = texte
+            pilule.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    if (!connu) R.color.gris else if (bon) R.color.vert else R.color.ambre,
+                )
+            )
         }
-        return ligne
     }
 
     private fun arrondi(valeur: Double, decimales: Int): String = when (decimales) {
@@ -1365,5 +1514,21 @@ class ActivitePrincipale : AppCompatActivity() {
     private companion object {
         /** Finesse des curseurs : assez pour le centime, pas plus. */
         const val PAS_CURSEUR = 200
+
+        /**
+         * Le même seuil de temps mort que le moteur, et non un second.
+         * Une pilule qui jugerait selon un chiffre propre à l'écran dirait
+         * autre chose que le verdict qu'elle accompagne.
+         */
+        const val SEUIL_TEMPS_MORT = 0.45
+
+        /**
+         * Durée d'une bascule d'onglet, en millisecondes.
+         *
+         * Assez pour que l'œil suive le mouvement, assez peu pour qu'on
+         * n'attende pas : au-delà de 250 ms, une transition d'interface cesse
+         * d'être ressentie comme une réponse et devient une animation.
+         */
+        const val DUREE_ONGLET = 200L
     }
 }

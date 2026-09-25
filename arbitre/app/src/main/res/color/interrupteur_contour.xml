@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le liseré de la piste : invisible quand elle est pleine, net quand elle
+     est vide — sans lui, un interrupteur éteint se confond avec le fond. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/primaire" android:state_checked="true" />
+    <item android:color="#4DFFFFFF" />
+</selector>

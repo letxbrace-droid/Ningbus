@@ -80,6 +80,7 @@
              touchent, et chacun ouvre ce qu'il faut pour le rallumer. -->
         <LinearLayout
             android:id="@+id/conteneur_chips"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/espace_xs"
@@ -110,6 +111,7 @@
 
         <LinearLayout
             android:id="@+id/carte_derniere"
+            android:animateLayoutChanges="true"
             style="@style/Carte" />
 
         <TextView

@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.DecelerateInterpolator
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -44,7 +45,7 @@ import kotlin.math.abs
 object Bulle {
 
     private val principal = Handler(Looper.getMainLooper())
-    private val fermeture = Runnable { retirer() }
+    private val fermeture = Runnable { effacer() }
 
     private var vue: View? = null
     private var gestionnaire: WindowManager? = null
@@ -54,6 +55,17 @@ object Bulle {
 
     /** Durée d'appui à partir de laquelle on ouvre le journal. */
     private const val APPUI_LONG_MS = 550L
+
+    /**
+     * Durée de l'entrée de la bulle, en millisecondes.
+     *
+     * Assez pour que l'œil suive le mouvement au lieu de chercher ce qui a
+     * changé, trop peu pour retarder une décision qui n'a que douze secondes.
+     */
+    private const val DUREE_ENTREE_MS = 180L
+
+    /** Durée de la sortie : plus courte que l'entrée, car on ne la regarde pas. */
+    private const val DUREE_SORTIE_MS = 140L
 
     fun afficher(
         contexte: Context,
@@ -144,6 +156,28 @@ object Bulle {
         vue = racine
         gestionnaire = wm
 
+        // La bulle descend en place plutôt que d'apparaître d'un coup.
+        //
+        // Elle se pose par-dessus une application que le chauffeur est en
+        // train de regarder : surgir sans transition est perçu comme un
+        // à-coup de l'application du dessous, et fait chercher des yeux ce qui
+        // vient de bouger. Le mouvement dit d'où elle vient, et l'œil la suit
+        // au lieu de la découvrir. Cent quatre-vingts millisecondes — assez
+        // pour être vu, trop peu pour retarder une décision qui en a douze.
+        val carte = racine.findViewById<View>(R.id.carte)
+        carte.alpha = 0f
+        carte.translationY = -24f * contexte.resources.displayMetrics.density
+        carte.scaleX = 0.97f
+        carte.scaleY = 0.97f
+        carte.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(DUREE_ENTREE_MS)
+            .setInterpolator(DecelerateInterpolator(1.4f))
+            .start()
+
         // La carte s'efface, la pilule de la pastille reste. C'est ce qui
         // permet de laisser la bulle courte sans rien perdre : douze secondes
         // suffisent à décider, une minute à se souvenir de ce qu'on a laissé.
@@ -151,6 +185,27 @@ object Bulle {
 
         principal.removeCallbacks(fermeture)
         principal.postDelayed(fermeture, reglages.secondesAffichage * 1000L)
+    }
+
+    /**
+     * Retire la bulle en la laissant s'effacer.
+     *
+     * Réservé à la fin normale du compte à rebours : une bulle remplacée par
+     * la suivante, ou fermée d'un geste, doit partir à l'instant — sans quoi
+     * deux cartes se chevaucheraient le temps de l'animation.
+     */
+    private fun effacer() {
+        val v = vue
+        if (v == null) {
+            retirer()
+            return
+        }
+        v.findViewById<View>(R.id.carte).animate()
+            .alpha(0f)
+            .translationY(-12f * v.resources.displayMetrics.density)
+            .setDuration(DUREE_SORTIE_MS)
+            .withEndAction { retirer() }
+            .start()
     }
 
     private fun retirer() {

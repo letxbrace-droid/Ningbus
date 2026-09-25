@@ -35,42 +35,29 @@
             android:text="@string/titre_rentabilite" />
 
         <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/Aide"
             android:text="@string/aide_bareme" />
 
         <LinearLayout
             android:id="@+id/conteneur_rentabilite"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:orientation="vertical" />
+            style="@style/Carte" />
 
         <TextView
             style="@style/Rubrique"
             android:text="@string/titre_course" />
 
         <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/Aide"
             android:text="@string/aide_course" />
 
         <LinearLayout
             android:id="@+id/conteneur_course"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:orientation="vertical" />
+            style="@style/Carte" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/prudence"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/prudence_active"
-            android:textSize="15sp" />
+            style="@style/Interrupteur"
+            android:text="@string/prudence_active" />
 
         <Button
             android:id="@+id/bouton_defaut"
@@ -85,71 +72,52 @@
             style="@style/Rubrique"
             android:text="@string/titre_detection" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/actif"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/arbitrage_actif"
-            android:textSize="15sp" />
+        <LinearLayout
+            style="@style/Carte"
+            android:animateLayoutChanges="true">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/filtre_ecrans"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/filtre_ecrans"
-            android:textSize="15sp" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/actif"
+                style="@style/Interrupteur"
+                android:text="@string/arbitrage_actif" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/ocr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/ocr_secours"
-            android:textSize="15sp" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/filtre_ecrans"
+                style="@style/Interrupteur"
+                android:text="@string/filtre_ecrans" />
 
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_ocr" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/ocr"
+                style="@style/Interrupteur"
+                android:text="@string/ocr_secours" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/veille"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/veille"
-            android:textSize="15sp" />
+            <TextView
+                style="@style/Aide"
+                android:text="@string/aide_ocr" />
 
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_veille" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/veille"
+                style="@style/Interrupteur"
+                android:text="@string/veille" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/decouverte"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/decouverte_active"
-            android:textSize="15sp" />
+            <TextView
+                style="@style/Aide"
+                android:text="@string/aide_veille" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/toutes_apps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/toutes_apps"
-            android:textSize="15sp" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/decouverte"
+                style="@style/Interrupteur"
+                android:text="@string/decouverte_active" />
 
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_toutes_apps" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/toutes_apps"
+                style="@style/Interrupteur"
+                android:text="@string/toutes_apps" />
+
+            <TextView
+                style="@style/Aide"
+                android:text="@string/aide_toutes_apps" />
+        </LinearLayout>
 
         <!-- Applications écoutées -->
 
@@ -161,13 +129,12 @@
             android:text="@string/titre_apps" />
 
         <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/Aide"
             android:text="@string/aide_apps" />
 
         <LinearLayout
             android:id="@+id/conteneur_apps"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -205,79 +172,65 @@
             android:text="@string/titre_affichage" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            style="@style/Carte">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/espace_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Texte.T1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/duree_bulle" />
+
+                <EditText
+                    android:id="@+id/champ_secondes"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:gravity="end"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/compact"
+                style="@style/Interrupteur"
+                android:text="@string/mode_compact" />
 
             <TextView
-                style="@style/Texte.T1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/duree_bulle" />
+                style="@style/Aide"
+                android:text="@string/aide_mode_compact" />
 
-            <EditText
-                android:id="@+id/champ_secondes"
-                android:layout_width="96dp"
-                android:layout_height="wrap_content"
-                android:autofillHints=""
-                android:gravity="end"
-                android:importantForAutofill="no"
-                android:inputType="number"
-                android:textSize="17sp" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/details_couts"
+                style="@style/Interrupteur"
+                android:text="@string/details_couts" />
+
+            <TextView
+                style="@style/Aide"
+                android:text="@string/aide_details_couts" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/bouton_flottant"
+                style="@style/Interrupteur"
+                android:text="@string/bouton_flottant" />
+
+            <TextView
+                style="@style/Aide"
+                android:text="@string/aide_bouton_flottant" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/vibration"
+                style="@style/Interrupteur"
+                android:text="@string/vibration_active" />
         </LinearLayout>
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/compact"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/mode_compact"
-            android:textSize="15sp" />
-
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_mode_compact" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/details_couts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/details_couts"
-            android:textSize="15sp" />
-
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_details_couts" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/bouton_flottant"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/bouton_flottant"
-            android:textSize="15sp" />
-
-        <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aide_bouton_flottant" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/vibration"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/espace_xs"
-            android:text="@string/vibration_active"
-            android:textSize="15sp" />
 
         <!-- ================= 🔧 Diagnostic système ================= -->
 
@@ -286,15 +239,14 @@
             android:text="@string/titre_diagnostic" />
 
         <TextView
-            style="@style/Texte.T2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/Aide"
             android:text="@string/aide_diagnostic" />
 
         <!-- Une ligne par organe : une puce, un nom, un état. Les listes de
              texte se lisent mal d'un coup d'œil ; une puce rouge, non. -->
         <LinearLayout
             android:id="@+id/conteneur_sante"
+            android:animateLayoutChanges="true"
             style="@style/Carte"
             android:padding="@dimen/espace_xs" />
 

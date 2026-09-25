@@ -31,6 +31,7 @@
 
         <LinearLayout
             android:id="@+id/conteneur_stats"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/espace_s"
@@ -40,6 +41,7 @@
 
         <LinearLayout
             android:id="@+id/conteneur_filtres"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/espace_s"
@@ -49,6 +51,7 @@
 
         <LinearLayout
             android:id="@+id/conteneur_historique"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/espace_xs"

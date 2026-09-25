@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Une carte sur laquelle on peut appuyer.
+
+    L'ondulation n'est pas décorative : sans elle, rien ne distingue une carte
+    qui réagit d'une carte qui informe, et l'utilisateur appuie deux fois
+    avant de comprendre qu'il ne se passera rien.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#26FFFFFF">
+    <item android:drawable="@drawable/fond_carte" />
+</ripple>

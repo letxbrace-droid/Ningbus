@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Une pilule sur laquelle on peut appuyer : filtre, voyant, raccourci. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#33FFFFFF">
+    <item android:drawable="@drawable/fond_chip" />
+</ripple>

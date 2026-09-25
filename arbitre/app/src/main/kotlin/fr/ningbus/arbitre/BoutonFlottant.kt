@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.OvershootInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import fr.ningbus.arbitre.moteur.Decision
@@ -46,6 +47,9 @@ object BoutonFlottant {
 
     /** Temps pendant lequel la pilule garde le dernier verdict. */
     private const val DUREE_VERDICT_MS = 60_000L
+
+    /** Durée de la pulsation qui signale un nouveau verdict. */
+    private const val DUREE_PULSATION_MS = 320L
 
     fun montrer(contexte: Context) {
         val app = contexte.applicationContext
@@ -118,6 +122,23 @@ object BoutonFlottant {
             pastille.text = euroKm?.let { "${fmt2(it)} €/km" } ?: decision.libelle
             pastille.background = fond(app, teinte)
             pastille.setTextColor(teinte)
+
+            // Une pulsation brève au moment où le verdict change.
+            //
+            // La pastille vit dans un coin de l'écran, hors du champ où le
+            // regard travaille : sans mouvement, un nouveau verdict s'y écrit
+            // sans que personne ne le voie. Le geste attire l'œil une fois,
+            // puis la pastille redevient immobile — c'est un signal, pas une
+            // animation d'ambiance.
+            pastille.animate().cancel()
+            pastille.scaleX = 0.88f
+            pastille.scaleY = 0.88f
+            pastille.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(DUREE_PULSATION_MS)
+                .setInterpolator(OvershootInterpolator(2.5f))
+                .start()
 
             principal.removeCallbacks(repos)
             principal.postDelayed(repos, DUREE_VERDICT_MS)
