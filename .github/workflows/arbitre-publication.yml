@@ -116,7 +116,62 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
+          ## Ce que cette version ajoute
+
+          **Un cockpit, et non plus un tableau.** L'accueil porte un en-tête
+          avec sa marque, son numéro de version et un point d'état. La carte
+          de service **rayonne de sa couleur** — vert, ambre ou rouge — et ses
+          trois voyants à icône, écran, image, détection, ouvrent chacun ce
+          qu'il faut pour se rallumer.
+
+          La carte du verdict porte son halo, sa pastille signée — ✓ pour
+          prendre, ✕ pour laisser — et **neuf valeurs en tuiles à icône** au
+          lieu de neuf chiffres nus. Dans une grille, l'œil retrouve « le
+          carburant » à sa tuile bien avant d'avoir lu la légende, et c'est
+          cette relecture-là qu'on fait au feu rouge. La confiance devient un
+          anneau : 93 % se lit, un anneau presque fermé se voit.
+
+          **De vrais interrupteurs.** Les onze réglages passent au modèle
+          Material 3 : piste pleine à la couleur d'accent, pouce qui grossit
+          en s'allumant. Le petit rail d'avant se confondait d'un état à
+          l'autre — au volant, « je crois que c'est activé » n'est pas une
+          réponse.
+
+          **Du mouvement, et rien que le nécessaire.** La bascule d'onglet
+          fond en deux cents millisecondes, sans quoi l'œil ne sait pas s'il a
+          changé d'onglet ou si l'application a sauté. La bulle descend en
+          place au lieu de surgir, parce qu'elle apparaît par-dessus une
+          application qu'on est en train de regarder. La pastille pulse quand
+          le verdict change, puisqu'elle vit hors du champ où le regard
+          travaille. Rien ne dépasse un tiers de seconde : au-delà, une
+          transition cesse d'être une réponse et devient une animation qu'on
+          subit.
+
+          Le **simulateur ne se reconstruit plus** à chaque pixel de curseur —
+          c'est ce qui lui donnait sa sensation poisseuse. La barre d'onglets
+          **flotte** au lieu d'être collée en bas, où elle se confondait avec
+          le trait de navigation du système.
+
           ## Ce que cette version corrige
+
+          **Le numéro de version affiché était faux.** L'écran d'accueil
+          annonçait « v1.0 » depuis le début des 2.x : le numéro était figé
+          dans le fichier de construction et n'a jamais suivi. Sur une
+          capture, impossible de savoir quelle version avait produit le défaut
+          qu'on regardait. Il est maintenant lu là où il est déjà maintenu.
+
+          **Une même course pouvait s'inscrire cinq fois** dans le journal, en
+          alternant « Bolt » et « Uber ». Deux causes conjuguées : le nom de
+          l'application figurait dans la signature qui reconnaît un doublon, et
+          la mémoire n'en retenait qu'une seule — une alternance A, B, A, B
+          n'était donc jamais reconnue. La signature ne garde plus que les
+          chiffres, et seize courses récentes sont mémorisées.
+
+          Au passage, une carte lue par-dessus l'écran d'accueil était
+          attribuée à « Launcher ». Elle revient désormais à l'application
+          chauffeur trouvée parmi les fenêtres superposées.
+
+          ## Ce que les versions précédentes corrigeaient
 
           Deux défauts trouvés par **une seule course réelle** — Brétigny-sur-Orge
           vers Sainte-Geneviève-des-Bois, 9,80 € pour 1,4 km d'approche et
@@ -152,7 +207,7 @@ jobs:
           exactement ce que l'euro par kilomètre ne peut pas voir, et la
           raison pour laquelle il ne décide pas seul.
 
-          ## Ce que la version précédente avait ajouté
+          ## Et, juste avant : quatre onglets
 
           **L'application se range en quatre onglets** — accueil, courses,
           simulateur, réglages — au lieu d'un écran unique qui défilait sur
