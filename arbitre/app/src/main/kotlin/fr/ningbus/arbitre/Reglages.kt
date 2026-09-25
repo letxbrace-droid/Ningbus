@@ -198,9 +198,15 @@ class Reglages(contexte: Context) {
      * d'une vraie offre passe par ici.
      */
     fun baremePour(plateforme: String?): Bareme {
-        if (!correctionMesuree) return bareme
-        val facteur = Mesures.facteur(app, plateforme) ?: return bareme
-        return bareme.copy(facteurDureeMesure = facteur)
+        var b = bareme
+        if (correctionMesuree) {
+            Mesures.facteur(app, plateforme)?.let { b = b.copy(facteurDureeMesure = it) }
+        }
+        // L'attente mesurée voyage toujours, même correction éteinte : elle
+        // n'entre dans aucun verdict, elle ne fait qu'afficher un second
+        // euro/heure à côté. Un chiffre qui ne décide rien n'a pas à se régler.
+        Densite.minutesEntreOffres(app)?.let { b = b.copy(minutesEntreOffres = it) }
+        return b
     }
 
     /** Pastille permanente : un appui analyse l'écran tel qu'il est. */

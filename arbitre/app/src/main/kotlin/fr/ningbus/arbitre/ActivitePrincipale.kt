@@ -853,6 +853,15 @@ class ActivitePrincipale : AppCompatActivity() {
         val conteneur = findViewById<LinearLayout>(R.id.conteneur_stats)
         conteneur.removeAllViews()
 
+        // La densité d'offres, sous les trois compteurs. Elle ne juge aucune
+        // course : elle dit à quel rythme elles arrivent, et c'est ce rythme
+        // qui décide si enchaîner des courses courtes a un sens ici.
+        findViewById<TextView>(R.id.densite)?.let { vue ->
+            val texte = Densite.resume(this)
+            vue.visibility = if (texte == null) View.GONE else View.VISIBLE
+            if (texte != null) vue.text = texte
+        }
+
         val conseillees = lignes.count { it.decision == Decision.PRENDS.name }
         val part = if (lignes.isEmpty()) 0 else conseillees * 100 / lignes.size
         val euroKm = lignes.mapNotNull { it.euroKm }

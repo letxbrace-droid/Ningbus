@@ -84,6 +84,26 @@ data class Verdict(
      * rendre un verdict optimiste et prévenir qu'il l'est.
      */
     val budgetApprocheKm: Double? = null,
+
+    /**
+     * Ce que la course laisse par heure **attente réelle comprise**, quand
+     * cette attente a été mesurée.
+     *
+     * L'[euroHeure] ordinaire amortit un retour à vide supposé — une fraction
+     * du trajet, la même pour toutes les courses. Celui-ci amortit le temps
+     * qui s'écoule vraiment avant l'offre suivante, tel qu'il a été observé.
+     * Ce n'est pas une nuance : le temps mort entre deux courses ne dépend
+     * presque pas de la longueur de celle qu'on vient de faire, si bien qu'il
+     * pèse cinq fois plus lourd sur une course de huit minutes que sur une
+     * course de quarante.
+     *
+     * Il ne décide rien, et c'est voulu. Baisser l'objectif quand les offres
+     * se font rares transformerait l'outil en machine à justifier les
+     * mauvaises courses — exactement ce qu'il existe pour empêcher. Il se
+     * pose à côté du verdict et laisse le chauffeur voir ce que son secteur
+     * lui coûte.
+     */
+    val euroHeureAmorti: Double? = null,
     val alertes: List<String> = emptyList(),
     /** Une ligne, lisible d'un coup d'œil au volant. */
     val resume: String = "",
@@ -322,6 +342,18 @@ object Arbitre {
             (recette - kmTotalPlein * bareme.coutKm) / (minutesTotalPlein / 60.0)
         } else null
 
+        // --- La même course, amortie sur l'attente réellement observée ------
+        //
+        // Le retour à vide modélisé disparaît du temps : l'attente mesurée
+        // contient déjà, dans les faits, le repositionnement effectué entre
+        // deux courses. Le kilométrage du retour, lui, reste compté — ces
+        // kilomètres-là ont bien été roulés, et ils coûtent.
+        val euroHeureAmorti = bareme.minutesEntreOffres?.let { attenteMesuree ->
+            val minutes = minutesApprocheAj + bareme.minutesAttente +
+                minutesTrajetAj + attenteMesuree
+            if (minutes > 0.0) revenuNet / (minutes / 60.0) else null
+        }
+
         // --- Jusqu'où l'approche peut aller ---------------------------------
         //
         // Uniquement quand l'offre n'en annonce aucune. C'est le cas où le
@@ -426,6 +458,7 @@ object Arbitre {
             ratio = ratio,
             euroHeureRetourPlein = euroHeureRetourPlein,
             budgetApprocheKm = budgetApprocheKm,
+            euroHeureAmorti = euroHeureAmorti,
             alertes = alertes.distinct(),
             resume = resume,
             confiance = confiance,

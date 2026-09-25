@@ -118,6 +118,55 @@ jobs:
 
           ## Ce que cette version ajoute
 
+          **L'appli mesure enfin le chiffre qui commande tous les autres :
+          l'attente entre deux offres.**
+
+          Une journée relevée le 25/09 l'a imposé. Sept courses entre 12:49 et
+          18:54, 121,33 € — et **3 h 44 de vide pour 2 h 20 payées**. Trou
+          médian : vingt-neuf minutes. Trois façons de lire le même argent :
+          51,9 €/h en ne comptant que le temps facturé, 19,9 €/h brut sur
+          l'amplitude réelle, environ **15 €/h net** une fois le roulage
+          déduit. Facteur trois et demi.
+
+          Le résultat est contre-intuitif, et il renverse la règle que tout le
+          monde applique. Le temps mort entre deux courses ne dépend presque
+          pas de la longueur de celle qu'on vient de faire : il faut attendre
+          la suivante, point. Une course de huit minutes traîne donc la même
+          attente qu'une course de quarante, et l'amortit sur cinq fois moins
+          de temps payé. Sur ce relevé :
+
+          - la course de **9,00 €** à Breuillet affiche **70 €/h** sur son
+            temps facturé — le meilleur de la journée — et **11,8 €/h** une
+            fois ses trente-huit minutes d'attente comptées : le plus mauvais
+            de la journée ;
+          - le **Dourdan–Orsay à 31,58 €**, qui n'affiche que 45 €/h et
+            **1,01 €/km** — un chiffre qu'un plancher à 1,70 € aurait
+            refusé — en rend **25,6**. La meilleure course du jour.
+
+          Les deux classements sont exactement inversés. « Enchaîner les
+          petites courses ultra rentables » n'est vrai que là où l'on peut
+          réellement enchaîner : client à deux minutes **et** offre suivante
+          immédiate. Il y faut les deux — l'approche est un coût fixe tout
+          autant que l'attente, et 4 km d'approche condamnent une course
+          courte même sans la moindre attente.
+
+          La bulle affiche donc, dès que l'attente a été mesurée :
+
+          > ⏳ attente réelle 29 min → 9 €/h tout compris
+
+          Et l'onglet Courses donne la densité brute : *une offre toutes les
+          29 min · 14 vues en 3 h*. Médiane et non moyenne, fenêtre de trois
+          heures, écarts de plus de 90 min écartés — une pause déjeuner
+          n'apprend rien sur un secteur.
+
+          **Ce chiffre ne décide rien, et c'est une règle.** Baisser
+          l'objectif quand les offres se raréfient ferait de cet outil une
+          machine à justifier les mauvaises courses, ce qu'il existe
+          précisément pour empêcher. Il se pose à côté du verdict et laisse
+          voir ce qu'un secteur creux coûte vraiment.
+
+          ## Ce que la version précédente ajoutait
+
           **Une barre d'onglets dessinée, et non plus assemblée.** Quatre
           cases côte à côte donnaient une barre correcte et sans caractère :
           on ne peut animer que ce que le système expose — une échelle, une
@@ -151,7 +200,7 @@ jobs:
           Rien de tout cela n'ajoute un kilo-octet ni une dépendance. C'est du
           Kotlin et un `Canvas` — la question n'a jamais été le langage.
 
-          ## Ce que la version précédente ajoutait
+          ## Et avant : la correction des durées
 
           **L'appli mesure de combien les plateformes se trompent.** Tu le
           savais déjà — les durées annoncées sont optimistes, et un chauffeur
@@ -191,7 +240,7 @@ jobs:
           instant où ce chiffre existe, et le journal d'Arbitre le seul endroit
           où il survit.
 
-          ## Ce que la version précédente corrigeait
+          ## Et avant : le compteur « prises »
 
           **Le compteur « prises » ne comptait pas les courses prises.** Il
           affichait « 1 prise (4 %) » alors qu'il dénombre les verdicts

@@ -88,7 +88,12 @@ object Calibrage {
         }
     }
 
-    internal fun mediane(valeurs: List<Double>): Double {
+    /**
+     * La médiane, publique parce qu'elle sert aussi à mesurer la densité des
+     * offres, et pour la même raison : une pause déjeuner déplace une moyenne
+     * et laisse une médiane où elle est.
+     */
+    fun mediane(valeurs: List<Double>): Double {
         val tri = valeurs.sorted()
         val milieu = tri.size / 2
         return if (tri.size % 2 == 1) tri[milieu] else (tri[milieu - 1] + tri[milieu]) / 2.0

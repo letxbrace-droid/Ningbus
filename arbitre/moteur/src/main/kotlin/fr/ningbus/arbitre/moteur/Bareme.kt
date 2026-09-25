@@ -102,6 +102,35 @@ data class Bareme(
      */
     val facteurDureeMesure: Double? = null,
 
+    /**
+     * Le temps qui s'écoule réellement entre deux offres, en minutes. Null
+     * tant qu'il n'a pas été mesuré.
+     *
+     * C'est le chiffre qui manquait à tout le reste, et une journée relevée
+     * l'a imposé : sept courses entre 12:49 et 18:54, **3 h 44 de vide pour
+     * 2 h 20 payées**, trou médian de 29 minutes.
+     *
+     * Son effet est contre-intuitif et il vaut d'être écrit. Le temps mort
+     * entre deux courses ne dépend presque pas de la longueur de celle qu'on
+     * vient de faire : il faut attendre la suivante, point. Une course de huit
+     * minutes qui traîne vingt-neuf minutes d'attente derrière elle rapporte
+     * donc trois fois moins qu'un chiffre au compteur ne le laisse croire,
+     * tandis qu'une course de quarante minutes amortit la même attente sur
+     * cinq fois plus de temps payé.
+     *
+     * Sur le relevé du 25/09 : la course de 9,00 € à Breuillet affiche
+     * 70 €/h sur son temps facturé et **11,8 €/h** une fois son attente
+     * comptée — la plus mauvaise de la journée. Le Dourdan-Orsay de 31,58 €,
+     * qui n'affiche que 45 €/h et 1,01 €/km, en rend **25,6**. Les deux
+     * classements sont exactement inversés.
+     *
+     * Le basculement se situe autour de **sept minutes d'attente** : en
+     * dessous, enchaîner des courses courtes écrase tout ; au-dessus, les
+     * longues gagnent. C'est donc l'attente, et non le prix au kilomètre, qui
+     * dit quelle stratégie a un sens à un endroit donné.
+     */
+    val minutesEntreOffres: Double? = null,
+
     /** Vitesse retenue pour estimer une donnée manquante, en km/h. */
     val vitesseParDefaut: Double = 22.0,
 ) {

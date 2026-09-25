@@ -104,6 +104,11 @@ object Arbitrage {
             recentes.remove(recentes.keys.first())
         }
 
+        // L'offre est notée avant d'être arbitrée : c'est le rythme des
+        // propositions qui dit ce que coûte un refus, et il se mesure sur tout
+        // ce qui arrive, pas sur ce qui est accepté.
+        Densite.noter(contexte)
+
         val reglages = Reglages(contexte)
         val verdict = Arbitre.arbitrer(course, reglages.baremePour(course.plateforme))
 

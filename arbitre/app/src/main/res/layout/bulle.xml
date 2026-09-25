@@ -256,6 +256,22 @@
                     zones sont mortes ; le chauffeur, si. On lui donne le
                     chiffre, pas la décision.
                 -->
+                <!--
+                    L'euro/heure amorti sur l'attente réellement mesurée.
+
+                    Il ne décide rien, et il est souvent le chiffre le plus
+                    parlant de la carte : une course courte traîne la même
+                    attente qu'une longue et l'amortit sur cinq fois moins de
+                    temps payé.
+                -->
+                <TextView
+                    android:id="@+id/amorti"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/retour_plein"
                     android:layout_width="match_parent"

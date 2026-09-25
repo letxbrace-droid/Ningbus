@@ -400,6 +400,35 @@ object Bulle {
             doux,
         )
 
+        // --- L'attente réelle : ce que coûte vraiment un secteur creux -------
+        //
+        // Une journée relevée le 25/09 a montré que ce chiffre inverse le
+        // classement : la course de 9,00 € qui affichait 70 €/h sur son temps
+        // facturé n'en rendait que 12 une fois ses trente-huit minutes
+        // d'attente comptées — la plus mauvaise de la journée — pendant que
+        // celle à 1,01 €/km, réputée médiocre, en rendait 26.
+        //
+        // Affiché dès qu'il existe, et jamais transformé en verdict : baisser
+        // l'objectif quand les offres se raréfient ferait de l'outil une
+        // machine à justifier les mauvaises courses.
+        val amorti = verdict.euroHeureAmorti
+        val attente = bareme.minutesEntreOffres
+        ligne(
+            racine,
+            R.id.amorti,
+            if (amorti == null || attente == null) null else {
+                "⏳ attente réelle ${fmt0(attente)} min → ${fmt0(amorti)} €/h tout compris"
+            },
+            ContextCompat.getColor(
+                ctx,
+                if (amorti != null && amorti < bareme.objectifHeure * (1.0 - bareme.marge)) {
+                    R.color.ambre
+                } else {
+                    R.color.bulle_texte
+                },
+            ),
+        )
+
         // --- La zone morte : le seul chiffre que le moteur ne sait pas juger --
         //
         // Le barème suppose un repositionnement moyen — 35 % du trajet. C'est

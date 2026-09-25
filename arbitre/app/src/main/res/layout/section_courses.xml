@@ -37,6 +37,13 @@
             android:layout_marginTop="@dimen/espace_s"
             android:orientation="horizontal" />
 
+        <!-- La densité d'offres mesurée : le chiffre qui dit quelle stratégie
+             a un sens ici et maintenant. -->
+        <TextView
+            android:id="@+id/densite"
+            style="@style/Aide"
+            android:layout_marginTop="@dimen/espace_xs" />
+
         <!-- ============ Filtres ============ -->
 
         <LinearLayout
