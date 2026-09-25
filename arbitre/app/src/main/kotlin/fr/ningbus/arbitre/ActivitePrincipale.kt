@@ -731,26 +731,54 @@ class ActivitePrincipale : AppCompatActivity() {
         }
     }
 
-    /** Trois valeurs et leurs légendes, la brique de base du cockpit. */
-    private fun troisColonnes(vararg colonnes: Pair<String, String>): View {
+    /**
+     * Une pilule de texte.
+     *
+     * Une pilule qui réagit le montre en ondulant ; une pilule qui informe
+     * reste inerte. Sans cette différence, on appuie deux fois avant de
+     * comprendre qu'il ne se passera rien.
+     */
+    private fun chip(texte: String, couleur: Int, action: (() -> Unit)? = null): TextView =
+        TextView(this).apply {
+            text = texte
+            textSize = 12f
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompat.getColor(this@ActivitePrincipale, couleur))
+            setBackgroundResource(
+                if (action == null) R.drawable.fond_chip else R.drawable.fond_chip_cliquable
+            )
+            setPadding(dp(10), dp(8), dp(10), dp(8))
+            action?.let {
+                isClickable = true
+                setOnClickListener { _ -> it() }
+            }
+        }
+
+    /**
+     * Trois colonnes dont on garde la main sur les valeurs.
+     *
+     * Pour tout ce qui se rafraîchit souvent — le simulateur au doigt — il
+     * faut pouvoir écrire dans les vues plutôt que de les recréer.
+     */
+    private class Trio(val vue: View, val valeurs: List<TextView>)
+
+    private fun trio(legendes: List<String>): Trio {
         val ligne = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(12), 0, 0)
         }
-        for ((valeur, legende) in colonnes) {
+        val valeurs = legendes.map { legende ->
             val colonne = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
                 )
             }
-            colonne.addView(
-                TextView(this).apply {
-                    text = valeur
-                    textSize = 16f
-                    setTypeface(typeface, Typeface.BOLD)
-                }
-            )
+            val valeur = TextView(this).apply {
+                textSize = 16f
+                setTypeface(typeface, Typeface.BOLD)
+            }
+            colonne.addView(valeur)
             colonne.addView(
                 TextView(this).apply {
                     text = legende
@@ -759,8 +787,9 @@ class ActivitePrincipale : AppCompatActivity() {
                 }
             )
             ligne.addView(colonne)
+            valeur
         }
-        return ligne
+        return Trio(ligne, valeurs)
     }
 
     private fun teinteDe(decision: String): Int = when (decision) {
