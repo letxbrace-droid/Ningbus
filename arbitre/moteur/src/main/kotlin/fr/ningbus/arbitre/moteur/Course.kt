@@ -1,6 +1,38 @@
 package fr.ningbus.arbitre.moteur
 
 /**
+ * Ce qui rend une lecture **douteuse**, par opposition à incomplète.
+ *
+ * La distinction a mis trois erreurs de terrain à s'imposer, et c'est la même
+ * à chaque fois. À Grigny, un « 1 » lu « l ». Sur une carte du 25/09, un
+ * montant de 4 768 € pour 47,7 km. À Antony, la distance du bandeau GPS prise
+ * pour celle de la course. Les trois fois, la bulle annonçait **100 % de
+ * confiance** — parce que tous les champs étaient remplis.
+ *
+ * Un champ vide se voit et fait baisser la confiance. Un champ rempli de
+ * travers ne se voit pas et la fait monter. C'est exactement le contraire de
+ * ce qu'il faudrait, et aucune finesse sur les poids ne le corrige : il faut
+ * que l'analyseur dise quand il a dû choisir, deviner ou écarter.
+ *
+ * Ces moments-là sont peu nombreux et parfaitement identifiables — ce sont
+ * ceux où le code prend une décision qu'un texte sans ambiguïté n'aurait pas
+ * exigée.
+ */
+enum class Doute(val libelle: String) {
+    /** Des nombres de l'écran n'appartenaient pas à la carte d'offre. */
+    INTRUS("des nombres étrangers à la carte ont été écartés"),
+
+    /** Plusieurs sommes pouvaient être le prix ; on a tranché. */
+    PLUSIEURS_MONTANTS("plusieurs montants possibles, le plus élevé retenu"),
+
+    /** Une attribution donnait une vitesse impossible et a été refaite. */
+    ROLES_RELUS("une durée a dû être relue comme temps d'approche"),
+
+    /** Un même nombre figurait deux fois : lequel décrivait quoi ? */
+    REPETITION("un nombre figurait deux fois à l'écran"),
+}
+
+/**
  * Une proposition de course, telle qu'elle a pu être extraite de la
  * notification. Tout est nullable : une notification tronquée ou un format
  * inconnu ne doit jamais faire inventer un chiffre au moteur.
@@ -22,6 +54,14 @@ data class Course(
     val texteBrut: String = "",
     /** Ce que l'analyseur n'a pas su lire. */
     val remarques: List<String> = emptyList(),
+    /**
+     * Ce que l'analyseur a dû trancher, deviner ou écarter.
+     *
+     * Séparé de [remarques], qui est du texte libre destiné à l'écran : ceux-ci
+     * sont typés parce que la confiance s'en sert pour descendre. Une lecture
+     * troublée ne peut pas se présenter comme certaine.
+     */
+    val doutes: List<Doute> = emptyList(),
 ) {
     /** Le minimum vital pour arbitrer : un prix et une idée du trajet payé. */
     val exploitable: Boolean
@@ -57,6 +97,9 @@ fun Course.completer(precedente: Course?): Course {
             precedente.texteBrut
         },
         remarques = (remarques + precedente.remarques).distinct(),
+        // Les doutes se cumulent et ne s'effacent jamais : une lecture
+        // complétée par une autre hérite des hésitations des deux.
+        doutes = (doutes + precedente.doutes).distinct(),
     )
 }
 

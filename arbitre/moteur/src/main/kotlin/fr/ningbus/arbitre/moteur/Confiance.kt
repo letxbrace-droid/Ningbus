@@ -44,6 +44,8 @@ data class Lecture(
 data class Confiance(
     val score: Double,
     val lectures: List<Lecture>,
+    /** Ce que l'analyseur a dû trancher, deviner ou écarter pour en arriver là. */
+    val doutes: List<Doute> = emptyList(),
 ) {
     // Arrondi, et non troncature : 92,5 % affiché « 92 % » ferait douter
     // d'un calcul par ailleurs juste.
@@ -55,11 +57,42 @@ data class Confiance(
     /** Les champs qui manquent — ce qu'il faudrait lire pour mieux conclure. */
     val manquants: List<Lecture> get() = lectures.filter { it.etat == EtatLecture.ABSENT }
 
-    /** Une ligne pour la bulle : « confiance 87 % ». */
-    val resume: String get() = "confiance $pourcent %"
+    /**
+     * Une ligne pour la bulle : « confiance 87 % », et « lecture troublée »
+     * quand l'analyseur a dû trancher.
+     *
+     * Le mot compte autant que le chiffre. « 70 % » se lit comme un petit
+     * manque ; « lecture troublée » dit que ce qui est affiché peut être faux,
+     * ce qui n'est pas la même invitation à vérifier.
+     */
+    val resume: String get() =
+        if (doutes.isEmpty()) "confiance $pourcent %"
+        else "confiance $pourcent % — lecture troublée"
 
     companion object {
         const val SEUIL_FIABLE = 0.75
+
+        /**
+         * Ce qu'une hésitation de lecture coûte, en proportion.
+         *
+         * Multiplicatif et non soustractif : deux hésitations se composent
+         * au lieu de s'additionner, et le score ne peut pas devenir négatif.
+         *
+         * La valeur n'est pas arbitraire. Elle est choisie pour qu'**un seul
+         * doute fasse passer une lecture parfaite sous [SEUIL_FIABLE]** :
+         * 1,00 × 0,70 = 0,70, sous les 0,75 requis. C'est tout l'objet de la
+         * manœuvre — une carte dont tous les champs sont remplis mais dont
+         * l'un a peut-être été mal choisi ne doit plus pouvoir obtenir de feu
+         * vert. Elle peut encore être refusée, ce qui est sans danger ; elle
+         * ne peut plus être recommandée.
+         *
+         * La répétition d'un nombre coûte moins cher : c'est une gêne de
+         * lecture courante sur des cartes qui affichent deux fois la même
+         * distance, et le moteur la traite correctement depuis le 21/09. Elle
+         * pèse sans condamner.
+         */
+        private const val COUT_DOUTE = 0.70
+        private const val COUT_REPETITION = 0.88
 
         /** Poids de chaque champ dans le calcul final. Leur somme fait 1. */
         private const val POIDS_PRIX = 0.40
@@ -112,14 +145,22 @@ data class Confiance(
                 POIDS_MINUTES_TRAJET,
                 POIDS_MINUTES_APPROCHE,
             )
-            val score = lectures.zip(poids).sumOf { (lecture, poids) ->
+            val rempli = lectures.zip(poids).sumOf { (lecture, poids) ->
                 when (lecture.etat) {
                     EtatLecture.LU -> poids
                     EtatLecture.ESTIME -> poids / 2.0
                     EtatLecture.ABSENT -> 0.0
                 }
             }
-            return Confiance(score, lectures)
+
+            // Et maintenant ce que les champs remplis valent vraiment. Un
+            // champ vide se voit et fait déjà baisser le score ci-dessus ; un
+            // champ rempli de travers ne se voit pas et le faisait monter.
+            // C'est ce renversement-là que les doutes corrigent.
+            val score = course.doutes.fold(rempli) { acc, doute ->
+                acc * if (doute == Doute.REPETITION) COUT_REPETITION else COUT_DOUTE
+            }
+            return Confiance(score, lectures, course.doutes)
         }
 
         private fun ligne(champ: String, valeur: String?, estime: Boolean): Lecture = Lecture(

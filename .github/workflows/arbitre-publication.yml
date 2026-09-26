@@ -118,6 +118,47 @@ jobs:
 
           ## Ce que cette version corrige
 
+          **La confiance mesurait si les champs étaient remplis, jamais s'ils
+          étaient vrais.** Trois erreurs de terrain l'ont dit, et c'est la même
+          à chaque fois. À Grigny, un « 1 » lu « l ». Le 25/09, un montant de
+          4 768 € pour 47,7 km. À Antony, la distance du bandeau GPS prise pour
+          celle de la course. **Les trois fois, la bulle annonçait 100 %.**
+
+          Un champ vide se voit, et il faisait déjà baisser le chiffre. Un
+          champ rempli de travers ne se voit pas, et il le faisait monter —
+          exactement le contraire de ce qu'il faudrait. Aucun réglage de poids
+          ne corrige ce renversement : il fallait que l'analyseur dise quand il
+          a dû **trancher, deviner ou écarter**.
+
+          Ces moments-là sont peu nombreux et parfaitement identifiables — ce
+          sont ceux où le code prend une décision qu'un texte sans ambiguïté
+          n'aurait pas exigée. Ils sont maintenant nommés : des nombres
+          étrangers à la carte ont été écartés ; plusieurs montants pouvaient
+          être le prix ; une durée a dû être relue comme temps d'approche ; un
+          nombre figurait deux fois.
+
+          **Un seul de ces doutes fait passer une lecture parfaite de 100 % à
+          70 %**, donc sous le seuil de fiabilité. La conséquence est la seule
+          qui compte : une carte dont tous les champs sont remplis mais dont
+          l'un a peut-être été mal choisi **ne peut plus obtenir de feu vert**.
+          Elle peut encore être refusée, ce qui est sans danger ; elle ne peut
+          plus être recommandée.
+
+          Le coût est multiplicatif, donc deux hésitations se composent — 49 %
+          — au lieu de s'additionner vers le négatif. La répétition d'un nombre
+          coûte moins cher que les autres : c'est une gêne courante sur des
+          cartes qui affichent deux fois la même distance, et le moteur la
+          traite correctement depuis le 21/09. Elle pèse sans condamner.
+
+          La bulle ne dit plus seulement le chiffre, elle dit le mot :
+          **« confiance 70 % — lecture troublée »**. « 70 % » se lit comme un
+          petit manque ; « lecture troublée » dit que ce qui est affiché peut
+          être faux, ce qui n'est pas la même invitation à vérifier.
+
+          Huit essais neufs, et les cent trente-neuf précédents inchangés.
+
+          ## Ce que la version précédente corrigeait
+
           **Le bandeau du GPS s'invitait dans le calcul.** Une carte Bolt
           relevée à Antony : 10,40 €, approche **3 min • 1,7 km**, trajet
           **12 min • 8,6 km** vers le terminal 3 d'Orly. Le verdict rendu :
@@ -153,7 +194,7 @@ jobs:
           4 768 €. Tous les champs étaient remplis — et faux. Ce défaut-là
           n'est pas encore réglé.
 
-          ## Ce que la version précédente ajoutait
+          ## Et avant : l'attente entre deux offres
 
           **L'appli mesure enfin le chiffre qui commande tous les autres :
           l'attente entre deux offres.**

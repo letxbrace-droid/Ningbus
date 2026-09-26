@@ -96,17 +96,18 @@ object Analyseur {
     fun analyser(texte: String, plateforme: String = ""): Course {
         val t = normaliser(texte)
         val remarques = mutableListOf<String>()
+        val doutes = mutableListOf<Doute>()
 
-        val prix = montant(t, remarques)
+        val prix = montant(t, remarques, doutes)
         val durees = durees(t)
             .filterNot { parasite(t, it.second, it.third) }
             .map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
-            .let { dedoublonner(it, "durée", remarques) }
+            .let { dedoublonner(it, "durée", remarques, doutes) }
         val distances = distances(t)
             .filterNot { parasite(t, it.second, it.third) }
             .map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
-            .let { dedoublonner(it, "distance", remarques) }
-            .let { ecarterIntruses(t, durees, it, remarques) }
+            .let { dedoublonner(it, "distance", remarques, doutes) }
+            .let { ecarterIntruses(t, durees, it, remarques, doutes) }
 
         // Première passe : les rôles posés par les mots-clés se transmettent
         // entre voisines immédiates.
@@ -129,6 +130,7 @@ object Analyseur {
                 kmTrajet = kmTraj,
                 texteBrut = texte.trim(),
                 remarques = remarques,
+                doutes = doutes.distinct(),
             )
         )
     }
@@ -156,10 +158,17 @@ object Analyseur {
      * courses à perte, d'autant que les plateformes annoncent souvent le
      * bonus comme « inclus » dans le total.
      */
-    private fun montant(t: String, remarques: MutableList<String>): Double? {
+    private fun montant(
+        t: String,
+        remarques: MutableList<String>,
+        doutes: MutableList<Doute>,
+    ): Double? {
         val valeurs = montants(t)
         if (valeurs.isEmpty()) return null
-        if (valeurs.size > 1) remarques += "plusieurs montants lus, le plus élevé retenu"
+        if (valeurs.size > 1) {
+            remarques += "plusieurs montants lus, le plus élevé retenu"
+            doutes += Doute.PLUSIEURS_MONTANTS
+        }
         return valeurs.max()
     }
 
@@ -378,6 +387,7 @@ object Analyseur {
         nombres: List<Nombre>,
         quoi: String,
         remarques: MutableList<String>,
+        doutes: MutableList<Doute>,
     ): List<Nombre> {
         if (nombres.size < 2) return nombres
         val garde = nombres.filterIndexed { i, n ->
@@ -386,6 +396,7 @@ object Analyseur {
         }
         if (garde.size < nombres.size) {
             remarques += "$quoi répétée sur l'écran, comptée une seule fois"
+            doutes += Doute.REPETITION
         }
         return garde
     }
@@ -418,6 +429,7 @@ object Analyseur {
         durees: List<Nombre>,
         distances: List<Nombre>,
         remarques: MutableList<String>,
+        doutes: MutableList<Doute>,
     ): List<Nombre> {
         if (distances.size < 3) return distances
         val enCouple = distances.filter { d ->
@@ -425,6 +437,7 @@ object Analyseur {
         }
         if (enCouple.size < 2 || enCouple.size == distances.size) return distances
         remarques += "${distances.size - enCouple.size} distance hors carte écartée"
+        doutes += Doute.INTRUS
         return enCouple
     }
 
@@ -458,6 +471,7 @@ object Analyseur {
             minutesApproche = c.minutesTrajet,
             minutesTrajet = null,
             remarques = c.remarques + "durée relue comme temps d'approche (vitesse impossible)",
+            doutes = c.doutes + Doute.ROLES_RELUS,
         )
     }
 
