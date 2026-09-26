@@ -116,7 +116,44 @@ jobs:
           sort du téléphone** — aucun compte, aucun serveur, et aucune
           permission réseau dans le manifeste.
 
-          ## Ce que cette version ajoute
+          ## Ce que cette version corrige
+
+          **Le bandeau du GPS s'invitait dans le calcul.** Une carte Bolt
+          relevée à Antony : 10,40 €, approche **3 min • 1,7 km**, trajet
+          **12 min • 8,6 km** vers le terminal 3 d'Orly. Le verdict rendu :
+          LIMITE, 1,89 €/km, 28 €/h — sur une course de 1,7 km et une approche
+          de 3,8 km, c'est-à-dire sur des chiffres qui ne figurent pas sur la
+          carte. Le vrai verdict était **LAISSE, 1,01 €/km, 21 €/h**.
+
+          La cause tient à ce qui fait par ailleurs la force de l'application :
+          elle lit **toutes les fenêtres visibles**, y compris une carte
+          d'offre posée par-dessus autre chose. Ce jour-là, l'autre chose était
+          le bandeau de navigation, qui porte sa propre distance — celle du
+          prochain embranchement, qui décompte pendant qu'on roule. Trois
+          distances pour deux étapes : les 8,6 km du trajet ont été chassés du
+          calcul, et une course d'aéroport a été arbitrée comme un trajet de
+          dix-sept cents mètres.
+
+          La règle qui en sort est structurelle. Sur une carte d'offre, **une
+          étape s'annonce en couple durée-distance** — « 3 min • 1,7 km ». Une
+          distance solitaire, sans durée collée à elle, ne décrit pas une
+          étape : c'est un panneau, un bandeau, une autre application. Elle est
+          désormais écartée, et l'écart est signalé sous le verdict plutôt que
+          tu.
+
+          Deux garde-fous l'empêchent de nuire ailleurs : elle ne se déclenche
+          qu'à partir de trois distances, donc jamais sur une carte normale, et
+          elle exige deux couples complets avant d'écarter quoi que ce soit —
+          les formats qui annoncent une distance seule, « Course de 12,1 km »,
+          n'en forment aucun et restent intacts. Cinq essais neufs, et les cent
+          trente-quatre précédents inchangés.
+
+          Une remarque qui revient pour la troisième fois : la bulle annonçait
+          **100 % de confiance**. Comme à Grigny, comme sur le montant de
+          4 768 €. Tous les champs étaient remplis — et faux. Ce défaut-là
+          n'est pas encore réglé.
+
+          ## Ce que la version précédente ajoutait
 
           **L'appli mesure enfin le chiffre qui commande tous les autres :
           l'attente entre deux offres.**
@@ -165,7 +202,7 @@ jobs:
           précisément pour empêcher. Il se pose à côté du verdict et laisse
           voir ce qu'un secteur creux coûte vraiment.
 
-          ## Ce que la version précédente ajoutait
+          ## Et avant : la barre d'onglets
 
           **Une barre d'onglets dessinée, et non plus assemblée.** Quatre
           cases côte à côte donnaient une barre correcte et sans caractère :

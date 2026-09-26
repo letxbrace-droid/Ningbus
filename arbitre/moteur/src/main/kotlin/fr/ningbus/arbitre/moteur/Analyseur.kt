@@ -106,6 +106,7 @@ object Analyseur {
             .filterNot { parasite(t, it.second, it.third) }
             .map { Nombre(it.first, it.second, it.third, classer(t, it.second, it.third)) }
             .let { dedoublonner(it, "distance", remarques) }
+            .let { ecarterIntruses(t, durees, it, remarques) }
 
         // Première passe : les rôles posés par les mots-clés se transmettent
         // entre voisines immédiates.
@@ -387,6 +388,44 @@ object Analyseur {
             remarques += "$quoi répétée sur l'écran, comptée une seule fois"
         }
         return garde
+    }
+
+    /**
+     * Écarte les distances qui n'appartiennent pas à la carte d'offre.
+     *
+     * Une carte Bolt relevée à Antony l'a imposé. Elle annonce deux étapes,
+     * chacune sous forme de **couple collé** : « 3 min • 1,7 km » pour
+     * l'approche, « 12 min • 8,6 km » pour le trajet vers Orly. Le service
+     * lit toutes les fenêtres visibles, et le bandeau du GPS posé par-dessus
+     * portait sa propre distance — celle du prochain embranchement, qui
+     * décompte pendant qu'on roule. Trois distances pour deux étapes : les
+     * 8,6 km du trajet ont été chassés, la course est devenue 1,7 km,
+     * l'approche 3,8 km, et le verdict est passé de LAISSE à LIMITE.
+     *
+     * La règle qui en sort est structurelle plutôt que cosmétique : sur une
+     * carte d'offre, **une étape s'annonce en couple durée-distance**. Une
+     * distance solitaire, sans durée collée à elle, ne décrit pas une étape —
+     * c'est un panneau, un bandeau, une autre application.
+     *
+     * Deux garde-fous l'empêchent de nuire ailleurs. Elle ne se déclenche
+     * qu'à partir de trois distances, donc jamais sur une carte normale. Et
+     * elle exige au moins deux couples complets avant d'écarter quoi que ce
+     * soit : les formats qui annoncent une distance seule — « Course de
+     * 12,1 km », sans durée — n'en forment aucun et restent intacts.
+     */
+    private fun ecarterIntruses(
+        t: String,
+        durees: List<Nombre>,
+        distances: List<Nombre>,
+        remarques: MutableList<String>,
+    ): List<Nombre> {
+        if (distances.size < 3) return distances
+        val enCouple = distances.filter { d ->
+            durees.any { ecart(d, it) <= ADJACENCE && collees(t, d, it) }
+        }
+        if (enCouple.size < 2 || enCouple.size == distances.size) return distances
+        remarques += "${distances.size - enCouple.size} distance hors carte écartée"
+        return enCouple
     }
 
     /** Rôle d'un nombre d'après les mots qui l'entourent. */
