@@ -610,6 +610,50 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Une machine, plein écran — le mode séance (v43)
+
+En salle, l'écran affichait onze stations empilées. Entre deux séries il
+fallait retrouver la bonne, viser deux champs de 36 px avec des mains
+moites, et le chrono vivait dans un coin, à 300 px de la saisie. Trois
+gestes là où il en faut un.
+
+**« Démarrer cet exercice » ouvre la machine en plein écran.** Une barre
+en haut porte son nom, ses muscles et la position dans la séance
+(`3 / 11`). Une navigation en bas passe à la suivante. Échap ou la
+flèche de retour ressort, et la page retrouve sa position de défilement.
+
+**Le chrono devient l'objet principal.** Hors mode séance il reste la
+pastille d'angle ; ici l'anneau passe à 148 px, centré, juste au-dessus
+de la saisie. Pendant le repos on le regarde ; quand il finit, les champs
+sont déjà sous le pouce. Le corps du panneau s'écarte de `--fx-chrono`
+pour lui ouvrir la place au lieu de le laisser recouvrir la saisie.
+
+**Le panneau se réordonne selon ce dont on a besoin.** Pendant le repos,
+le conseil du coach remonte en tête — c'est la minute où on le lit, et il
+était jusque-là sous la ligne de flottaison. Dès que le chrono s'arrête,
+il reprend sa place sous la saisie.
+
+**Le RIR passe avant le bouton.** Dans l'ancien ordre le bouton venait en
+premier : sur la sauvegarde réelle, la moitié des séries sont
+enregistrées sans RIR. Les champs montent à 56 px, les pastilles de RIR à
+48 — 36 px suffisent assis au calme, pas debout et essoufflé.
+
+**Aucun nœud n'est déplacé.** La station reste exactement où elle est
+dans le DOM ; le CSS la soulève. C'est ce qui permet à la saisie, à
+l'historique, au chrono, à la double progression et aux 586 contrôles
+existants de continuer à fonctionner sans une ligne de changement —
+`test-seance.js` vérifie explicitement que le parent et le rang ne
+bougent pas.
+
+Deux défauts trouvés en chemin, tous deux signalés par les tests :
+`background:var(--bg)` lisait un jeton **qui n'existe pas** — le panneau
+était transparent et laissait voir la liste par-dessous (même défaut que
+le `--surface` de la v37) ; et `env(safe-area-inset-bottom,0px)` ajoutait
+une valeur d'espacement hors échelle, pour un zéro qui n'a pas besoin
+d'unité.
+
+`test-seance.js` : 23 contrôles. Batterie complète : **609 ok / 0 KO**.
+
 ## Le déficit et la balance ne pouvaient pas être d'accord (v41)
 
 `objectifNutrition()` prescrivait **−400 kcal par jour** et surveillait une
