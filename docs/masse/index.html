@@ -1304,6 +1304,18 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
    AUCUN NŒUD N'EST DÉPLACÉ : la station reste où elle est dans le DOM,
    le CSS la soulève. Tous les gestionnaires d'événements, tout l'état
    et tous les tests continuent de fonctionner à l'identique. */
+/* La consigne d'enchaînement remplace le chrono quand il n'y a pas de
+   repos à décompter : liseré d'accent, pas d'information — c'est une
+   instruction à exécuter maintenant, pas un rappel à lire. */
+.ench{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 2px;
+  padding:12px;border-radius:var(--r-3);background:var(--surface-1);
+  border:1px solid var(--bord);border-left:3px solid var(--accent);
+  font-size:var(--t-3);color:var(--text)}
+.ench b{color:var(--accent-ink);font-weight:700}
+.ench .ench-go{margin-left:auto;min-height:44px;padding:0 16px;border-radius:var(--r-2);
+  border:1px solid var(--accent);background:var(--accent);color:var(--accent-on);
+  font-family:var(--disp);font-weight:700;font-size:var(--t-4);cursor:pointer}
+.station.focus .ench{order:0;margin:0 0 10px;font-size:var(--t-4)}
 .fx-go{display:none}
 .station.open .fx-go{display:flex;align-items:center;justify-content:center;gap:8px;
   width:100%;min-height:52px;margin:12px 0 2px;border:1px solid var(--accent);
@@ -3236,6 +3248,10 @@ function enhanceStation(st){
   var iw=st.querySelector('[data-w]'), ir=st.querySelector('[data-r]');
   var log=st.querySelector('.log'); if(!log||!iw) return;
   var stepW=wStep(st);
+  /* le champ arrive pré-rempli : un appui sélectionne tout, pour que
+     taper remplace au lieu de s'ajouter derrière */
+  [iw, ir].forEach(function(f){ if(f) f.addEventListener('focus', function(){
+    try{ f.select(); }catch(e){} }); });
 
   /* l'en-tête déplie la technique et le lien démo : ils se lisent une fois,
      ils n'ont pas à occuper 123 px sur chaque carte pendant la séance */
@@ -3245,6 +3261,12 @@ function enhanceStation(st){
   // 1RM + badge dans le header
   /* Démarrer : on n'entre en mode séance que si la station a de quoi
      saisir une série. Les blocs d'information n'ont pas de .log. */
+  /* la consigne d'enchaînement : vide et masquée tant que la machine
+     n'est pas la première d'une paire */
+  var ench=document.createElement('div');
+  ench.className='ench'; ench.setAttribute('data-ench',''); ench.style.display='none';
+  log.parentNode.insertBefore(ench, log.nextSibling);
+
   var go=document.createElement('button');
   go.className='fx-go'; go.type='button';
   go.textContent='Démarrer cet exercice';
@@ -3900,11 +3922,18 @@ function addSet(st){
   autoMark(groupOf(id));
   refreshPlan();
   annoncerNiveau();   /* une série de plus peut faire basculer un palier */
-  wi.value=''; ri.value=''; wi.blur(); ri.blur();
+  /* la charge reste, les reps se vident : d'une série à l'autre c'est
+     le nombre de répétitions qui change, pas le poids */
+  ri.value=''; wi.blur(); ri.blur();
+  prefillCharge(st);
   st.querySelectorAll('[data-rir] .rb').forEach(function(b){ b.classList.remove('sel'); });
   buzz(30);
   if(record && getSet('confetti')!==false){ confetti(); buzz(70); if(getSet('beep')) beep(); }
-  if(getSet('timer')){ startRest(restSecondsFor(st)); }
+  /* Le repos dépend de la place dans la supersérie, pas seulement de la
+     prescription : après la première machine d'une paire on enchaîne. */
+  var sec=reposApres(st);
+  if(getSet('timer') && sec>0){ startRest(sec); }
+  majEnchaine(st);
 }
 function delSet(id, i){
   var all=loadExSets(); var tk=todayKey();
@@ -6537,6 +6566,117 @@ migrerPlanProgramme();
 refreshPlan();
 annoncerNiveau();
 
+/* ===== LES SUPERSÉRIES, VUES PAR LE CHRONO ============================
+   La v42 a introduit des blocs en supersérie : « une série de chest
+   press, puis DIRECTEMENT une série de rowing, et seulement là tu
+   souffles 2 min ». La v43 a livré le chrono sans le lui dire — il
+   lançait 2 minutes de repos après la première machine de la paire, au
+   moment précis où la consigne dit d'enchaîner. L'app se contredisait.
+
+   La règle se lit dans le DOM, sans nouvel attribut : un bloc porte une
+   .ssnote, et à l'intérieur les machines s'apparient deux par deux dans
+   l'ordre affiché. Une machine seule en fin de bloc impair se fait
+   normalement — c'est exactement ce que dit la note du bloc 1 du haut,
+   où le tirage vertical suit la paire chest press / rowing. */
+function blocDe(st){
+  /* le bloc = ce qui sépare deux .phase ; on note au passage si une
+     .ssnote s'y trouve */
+  var stations=[], ss=false, n=st;
+  while(n && !n.classList.contains('phase')){
+    if(n.classList.contains('ssnote')) ss=true;
+    if(n.classList.contains('station')) stations.unshift(n);
+    n=n.previousElementSibling;
+  }
+  n=st.nextElementSibling;
+  while(n && !n.classList.contains('phase')){
+    if(n.classList.contains('station')) stations.push(n);
+    n=n.nextElementSibling;
+  }
+  return {stations:stations, superserie:ss};
+}
+/* Renvoie le partenaire de supersérie, et la place dans la paire.
+   null si la machine se fait seule. */
+function paireDe(st){
+  var b=blocDe(st);
+  if(!b.superserie) return null;
+  var i=b.stations.indexOf(st);
+  if(i<0) return null;
+  if(i%2===0) return (i+1<b.stations.length) ? {partenaire:b.stations[i+1], premier:true} : null;
+  return {partenaire:b.stations[i-1], premier:false};
+}
+/* Combien de repos après une série sur cette machine ?
+   Première d'une paire : aucun — on enchaîne. Sinon, le prescrit. */
+function reposApres(st){
+  var p=paireDe(st);
+  return (p && p.premier) ? 0 : restSecondsFor(st);
+}
+
+/* ===== « ENCHAÎNE » : la consigne qui remplace le chrono ==============
+   Après la première machine d'une paire il n'y a pas de repos à
+   décompter — il y a une machine à rejoindre. Le panneau le dit, et le
+   bouton y va. */
+function majEnchaine(st){
+  var box=st.querySelector('[data-ench]');
+  var p=paireDe(st);
+  if(!box) return;
+  if(!p || !p.premier){ box.style.display='none'; box.innerHTML=''; return; }
+  var nom=(p.partenaire.querySelector('.st-name')||{}).textContent||'la suivante';
+  box.style.display='';
+  box.innerHTML='<b>Enchaîne sans repos :</b> '+nom+
+    '<button type="button" class="ench-go">Y aller</button>';
+  box.querySelector('.ench-go').onclick=function(){
+    if(fxSt) ouvrirFocus(p.partenaire);
+    else p.partenaire.scrollIntoView({block:'center'});
+  };
+}
+
+/* ===== LA CHARGE ARRIVE DÉJÀ ÉCRITE ==================================
+   Sur sa séance du 16/09, quatre séries de chest press : 48,3 — 48,3 —
+   48,3 — 48,3. Quatre fois la même saisie pour une valeur que l'app
+   connaît. Sur onze machines ça fait une quarantaine de frappes, et
+   c'est cette friction qui fait qu'on arrête de loguer en cours de
+   séance. Le champ arrive donc rempli : la charge de la série
+   précédente du jour, sinon la charge de référence de la dernière
+   séance. Un appui sur le champ sélectionne tout — taper remplace. */
+function chargeProposee(st){
+  var id=st.getAttribute('data-ex');
+  var auj=setsOn(id, todayKey());
+  if(auj.length) return auj[auj.length-1].w;
+  var ld=lastSessionDate(id, true);
+  if(ld){ var s=setsOn(id, ld); if(s.length) return chargeRef(s); }
+  var rec=loadLogs()[id];
+  return (rec && rec.w) ? rec.w : null;
+}
+function prefillCharge(st){
+  var wi=st.querySelector('[data-w]'); if(!wi) return;
+  if(document.activeElement===wi) return;       /* il est en train de taper */
+  var w=chargeProposee(st);
+  wi.value = (w===null||w===undefined) ? '' : fmtKg(w);
+}
+
+/* ===== L'ÉCRAN RESTE ALLUMÉ ==========================================
+   Deux minutes de repos suffisent à verrouiller le téléphone : on
+   rallume, on se ré-authentifie, on cherche où on en était. Le verrou
+   ne vit que pendant le mode séance, et se reprend au retour d'onglet
+   car le navigateur le relâche en arrière-plan. */
+var fxLock=null;
+function prendreVerrou(){
+  if(!('wakeLock' in navigator)) return;
+  try{
+    navigator.wakeLock.request('screen').then(function(l){
+      fxLock=l; l.addEventListener('release', function(){ fxLock=null; });
+    }).catch(function(){});
+  }catch(e){}
+}
+function rendreVerrou(){
+  if(!fxLock) return;
+  try{ fxLock.release(); }catch(e){}
+  fxLock=null;
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && fxSt && !fxLock) prendreVerrou();
+});
+
 /* ===== MODE SÉANCE : une machine, plein écran =========================
    Le CSS fait tout le travail visuel ; ce module ne gère que trois
    choses : qui est à l'écran, comment on en sort, et comment on passe à
@@ -6570,6 +6710,9 @@ function ouvrirFocus(st){
   if(restLeft>0) st.classList.add('resting');
   document.body.classList.add('focus-on');
   fxMajBarre();
+  prefillCharge(st);
+  majEnchaine(st);
+  prendreVerrou();
   st.scrollTop=0;
   buzz(12);
 }
@@ -6577,6 +6720,7 @@ function fermerFocus(){
   if(!fxSt) return;
   fxSt.classList.remove('focus','resting');
   fxSt=null;
+  rendreVerrou();
   document.body.classList.remove('focus-on');
   /* la page avait été figée en haut : on la repose où elle était */
   window.scrollTo(0, fxScroll);

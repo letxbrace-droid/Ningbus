@@ -70,14 +70,18 @@ const check = (n, c, d) => (c ? ok : bad).push(n + (d ? ' — ' + d : ''));
   check('la page du dessous ne défile plus', entre.corpsFige === 'hidden', entre.corpsFige);
 
   // ===== 3 · saisir une série depuis le panneau =====
+  /* On saisit sur la DEUXIÈME machine du binôme : depuis la v44, la
+     première d'une paire ne démarre aucun repos — c'est le sujet des
+     contrôles 9. Ici on veut vérifier la saisie et le chrono. */
   const saisie = await p.evaluate(() => {
+    document.getElementById('fxNext').click();
     const st = document.querySelector('.station.focus');
-    st.querySelector('[data-w]').value = '48.3';
+    st.querySelector('[data-w]').value = '36';
     st.querySelector('[data-r]').value = '10';
     st.querySelector('[data-rir] .rb[data-v="1"]').click();
     st.querySelector('[data-save]').click();
     const k = todayKey();
-    return { enregistrees: setsOn('push1', k).length, rir: setsOn('push1', k)[0].rir,
+    return { enregistrees: setsOn('pull2', k).length, rir: setsOn('pull2', k)[0].rir,
              resting: st.classList.contains('resting') };
   });
   check('la série s\'enregistre depuis le mode séance', saisie.enregistrees === 1);
@@ -121,7 +125,7 @@ const check = (n, c, d) => (c ? ok : bad).push(n + (d ? ' — ' + d : ''));
              chronoCoupe: !document.getElementById('restRing').classList.contains('show'),
              precedentActif: !document.getElementById('fxPrev').disabled };
   });
-  check('Suivant passe à la machine d\'après', nav.ex === 'pull2' && nav.pos === '2 / 11',
+  check('Suivant passe à la machine d\'après', nav.ex === 'pull1' && nav.pos === '3 / 11',
     JSON.stringify(nav));
   check('une seule station en mode séance à la fois', nav.unSeul === 1, String(nav.unSeul));
   check('le chrono de la machine quittée est coupé', nav.chronoCoupe === true);
@@ -140,8 +144,96 @@ const check = (n, c, d) => (c ? ok : bad).push(n + (d ? ' — ' + d : ''));
   check('les barres disparaissent', sortie.barre === 'none', sortie.barre);
 
   // ===== 8 · la série saisie en mode séance a bien survécu =====
-  const apres = await p.evaluate(() => setsOn('push1', todayKey()).length);
+  const apres = await p.evaluate(() => setsOn('pull2', todayKey()).length);
   check('la série reste enregistrée après la sortie', apres === 1, String(apres));
+
+  // ===== 9 · LE CHRONO CONNAÎT LES SUPERSÉRIES =====
+  /* La v42 prescrit « chest press puis DIRECTEMENT rowing, et seulement
+     là 2 min ». La v43 lançait 2 minutes après la première machine —
+     l'app se contredisait. Les paires se lisent dans le DOM : un bloc
+     porte une .ssnote, les machines s'y apparient deux par deux. */
+  const paires = await p.evaluate(() => {
+    const q = id => document.querySelector('#haut .station[data-ex="' + id + '"]');
+    const dit = id => { const a = paireDe(q(id));
+      return a ? (a.premier ? '1:' : '2:') + a.partenaire.getAttribute('data-ex') : 'seule'; };
+    return { push1: dit('push1'), pull2: dit('pull2'), pull1: dit('pull1'),
+             push4: dit('push4'), up5: dit('up5'), pull5: dit('pull5'),
+             repos1: reposApres(q('push1')), repos2: reposApres(q('pull2')),
+             reposSeule: reposApres(q('pull1')) };
+  });
+  check('les machines du bloc 1 s\'apparient : chest press ⟷ rowing',
+    paires.push1 === '1:pull2' && paires.pull2 === '2:push1', JSON.stringify(paires));
+  check('le tirage vertical reste seul — le bloc est impair',
+    paires.pull1 === 'seule', paires.pull1);
+  check('les blocs d\'isolation s\'apparient aussi',
+    paires.push4 === '1:up5' && paires.up5 === '2:push4' && paires.pull5 === '2:pull4',
+    JSON.stringify(paires));
+  check('AUCUN REPOS après la première machine d\'une paire',
+    paires.repos1 === 0, String(paires.repos1));
+  check('le repos prescrit après la seconde', paires.repos2 === 120, String(paires.repos2));
+  check('… et après une machine seule', paires.reposSeule === 120, String(paires.reposSeule));
+
+  const ss = await p.evaluate(() => {
+    localStorage.removeItem('inrun_sets');
+    const st = document.querySelector('#haut .station[data-ex="push1"]');
+    refreshStation(st);
+    st.classList.add('open'); st.querySelector('.fx-go').click();
+    st.querySelector('[data-w]').value = '48.3';
+    st.querySelector('[data-r]').value = '10';
+    st.querySelector('[data-save]').click();
+    const e = st.querySelector('[data-ench]');
+    return { chrono: document.getElementById('restRing').classList.contains('show'),
+             enchVu: e.style.display !== 'none', txt: e.textContent };
+  });
+  check('en supersérie, aucun chrono ne démarre', ss.chrono === false);
+  check('… la consigne « enchaîne » le remplace',
+    ss.enchVu && /Rowing machine assis/.test(ss.txt), ss.txt.slice(0, 50));
+
+  const yaller = await p.evaluate(() => {
+    document.querySelector('.station.focus .ench-go').click();
+    const st = document.querySelector('.station.focus');
+    st.querySelector('[data-w]').value = '36';
+    st.querySelector('[data-r]').value = '10';
+    st.querySelector('[data-save]').click();
+    return { arrive: st.getAttribute('data-ex'),
+             chrono: document.getElementById('restRing').classList.contains('show'),
+             ench: st.querySelector('[data-ench]').style.display };
+  });
+  check('« Y aller » ouvre la machine partenaire', yaller.arrive === 'pull2', yaller.arrive);
+  check('le chrono part après la SECONDE du binôme', yaller.chrono === true);
+  check('et la machine partenaire n\'affiche pas la consigne',
+    yaller.ench === 'none', yaller.ench);
+
+  // ===== 10 · LA CHARGE ARRIVE DÉJÀ ÉCRITE =====
+  /* Séance réelle du 16/09, chest press : 48,3 — 48,3 — 48,3 — 48,3.
+     Quatre fois la même saisie pour une valeur déjà connue. */
+  const pre = await p.evaluate(() => {
+    const st = document.querySelector('#haut .station[data-ex="push1"]');
+    document.getElementById('fxBack').click();
+    st.querySelector('.fx-go').click();
+    const champ = st.querySelector('[data-w]').value;
+    st.querySelector('[data-r]').value = '9';
+    st.querySelector('[data-save]').click();     /* sans retoucher le poids */
+    const t = setsOn('push1', todayKey());
+    return { propose: champ, enregistre: t[t.length - 1].w, nbSeries: t.length,
+             kgReste: st.querySelector('[data-w]').value,
+             repsVide: st.querySelector('[data-r]').value };
+  });
+  check('le champ kg arrive rempli avec la charge précédente',
+    pre.propose === '48,3', pre.propose);
+  check('la virgule est bien relue — 48,3 et non 48',
+    pre.enregistre === 48.3, String(pre.enregistre));
+  check('une série de plus sans avoir retapé le poids', pre.nbSeries === 2, String(pre.nbSeries));
+  check('la charge reste après l\'enregistrement, les reps se vident',
+    pre.kgReste === '48,3' && pre.repsVide === '', JSON.stringify(pre));
+
+  // ===== 11 · l'écran reste allumé =====
+  const verrou = await p.evaluate(() => ({
+    fonction: typeof prendreVerrou === 'function' && typeof rendreVerrou === 'function',
+    tolere: (() => { try { prendreVerrou(); rendreVerrou(); return true; } catch (e) { return false; } })()
+  }));
+  check('le verrou d\'écran existe et ne casse rien sans support',
+    verrou.fonction && verrou.tolere, JSON.stringify(verrou));
 
   check('aucune erreur JS', errs.length === 0, errs.join(' | '));
 

@@ -610,6 +610,55 @@ règles le faisaient (`.ic.grad`, `.sessbar .sc.on .ic`). Elles passent par
 Il y ajoute deux règles : aucune séance n'emprunte le dessin d'une autre,
 et aucune icône vectorielle n'est masquée par un fond plein.
 
+## Le chrono ne savait pas ce qu'est une supersérie (v44)
+
+**Un défaut livré par la v43.** La v42 prescrit, bloc 1 du haut : « une
+série de chest press, puis **directement** une série de rowing, et
+seulement là tu souffles 2 min ». À l'enregistrement de la série de chest
+press, l'app lançait un compte à rebours de 2 minutes — elle disait
+d'enchaîner et déclenchait un repos dans la même seconde.
+
+La règle se lit dans le DOM, sans nouvel attribut : **un bloc porte une
+`.ssnote`, et à l'intérieur les machines s'apparient deux par deux dans
+l'ordre affiché.** Une machine seule en fin de bloc impair se fait
+normalement — ce qui décrit exactement le bloc 1 du haut, où le tirage
+vertical suit la paire chest press / rowing.
+
+`reposApres()` remplace `restSecondsFor()` au déclenchement : **zéro
+après la première d'une paire, le prescrit sinon.** À la place du chrono,
+le panneau affiche la consigne — *« Enchaîne sans repos : Rowing machine
+assis »* — et un bouton qui ouvre la machine partenaire.
+
+## La charge arrive déjà écrite
+
+Séance réelle du 16 septembre, chest press : 48,3 — 48,3 — 48,3 — 48,3.
+**Quatre fois la même saisie** pour une valeur que l'app connaît. Sur
+onze machines, une quarantaine de frappes, et c'est cette friction qui
+fait qu'on cesse de loguer en cours de séance.
+
+Le champ kg arrive rempli : la charge de la série précédente du jour,
+sinon la charge de référence de la dernière séance. Un appui sélectionne
+tout, donc taper remplace. Après un enregistrement, **la charge reste et
+seules les reps se vident** — d'une série à l'autre c'est le nombre de
+répétitions qui change, pas le poids.
+
+La virgule de `fmtKg` est relue correctement : la saisie faisait déjà
+`replace(',','.')`, un test le verrouille désormais (48,3 et non 48).
+
+## L'écran reste allumé
+
+Deux minutes de repos suffisent à verrouiller le téléphone. `wakeLock`
+est pris à l'entrée en mode séance, rendu à la sortie, et repris au
+retour d'onglet — le navigateur le relâche en arrière-plan. Absent du
+navigateur, tout fonctionne à l'identique.
+
+`test-seance.js` passe de 23 à 39 contrôles. Batterie : **625 ok / 0 KO**.
+
+Deux contrôles de la v43 ont dû être recalés : ils saisissaient sur
+`push1` en attendant un chrono, or `push1` est première d'une paire. Ce
+n'était pas une régression — c'étaient les tests qui encodaient l'ancien
+comportement, celui qui était faux.
+
 ## Une machine, plein écran — le mode séance (v43)
 
 En salle, l'écran affichait onze stations empilées. Entre deux séries il
