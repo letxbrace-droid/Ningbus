@@ -165,6 +165,11 @@
   --knob:var(--n-000);
 
   --glass-b:12px;
+  /* Cotes du mode séance — géométrie d'un composant, pas des marches de
+     l'échelle d'espacement : hauteur de la barre du haut, hauteur de la
+     navigation du bas, place à ouvrir sous l'anneau du chrono. Les trois
+     dépendent les unes des autres, elles se corrigent donc en un point. */
+  --fx-bar:56px; --fx-nav:76px; --fx-chrono:222px;
 
   /* ================================================================
      ÉCHELLES — rayons et tailles de texte
@@ -643,9 +648,14 @@ section{padding:26px 0 10px}
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .warmnote b{color:var(--text);font-weight:700}
 /* la note de méthode : même boîte que l'échauffement, mais liseré
-   d'information — elle explique comment faire, elle n'avertit de rien */
+   d'information — elle explique comment faire, elle n'avertit de rien.
+   Encre PLEINE, pas secondaire : ce n'est pas une légende, c'est une
+   consigne qu'on lit debout entre deux séries, dans une salle éclairée
+   au néon et l'écran couvert de traces de doigts. La v42 l'a corrigé —
+   en --text-2 elle tirait la moyenne APCA sous son seuil, et le test
+   avait raison de le signaler. */
 .ssnote{background:var(--surface-1);border:1px solid var(--bord);border-left:3px solid var(--info);
-  border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-3);color:var(--text-2);margin-bottom:14px}
+  border-radius:var(--r-3);padding:12px 14px;font-size:var(--t-3);color:var(--text);margin-bottom:14px}
 .ssnote b{color:var(--info-ink);font-weight:700}
 
 .total{display:flex;align-items:center;gap:16px;margin:20px 0 8px;padding:16px;border-radius:var(--r-4);
@@ -1279,6 +1289,113 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;
     transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
+
+/* ===================================================================
+   MODE SÉANCE — une machine, plein écran
+   -------------------------------------------------------------------
+   Le problème que ça règle : en salle, l'écran affiche onze stations
+   empilées. Entre deux séries il faut retrouver la bonne, viser deux
+   champs de 36 px avec des mains moites, et le chrono vit dans un coin
+   à 300 px de là. Trois gestes là où il en faut un.
+   Ici une seule machine occupe l'écran. Le chrono est au centre, juste
+   au-dessus de la saisie : pendant le repos on le regarde, quand il
+   finit la saisie est déjà sous le pouce. Le conseil du coach est
+   dépliéd'office — c'est entre deux séries qu'on le lit.
+   AUCUN NŒUD N'EST DÉPLACÉ : la station reste où elle est dans le DOM,
+   le CSS la soulève. Tous les gestionnaires d'événements, tout l'état
+   et tous les tests continuent de fonctionner à l'identique. */
+.fx-go{display:none}
+.station.open .fx-go{display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;min-height:52px;margin:12px 0 2px;border:1px solid var(--accent);
+  border-radius:var(--r-3);background:var(--accent);color:var(--accent-on);
+  font-family:var(--disp);font-weight:700;font-size:var(--t-6);letter-spacing:.04em;
+  text-transform:uppercase;cursor:pointer}
+.station.open .fx-go:active{transform:translateY(1px)}
+
+body.focus-on{overflow:hidden}
+/* --bg n'existe pas dans la palette : le panneau était donc transparent
+   et laissait voir la liste des stations à travers. C'est --surface-0,
+   le noir de fond de page. Et le flou d'arrière-plan n'a plus de sens
+   quand il n'y a plus d'arrière-plan à laisser deviner. */
+.station.focus{position:fixed;inset:0;z-index:200;margin:0;border:0;border-radius:0;
+  overflow-y:auto;overflow-x:hidden;background:var(--surface-0);
+  backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;
+  padding:var(--fx-bar) 0 var(--fx-nav);-webkit-overflow-scrolling:touch}
+.station.focus:hover{box-shadow:none;border-color:transparent}
+/* en mode séance tout est lisible : la technique et le conseil ne se
+   replient plus derrière l'en-tête, c'est précisément le moment de les lire */
+.station.focus .st-desc,.station.focus .demo,.station.focus .tipbox{display:block}
+/* L'en-tête de la carte ne sert plus : la barre du haut porte le nom
+   et la position. L'afficher deux fois coûtait 130 px d'écran. */
+.station.focus .st-head{display:none}
+.station.focus .fx-go{display:none}
+.station.focus .st-body{padding:0 14px 14px}
+
+/* la barre du haut : sortir, et savoir où on en est */
+.fx-bar{display:none}
+body.focus-on .fx-bar{display:flex;align-items:center;gap:10px;
+  position:fixed;top:0;left:0;right:0;height:var(--fx-bar);z-index:210;padding:0 8px 0 4px;
+  background:var(--surface-1);border-bottom:1px solid var(--bord-fort)}
+.fx-bar .fx-back{width:48px;height:48px;border:none;background:none;color:var(--text);
+  font-size:var(--t-9);line-height:1;cursor:pointer}
+.fx-bar .fx-tx{flex:1;min-width:0}
+.fx-bar .fx-mus{font-size:var(--t-2);color:var(--text-2);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.fx-bar .fx-name{min-width:0;line-height:1.15;font-family:var(--disp);font-weight:700;
+  font-size:var(--t-6);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx-bar .fx-pos{font-family:var(--mono);font-weight:600;font-size:var(--t-3);
+  color:var(--text-2);padding-right:6px;white-space:nowrap}
+
+/* la navigation entre machines, au pouce */
+.fx-nav{display:none}
+body.focus-on .fx-nav{display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:210;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom,0));
+  background:var(--surface-1);border-top:1px solid var(--bord-fort)}
+.fx-nav button{flex:1;min-height:52px;border-radius:var(--r-3);border:1px solid var(--bord-fort);
+  background:var(--surface-2);color:var(--text);font-family:var(--disp);font-weight:700;
+  font-size:var(--t-5);cursor:pointer}
+.fx-nav button:disabled{opacity:.35}
+
+/* LE CHRONO : centré, juste au-dessus de la saisie.
+   Hors mode séance il reste la pastille d'angle, qui ne gêne pas la lecture
+   de la liste ; ici il devient l'objet principal de l'écran. */
+body.focus-on .rest-ring{right:auto;bottom:auto;top:62px;left:50%;width:148px;height:148px;z-index:205;
+  transform:translateX(-50%) scale(.9)}
+body.focus-on .rest-ring.show{transform:translateX(-50%) scale(1)}
+body.focus-on .rest-ring svg{width:148px;height:148px}
+body.focus-on .rest-ring .tnum{font-size:var(--t-12)}
+body.focus-on .rest-ctl{right:auto;bottom:auto;top:218px;left:50%;flex-direction:row;z-index:205;
+  transform:translateX(-50%)}
+body.focus-on .rest-ctl.show{transform:translateX(-50%)}
+/* Pendant le repos, l'anneau se pose en haut du panneau : on lui ouvre
+   la place plutôt que de le laisser recouvrir la saisie. Un simple
+   décalage du corps, pas d'élément fantôme à entretenir. */
+body.focus-on .station.focus.resting .st-body{padding-top:var(--fx-chrono);transition:padding-top .18s}
+/* 62 (haut de l'anneau) + 148 (anneau) + 56 (boutons) − 56 (le panneau
+   commence déjà à 56) = 210. On arrondit à 212. */
+
+/* LA SAISIE : des cibles qu'on atteint sans viser.
+   36 px suffisent assis au calme ; debout, essoufflé, les mains moites,
+   il en faut 56. */
+.station.focus .log-in{padding:12px;gap:10px;flex-wrap:wrap}
+.station.focus .log-in input{min-height:56px;font-size:var(--t-9);text-align:center}
+.station.focus .log-in button{flex:1 0 100%;min-height:56px;order:9;font-size:var(--t-6)}
+/* L'ordre de la colonne : on choisit son RIR AVANT d'enregistrer.
+   Dans l'ancien ordre le bouton venait en premier — c'est pour ça que
+   la moitié de ses séries sont enregistrées sans RIR. */
+.station.focus .log{display:flex;flex-direction:column}
+.station.focus .log-prev{order:1}
+.station.focus [data-sets]{order:2}
+.station.focus .rirrow{order:3;padding:12px}
+.station.focus .log-in{order:4}
+.station.focus [data-advice]{order:5}
+/* Pendant le repos, le conseil passe en premier : c'est la minute où
+   on le lit, et il était sous la ligne de flottaison. Dès que le
+   chrono s'arrête il retrouve sa place sous la saisie. */
+.station.focus.resting [data-advice]{order:0}
+.station.focus .rirrow .rb{min-width:48px;min-height:48px;font-size:var(--t-6)}
+.station.focus .advice{font-size:var(--t-4)}
+.station.focus .st-desc{font-size:var(--t-4);color:var(--text)}
 </style>
 </head>
 <body>
@@ -1478,17 +1595,17 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="station" data-ex="push5">
     <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extension triceps overhead</div><div class="st-mus">Triceps</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Poulie haute, corde ou barre. Coudes fixes collés au corps, tends les bras vers le bas, contrôle la remontée. Les triceps font les 2/3 du volume du bras.</div>
+      <div class="st-desc"><b>Dos à la poulie, corde au-dessus de la tête</b>, coudes hauts et serrés. Tends les bras vers l'avant, laisse les mains redescendre <b>derrière la nuque</b> jusqu'à sentir l'étirement. C'est cette position qui compte : la <b>longue portion</b> du triceps s'attache sur l'omoplate, elle ne s'allonge donc que bras au-dessus de la tête. Un pushdown coudes au corps ne la touche presque pas — et c'est elle qui fait les deux tiers du volume du bras.</div>
       <div class="presc"><div class="c"><div class="cv acc">3</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 
@@ -1668,10 +1785,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 
   <div class="station" data-ex="legs4">
     <div class="st-head"><div class="st-no">4</div>
-      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl (assis de préférence)</div><div class="st-mus">Arrière des cuisses</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="st-desc"><b>Prends la version assise si ta salle l'a</b>, pas la couchée : hanche pliée, l'ischio-jambier est déjà étiré avant même que tu commences, et c'est en position longue qu'un muscle grossit le plus. Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour <b>jusqu'à jambes tendues</b>. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
       <div class="presc"><div class="c"><div class="cv acc">6</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -1687,7 +1804,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Monte sur la pointe le plus haut possible, pause en haut, descends jusqu'à <b>l'étirement complet</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
+      <div class="st-desc">Monte sur la pointe le plus haut possible, puis descends jusqu'à <b>l'étirement complet</b> et <b>tiens deux secondes en bas</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
       <div class="presc"><div class="c"><div class="cv acc">7</div><div class="ck">séries</div></div><div class="c"><div class="cv">15-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -1813,7 +1930,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 
@@ -1938,7 +2055,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 <div class="sess-head"><div class="wrap sh-in">
   <div class="sh-tx">
   <h2>Haut du corps<span class="o">pecs · dos · épaules · bras</span></h2>
-  <div class="sh-g"><span>~55′</span><span>11 machines</span><span>32 séries</span></div>
+  <div class="sh-g"><span>~47′</span><span>11 machines</span><span>32 séries</span></div>
   <p class="sh-lead">Tout le buste en une séance, deux fois par semaine. C’est la fréquence qui construit, pas la longueur : chaque muscle reçoit deux stimulus au lieu d’un.</p>
   </div>
   <svg class="sh-mus" role="img" aria-label="Muscles travaillés"><use href="#mv-carte"/></svg>
@@ -1950,6 +2067,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   <div class="warmnote"><b>Échauffement · 8 min.</b> Vélo ou rameur léger, puis <b>2 × 15 rotations externes</b> à la poulie basse, coude au corps, très léger. La coiffe des rotateurs ne fait pas de volume mais elle tient l’épaule sur trois développés. Finis par 1 série légère à la première machine.</div>
 
       <div class="phase"><span class="num">01</span><span class="tag">Force · les gros d'abord</span><span class="line"></span></div>
+      <div class="ssnote"><b>Les deux premières en superserie antagoniste.</b> Une série de <b>chest press</b>, puis directement une série de <b>rowing</b>, et seulement là tu souffles 2 min. Pousser et tirer ne se gênent pas — pendant que les pectoraux travaillent, le dos récupère, et inversement. Tu rends la moitié du repos sans toucher aux charges : <b>environ 8 minutes de gagnées</b> sur le bloc le plus long de la séance. Le tirage vertical se fait normalement, à la suite.</div>
 <div class="station" data-ex="push1">
     <div class="st-head"><div class="st-no">1</div>
       <div class="st-tx"><div class="st-cat">Pectoraux</div><div class="st-name">Chest press</div><div class="st-mus">Pectoraux · triceps · épaules</div></div>
@@ -2077,17 +2195,17 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 <div class="station" data-ex="push5">
     <div class="st-head"><div class="st-no">9</div>
-      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extensions triceps poulie</div><div class="st-mus">Triceps</div></div>
+      <div class="st-tx"><div class="st-cat">Triceps</div><div class="st-name">Extension triceps overhead</div><div class="st-mus">Triceps</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Poulie haute, corde ou barre. Coudes fixes collés au corps, tends les bras vers le bas, contrôle la remontée. Les triceps font les 2/3 du volume du bras.</div>
+      <div class="st-desc"><b>Dos à la poulie, corde au-dessus de la tête</b>, coudes hauts et serrés. Tends les bras vers l'avant, laisse les mains redescendre <b>derrière la nuque</b> jusqu'à sentir l'étirement. C'est cette position qui compte : la <b>longue portion</b> du triceps s'attache sur l'omoplate, elle ne s'allonge donc que bras au-dessus de la tête. Un pushdown coudes au corps ne la touche presque pas — et c'est elle qui fait les deux tiers du volume du bras.</div>
       <div class="presc"><div class="c"><div class="cv acc">2</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
         <div class="log-in"><input data-w placeholder="kg" inputmode="decimal"><span class="x">×</span><input data-r placeholder="reps" inputmode="numeric"><button data-save>+ Série</button></div>
         <div class="rirrow"><span class="rl">RIR</span><div class="rg" data-rir><span class="rb" data-v="0">0</span><span class="rb" data-v="1">1</span><span class="rb" data-v="2">2</span><span class="rb" data-v="3">3</span><span class="rb" data-v="4">4+</span></div></div>
         <div class="advice" data-advice></div></div>
-      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=extension+triceps+poulie+corde+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
+      <a class="demo" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=overhead+cable+triceps+extension+technique"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Démo</a>
     </div>
   </div>
 <div class="station" data-ex="pull4">
@@ -2149,7 +2267,7 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
       <div class="st-tx"><div class="st-cat">Mollets</div><div class="st-name">Mollets machine</div><div class="st-mus">Mollets</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Monte sur la pointe le plus haut possible, pause en haut, descends jusqu'à <b>l'étirement complet</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
+      <div class="st-desc">Monte sur la pointe le plus haut possible, puis descends jusqu'à <b>l'étirement complet</b> et <b>tiens deux secondes en bas</b> — c'est le bas du mouvement qui fait grossir. Riches en fibres lentes, les mollets réclament du volume. <b>Debout</b> tu travailles le gastrocnémien, <b>assis</b> le soléaire en dessous : alterne si ta salle a les deux.</div>
       <div class="presc"><div class="c"><div class="cv acc">6</div><div class="ck">séries</div></div><div class="c"><div class="cv">15-20</div><div class="ck">reps</div></div><div class="c"><div class="cv">60″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -2209,10 +2327,10 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
   </div>
 <div class="station" data-ex="legs4">
     <div class="st-head"><div class="st-no">5</div>
-      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl</div><div class="st-mus">Arrière des cuisses</div></div>
+      <div class="st-tx"><div class="st-cat">Ischios</div><div class="st-name">Leg curl (assis de préférence)</div><div class="st-mus">Arrière des cuisses</div></div>
       <span class="st-badge">Machine</span></div>
     <div class="st-body">
-      <div class="st-desc">Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
+      <div class="st-desc"><b>Prends la version assise si ta salle l'a</b>, pas la couchée : hanche pliée, l'ischio-jambier est déjà étiré avant même que tu commences, et c'est en position longue qu'un muscle grossit le plus. Ramène le coussin vers les fesses en contractant l'arrière des cuisses, contrôle le retour <b>jusqu'à jambes tendues</b>. Équilibre le leg extension pour des jambes complètes — sans lui, le genou travaille en déséquilibre.</div>
       <div class="presc"><div class="c"><div class="cv acc">4</div><div class="ck">séries</div></div><div class="c"><div class="cv">12-15</div><div class="ck">reps</div></div><div class="c"><div class="cv">75″</div><div class="ck">repos</div></div></div>
       <div class="log"><div class="log-prev"><span class="lb">Dernière fois</span><span class="val empty" data-prev>—</span></div>
         <div class="sets" data-sets></div>
@@ -2698,6 +2816,18 @@ body:after{background-image:url(img/fond-texture.webp);background-size:cover;
 </div>
 
 <!-- ====== REST TIMER : anneau lumineux ====== -->
+<!-- Mode séance : la barre du haut et la navigation du bas. Elles vivent
+     hors des stations parce qu'il n'y en a qu'une à l'écran à la fois —
+     les dupliquer sur 56 stations coûterait 56 fois le même DOM. -->
+<div class="fx-bar" id="fxBar">
+  <button class="fx-back" id="fxBack" aria-label="Revenir à la séance">&#8249;</button>
+  <div class="fx-tx"><div class="fx-name" id="fxName"></div><div class="fx-mus" id="fxMus"></div></div>
+  <div class="fx-pos" id="fxPos"></div>
+</div>
+<div class="fx-nav" id="fxNav">
+  <button id="fxPrev">&#8249;&nbsp; Précédent</button>
+  <button id="fxNext">Suivant &nbsp;&#8250;</button>
+</div>
 <div class="rest-ctl" id="restCtl">
   <button onclick="addRest(15)">+15</button>
   <button class="stop" onclick="stopRest()">■</button>
@@ -3113,6 +3243,14 @@ function enhanceStation(st){
   if(head) head.addEventListener('click', function(){ st.classList.toggle('open'); buzz(8); });
 
   // 1RM + badge dans le header
+  /* Démarrer : on n'entre en mode séance que si la station a de quoi
+     saisir une série. Les blocs d'information n'ont pas de .log. */
+  var go=document.createElement('button');
+  go.className='fx-go'; go.type='button';
+  go.textContent='Démarrer cet exercice';
+  go.addEventListener('click', function(e){ e.stopPropagation(); ouvrirFocus(st); });
+  log.parentNode.insertBefore(go, log);
+
   var tx=st.querySelector('.st-tx');
   if(tx){
     var ex=document.createElement('div'); ex.className='st-extra';
@@ -6399,6 +6537,68 @@ migrerPlanProgramme();
 refreshPlan();
 annoncerNiveau();
 
+/* ===== MODE SÉANCE : une machine, plein écran =========================
+   Le CSS fait tout le travail visuel ; ce module ne gère que trois
+   choses : qui est à l'écran, comment on en sort, et comment on passe à
+   la machine suivante. La station n'est jamais déplacée dans le DOM —
+   c'est ce qui permet à la saisie, à l'historique, au chrono et aux 586
+   contrôles de continuer à fonctionner sans une ligne de changement. */
+var fxSt=null, fxScroll=0;
+
+/* les stations de la MÊME séance, dans l'ordre affiché */
+function fxVoisines(st){
+  var sess=st.closest('.sess'); if(!sess) return [st];
+  return Array.prototype.filter.call(sess.querySelectorAll('.station'),
+    function(s){ return s.querySelector('.log'); });
+}
+function fxMajBarre(){
+  if(!fxSt) return;
+  var nom=(fxSt.querySelector('.st-name')||{}).textContent||'';
+  var liste=fxVoisines(fxSt), i=liste.indexOf(fxSt);
+  document.getElementById('fxName').textContent=nom;
+  document.getElementById('fxMus').textContent=(fxSt.querySelector('.st-mus')||{}).textContent||'';
+  document.getElementById('fxPos').textContent=(i+1)+' / '+liste.length;
+  document.getElementById('fxPrev').disabled = i<=0;
+  document.getElementById('fxNext').disabled = i>=liste.length-1;
+}
+function ouvrirFocus(st){
+  if(fxSt===st) return;
+  if(fxSt) fxSt.classList.remove('focus','resting');
+  else fxScroll=window.scrollY||0;      /* on rendra sa place à la page */
+  fxSt=st;
+  st.classList.add('open','focus');
+  if(restLeft>0) st.classList.add('resting');
+  document.body.classList.add('focus-on');
+  fxMajBarre();
+  st.scrollTop=0;
+  buzz(12);
+}
+function fermerFocus(){
+  if(!fxSt) return;
+  fxSt.classList.remove('focus','resting');
+  fxSt=null;
+  document.body.classList.remove('focus-on');
+  /* la page avait été figée en haut : on la repose où elle était */
+  window.scrollTo(0, fxScroll);
+  buzz(8);
+}
+function fxAller(pas){
+  if(!fxSt) return;
+  var liste=fxVoisines(fxSt), i=liste.indexOf(fxSt)+pas;
+  if(i<0 || i>=liste.length) return;
+  /* le chrono de la machine qu'on quitte n'a plus de sens */
+  if(restLeft>0) stopRest();
+  ouvrirFocus(liste[i]);
+}
+(function(){
+  var b=document.getElementById('fxBack'); if(b) b.onclick=fermerFocus;
+  var p=document.getElementById('fxPrev'); if(p) p.onclick=function(){ fxAller(-1); };
+  var n=document.getElementById('fxNext'); if(n) n.onclick=function(){ fxAller(1); };
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && fxSt) fermerFocus();
+  });
+})();
+
 /* ===== Minuteur de repos : anneau circulaire ===== */
 var restTotal=90, restLeft=0, restInt=null;
 var CIRC=264; // 2*pi*42
@@ -6414,6 +6614,7 @@ function restSecondsFor(st){
 function fmtR(s){ var m=Math.floor(s/60); var ss=s%60; return m+':'+String(ss).padStart(2,'0'); }
 function startRest(sec){
   restTotal=sec; restLeft=sec;
+  if(fxSt) fxSt.classList.add('resting');
   document.getElementById('restRing').classList.add('show');
   document.getElementById('restCtl').classList.add('show');
   updateRing();
@@ -6430,7 +6631,7 @@ function updateRing(){
   document.getElementById('restProg').style.strokeDashoffset = CIRC*(1-frac);
 }
 function addRest(s){ restLeft+=s; restTotal=Math.max(restTotal,restLeft); updateRing(); }
-function stopRest(){ clearInterval(restInt); document.getElementById('restRing').classList.remove('show'); document.getElementById('restCtl').classList.remove('show'); }
+function stopRest(){ clearInterval(restInt); if(fxSt) fxSt.classList.remove('resting'); document.getElementById('restRing').classList.remove('show'); document.getElementById('restCtl').classList.remove('show'); }
 function endRest(){
   clearInterval(restInt);
   if(getSet('beep')){ beep(); }

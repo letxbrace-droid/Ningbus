@@ -1,6 +1,6 @@
 # Tests — I&N RUN Masse
 
-**586 contrôles sur 23 fichiers.** Ils tournent dans un vrai Chromium contre
+**609 contrôles sur 24 fichiers.** Ils tournent dans un vrai Chromium contre
 `docs/masse/index.html`, servi en local. Rien n'est simulé : ce qui est
 vérifié est ce que le navigateur rend.
 
@@ -47,6 +47,7 @@ binaire du navigateur ; sinon `contexte.js` le cherche dans
 | `test-jetons.js` | 9 | **aucune couleur en dur, aucune primitive lue par le CSS** |
 | `test-echelles.js` | 9 | **rayons et tailles sur leur échelle, espacements pairs** |
 | `test-histo.js` | 12 | **supprimer une série retire bien sa 1RM de l'historique** |
+| `test-seance.js` | 23 | **le mode séance : une machine plein écran, chrono placé, rien de déplacé** |
 
 `audit.js` n'est pas un test : il parcourt l'app et cherche des
 contradictions entre ce qu'elle affiche et ce qu'elle calcule. Il se lance
