@@ -1,0 +1,235 @@
+name: Arbitre — publication
+
+# Publie l'APK en Release, c'est-à-dire en téléchargement direct : sur un
+# dépôt public, un fichier de Release s'ouvre sans compte GitHub et sans
+# dézippage, donc s'installe depuis le téléphone en un appui. Les artefacts
+# de la CI, eux, exigent d'être connecté et livrent un .zip.
+#
+# Déclenchement : modifier arbitre/VERSION et pousser. Le numéro qu'il
+# contient donne le nom de la Release et de l'étiquette, que le workflow
+# crée lui-même. Publier une nouvelle version tient donc en un chiffre.
+on:
+  push:
+    paths:
+      - "arbitre/VERSION"
+      # Les notes d'installation vivent dans ce fichier : les corriger doit
+      # suffire à rectifier la Release, sans inventer un numéro de version.
+      - ".github/workflows/arbitre-publication.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: arbitre
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Préparer le SDK Android
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;35.0.0"
+
+      - name: Rendre le wrapper exécutable
+        run: chmod +x gradlew
+
+      # On ne publie pas un APK dont le moteur d'arbitrage n'a pas été vérifié.
+      - name: Tester le moteur d'arbitrage
+        run: ./gradlew :moteur:test
+
+      - name: Construire l'APK
+        run: ./gradlew :app:assembleDebug
+
+      - name: Nommer l'APK d'après VERSION
+        run: |
+          version="$(tr -d ' \t\r\n' < VERSION)"
+          if [ -z "$version" ]; then
+            echo "arbitre/VERSION est vide" >&2
+            exit 1
+          fi
+          cp app/build/outputs/apk/debug/app-debug.apk "arbitre-${version}.apk"
+          {
+            echo "version=$version"
+            echo "etiquette=arbitre-v${version}"
+          } >> "$GITHUB_ENV"
+
+      - name: Publier la Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'TEXTE'
+          Widget d'arbitrage des courses : il repère l'offre qui arrive,
+          calcule ce qu'elle laisse réellement par heure de travail — approche
+          à vide, bouchons, retour à vide, coût au kilomètre — et pose un
+          verdict par-dessus l'application chauffeur.
+
+          ## Installer
+
+          1. Télécharger `arbitre-VERSION.apk` ci-dessous, depuis le téléphone.
+          2. L'ouvrir ; autoriser « installer des applications inconnues » pour
+             le navigateur si Android le demande.
+          3. Au premier lancement, accorder les **trois** permissions depuis
+             l'écran d'accueil :
+             - **lecture de l'écran** (accessibilité) — la plus importante :
+               quand l'application chauffeur est au premier plan, Uber affiche
+               son offre sans envoyer aucune notification. Sans cette
+               permission, ces courses-là passent inaperçues ;
+             - **accès aux notifications** — pour les offres reçues
+               application en arrière-plan ou écran verrouillé ;
+             - **superposition d'écran** — pour dessiner la bulle.
+          4. Régler son barème, puis **« Essayer avec une course fictive »**
+             pour placer la bulle.
+
+          Rien à cocher dans le cas courant : Uber, Bolt, Heetch, FreeNow,
+          Marcel et Caocao sont écoutés d'origine. Si ton application
+          chauffeur manque, le **mode découverte** donne son nom exact dès
+          qu'elle envoie quelque chose, et il suffit alors de la cocher.
+
+          « Écouter toutes les applications » existe pour ce cas, et doit être
+          éteint ensuite. Sur une vraie journée avec ce mode allumé, 55
+          verdicts sur 80 portaient sur autre chose qu'une course — l'écran
+          d'accueil, une boîte mail, une conversation. Cette version le rend
+          beaucoup moins nuisible, mais elle ne le rend pas utile.
+
+          Une **pastille « €/h »** reste à l'écran : un appui analyse l'écran
+          tel qu'il est. C'est le chemin qui ne dépend d'aucune détection — si
+          une offre passe inaperçue, il répond quand même. Glisse-la où elle
+          ne gêne pas le bouton d'acceptation.
+
+          L'écran d'accueil montre l'**état réel des services** : Android peut
+          délier un service tout en le laissant « autorisé » dans ses
+          réglages, et c'est la panne la plus déroutante.
+
+          Ces permissions sont larges par nature. Ce qui les borne : **rien ne
+          sort du téléphone** — aucun compte, aucun serveur, et aucune
+          permission réseau dans le manifeste.
+
+          ## Ce que cette version corrige
+
+          Celle-ci ne vient pas d'une idée mais d'un relevé : **80 verdicts
+          d'une vraie journée**, exportés depuis le journal. Ils ont démenti
+          trois choses que la version précédente tenait pour acquises.
+
+          **Des chiffres ne prouvent rien.** Cinquante-cinq de ces 80 verdicts
+          ne portaient sur aucune course : l'écran d'accueil, la barre d'état,
+          une boîte mail, une conversation. Tous marquaient 60 points — un
+          montant, deux nombres suivis de « km », une durée — au-dessus du
+          seuil qui déclenchait l'arbitrage. Une offre, elle, porte une marque
+          qui n'appartient qu'à elle : le bouton qui l'accepte, ou le compte à
+          rebours qui l'emporte. Sans cette marque, un écran ne dépasse plus
+          « ambigu », quel que soit son score. Le prix est assumé : une carte
+          lue avant que son bouton ne soit dessiné n'est plus arbitrée du
+          premier coup — elle l'est à la lecture suivante, quelques centièmes
+          plus tard, ou d'un appui sur la pastille.
+
+          **Une liste de courses n'est pas une course.** Sous « Demandes de
+          courses planifiées », Bolt empile plusieurs offres. Quatorze
+          verdicts de la journée mélangeaient le prix de l'une et la distance
+          de l'autre — et s'annonçaient à 83 % de confiance. Deux sommes qui
+          ne sont ni un péage, ni un bonus, ni un tarif à la minute, ce sont
+          deux courses : l'écran n'est plus arbitré du tout, et le journal dit
+          pourquoi.
+
+          **La confiance mesurait la complétude, pas la justesse.** Les
+          verdicts les plus faux de la journée étaient les seuls à 100 %,
+          parce qu'un champ rempli par erreur la faisait monter là où un champ
+          vide l'aurait fait descendre. Deux causes, relevées sur de vraies
+          cartes Bolt : « 13.6km » écrit deux fois devenait treize kilomètres
+          d'approche sur une carte qui n'en annonce aucune, et les « 5 min
+          gratuites incluses dans le tarif » devenaient une durée d'approche.
+          Un nombre est désormais jugé sur son voisin immédiat — « 11,7 €
+          péage » n'est pas un prix — et un même nombre écrit deux fois reste
+          un seul nombre. Une donnée manquante se voit ; une donnée inventée,
+          non.
+
+          **Grigny : la cause était ailleurs.** La capture brute conservée par
+          le journal montre « 5 min (à l.6 km) » — le chiffre un rendu par la
+          lettre L. Ce n'était pas une décimale coupée, et la couture posée
+          pour elle ne pouvait rien y faire. Les sosies de chiffres sont
+          maintenant redressés devant une unité.
+
+          **« Écouter toutes les applications » ne donne plus les mêmes droits
+          que la liste.** L'interface du système, le lanceur, le clavier et
+          Arbitre lui-même sont écartés en toutes circonstances ; hors des
+          applications cochées, un écran doit être certain et non seulement
+          probable ; et la capture d'écran ne se déclenche que dans une
+          application cochée — les neuf captures de la journée avaient toutes
+          été prises ailleurs. Le mode reste là pour trouver le nom d'une
+          application chauffeur manquante, et à éteindre ensuite.
+
+          ## Ce que les versions récentes avaient apporté
+
+          **La bulle se lit par étages** : la décision, puis l'argent, puis les
+          contraintes, puis l'explication, puis le diagnostic. Un appui la
+          réduit au verdict et à l'euro/heure, un appui long ouvre le journal,
+          un glissement la déplace. **Les trois kilométrages ne sont pas
+          additionnés** — course, approche, retour à vide, chacun sur sa
+          ligne. **Le verdict dit pourquoi**, et **la source de lecture est
+          affichée** : écran ou image.
+
+          **Lecture en image.** Les applications chauffeur passent à des cartes
+          dessinées plutôt qu'écrites, où le texte n'existe pas en tant que
+          tel. Une capture est analysée sur le téléphone même, en second
+          rideau seulement. Le modèle est embarqué dans l'application — aucun
+          réseau, et l'image ne sort pas d'ici.
+
+          **Veille.** Certaines surcouches constructeur arrêtent le processus,
+          et le service de lecture part avec lui. Une notification permanente
+          et discrète maintient l'application en vie, et prévient si la lecture
+          d'écran se détache malgré tout.
+
+          **Interface de nuit**, noir pur et verdicts en néon. **Tableau de
+          santé** à six voyants, et un **simulateur à curseurs** qui recalcule
+          le verdict sous le doigt.
+
+          ## À savoir
+
+          Build de débogage, signé avec la clé de débogage versionnée dans le
+          dépôt. Elle est fixe, donc les versions suivantes s'installeront
+          par-dessus celle-ci sans désinstallation et sans perte de réglages.
+
+          Si une offre n'est pas vue, ou mal lue, le **journal** conserve le
+          texte brut de ce qui a été capté et la liste des écrans écartés :
+          « Copier le journal » suffit à faire remonter le cas.
+
+          Six essais tournent sur un vrai Android à chaque modification, face
+          à une fausse application chauffeur qui rejoue de vraies cartes
+          d'offre. Ils établissent que l'offre affichée **en fenêtre
+          flottante** — par-dessus l'écran d'accueil, un GPS ou TikTok, focus
+          laissé au-dessous — est lue avec son approche et sa course, que le
+          prix n'est pas confondu avec le bonus de prise en charge, qu'un
+          écran de navigation ne fait surgir aucune bulle en pleine conduite,
+          qu'une même course n'est annoncée qu'une fois, et qu'une carte
+          **peinte** est lue quand même. La lecture prend environ 130 ms.
+
+          Documentation complète : [`arbitre/README.md`](https://github.com/letxbrace-droid/Ningbus/blob/ETIQUETTE/arbitre/README.md)
+          TEXTE
+          sed -i "s/arbitre-VERSION.apk/arbitre-${version}.apk/; s|ETIQUETTE|${etiquette}|" notes.md
+
+          # Republier la même version (relance du workflow, correctif) remplace
+          # le fichier au lieu d'échouer.
+          if gh release view "$etiquette" >/dev/null 2>&1; then
+            gh release upload "$etiquette" "arbitre-${version}.apk" --clobber
+            gh release edit "$etiquette" --notes-file notes.md
+          else
+            gh release create "$etiquette" "arbitre-${version}.apk" \
+              --target "$GITHUB_SHA" \
+              --title "Arbitre ${version}" \
+              --notes-file notes.md
+          fi
+
+      - name: Rappeler le lien
+        run: |
+          echo "APK : https://github.com/${GITHUB_REPOSITORY}/releases/download/${etiquette}/arbitre-${version}.apk"

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Dessiner la bulle par-dessus l'application chauffeur. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Repli quand la bulle n'est pas autorisée : une notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Signal haptique : le verdict se sent sans quitter la route des yeux. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+        Service de veille : il ne fait rien d'autre que maintenir le processus
+        vivant. Une surcouche constructeur qui tue le processus emporte le
+        service d'accessibilité avec lui, et Android ne le relie pas toujours
+        ensuite.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!--
+        ML Kit déclare l'accès réseau pour sa télémétrie. Le modèle de
+        reconnaissance de texte, lui, est embarqué dans l'APK et n'en a aucun
+        besoin. On retire donc la permission au moment de la fusion des
+        manifestes : la promesse « rien ne sort du téléphone » reste
+        vérifiable d'une commande — `aapt dump permissions` ne doit jamais
+        montrer INTERNET.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/nom_app"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.Arbitre">
+
+        <activity
+            android:name=".ActivitePrincipale"
+            android:exported="true"
+            android:label="@string/nom_app">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ActiviteJournal"
+            android:exported="false"
+            android:label="@string/titre_journal"
+            android:parentActivityName=".ActivitePrincipale" />
+
+        <!--
+            Le service est lié par le système dès que l'accès aux
+            notifications est accordé. Il reste vivant tant que l'accès
+            n'est pas retiré : rien à démarrer, rien à maintenir en tâche
+            de fond, donc aucune latence au moment où la course tombe.
+        -->
+        <!--
+            Lecture de la carte d'offre affichée dans l'application chauffeur.
+            C'est le chemin principal : au premier plan, Uber dessine son
+            offre sans poster la moindre notification. La liste des
+            applications écoutées est posée à l'exécution, de sorte que le
+            système lui-même écarte tout le reste du téléphone.
+        -->
+        <service
+            android:name=".LectureEcran"
+            android:exported="true"
+            android:label="@string/nom_app"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/lecture_ecran" />
+        </service>
+
+        <!--
+            Le service de veille ne calcule rien et n'écoute rien. Son seul
+            rôle est d'élever l'importance du processus, pour que les
+            surcouches qui font le ménage en arrière-plan ne l'emportent pas —
+            et de dire au chauffeur quand la lecture d'écran s'est détachée,
+            puisque l'application ne peut pas se relier elle-même.
+        -->
+        <service
+            android:name=".ServiceVeille"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Maintient en vie le service de lecture d'écran, que certaines surcouches arrêtent silencieusement." />
+        </service>
+
+        <receiver
+            android:name=".AuDemarrage"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".EcouteNotifications"
+            android:exported="true"
+            android:label="@string/nom_app"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

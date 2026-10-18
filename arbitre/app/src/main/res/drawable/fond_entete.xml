@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Blanc plein : la couleur du verdict est appliquée par teinte à
+     l'exécution (backgroundTintList), ce qui évite trois ressources. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+    <corners
+        android:topLeftRadius="17dp"
+        android:topRightRadius="17dp" />
+</shape>
